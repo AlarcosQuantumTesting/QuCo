@@ -1,0 +1,145 @@
+<div>
+    Number of qubits: <input type="number" min="1" [(ngModel)]="qubits" (change)="updateOutputs()">
+</div>
+<span style="color : red">{{ error }}</span>
+
+<div>
+    <p>You can use this code and circuits generator in two ways:</p>
+    <ol>
+        <li>In the <strong>first time</strong>, you can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.</li>
+        <li>In the <strong>second time</strong>, you can use it in a <i>"Grover approach"</i>: i.e, you can type an expression for highlighting those 
+            elements that must be searched by the circuit or program.
+        <br>For this second case, press <a style="color : blue" (click)="hideExamples=!hideExamples">here</a> to show or hide some examples.<br>
+        If you want to use this approach, you can add the expressions you desire to mark the elements that must be selected.
+    </li>
+    </ol>
+</div>
+
+<div [hidden]="hideExamples">
+    <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
+    <p>
+        You can use the following <i>reseved words:</i>
+    </p>
+    <ul>
+        <li><b>q0</b>, <b>q1</b>...<b>q<i>x</i></b> to reference a given qubit.</li>
+        <li><b>input</b> to reference the decimal value of the input.</li>
+        <li><b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>x</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.</li>
+    </ul>        
+    <strong>Examples of expressions to fill-in the table:</strong>
+    <ol>
+        <li *ngFor="let javaExample of javaExamples; let i = index">
+            <span *ngIf="javaExample.exprs.length==1">
+                <code>{{ javaExample.exprs[0] }}</code>
+                →
+                &nbsp;
+                <i>{{ javaExample.explanation }}</i>
+                &nbsp;
+                <a style="color: blue;" (click)="tryFill(i)">Try</a>
+            </span>
+            <span *ngIf="javaExample.exprs.length>1">
+                <i>{{ javaExample.explanation }}</i>
+                <ol *ngFor="let expr of javaExample.exprs; let j=index">
+                    <code>{{ expr }}</code>
+                    <span *ngIf="j==javaExample.exprs.length-1">
+                        &nbsp;<a style="color: blue;" (click)="tryFill(i)">Try</a>
+                    </span>
+                </ol>
+            </span>
+        </li>
+    </ol>
+</div>
+
+<div>
+    <strong>Your expressions:</strong>
+    <br>
+    <input type="text" size="50" [(ngModel)]="currentUserExpression">&nbsp;<a style="color : blue" (click)="addUserExpression()">Add</a>
+    <div *ngFor="let userExpression of userExpressions; let i = index">
+        <code>{{ userExpression }}</code>&nbsp;<a style="color : blue" (click)="removeUserExpression(i)">Remove</a>
+    </div>
+    <br>
+    <button (click)="fillTableWithUserExpressions()">Fill table with these expressions</button>
+    <div *ngIf="selectedElements>0">
+        <i style="color : blue">{{ selectedElements }} elements selected </i>
+    </div>
+</div>
+
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+    <!-- Tabla -->
+    <table border="1">
+      <tr style="color:blue">
+        <td align="center" colspan="5">
+          <button (click)="getCircuit('subcircuitsSolver')">Get whole Qiskit code</button>
+          &nbsp;
+          <button (click)="getCircuit('matrixSolver')">Get Qiskit matrix code</button>
+          &nbsp;
+          <u style="color:blue" (click)="goToCode()">Go to code</u>
+        </td>
+      </tr>
+      <tr>
+        <th colspan="5" align="left">
+          Physical angle:
+          &nbsp;
+          <input type="checkbox" [(ngModel)]="usePhysicalAngle">
+          <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
+        </th>
+      </tr>
+      <tr>
+        <th rowspan="2">Output</th>
+        <th colspan="3">Expected frequency</th>
+      </tr>
+      <tr>
+        <th colspan="6">
+          <i>p<sub>i</sub></i>
+          &nbsp;
+          <small><small style="color: blue" (click)="random(1)">Random</small></small>
+          &nbsp;
+          <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
+          &nbsp;
+          <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
+          &nbsp;
+          <small><small style="color: blue" (click)="reset()">Reset</small></small>
+        </th>
+      </tr>
+      <tr *ngFor="let i of [].constructor(expectedFrequencies.length); let rowIndex = index" align="center">
+        <td>
+          {{ rowIndex }}
+          <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
+        </td>
+        <td>
+          <input type="number" min="0" step="1" [(ngModel)]="expectedFrequencies[rowIndex]" (change)="updateOutputs()">
+        </td>
+        <td>
+          <span>{{ relativeFrequencies[rowIndex].toFixed(2) }}%</span>
+        </td>
+      </tr>
+    </table>
+  
+<!-- SVG -->
+<div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree">
+      <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
+        <g [innerHTML]="svgTree"></g>
+      </svg>
+    </div>
+</div>
+
+<!--<div>
+  Desired: <textarea rows="3" cols="200" [(ngModel)]="expandedArray"></textarea>
+  <br>
+  Obtained: <textarea rows="3" cols="200"></textarea>
+  <br>
+  <button>Check</button>
+</div>-->
+  
+<div id="divCode" #codeArea>
+  <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
+  <div>
+      <strong>Available templates:</strong>
+      <span *ngFor="let template of templates; let i=index">
+          <input type="radio" name="template" [(ngModel)]="selectedTemplate" (change)="buildCode()" [value]="template">{{ template.name }} {{ i}}
+      </span>
+  </div>
+  <small id="codeArea">
+      <pre *ngIf="code">{{ code }}</pre>
+      <pre *ngIf="!code && selectedTemplate">{{ selectedTemplate.code }}</pre>
+  </small>
+</div>

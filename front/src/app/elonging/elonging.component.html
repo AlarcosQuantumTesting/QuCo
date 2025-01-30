@@ -1,0 +1,250 @@
+<div>
+    Number of qubits: <input type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
+        (change)="updateExpectedFrequencies()">
+    &nbsp;
+    <table style="border : solid 1px">
+        <tr>
+            <th align="left"><i>Qubits</i></th>
+            <th *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                {{qubitIndex}}
+            </th>
+            <th>Parameterization</th>
+            <th>Available gates</th>
+        </tr>
+        <tr>
+            <th align="left"><i>Output qubits</i></th>
+            <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                    (change)="updateOutputs()">
+            </td>
+            <td rowspan="2">
+                Number of columns: between <input type="number" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns"> and 
+                    <input type="number" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
+                <br>
+                Initial population size: <input type="number" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
+                <br>
+                Max population size: <input type="number" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize">
+                <br>
+                Shots: <span>{{ pc.inputConfiguration!.shots }}</span>
+                <br>
+                Desired error (%): <input type="number" min="0" step="0.025" (change)="saveConf()" [(ngModel)]="pc.desiredError"
+                    (change)="updateDesiredError()">
+            </td>
+            <td>
+                <ng-container *ngFor="let gate of gates; let i=index">
+                    <input type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> {{ gate.name }}
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <th align="left"><i>Start with Hadamard</i></th>
+            <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.startWithH[qubitIndex]" (change)="updateOutputs()">
+            </td>
+        </tr>
+    </table>
+
+    <br>
+    <table border="1">
+        <tr>
+            <th [colSpan]="remoteFitnessers.length">
+                Available fitnessers
+            </th>
+        </tr>
+        <tr>
+            <th *ngFor="let rf of remoteFitnessers">
+                {{ rf.name }} ({{ rf.index }})
+                <input type="checkbox" [(ngModel)]="rf.selected" (click)="selectFitnesser(rf)">
+            </th>
+        </tr>
+        <tr>
+            <td *ngFor="let rf of remoteFitnessers">
+                Max. fitness: {{ rf.maxFitness }}
+                <br>
+                Max. error: {{ rf.maxError }}
+                <br>
+                <mark>Expected fitness: {{ rf.expectedFitness }}</mark>
+            </td>
+        </tr>
+    </table>
+    
+    <br>
+    Delete files: <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.deleteFiles">
+    &nbsp;
+    <span style="border : solid 1px">
+        % of 1 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates">
+        &nbsp;
+        % of 2 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates">
+        &nbsp;
+        % of =3 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates">
+        &nbsp;
+        % of >=4 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates">
+    </span>
+    <br>
+    <div style="border : solid 1px">
+        <strong>Strategies policy</strong>
+        <br>
+        <label>
+            <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
+        </label>
+        <label>
+            <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
+        </label>
+        <div>
+            <div *ngFor="let st of existingStrategies; let i = index">
+                <span>{{ st.name}}</span>
+                &nbsp;
+                <input type="number" (change)="modifyProbability()" [(ngModel)]="st.probability" step="1" min="0" max="100">
+                &nbsp;
+                ({{ (100*st.probability / selectedStrategiesProbability).toFixed(2) }}%)
+                &nbsp;
+                <small style="color:blue" (click)="st.probability=0"><u>Reset</u></small>
+                &nbsp;
+                <span *ngIf="i>0" (click)="moveUp(i)">⬆️</span>
+                &nbsp;
+                <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>        
+            </div>
+        </div>
+
+        <u>Massive mutation</u>:
+        <br>&nbsp;&nbsp;Apply after <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold"> 
+            falls of the <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><u>best fitness</u> 
+            <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><u>mean fitness</u>
+        <br>&nbsp;&nbsp;Apply when the best indivudal reaches a fitness of <input type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"> 
+            of the expected fitness 
+        <br>&nbsp;&nbsp;Maximum times of consecutive massive mutations: <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
+    </div>
+    <br>
+    <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running">Generate initial population and start running</button>
+    &nbsp;
+    <button (click)="stop()" [disabled]="!running">Stop</button>
+</div>
+
+<span style="color : red">{{ error }}</span>
+
+<small style="overflow-x: auto; border: 1px solid #ddd; padding: 5px;">
+    <table border="1">
+        <tr>
+            <th colspan="2" valign="right">Generation</th>
+            <th *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
+                {{ iterationIndex }}
+            </th>
+        </tr>
+        <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
+            <tr>
+                <th rowspan="5">{{ fitnesser.shortName }}</th>
+            </tr>
+            <tr>
+                <th>Strategy</th>
+                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
+                    {{ strategies[fitnesserIndex][iterationIndex] }}
+                </td>
+            </tr>
+            <tr>
+                <th>Best fitness</th>
+                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
+                    {{ bestFitnesses[fitnesserIndex][iterationIndex] }}
+                </td>
+            </tr>
+            <tr>
+                <th>Mean fitness</th>
+                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
+                    {{ meanFitnesses[fitnesserIndex][iterationIndex] }}
+                </td>
+            </tr>
+            <tr>
+                <th>Error</th>
+                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
+                    {{ meanErrors[fitnesserIndex][iterationIndex] }}
+                </td>
+            </tr>
+        </ng-container>
+    </table>
+</small>
+
+<table border="1" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
+    <tr>
+        <th [colSpan]="2+individuals.length" align="left">{{ rf.shortName }}</th>
+    </tr>
+    <tr>
+        <th [colSpan]="2+individuals.length" align="left">
+            <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+            &nbsp;
+            <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+        </th>
+    </tr>
+    <tr>
+        <th>Output</th>
+        <th>
+            <i>p<sub>i</sub></i>
+            &nbsp;
+            <small><small style="color : blue" (click)="random()">Random</small></small>
+            &nbsp;
+            <small><small style="color : blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
+            &nbsp;
+            <small><small style="color : blue" (click)="resetMatrix()">Reset</small></small>
+        </th>
+        <th *ngFor="let individual of individuals; let individualIndex = index" 
+            [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
+            <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
+            <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
+        </th>
+    </tr>
+    <tr *ngFor="let i of [].constructor(pc.inputConfiguration!.expectedFrequencies.length); let rowIndex = index" align="center">
+        <td>
+            {{ rowIndex }}
+            <sub>{{ rowIndex.toString(2) }}</sub>
+        </td>
+        <td>
+            <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration!.expectedFrequencies[rowIndex]" (change)="updateExpectedFrequencies()">
+        </td>
+        <td *ngFor="let individual of individuals" align="right">
+            {{ individual.gotFrequencies[fitnesserIndex][rowIndex] }}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" align="right">
+            <strong><i>Error</i></strong>
+        </td>
+        <td *ngFor="let individual of individuals" align="right">
+            {{ individual.error[fitnesserIndex] }}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" align="right">
+            <strong><i>Fitness</i></strong>
+        </td>
+        <td *ngFor="let individual of individuals" align="right">
+            {{ individual.fitness[fitnesserIndex] }}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" align="right">
+            <strong><i>Length</i></strong>
+        </td>
+        <td *ngFor="let individual of individuals" align="right">
+            {{ individual.length[fitnesserIndex] }}
+        </td>
+    </tr>    
+</table>
+
+<i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+&nbsp;
+<small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+
+<span *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
+    <div class="chart-container" style="position: relative; height:40vh; width:80vw" [hidden]="!rf.selected">
+        <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+    </div>
+</span>
+
+<div class="chart-container" style="position: relative; height:40vh; width:80vw">
+    <canvas id="timesChart"></canvas>
+</div>
+
+<strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
+<small id="codeArea">
+    <pre>
+    {{ code }}
+    </pre>
+</small>
