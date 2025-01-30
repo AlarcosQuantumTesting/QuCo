@@ -1,0 +1,60 @@
+package edu.uclm.tp3.common.deterministic;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestController
+@RequestMapping("deterministic")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+public class DeterministicController {
+	
+	@Autowired
+	private DeterministicService service;
+	
+	@GetMapping("/getTemplates")
+	public List<Map<String, String>> getTemplates() throws IOException {
+		return this.service.getTemplates();
+	}
+		
+	@PostMapping("/calculate") @ResponseBody
+	public Map<String, Object> calculate(HttpSession session, @RequestParam String solver, @RequestBody Map<String, Object> info) {
+		JSONObject jso = new JSONObject(info);
+		
+		int qubits = jso.getInt("qubits");
+		
+		boolean usePhysicalAngle = jso.getBoolean("usePhysicalAngle");
+		double physicalAngle = jso.getDouble("physicalAngle");
+		
+		JSONArray jsa = jso.getJSONArray("expectedFrequencies");
+		List<Integer> expectedFrequencies = IntStream.range(0, jsa.length())
+                .mapToObj(jsa::getInt)
+                .collect(Collectors.toList());
+		
+		try {
+			Map<String, Object> result = this.service.calculate(solver, qubits, expectedFrequencies, usePhysicalAngle, physicalAngle);
+			return result;
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+}
+

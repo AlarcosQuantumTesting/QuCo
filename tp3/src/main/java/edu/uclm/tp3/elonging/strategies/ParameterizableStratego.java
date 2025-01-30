@@ -1,0 +1,123 @@
+package edu.uclm.tp3.elonging.strategies;
+
+import java.lang.reflect.Constructor;
+import java.util.List;
+import java.util.Map;
+
+import edu.uclm.tp3.common.model.History;
+import edu.uclm.tp3.common.model.ProblemConfiguration;
+import edu.uclm.tp3.common.services.EvolutionaryService;
+import edu.uclm.tp3.common.strategies.Strategy;
+import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+
+public class ParameterizableStratego implements IStratego {
+
+	@SuppressWarnings("unchecked")
+	public Strategy getStrategy(String gt, ProblemConfiguration pc, Fitnesser fitnesser, ManagerService manager, 
+			List<Map<String, Object>> selectedStrategies) {
+		
+		if (pc.getNextStrategy()!=null)
+			return pc.getNextStrategy();
+		
+		double tirada = EvolutionaryService.dado.nextDouble();
+		
+		History history = pc.getHistory(fitnesser.getClass().getSimpleName());
+		if (tirada<0.5) {
+			if (pc.getMassiveMutationPolicy().getCounter()<pc.getMassiveMutationPolicy().getMaxConsecutiveApplications()) {
+				if (pc.getMassiveMutationPolicy().getFallsThreshold()>0) {
+					if (pc.getMassiveMutationPolicy().isApplicableWhenMeanFitnessFalls()) {
+						if (history.getMeanFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
+							pc.getMassiveMutationPolicy().increaseCounter();
+							return new AllMutants(gt, pc, fitnesser, manager);
+						}
+					}
+				
+					if (pc.getMassiveMutationPolicy().isApplicableWhenBestFitnessFalls()) {
+						if (history.getBestFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
+							pc.getMassiveMutationPolicy().increaseCounter();
+							return new AllMutants(gt, pc, fitnesser, manager);
+						} 
+					}
+				}
+			}
+		}
+		
+		pc.getMassiveMutationPolicy().setCounter(0);
+		tirada = EvolutionaryService.dado.nextDouble();
+		double goodThreshold = pc.getMassiveMutationPolicy().getFitnessPercentage()*fitnesser.getExpectedFitness();
+		
+		if (history.getLastBestFitness()>=goodThreshold && tirada<0.7)
+			return new AllMutants(gt, pc, fitnesser, manager);
+		
+		
+		Map<String, Object> stMap = null;
+		double prob = 0;
+		for (int i=0; i<selectedStrategies.size(); i++) {
+			stMap = selectedStrategies.get(i);
+			Object value = stMap.get("probability");
+			double stProb = 0.0;
+
+			if (value instanceof Number) {
+			    stProb = ((Number) value).doubleValue();
+			}
+			
+			prob = prob + stProb;
+			if (tirada<=prob) {
+				break;
+			}
+		}
+		
+		try {
+			Class<Strategy> stClazz = (Class<Strategy>) Class.forName("edu.uclm.tp3.elonging.strategies." + stMap.get("name").toString());
+			Constructor<?> c = stClazz.getConstructors()[0];
+			Strategy st = (Strategy) c.newInstance(gt, pc, fitnesser, manager);
+			return st;
+		} catch (Exception e) {
+			System.out.println();
+			return null;
+		}
+		
+		/*History history = pc.getHistory(fitnesser.getClass().getSimpleName());
+		if (tirada<0.5) {
+			if (pc.getMassiveMutationPolicy().getCounter()<pc.getMassiveMutationPolicy().getMaxConsecutiveApplications()) {
+				if (pc.getMassiveMutationPolicy().getFallsThreshold()>0) {
+					if (pc.getMassiveMutationPolicy().isApplicableWhenMeanFitnessFalls()) {
+						if (history.getMeanFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
+							pc.getMassiveMutationPolicy().increaseCounter();
+							return new AllMutants(gt, pc, fitnesser, manager);
+						}
+					}
+				
+					if (pc.getMassiveMutationPolicy().isApplicableWhenBestFitnessFalls()) {
+						if (history.getBestFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
+							pc.getMassiveMutationPolicy().increaseCounter();
+							return new AllMutants(gt, pc, fitnesser, manager);
+						} 
+					}
+				}
+			}
+		}
+		
+		pc.getMassiveMutationPolicy().setCounter(0);
+		
+		tirada = EvolutionaryService.dado.nextDouble();
+		double goodThreshold = pc.getMassiveMutationPolicy().getFitnessPercentage()*fitnesser.getExpectedFitness();
+		
+		if (history.getLastBestFitness()>=goodThreshold && tirada<0.7)
+			return new AllMutants(gt, pc, fitnesser, manager);
+		
+		if (pc.getSourceGeneration()>5) {
+			tirada = EvolutionaryService.dado.nextDouble();
+			if (tirada<0.40)
+				return new ClassicRoulette(gt, pc, fitnesser, manager);
+			if (tirada<0.50)
+				return new GenerateNewPopulation(gt, pc, fitnesser, manager);
+			if (tirada<0.60)
+				return new PopulationWithBests(gt, pc, fitnesser, manager);
+		}
+		
+		return new AddOrRemoveGate(gt, pc, fitnesser, manager);*/
+		
+	}
+
+}

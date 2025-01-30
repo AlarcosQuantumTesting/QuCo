@@ -1,0 +1,89 @@
+from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2
+from qiskit_aer import AerSimulator
+from qiskit import transpile
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit.circuit.library.standard_gates import *
+from qiskit.visualization import plot_histogram
+from qiskit.quantum_info.operators import Operator
+from math import pi
+import numpy 
+from qiskit.visualization import plot_state_city 
+from qiskit.visualization import plot_histogram
+from qiskit.circuit.library import MCMT
+
+#numpy.set_printoptions(threshold=sys.maxsize)
+
+qreg = QuantumRegister(#QUBITS#, 'q') 
+creg = ClassicalRegister(#OUTPUT_QUBITS#, 'c')
+
+circuit = QuantumCircuit(qreg, creg)
+
+def convert_histogram_to_decimal_list(histogram):
+    """
+    Convierte un histograma de conteos (claves binarias con valores de ocurrencias)
+    en una lista donde cada valor decimal aparece tantas veces como indica el conteo,
+    ordenados por sus valores decimales.
+
+    Args:
+        histogram (dict): Diccionario con claves binarias y valores de conteos.
+
+    Returns:
+        list: Lista con valores decimales repetidos según los conteos del histograma, ordenados.
+    """
+    decimal_list = []
+
+    # Ordenar las claves binarias por su valor decimal
+    sorted_histogram = sorted(histogram.items(), key=lambda x: int(x[0], 2))
+
+    # Iterar sobre las claves y valores del histograma ordenado
+    for binary_key, count in sorted_histogram:
+        # Convertir la clave binaria a decimal
+        decimal_value = int(binary_key, 2)
+        # Agregar el valor decimal `count` veces a la lista
+        decimal_list.extend([decimal_value] * count)
+
+    # Guardar el resultado en un archivo
+    with open('/Users/macariopolousaola/Desktop/results.txt', 'w') as file:
+        file.write("\n".join(map(str, decimal_list)))
+
+    return decimal_list
+    
+ONE = [0, 1]
+ZERO = [1, 0]
+#INITIALIZE#
+
+#CALCULUS#
+
+#MEASURES#
+
+print("ORIGINAL CIRCUIT:")
+print(circuit)
+print("**********************")
+
+backend = AerSimulator(method="statevector")
+
+tp = transpile(circuit, backend)
+print("TRANSPILED CIRCUIT:")
+print(tp)
+print("**********************")
+
+job = backend.run(tp, shots=#SHOTS#) 
+result = job.result()
+
+histogram = result.get_counts()
+print(histogram)
+
+convert_histogram_to_decimal_list(histogram)
+
+# Resultados absolutos de las mediciones
+absolute_counts = result.get_counts()
+
+# Total de ejecuciones (shots)
+total_shots = sum(absolute_counts.values())
+
+# Convertir a frecuencias relativas
+relative_counts = {key: value / total_shots for key, value in absolute_counts.items()}
+
+
+plot_histogram(relative_counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
+circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png')    
