@@ -15,12 +15,13 @@ export class DeterministicService {
     return this.client.get<any[]>(environment.beUrl + this.controller + "/getTemplates", { responseType : 'json' })
   }
 
-  calculate(solver: string, qubits: number, expectedFrequencies: number[], physicalAngle: number, usePhysicalAngle: boolean) {
+  calculate(solver: string, qubits: number, expectedFrequencies: number[], physicalAngle: number, usePhysicalAngle: boolean, unifySimiliarNodes: boolean) {
     let info = {
       qubits : qubits,
       expectedFrequencies : expectedFrequencies,
       physicalAngle : physicalAngle,
-      usePhysicalAngle : usePhysicalAngle
+      usePhysicalAngle : usePhysicalAngle,
+      unifySimiliarNodes : unifySimiliarNodes
     }
     return this.client.post<any>(environment.beUrl + this.controller + "/calculate?solver=" + solver, info, { withCredentials: true })
   }
