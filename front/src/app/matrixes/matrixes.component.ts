@@ -4,6 +4,7 @@ import { QuirkService } from '../quirk.service';
 import { QiskitService } from '../qiskit.service';
 import { FillingService } from '../filling.service';
 import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 @Component({
   selector: 'app-matrixes',
@@ -395,4 +396,9 @@ export class MatrixesComponent  {
       this.matrix![rowIndex][i] = parseInt(s[i-this.inputQubits])
     }
   }
+
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+  }
+    
 }

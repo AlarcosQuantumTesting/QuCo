@@ -6,13 +6,14 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.qiskit.AbstractQiskitCoder;
 
 @Service
 public class QiskitGroverCoder extends AbstractQiskitCoder {
 
 	@SuppressWarnings("unchecked")
-	public String[] getCode(Map<String, Object> quirk) throws IOException {
+	public String[] getCode(Map<String, Object> quirk, CodeTemplate template) throws IOException {
 		StringBuilder sbCalculus = new StringBuilder();
 		List<List<Object>> matrixes = (List<List<Object>>) quirk.get("cols");
 		for (int i=0; i<matrixes.size(); i++) {
@@ -21,7 +22,7 @@ public class QiskitGroverCoder extends AbstractQiskitCoder {
 		}
 		
 		int qubits = matrixes.get(0).size();
-		String code = this.prepareCode(qubits, qubits, sbCalculus);
+		String code = this.prepareCode(qubits, qubits, sbCalculus, template);
 		return code.split("\n");
 	}
 

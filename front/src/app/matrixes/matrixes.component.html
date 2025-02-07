@@ -83,6 +83,13 @@
         Amplitude domain: <input type="radio" [(ngModel)]="domain" [value]="'amplitude'" name="domain">
         &nbsp;
         Phase domain: <input type="radio" [(ngModel)]="domain" [value]="'phase'" name="domain">
+        &nbsp;
+        Available templates:
+        <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+            <option *ngFor="let template of manager.templates" [ngValue]="template">
+              {{ template.fileName }}
+            </option>
+        </select> 
     </div>
 
     <table border="1">
@@ -269,5 +276,3 @@
         </small>
     </div>
 </div>
-
-<app-templates></app-templates>

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { QiskitService } from '../qiskit.service';
 import { GroverService } from '../grover.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 @Component({
   selector: 'app-grover',
   templateUrl: './grover.component.html',
@@ -22,7 +23,7 @@ export class GroverComponent extends GroverStyle {
 
   max: number = 50000
 
-  constructor(private groverService: GroverService, public sanitizer: DomSanitizer) {
+  constructor(private groverService: GroverService, public sanitizer: DomSanitizer, public manager : ManagerService) {
     super()
   }
 
@@ -218,8 +219,11 @@ export class GroverComponent extends GroverStyle {
   getQiskitCode(matrix: any[], type : string) {
     this.reset()
 
-    let info = matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1))
-    if (info.length == 0) {
+    let info = {
+      matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+      template : this.manager.selectedTemplate
+    }
+    if (info.matrix.length == 0) {
       this.error = "Select some output"
       return
     }
@@ -277,5 +281,9 @@ export class GroverComponent extends GroverStyle {
 
   mark(rowIndex: number) {
     this.matrix![rowIndex][this.qubits] = !this.matrix![rowIndex][this.qubits]
+  }
+
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
 }

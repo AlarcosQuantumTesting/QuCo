@@ -2,11 +2,11 @@ package edu.uclm.tp3.qiskit;
 
 import java.io.IOException;
 
-import edu.uclm.tp3.Utils;
+import edu.uclm.tp3.common.model.CodeTemplate;
 
 public abstract class AbstractQiskitCoder {
 	
-	protected final String prepareCode(int inputQubits, int qubits, StringBuilder sbCalculus) throws IOException {
+	protected final String prepareCode(int inputQubits, int qubits, StringBuilder sbCalculus, CodeTemplate template) throws IOException {
 		String initialize = "#Input qubits initialization:\n";
 		for (int i=0; i<inputQubits; i++) 
 			initialize = initialize + "circuit.initialize(ZERO, " + i + ")\n";
@@ -15,7 +15,7 @@ public abstract class AbstractQiskitCoder {
 		for (int i=inputQubits; i<qubits; i++)
 			initialize = initialize + "circuit.initialize(ZERO, " + i + ")\n";
 
-		String code = Utils.readFileAsString(this, "qiskitTemplate.txt");
+		String code = template.getCode();
 		code = code.replace("#QUBITS#", "" + qubits);
 		code = code.replace("#OUTPUT_QUBITS#", "" + (qubits-inputQubits));
 		code = code.replace("#INITIALIZE#", initialize);

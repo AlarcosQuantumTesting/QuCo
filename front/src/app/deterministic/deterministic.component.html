@@ -58,6 +58,15 @@
     </div>
     <br>
     <button (click)="fillTableWithUserExpressions()">Fill table with these expressions</button>
+
+    &nbsp;
+    Available templates:
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+        <option *ngFor="let template of manager.templates" [ngValue]="template">
+            {{ template.fileName }}
+        </option>
+    </select> 
+
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>
     </div>
@@ -134,14 +143,7 @@
   
 <div id="divCode" #codeArea>
   <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
-  <div>
-      <strong>Available templates:</strong>
-      <span *ngFor="let template of templates; let i=index">
-          <input type="radio" name="template" [(ngModel)]="selectedTemplate" (change)="buildCode()" [value]="template">{{ template.name }} {{ i}}
-      </span>
-  </div>
   <small id="codeArea">
       <pre *ngIf="code">{{ code }}</pre>
-      <pre *ngIf="!code && selectedTemplate">{{ selectedTemplate.code }}</pre>
   </small>
 </div>

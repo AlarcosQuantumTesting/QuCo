@@ -3,6 +3,8 @@ import { Chart, registerables } from 'chart.js';
 import { DeterministicService } from '../deterministic.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 Chart.register(...registerables)
 
@@ -35,17 +37,10 @@ export class DeterministicComponent extends GroverStyle {
   svgWidth : number = 0
   svgHeight : number = 0
 
-  templates : any[] = []
-  selectedTemplate? : any;
-
   responseReceived? : any
 
-  constructor(private service : DeterministicService, private sanitizer : DomSanitizer) {
+  constructor(private service : DeterministicService, private sanitizer : DomSanitizer, public manager : ManagerService) {
     super()
-    this.service.loadTemplates().subscribe(templates => {
-      this.templates = templates
-      this.selectedTemplate = this.templates[0]
-    })
 
     for (let i=0; i<Math.pow(2, this.qubits); i++)
       this.expectedFrequencies.push(Math.round(Math.random()*10))
@@ -161,7 +156,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   buildCode() {
-    this.code = this.selectedTemplate.code
+    this.code = this.manager.selectedTemplate.code
     if (!this.responseReceived)
       return
 
@@ -394,5 +389,9 @@ export class DeterministicComponent extends GroverStyle {
     window.getSelection()!.addRange(range); // to select text
     document.execCommand("copy")
     window.getSelection()!.removeAllRanges()
+  }
+
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
 }
