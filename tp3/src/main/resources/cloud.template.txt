@@ -8,6 +8,7 @@ from qiskit.visualization import plot_histogram
 from qiskit.quantum_info.operators import Operator
 from math import pi
 import numpy 
+import time
 from qiskit.visualization import plot_state_city 
 from qiskit.visualization import plot_histogram
 
@@ -34,19 +35,34 @@ service = QiskitRuntimeService()
 backend = service.least_busy(operational=True, simulator=False)
 sampler = Sampler(mode=backend)
 
-transpiled_circuit = transpile(circuit, backend)
 
-job = sampler.run([transpiled_circuit]) 
+start_time = time.time()
+tp = transpile(circuit, backend)
+end_time = time.time()
+
+transpilation_time = end_time - start_time
+print(f"Transpilation time: {transpilation_time:.4f} seconds")
+
+start_time = time.time()
+job = sampler.run([tp])
+end_time = time.time()
+run_time = end_time - start_time
+print(f"run() time: {run_time:.4f} seconds")
+ 
+start_time = time.time()
 result = job.result()
+end_time = time.time()
+result_time = end_time - start_time
+print(f"result() time: {result_time:.4f} seconds")
 
-print(result)
 
-pub_result = result[0]
-print(f" >> Meas output register counts: {pub_result.data.meas.get_counts()}")
-
-'''
 histogram = result.get_counts()
 print(histogram)
+
+#pub_result = result[0]
+#print(f" >> Meas output register counts: {pub_result.data.meas.get_counts()}")
+
+'''
 
 absolute_counts = result.get_counts()
 total_shots = sum(absolute_counts.values())

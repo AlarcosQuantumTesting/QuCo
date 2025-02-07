@@ -3,6 +3,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { QuirkService } from '../quirk.service';
 import { QiskitService } from '../qiskit.service';
 import { FillingService } from '../filling.service';
+import { ManagerService } from '../manager.service';
 
 @Component({
   selector: 'app-matrixes',
@@ -88,7 +89,7 @@ export class MatrixesComponent  {
 
   dialogo : any = undefined
 
-  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, public sanitizer : DomSanitizer) {}
+  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, public sanitizer : DomSanitizer, public manager : ManagerService) {}
 
   addUserExpression(): void {
     this.error = undefined
@@ -263,6 +264,7 @@ export class MatrixesComponent  {
       qubits : this.inputQubits + this.outputQubits,
       reduce : this.reduceQuiskit,
       domain : this.domain,
+      template : this.manager.selectedTemplate,
       type : type
     }
     if (rowIndex!=undefined)
@@ -279,7 +281,7 @@ export class MatrixesComponent  {
     if (!this.qiskitCode)
       return
     for (let i=0; i<this.qiskitCode.length; i++)
-      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
+      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", shots)
   }
 
   addHadamardGates() {

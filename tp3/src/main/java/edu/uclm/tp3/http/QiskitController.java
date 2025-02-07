@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.qiskit.QiskitCoder;
 import edu.uclm.tp3.quirk.QuirkReducer;
 
@@ -30,6 +31,11 @@ public class QiskitController {
 		try {
 			boolean reduce = info.containsKey("reduce") && (boolean) info.get("reduce");
 			String[] code;
+
+			Map<String, Object> receivedTemplate = (Map<String, Object>) info.get("template");
+			CodeTemplate template = new CodeTemplate();
+			template.setFileName(receivedTemplate.get("fileName").toString());
+			template.setCode(receivedTemplate.get("code").toString());
 			if (reduce) {
 				List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
 				int inputQubits = (int) info.get("inputQubits");

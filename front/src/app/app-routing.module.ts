@@ -6,6 +6,7 @@ import { ElongingComponent } from './elonging/elonging.component';
 import { GroverComponent } from './grover/grover.component';
 import { DeterministicComponent } from './deterministic/deterministic.component';
 import { QuantumEditorComponent } from './quantum-editor/quantum-editor.component';
+import { TemplatesComponent } from './templates/templates.component';
 
 const routes: Routes = [
   { path : "matrix", component : MatrixesComponent },
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path : "blocks", component : BlocksComponent },
   { path : "grenoble", component : DeterministicComponent },
   { path : "editor", component : QuantumEditorComponent },
+  { path : "templates", component : TemplatesComponent },
 ];
 
 @NgModule({
