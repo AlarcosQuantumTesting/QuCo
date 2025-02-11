@@ -43,6 +43,7 @@ public class DeterministicController {
 		
 		boolean usePhysicalAngle = jso.getBoolean("usePhysicalAngle");
 		double physicalAngle = jso.getDouble("physicalAngle");
+		boolean unifySimiliarNodes = jso.getBoolean("unifySimiliarNodes");
 		
 		JSONArray jsa = jso.getJSONArray("expectedFrequencies");
 		List<Integer> expectedFrequencies = IntStream.range(0, jsa.length())
@@ -50,7 +51,7 @@ public class DeterministicController {
                 .collect(Collectors.toList());
 		
 		try {
-			Map<String, Object> result = this.service.calculate(solver, qubits, expectedFrequencies, usePhysicalAngle, physicalAngle);
+			Map<String, Object> result = this.service.calculate(solver, qubits, expectedFrequencies, usePhysicalAngle, physicalAngle, unifySimiliarNodes);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

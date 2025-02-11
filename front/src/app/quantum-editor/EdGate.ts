@@ -8,6 +8,19 @@ export class EdCircuit {
         this.columns = 5
     }
 
+    resizeTo(qubits: number) {
+        if (qubits < this.qubits.length) {
+            this.qubits = this.qubits.slice(0, qubits);
+        } else {
+            for (let i = this.qubits.length; i < qubits; i++) {
+                this.qubits.push(new EdQubit());
+                for (let j = 0; j < this.columns; j++) {
+                    this.qubits[i].add(new EdGate('I', 1));
+                }
+            }
+        }
+    }  
+
     add() {
         this.qubits.push(new EdQubit());
         for (let i=0; i<this.columns; i++)
@@ -66,7 +79,13 @@ export class EdGate {
     description: string = ''; // Descripción de la puerta
 
     constructor(name: string, qubits: number) {
+        if (!name) 
+            name = "XXX"
         this.name = name;
+        this.code = "def " + name + "() : \n"
+            + "\tU = QuantumCircuit(" + qubits + ")\n" +
+            "\t# Add code here\n" + 
+            "\treturn U.to_gate()\n";
         this.qubits = qubits;
     }
 

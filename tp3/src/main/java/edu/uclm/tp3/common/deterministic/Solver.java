@@ -3,10 +3,6 @@ package edu.uclm.tp3.common.deterministic;
 import java.io.IOException;
 import java.util.Map;
 
-import edu.uclm.tp3.common.gates.Barrier;
-import edu.uclm.tp3.common.gates.CRY;
-import edu.uclm.tp3.common.gates.Identity;
-import edu.uclm.tp3.common.gates.RY;
 import edu.uclm.tp3.common.gates.X;
 import edu.uclm.tp3.common.model.Circuit;
 
@@ -28,55 +24,11 @@ public abstract class Solver {
 			circuit.add(circuit.getGates().get(i));
 	}
 	
-	protected RY getRY(int qubit, BinaryTree node, boolean towardsZero) {
-		RY ry = new RY();
-		double theta = 0;
-		
-		if (DEBUG)
-			theta = towardsZero ? -node.leftProbability : node.leftProbability;
-		else {
-			//if (towardsZero && node.leftProbability==1)
-			//	return null;
-			theta = towardsZero ? node.leftAngle : node.rightAngle;
-		}
-		
-		ry.setTheta(theta-Math.PI/2, qubit);
-		return ry;
-	}
-	
 	protected X getX(int qubit) {
 		X x = new X();
 		x.setQubit(qubit);
 		return x;
 	}
-	
-	protected Identity getIdentity(int qubit) {
-		Identity id = new Identity();
-		id.setQubit(qubit);
-		if (PRINT)
-			System.out.print(id);
-		return id;
-	}
-	
-	protected CRY getCRY(int controlQubit, int controlledQubit, BinaryTree node, boolean towardsZero) {
-		CRY cry = new CRY();
-		cry.set(0, controlQubit);
-		cry.set(1, controlledQubit);
-		double theta = 0;
-		
-		if (DEBUG)
-			theta = towardsZero ? -node.leftProbability : node.rightProbability;
-		else 
-			theta = towardsZero ? node.leftAngle : node.rightAngle;
-		
-		cry.setTheta(theta-Math.PI/2);
-		return cry;
-	}
-    
-	protected Barrier getBarrier() {
-    	Barrier barrier = new Barrier();
-    	return barrier;
-    }
 	
 	protected String getMeasures(int qubits) {
 		StringBuilder sb = new StringBuilder();

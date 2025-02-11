@@ -22,7 +22,7 @@ public class QiskitGroverCoder extends AbstractQiskitCoder {
 		}
 		
 		int qubits = matrixes.get(0).size();
-		String code = this.prepareCode(qubits, qubits, sbCalculus, template);
+		String code = this.prepareCode("program", qubits, qubits, sbCalculus, template);
 		return code.split("\n");
 	}
 

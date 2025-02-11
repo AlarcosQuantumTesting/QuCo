@@ -2,9 +2,14 @@ package edu.uclm.tp3.common.gates;
 
 import edu.uclm.tp3.sparse.QMatrix;
 
-public class CRY extends TwoQubitsGate {
+public class CRY extends TwoQubitsGate implements IRotableGate {
 
 	private double theta;
+
+	public CRY() {
+		super();
+		this.theta = Math.PI/2;
+	}
 
 	@Override
 	public String toString() {
@@ -16,7 +21,7 @@ public class CRY extends TwoQubitsGate {
 	}
 
 	@Override
-	public edu.uclm.tp3.sparse.QMatrix getMatrix() {
+	public QMatrix getMatrix() {
 		QMatrix m = new QMatrix();
 		m.setValues(
 				1.0, 0.0, 0.0, 0.0, 
@@ -24,5 +29,11 @@ public class CRY extends TwoQubitsGate {
 				0.0, 0.0, 1.0, 0.0,
 				0, Math.sin(theta/2), 0, Math.cos(theta/2));
 		return m;
+	}
+
+	@Override
+	public IRotableGate smallRotation(double radians) {
+		this.theta += radians;
+		return this;
 	}
 }

@@ -12,7 +12,7 @@ import edu.uclm.tp3.common.model.CodeTemplate;
 @Service
 public class QiskitCoder extends AbstractQiskitCoder {
 	
-	public String[] getCodeReduced(List<List<List<Integer>>> reducedMatrixes, int inputQubits, int qubits, String domain, CodeTemplate template) throws IOException {				
+	public String[] getCodeReduced(List<List<List<Integer>>> reducedMatrixes, int inputQubits, int qubits, String domain, CodeTemplate template, String type) throws IOException {				
 		StringBuilder sbCalculus = new StringBuilder(); 
 		for (int i=0; i<reducedMatrixes.size(); i++) {
 			List<List<Integer>> reducedMatrix = reducedMatrixes.get(i);
@@ -26,7 +26,7 @@ public class QiskitCoder extends AbstractQiskitCoder {
 		if (domain.equals("PHASE"))
 			sbCalculus = this.changeToPhase(sbCalculus);
 		
-		String code = this.prepareCode(inputQubits, qubits, sbCalculus, template);
+		String code = this.prepareCode(type, inputQubits, qubits, sbCalculus, template);
 		return code.split("\n");
 	}
 
@@ -110,7 +110,8 @@ public class QiskitCoder extends AbstractQiskitCoder {
 			}			
 		}
 		
-		String code = this.prepareCode(inputQubits, qubits, sbCalculus, template);
+		String type = info.get("type").toString();
+		String code = this.prepareCode(type, inputQubits, qubits, sbCalculus, template);
 		return code.split("\n");
 	}
 	

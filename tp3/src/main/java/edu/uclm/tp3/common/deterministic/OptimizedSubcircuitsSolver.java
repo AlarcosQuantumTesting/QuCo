@@ -6,15 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.uclm.tp3.common.gates.CRY;
-import edu.uclm.tp3.common.gates.RY;
-import edu.uclm.tp3.common.gates.X;
 import edu.uclm.tp3.common.model.Circuit;
 
 public class OptimizedSubcircuitsSolver extends Solver {
 
 	private int depth;
-
+	
 	protected OptimizedSubcircuitsSolver(BinaryTree tree, Circuit circuit) {
 		super(tree, circuit);
 	}
@@ -35,7 +32,6 @@ public class OptimizedSubcircuitsSolver extends Solver {
 		} else {
 			code.append("circuit.append(get0(), [" + this.getTargetQubits(0, this.depth) + "])\n");
 			this.buildGet0(this.tree, gatesCode);
-			//this.buildGates(this.tree, 0, this.depth, gatesCode);
 		}
 
 		Map<String, Object> result = new HashMap<>();
@@ -68,27 +64,56 @@ public class OptimizedSubcircuitsSolver extends Solver {
 			this.buildGates(tree.rightChild, 1, depth, gatesCode);
 			return;
 		}
-		if (root.leftChild.leftAngle==root.rightChild.leftAngle) {
+		if (root.leftAngle==root.rightAngle) {
 			if (root.leftAngle!=0)
 				code.append("\tcircuit.ry(" + root.leftAngle + ", 0)\n");
-			code.append("\tU.append(get1L(), [" + this.getTargetQubits(1, depth) + "])\n");
-			code.append("\tU.append(get1R(), [" + this.getTargetQubits(1, depth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			gatesCode.add(code.toString());
+			
+			boolean added = false;
+			int sizeLeftPre = gatesCode.size();
 			this.buildGates(tree.leftChild, 1, depth, gatesCode);
+			if (gatesCode.size()>sizeLeftPre) {			
+				code.append("\tcircuit.x(0)\n");
+				code.append("\tU.append(get1L().control(1), [" + this.getTargetQubits(0, depth) + "])\n");
+				code.append("\tcircuit.x(0)\n");
+				added = true;
+			}
+			
+			int sizeRightPre = gatesCode.size();
 			this.buildGates(tree.rightChild, 1, depth, gatesCode);
+			if (gatesCode.size()>sizeRightPre) {	
+				code.append("\tU.append(get1R().control(1), [" + this.getTargetQubits(0, depth) + "])\n");
+				added = true;
+			}
+			
+			if (added) {
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			}
 			return;
 		}
 		
-		code.append("\tU.ry(" + root.leftAngle + ", 0)\n");
-		code.append("\tx(0)\n");
-		code.append("\tU.append(get1L(), [" + this.getTargetQubits(1, depth) + "])\n");
-		code.append("\tx(0)\n");
-		code.append("\tU.append(get1R(), [" + this.getTargetQubits(1, depth) + "])\n");
-		code.append("\treturn U.to_gate()\n\n");
-		gatesCode.add(code.toString());
+		boolean added = false;
+		int sizeLeftPre = gatesCode.size();
 		this.buildGates(tree.leftChild, 1, depth, gatesCode);
+		if (gatesCode.size()>sizeLeftPre) {		
+			code.append("\tU.ry(" + root.leftAngle + ", 0)\n");
+			code.append("\tU.x(0)\n");
+			code.append("\tU.append(get1L().control(1), [" + this.getTargetQubits(0, depth) + "])\n");
+			code.append("\tU.x(0)\n");
+			added = true;
+		}
+		
+		int sizeRightPre = gatesCode.size();
 		this.buildGates(tree.rightChild, 1, depth, gatesCode);
+		if (gatesCode.size()>sizeRightPre) {
+			code.append("\tU.append(get1R().control(1), [" + this.getTargetQubits(0, depth) + "])\n");
+			added = true;
+		}
+		
+		if (added) {
+			code.append("\treturn U.to_gate()\n\n");
+			gatesCode.add(code.toString());
+		}
 	}
 
 	private void buildGates(BinaryTree node, int startQubit, int depth, List<String> gatesCode) {
@@ -99,44 +124,92 @@ public class OptimizedSubcircuitsSolver extends Solver {
 		}
 		code.append("def get" + node.name + "():\n");
 		code.append("\tU = QuantumCircuit(" + (depth-startQubit) + ", name=\"" + node.name + "\")\n");		
-		if (node.rightChild==null) {			
-			code.append("\tU.ry(" + node.leftAngle + ", 0)\n");
-			code.append("\tU.append(get" + node.leftChild.name + "(), [" + this.getTargetQubits(1, depth-startQubit) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			gatesCode.add(code.toString());
+		if (node.rightChild==null) {
+			int sizePre = gatesCode.size();
 			this.buildGates(node.leftChild, startQubit+1, depth, gatesCode);
+					
+			if (gatesCode.size()>sizePre) {
+				code.append("\tU.ry(" + node.leftAngle + ", 0)\n");
+				code.append("\tU.append(get" + node.leftChild.name + "(), [" + this.getTargetQubits(1, depth-startQubit) + "])\n");
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			} else {
+				code.append("\tU.ry(" + node.leftAngle + ", 0)\n");
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			}
 			return;
 		}
 		
 		if (node.leftChild==null) {
-			code.append("\tU.ry(" + node.rightAngle + ", 0)\n");
-			code.append("\tU.append(get" + node.rightChild.name + "(), [" + this.getTargetQubits(1, depth-startQubit) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			gatesCode.add(code.toString());
+			int sizePre = gatesCode.size();
 			this.buildGates(node.rightChild, startQubit+1, depth, gatesCode);
+
+			if (gatesCode.size()>sizePre) {
+				code.append("\tU.ry(" + node.rightAngle + ", 0)\n");
+				code.append("\tU.append(get" + node.rightChild.name + "(), [" + this.getTargetQubits(1, depth-startQubit) + "])\n");
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			} else {
+				code.append("\tU.ry(" + node.leftAngle + ", 0)\n");
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			}
 			return;
 		}
 		
-		if (node.leftChild.leftAngle==node.rightChild.leftAngle) {
-			code.append("\trU.y(" + node.leftChild.leftAngle + ", " + startQubit+1 + ")\n");
-			code.append("\treturn U.to_gate().control(1)\n\n");
-			gatesCode.add(code.toString());
+		if (node.leftAngle==node.rightAngle) {
+			if (node.leftAngle!=0)
+				code.append("\trU.y(" + node.leftAngle + ", " + 0 + ")\n");
+
+			int sizePreLeft = gatesCode.size();
+			boolean added = false;
 			this.buildGates(node.leftChild, startQubit+1, depth, gatesCode);
+			if (gatesCode.size()>sizePreLeft) {
+				code.append("\tU.x(0)\n");
+				code.append("\tU.append(get" + node.leftChild.name + "().control(1), [" + this.getTargetQubits(0, depth-startQubit) + "])\n");
+				code.append("\tU.x(0)\n");
+				added = true;
+			}
+			
+			int sizePreRight = gatesCode.size();
 			this.buildGates(node.rightChild, startQubit+1, depth, gatesCode);
+			if (gatesCode.size()>sizePreRight) {
+				code.append("\tU.append(get" + node.rightChild.name + "().control(1), [" + this.getTargetQubits(0, depth-startQubit) + "])\n");
+				added = true;
+			}
+			
+			if (added) {
+				code.append("\treturn U.to_gate()\n\n");
+				gatesCode.add(code.toString());
+			}
 			return;
 		}
 		
 		if (node.leftAngle!=0)
-			code.append("\tU.ry(" + node.leftAngle + ", " + (startQubit-1) + ")\n");
+			code.append("\tU.ry(" + node.leftAngle + ", " + (0) + ")\n");
 
-		code.append("\tU.x("+ (startQubit-1) + ")\n");
-		code.append("\tU.append(get" + node.leftChild.name + "(), [" + this.getTargetQubits(startQubit, depth) + "])\n");
-		code.append("\tU.x("+ (startQubit-1) + ")\n");
-		code.append("\tU.append(get" + node.rightChild.name + "(), [" + this.getTargetQubits(startQubit, depth) + "])\n");
-		code.append("\treturn U.to_gate()\n\n");
-		gatesCode.add(code.toString());
+		boolean added = false;
+		int sizeLeftPre = gatesCode.size();
 		this.buildGates(node.leftChild, startQubit+1, depth, gatesCode);
+		if (gatesCode.size()>sizeLeftPre) {
+			code.append("\tU.x(0)\n");
+			code.append("\tU.append(get" + node.leftChild.name + "().control(1), [" + this.getTargetQubits(0, depth-startQubit) + "])\n");
+			code.append("\tU.x(0)\n");
+			added = true;
+		}
+		
+		int sizeRightPre = gatesCode.size();
 		this.buildGates(node.rightChild, startQubit+1, depth, gatesCode);
+		if (gatesCode.size()>sizeRightPre) { 
+			code.append("\tU.append(get" + node.rightChild.name + "().control(1), [" + this.getTargetQubits(0, depth-startQubit) + "])\n");
+			added = true;
+		}
+		
+		if (added) {
+			code.append("\treturn U.to_gate()\n\n");
+			gatesCode.add(code.toString());
+		}
 	}
 
 	private void buildLeafCode(BinaryTree node, List<String> gatesCode) {
@@ -164,6 +237,9 @@ public class OptimizedSubcircuitsSolver extends Solver {
 		}
 		
 		if (node.leftChild.leftAngle==node.rightChild.leftAngle) {
+			if (node.leftChild.leftAngle==0)
+				return;
+			
 			code+="\tU.ry(" + node.leftChild.leftAngle + ", 1)\n";
 			code+="\treturn U.to_gate()\n\n";
 			gatesCode.add(code);
@@ -173,11 +249,14 @@ public class OptimizedSubcircuitsSolver extends Solver {
 		if (node.leftAngle!=0) 
 			code+="\tU.ry(" + node.leftAngle + ", 0)\n";
 		
-		code+="\tU.x(0)\n";
-		code+="\tU.cry(" + node.leftChild.leftAngle + ", 0, 1)\n"; 
-		code+="\tU.x(0)\n";
-		code+="\tU.cry(" + node.rightChild.leftAngle + ", 0, 1)\n";
-		code+="\treturn U.to_gate().control(1)\n\n";
+		if (node.leftChild.leftAngle!=0) {
+			code+="\tU.x(0)\n";
+			code+="\tU.cry(" + node.leftChild.leftAngle + ", 0, 1)\n"; 
+			code+="\tU.x(0)\n";
+		}
+		if (node.rightChild.leftAngle!=0)
+			code+="\tU.cry(" + node.rightChild.leftAngle + ", 0, 1)\n";
+		code+="\treturn U.to_gate()\n\n";
 		gatesCode.add(code);
 	}
 		

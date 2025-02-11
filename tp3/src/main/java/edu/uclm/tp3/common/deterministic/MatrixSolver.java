@@ -136,7 +136,6 @@ public class MatrixSolver extends Solver {
 			return null;
 		RY ry = new RY();
 		ry.setQubit(qubit);
-		ry.setTheta(theta, qubit);
 		return ry.getMatrix();
 	}
 }

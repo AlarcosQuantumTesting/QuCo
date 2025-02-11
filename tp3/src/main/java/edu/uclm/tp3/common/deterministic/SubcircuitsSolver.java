@@ -132,7 +132,7 @@ public class SubcircuitsSolver extends Solver {
 	private RY getRY(int qubit, double leftAngle) {
 		RY ry = new RY();
 		ry.setQubit(qubit);
-		ry.setTheta(leftAngle, qubit);
+		ry.setTheta(leftAngle);
 		return ry;
 	}
 }

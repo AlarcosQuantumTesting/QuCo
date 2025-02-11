@@ -41,9 +41,10 @@ public class QiskitController {
 				int inputQubits = (int) info.get("inputQubits");
 				int qubits = (int) info.get("qubits");
 				String domain = info.get("domain").toString().trim().toUpperCase();
+				String type = info.get("type").toString();
 				
 				List<List<List<Integer>>> reducedMatrixes = QuirkReducer.reduce(receivedMatrixes, inputQubits, qubits);
-				code = this.coder.getCodeReduced(reducedMatrixes, inputQubits, qubits, domain, template);
+				code = this.coder.getCodeReduced(reducedMatrixes, inputQubits, qubits, domain, template, type);
 			} else {
 				code = this.coder.getCode(info, template);				
 			}

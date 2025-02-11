@@ -1,0 +1,53 @@
+.qubits-configuration {
+  text-align: center;
+  margin: 20px;
+}
+
+input {
+  width: 60px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: auto;
+}
+
+td {
+  width: 25px;
+  height: 25px;
+  border: 1px solid black;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.x-cell {
+  background-color: lightblue;
+  font-weight: bold;
+}
+
+.conflict {
+  background-color: red !important;
+}
+
+.header {
+  background-color: #ddd;
+  font-weight: bold;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #ddd;
+  border: 1px solid black;
+}
+
+input[type="text"] {
+  width: 100%;
+  max-width: 400px; /* Ajusta según prefieras */
+}

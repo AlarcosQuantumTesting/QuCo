@@ -43,6 +43,8 @@ public class ProblemConfiguration {
 	private List<Class<? extends Gate>> selected3QubitGates;
 	private List<Class<? extends Gate>> selectedNQubitGates;
 	private int totalGates;
+
+	private CodeTemplate codeTemplate;
 	
 	protected ProblemConfiguration() {
 		this.selected1QubitGates = new ArrayList<>();
@@ -276,5 +278,13 @@ public class ProblemConfiguration {
 
 	public int getTotalGates() {
 		return totalGates;
+	}
+
+	public void setCodeTemplate(CodeTemplate codeTemplate) {
+		this.codeTemplate = codeTemplate;
+	}
+
+	public CodeTemplate getCodeTemplate() {
+		return codeTemplate;
 	}
 }

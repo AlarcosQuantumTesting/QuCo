@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.uclm.tp3.common.gates.Gate;
+import edu.uclm.tp3.common.gates.IRotableGate;
 import edu.uclm.tp3.common.gates.OneQubitGate;
 import edu.uclm.tp3.common.gates.TwoQubitsGate;
 import edu.uclm.tp3.common.services.EvolutionaryService;
@@ -137,5 +138,17 @@ public class Circuit implements Serializable {
 			return shortFileName;
 		}		
 	}
+
+    public IRotableGate getRotableGate() {
+    		List<IRotableGate> oqrgs = new ArrayList<>();
+			for (Gate gate : this.gates) {
+				if (IRotableGate.class.isAssignableFrom(gate.getClass()))
+					oqrgs.add((IRotableGate) gate);
+			}
+			if (oqrgs.isEmpty())
+				return null;
+			int index = EvolutionaryService.dado.nextInt(oqrgs.size());
+			return oqrgs.get(index);
+    }
 
 }

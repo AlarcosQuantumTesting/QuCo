@@ -3,7 +3,14 @@ package edu.uclm.tp3.common.gates;
 import edu.uclm.tp3.Complex;
 import edu.uclm.tp3.sparse.QMatrix;
 
-public class CP extends TwoQubitsGate {
+public class CP extends TwoQubitsGate implements IRotableGate {
+
+	private double theta;
+
+	public CP() {
+		super();
+		this.theta = Math.PI/2;
+	}
 	
 	@Override
 	public String toString() {
@@ -19,7 +26,13 @@ public class CP extends TwoQubitsGate {
 				0.0, 0.0, 1.0, 0.0,
 				0.0, 0.0, 0.0, 0.0
 				);
-		m.set(3, 3, new Complex(Math.cos(Math.PI/2), Math.sin(Math.PI/2)));
+		m.set(3, 3, new Complex(Math.cos(this.theta), Math.sin(this.theta)));
 		return m;
+	}
+
+	@Override
+	public IRotableGate smallRotation(double radians) {
+		this.theta += radians;
+		return this;
 	}
 }

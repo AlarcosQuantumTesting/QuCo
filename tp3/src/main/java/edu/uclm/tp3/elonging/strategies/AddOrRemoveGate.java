@@ -36,14 +36,14 @@ public class AddOrRemoveGate extends Strategy {
 					if (tirada<0.8)
 						EvolutionaryService.addGate(pc, circuit);
 					else if (tirada<0.9)
-						EvolutionaryService.removeGate(pc, circuit);
-					else
 						EvolutionaryService.changeGate(pc, circuit);
+					else
+						EvolutionaryService.removeGate(pc, circuit);
 				} else {
 					if (tirada<0.5)
-						EvolutionaryService.removeGate(pc, circuit);
-					else
 						EvolutionaryService.changeGate(pc, circuit);
+					else
+						EvolutionaryService.removeGate(pc, circuit);
 				}
 			} else {
 				EvolutionaryService.addGate(pc, circuit);

@@ -18,7 +18,7 @@ import edu.uclm.tp3.common.model.Circuit;
 public class DeterministicService {
 	
 	public Map<String, Object> calculate(String solverName, int qubits, 
-			List<Integer> expectedFrequencies, boolean usePhysicalAngle, double physicalAngle) throws Exception {
+			List<Integer> expectedFrequencies, boolean usePhysicalAngle, double physicalAngle, boolean unifySimiliarNodes) throws Exception {
 		
 		int nOfOutputs = (int) Math.pow(2, qubits);
 		int shots = expectedFrequencies.stream().mapToInt(Integer::intValue).sum();
@@ -42,12 +42,15 @@ public class DeterministicService {
 		if (solverName.equals("subcircuitsSolver")) {
 			if (usePhysicalAngle) {
 				tree.removeLowAngles(physicalAngle);
-				solver = new OptimizedSubcircuitsSolver(tree, circuit);
+				if (unifySimiliarNodes) {
+					solver = new MinimizerSubcircuitsSolver(tree.hashing().get(tree.hashCode()), circuit);
+				} else 
+					solver = new OptimizedSubcircuitsSolver(tree, circuit);
 			} else { 
 				solver = new SubcircuitsSolver(tree, circuit);
 			}
 		} else if (solverName.equals("matrixSolver")) {
-			tree.removeEmptyNodes();
+			tree.prune();
 			solver = new MatrixSolver(tree, circuit);
 		}
 		return solver.solve(shots);

@@ -1,0 +1,57 @@
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, transpile
+from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
+from qiskit.circuit.library.standard_gates import *
+from qiskit.visualization import plot_histogram
+from qiskit.quantum_info.operators import Operator
+from math import pi
+import numpy
+from qiskit.visualization import plot_state_city
+from qiskit.visualization import plot_histogram
+from qiskit.circuit.library import MCMT
+
+qreg = QuantumRegister(#QUBITS#, 'q') 
+creg = ClassicalRegister(#OUTPUT_QUBITS#, 'c')
+circuit = QuantumCircuit(qreg, creg)
+
+#INITIALIZE#
+
+#CALCULUS#
+
+#MEASURES#
+
+service = QiskitRuntimeService(
+    channel='ibm_quantum',
+    instance='ibm-q/open/main',
+    token='56aa75a27a90b2d447cebd828e6f5009ce262e0e8a0ea931b9e30a8abfdb6a8f492f1e1eb5753447174dde4d61357101e55af6d4db3d164f0b1cf7317602a73c'
+)
+
+name_backend = 'ibm_brisbane'
+backend = service.backend(name_backend)
+
+print("ORIGINAL CIRCUIT:")
+print(circuit)
+print("**********************")
+
+transpiled_circuit = transpile(circuit, backend, initial_layout=[#QUBITS_LAYOUT#])
+
+print("TRANSPILED CIRCUIT:")
+print(transpiled_circuit)
+print("**********************")
+
+
+sampler = Sampler(mode=backend)
+
+job = sampler.run([transpiled_circuit], shots=#SHOTS#)
+result = job.result()
+histogram = result.get_counts()
+print(histogram)
+
+#pub_result = result[0]
+#print(f" >> Meas output register counts: {pub_result.data.meas.get_counts()}")
+
+
+absolute_counts = result.get_counts()
+total_shots = sum(absolute_counts.values())
+relative_counts = {key: value / total_shots for key, value in absolute_counts.items()}
+plot_histogram(relative_counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
+circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png')

@@ -3,7 +3,6 @@ package edu.uclm.tp3.common.gates;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.uclm.tp3.classic.QMatrix;
 import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 
@@ -11,6 +10,12 @@ import edu.uclm.tp3.common.services.EvolutionaryService;
 public abstract class OneQubitGate extends Gate {
 
 	protected int qubit;
+	protected double angle;
+
+	protected OneQubitGate() {
+		this.qubit = -1;
+		this.angle = Math.PI/2;
+	}
 	
 	public OneQubitGate setQubit(int qubit) {
 		this.qubit = qubit;
