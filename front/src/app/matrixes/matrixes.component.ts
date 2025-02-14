@@ -200,6 +200,9 @@ export class MatrixesComponent  {
         this.rows = result.numberOfRows
         this.cols = result.numberOfCols
         this.load(result.matrix)
+      },
+      error => {
+        this.error = (error as any).error.message
       }
     )
   }
@@ -257,7 +260,15 @@ export class MatrixesComponent  {
     )
   }
 
-  getQiskitCode(matrix : any[], type : string, rowIndex? : number) {
+  getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
+    let functionName
+    if (asFunction) {
+      functionName = prompt("Enter the name of the function")
+      if (!functionName || functionName.trim().length==0) {
+        this.error = "You must enter a name for the function"
+        return
+      }
+    }
     this.reset()
     let info = {
       matrix : matrix,
@@ -266,7 +277,7 @@ export class MatrixesComponent  {
       reduce : this.reduceQuiskit,
       domain : this.domain,
       template : this.manager.selectedTemplate,
-      type : type
+      functionName : functionName
     }
     if (rowIndex!=undefined)
       info.matrix = matrix[rowIndex]

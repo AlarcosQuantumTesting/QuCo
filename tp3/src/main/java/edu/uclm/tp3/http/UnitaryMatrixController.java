@@ -121,6 +121,4 @@ public class UnitaryMatrixController {
 			result.add(QMatrix.i());
 		return result;
 	}
-	
-	
 }

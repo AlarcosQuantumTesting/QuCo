@@ -6,7 +6,6 @@ import { TemplatesService } from './templates.service';
   providedIn: 'root'
 })
 export class ManagerService {
-
   selectedTemplate: CodeTemplate = new CodeTemplate("", "", "")
   templates: CodeTemplate[] = []
 
@@ -15,6 +14,11 @@ export class ManagerService {
       this.templates = data
       this.selectedTemplate = this.templates[0]
     })
-
   }
+
+  getTemplatesStartingBy(prefix: string): CodeTemplate[] {
+    return this.templates.filter(t => t.fileName.startsWith(prefix))
+  }
+  
+  
 }

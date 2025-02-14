@@ -144,6 +144,10 @@ export class GroverComponent extends GroverStyle {
   }
 
   getEmptyMatrix() {
+    if (this.qubits>12) {
+      this.error = "The number of qubits must be less or equal to 12"
+      return
+    }
     this.reset()
     this.matrix = this.emptyMatrix(this.qubits, 0)
   }
@@ -216,18 +220,28 @@ export class GroverComponent extends GroverStyle {
     window.getSelection()!.removeAllRanges()
   }
 
-  getQiskitCode(matrix: any[], type : string) {
+  getQiskitCode(matrix: any[], asFunction : boolean) {
+    let name
+    if (asFunction) {
+      name = prompt("Enter the name of the function")
+      if (!name || name.trim().length==0) {
+        this.error = "You must enter a name for the function"
+        return
+      }
+    }
+
     this.reset()
 
     let info = {
       matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
-      template : this.manager.selectedTemplate
+      template : this.manager.selectedTemplate,
+      functionName : name
     }
     if (info.matrix.length == 0) {
       this.error = "Select some output"
       return
     }
-    this.groverService.getCode(info, type).subscribe(
+    this.groverService.getCode(info).subscribe(
       result => {
         this.qiskitCode = result.code
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });

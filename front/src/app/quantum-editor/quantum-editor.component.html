@@ -122,16 +122,12 @@
           <th>q<sub>{{ i }}</sub></th>
 
           <ng-container *ngFor="let col of [].constructor(circuit.columns); let j = index">
-
-            <!-- Renderizar solo una celda con rowspan si la puerta comienza en esta posición -->
             <td *ngIf="circuit.getGate(i, j) && !circuit.isCovered(i, j)" [rowSpan]="circuit.getGate(i, j)?.qubits"
               (click)="placeGate(i, j)" (dblclick)="removeGate(i, j)">
               <button class="gate-button">
                 {{ circuit.getGate(i, j)?.name }}
               </button>
             </td>
-
-            <!-- Renderizar celdas normales solo si no están cubiertas por otra puerta -->
             <td *ngIf="!circuit.getGate(i, j) && !circuit.isCovered(i, j)" (click)="placeGate(i, j)">
             </td>
           </ng-container>

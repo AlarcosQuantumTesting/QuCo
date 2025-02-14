@@ -10,15 +10,18 @@ import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 
 const routes: Routes = [
-  { path : "matrix", component : MatrixesComponent },
-  { path : "grover", component : GroverComponent },
-  { path : "elonging", component : ElongingComponent },
-  { path : "blocks", component : BlocksComponent },
-  { path : "grenoble", component : DeterministicComponent },
-  { path : "editor", component : QuantumEditorComponent },
-  { path : "templates", component : TemplatesComponent },
-  { path : "qubits-configuration", component : QubitsConfigurationComponent }
+  { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
+  { path: "matrix", component: MatrixesComponent },
+  { path: "grover", component: GroverComponent },
+  { path: "elonging", component: ElongingComponent },
+  { path: "blocks", component: BlocksComponent },
+  { path: "grenoble", component: DeterministicComponent },
+  { path: "editor", component: QuantumEditorComponent },
+  { path: "templates", component: TemplatesComponent },
+  { path: "qubits-configuration", component: QubitsConfigurationComponent },
+  { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

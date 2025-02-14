@@ -1,4 +1,4 @@
-package edu.uclm.tp3.grover;
+package edu.uclm.tp3.qiskit;
 
 import java.util.ArrayList;
 import java.util.List;

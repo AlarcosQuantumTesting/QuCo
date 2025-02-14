@@ -28,11 +28,14 @@ export class EdCircuit {
     }
 
     getGate(qubit: number, column: number): EdGate | null {
-        return this.qubits[qubit].gates.find(gate => gate.x === column) || null;
+        return this.qubits[qubit].gates.find(gate => gate.column === column) || null;
     }
 
     setGate(qubit: number, column: number, selectedGate: EdGate) {
-        selectedGate.x = column; // Establecer la posición en la columna
+        let selectedQubit = this.qubits[qubit];
+        if (selectedQubit.gates.find(gate => gate.column === column)) 
+            return
+        selectedGate.column = column; 
         this.qubits[qubit].add(selectedGate);
     }
 
@@ -62,19 +65,18 @@ export class EdQubit {
         if (!this.gates.includes(gate))
             this.gates.push(gate)
 
-        this.gates.sort((a, b) => a.x! - b.x!)
+        this.gates.sort((a, b) => a.column! - b.column!)
     }
 
     removeGate(column: number) {
-        this.gates = this.gates.slice().filter(gate => gate.x !== column);
+        this.gates = this.gates.slice().filter(gate => gate.column !== column);
     }
 }
 
 export class EdGate {
     name?: string;
     qubits: number = 1;
-    x: number = -1;
-    y: number = -1;
+    column: number = -1;
     code: string = ''; // Texto asociado
     description: string = ''; // Descripción de la puerta
 

@@ -11,10 +11,6 @@ export class QiskitService {
   getQiskitMatrix(info : any) {
     return this.client.put<any>(environment.beUrl + "unitaryMatrix/getMatrix", info)
   }
-  
-  getQiskitMatrixes(info : any) {
-    return this.client.put<any>(environment.beUrl + "unitaryMatrix/getMatrixes", info)
-  }
 
   getCode(info : any) {
     return this.client.put<any>(environment.beUrl + "qiskit/getCode", info)

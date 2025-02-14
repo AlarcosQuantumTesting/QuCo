@@ -13,8 +13,8 @@ export class GroverService {
     return this.client.put<any>(environment.beUrl + "grover/getAllQuirk", info)
   }
 
-  getCode(info : any, type : string) {
-    return this.client.put<any>(environment.beUrl + "grover/getCode?type=" + type, info)
+  getCode(info : any) {
+    return this.client.put<any>(environment.beUrl + "grover/getCode", info)
   }
 
   getQiskitMatrix(info : any) {

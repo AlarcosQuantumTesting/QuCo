@@ -137,7 +137,7 @@ export class QuantumEditorComponent {
     if (!this.selectedGate) return;
 
     if (this.selectedGate.name === 'M') {
-      for (let i=this.measureFrom; i<this.measureTo; i++) 
+      for (let i=this.measureFrom; i<=this.measureTo; i++) 
         this.circuit.setGate(i, this.circuit.columns-1, this.selectedGate.copy());
       this.selectedGate = undefined;
       return;
@@ -177,12 +177,12 @@ export class QuantumEditorComponent {
   }
 
   setQubits(event : any) {
-    let qubits = parseInt(event.target.value) - this.circuit.qubits.length;
+    let qubits = parseInt(event.target.value) // - this.circuit.qubits.length;
     if (qubits < this.circuit.qubits.length) 
-      for (let i=0; i<-qubits; i++) 
+      for (let i=0; i<qubits; i++) 
         this.removeQubit()
     else 
-      for (let i=0; i<qubits; i++) 
+      for (let i=this.circuit.qubits.length; i<qubits; i++) 
         this.addQubit()
   }
 
