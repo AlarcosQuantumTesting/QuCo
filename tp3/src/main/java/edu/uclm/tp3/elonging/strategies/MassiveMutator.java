@@ -100,7 +100,7 @@ public class MassiveMutator {
 		if (newGate.getClass()==oldGate.getClass())
 			newGate.modifyQubits(circuit.getQubits());
 		circuit.getGates().set(index, newGate);
-		circuit.save(gt, targetGeneration, cont[0], fitnesser);
+		circuit.save(pc, gt, targetGeneration, cont[0], fitnesser);
 		String gatesCode = circuit.getGatesCode();
 		StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 		circuit.saveCode(gt, targetGeneration, cont[0]++, fitnesser, sb.toString());
@@ -112,7 +112,7 @@ public class MassiveMutator {
 		int index = EvolutionaryService.dado.nextInt(circuit.getGates().size()); 
 		Gate removedGate = circuit.getGates().remove(index);
 		int targetGeneration = pc.getTargetGeneration();
-		circuit.save(gt, targetGeneration, cont[0], fitnesser);
+		circuit.save(pc, gt, targetGeneration, cont[0], fitnesser);
 		String gatesCode = circuit.getGatesCode();
 		StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 		circuit.saveCode(gt, targetGeneration, cont[0]++, fitnesser, sb.toString());
@@ -122,7 +122,7 @@ public class MassiveMutator {
 	private void addRandomGate(Circuit circuit, int[] cont, String gt, ProblemConfiguration pc, Fitnesser fitnesser) throws Exception {
 		EvolutionaryService.addGate(pc, circuit);
 		int targetGeneration = pc.getTargetGeneration();
-		circuit.save(gt, targetGeneration, cont[0], fitnesser);
+		circuit.save(pc, gt, targetGeneration, cont[0], fitnesser);
 		String gatesCode = circuit.getGatesCode();
 		StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 		circuit.saveCode(gt, targetGeneration, cont[0]++, fitnesser, sb.toString());
@@ -138,7 +138,7 @@ public class MassiveMutator {
 			gate = (Gate) gateClazz.getConstructors()[0].newInstance();
 			gate.assignRandomQubits(circuit);
 			circuit.add(gate);
-			circuit.save(gt, targetGeneration, cont[0], fitnesser);
+			circuit.save(pc, gt, targetGeneration, cont[0], fitnesser);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 			circuit.saveCode(gt, targetGeneration, cont[0]++, fitnesser, sb.toString());

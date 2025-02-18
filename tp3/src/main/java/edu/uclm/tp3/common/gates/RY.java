@@ -12,8 +12,8 @@ public class RY extends OneQubitGate implements IRotableGate {
 	@Override
 	public String toString() {
 		if (this.angle==Math.PI/2)
-			return "rx(pi/2, " + this.qubit + ")\n";
-		return "rx(" + this.angle + ", " + this.qubit + ")\n";
+			return "ry(pi/2, " + this.qubit + ")\n";
+		return "ry(" + this.angle + ", " + this.qubit + ")\n";
 	}
 
 	public void setTheta(double theta) {

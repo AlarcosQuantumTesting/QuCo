@@ -168,12 +168,12 @@ export class DeterministicComponent extends GroverStyle {
     }
   }
 
-  getCircuit(solver : string) {
+  getCircuit() {
     this.running = true
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(solver, this.qubits, this.expectedFrequencies, this.physicalAngle, this.usePhysicalAngle, this.unifySimiliarNodes).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.usePhysicalAngle, this.unifySimiliarNodes).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
@@ -198,7 +198,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   private shouldDisplay(node : any) : boolean {
-    return node && (node.leftProbability>0 || node.rightProbability>0)
+    return true //node && (node.leftProbability>0 || node.rightProbability>0)
   }
 
   generateSvgFromBottom(

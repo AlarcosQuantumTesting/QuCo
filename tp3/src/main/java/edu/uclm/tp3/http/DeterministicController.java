@@ -1,4 +1,4 @@
-package edu.uclm.tp3.common.deterministic;
+package edu.uclm.tp3.http;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.tp3.common.services.DeterministicService;
+
 @RestController
 @RequestMapping("deterministic")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
@@ -36,7 +38,7 @@ public class DeterministicController {
 	}
 		
 	@PostMapping("/calculate") @ResponseBody
-	public Map<String, Object> calculate(HttpSession session, @RequestParam String solver, @RequestBody Map<String, Object> info) {
+	public Map<String, Object> calculate(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -51,7 +53,7 @@ public class DeterministicController {
                 .collect(Collectors.toList());
 		
 		try {
-			Map<String, Object> result = this.service.calculate(solver, qubits, expectedFrequencies, usePhysicalAngle, physicalAngle, unifySimiliarNodes);
+			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, usePhysicalAngle, physicalAngle, unifySimiliarNodes);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

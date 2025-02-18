@@ -1,6 +1,7 @@
 package edu.uclm.tp3.genetic;
 
 import edu.uclm.tp3.common.gates.Gate;
+import edu.uclm.tp3.common.gates.IRotableGate;
 import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.model.GateEncoding;
 import edu.uclm.tp3.common.model.ProblemConfiguration;
@@ -22,11 +23,22 @@ public class Mutator {
 			return;
 		}
 		
-		int type = EvolutionaryService.dado.nextInt(2);
-		if (type==0 || circuit.getQubits()==1)
+		int type = EvolutionaryService.dado.nextInt(10);
+		if (type==0 || circuit.getQubits()==1) {
 			mutateGate(pc, circuit, column);
-		else if (type==1)
+		} else if (type<5) {
 			mutateQubit(circuit, column);
+		} else {
+			if (circuit.getGates().size()>2) {
+				IRotableGate rotableGate = circuit.getRotableGate();
+				if (rotableGate==null) {
+					return;
+				} else {
+					double radians = EvolutionaryService.dado.nextDouble()*0.5;
+					rotableGate.smallRotation(radians);
+				}
+			}
+		}
 	}
 
 	private static void mutateGate(ProblemConfiguration pc, Circuit circuit, int column) {

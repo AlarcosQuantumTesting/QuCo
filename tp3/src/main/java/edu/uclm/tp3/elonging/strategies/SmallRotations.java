@@ -42,7 +42,7 @@ public class SmallRotations extends Strategy {
 			} else {
 				EvolutionaryService.addGate(pc, circuit);
 			}
-			circuit.save(gt, targetGeneration, i, fitnesser);
+			circuit.save(pc, gt, targetGeneration, i, fitnesser);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 			circuit.saveCode(gt, targetGeneration, i, fitnesser, sb.toString());

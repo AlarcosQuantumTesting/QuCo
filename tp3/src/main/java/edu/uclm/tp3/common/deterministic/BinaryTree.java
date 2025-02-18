@@ -80,8 +80,8 @@ public class BinaryTree {
         
         node.leftAngle = 2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2;
         node.rightAngle = Math.PI - node.leftAngle;
-        if (node.rightAngle>=Math.PI)
-        	node.rightAngle = node.rightAngle-Math.PI;
+        //if (node.rightAngle>=Math.PI)
+        //	node.rightAngle = node.rightAngle-Math.PI;
 
         normalizeProbabilitiesRecursive(node.leftChild);
         normalizeProbabilitiesRecursive(node.rightChild);
@@ -363,6 +363,7 @@ public class BinaryTree {
 			
 			StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
 			code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
+			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
 			code.append("\tU.append(get" + this.leftChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
 			code.append("\treturn U.to_gate()\n\n");
 			return code.toString();

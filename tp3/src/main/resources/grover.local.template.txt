@@ -1,5 +1,5 @@
 from qiskit_ibm_runtime import SamplerV2
-from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2
+from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2, FakeBrisbane
 from qiskit import transpile
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.circuit.library.standard_gates import *
@@ -34,7 +34,11 @@ print("ORIGINAL CIRCUIT:")
 print(circuit)
 print("**********************")
 
-backend = FakeAlmadenV2()
+# Check other fake providers at https://docs.quantum.ibm.com/api/qiskit-ibm-runtime/fake-provider
+#backend = FakeAlmadenV2()  # 21 qubits
+#backend = FakeAlgiers()  # 27 qubits
+#backend = FakeBrisbane()  # 127 qubits
+
 start_time = time.time()
 transpiled_circuit = transpile(circuit, backend)
 end_time = time.time()
@@ -68,3 +72,4 @@ print("Results: ", counts)
 
 plot_histogram(counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
 circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
+#transpiled_circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_transpiled_circuit.png') 

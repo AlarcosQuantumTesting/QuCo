@@ -37,5 +37,5 @@ public abstract class Solver {
 		return sb.toString();
 	}
 
-	protected abstract Map<String, Object> solve(int shots) throws IOException;
+	public abstract Map<String, Object> solve(int shots) throws IOException;
 }

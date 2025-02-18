@@ -37,18 +37,11 @@ public class ClassicRoulette extends Roulette {
 		Circuit father = parents[index0];
 		Circuit mother = parents[index1];
 		Circuit[] children = Crosser.cross(father, mother);
-				
-		if (EvolutionaryService.dado.nextDouble()<0.03) 
-			Mutator.mutate(pc, children[0]);
-		
-		if (EvolutionaryService.dado.nextDouble()<0.03)
-			Mutator.mutate(pc, children[1]);
-				
 		parents[index0] = children[0];
 		parents[index1] = children[1];
 		
 		for (int i=0; i<parents.length; i++)
-			parents[i].save(gt, targetGeneration, i, fitnesser);
+			parents[i].save(pc, gt, targetGeneration, i, fitnesser);
 		return parents;
 	}
 

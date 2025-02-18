@@ -133,8 +133,8 @@
     <table border="1">
         <tr>
             <th colspan="2" valign="right">Generation</th>
-            <th *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                {{ iterationIndex }}
+            <th *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                {{ pc.iterationIndex - 1 - iterationIndex }}
             </th>
         </tr>
         <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
@@ -143,30 +143,30 @@
             </tr>
             <tr>
                 <th>Strategy</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ strategies[fitnesserIndex][iterationIndex] }}
+                <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                    {{ strategies[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
                 </td>
             </tr>
             <tr>
                 <th>Best fitness</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ bestFitnesses[fitnesserIndex][iterationIndex] }}
+                <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                    {{ bestFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
                 </td>
             </tr>
             <tr>
                 <th>Mean fitness</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ meanFitnesses[fitnesserIndex][iterationIndex] }}
+                <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                    {{ meanFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
                 </td>
             </tr>
             <tr>
                 <th>Error</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ meanErrors[fitnesserIndex][iterationIndex] }}
+                <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                    {{ meanErrors[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
                 </td>
             </tr>
         </ng-container>
-    </table>
+    </table>    
 </small>
 
 <table border="1" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">

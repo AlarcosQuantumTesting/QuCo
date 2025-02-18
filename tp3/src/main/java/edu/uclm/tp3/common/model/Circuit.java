@@ -8,11 +8,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.parsing.Problem;
+
 import edu.uclm.tp3.common.gates.Gate;
 import edu.uclm.tp3.common.gates.IRotableGate;
 import edu.uclm.tp3.common.gates.OneQubitGate;
 import edu.uclm.tp3.common.gates.TwoQubitsGate;
 import edu.uclm.tp3.common.services.EvolutionaryService;
+import edu.uclm.tp3.genetic.Mutator;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 
 public class Circuit implements Serializable {
@@ -85,7 +88,11 @@ public class Circuit implements Serializable {
 		return accumulatedQubits;
 	}
 
-	public String save(String token, int targetGeneration, int fileIndex, Fitnesser fitnesser) throws FileNotFoundException, IOException {
+	public String save(ProblemConfiguration pc,	String token, int targetGeneration, int fileIndex, Fitnesser fitnesser) throws FileNotFoundException, IOException {
+		this.encode(EvolutionaryService.requiredBitsForGates);
+		if (EvolutionaryService.dado.nextDouble()<0.03) 
+			Mutator.mutate(pc, this);
+
 		String fileName = EvolutionaryService.generationFolder(token, targetGeneration) + fileIndex;
 		if (fitnesser!=null)
 			fileName += "." + fitnesser.getClass().getSimpleName();

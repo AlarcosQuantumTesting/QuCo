@@ -1,5 +1,5 @@
 from qiskit_ibm_runtime import SamplerV2
-from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2
+from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2, FakeBrisbane
 from qiskit import transpile
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit.circuit.library.standard_gates import *
@@ -34,7 +34,11 @@ print("ORIGINAL CIRCUIT:")
 print(circuit)
 print("**********************")
 
-backend = FakeAlmadenV2()
+# Check other fake providers at https://docs.quantum.ibm.com/api/qiskit-ibm-runtime/fake-provider
+#backend = FakeAlmadenV2()  # 21 qubits
+#backend = FakeAlgiers()  # 27 qubits
+#backend = FakeBrisbane()  # 127 qubits
+
 start_time = time.time()
 transpiled_circuit = transpile(circuit, backend)
 end_time = time.time()
@@ -67,14 +71,6 @@ print("Gates (transpiled):", sum(transpiled_circuit.count_ops().values()))
 print("Results: ", counts)
 
 plot_histogram(counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
+circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
+#transpiled_circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_transpiled_circuit.png') 
 
-
-#convert_histogram_to_decimal_list(histogram)
-# Resultados absolutos de las mediciones
-#absolute_counts = result.get_counts()
-# Total de ejecuciones (shots)
-#total_shots = sum(absolute_counts.values())
-# Convertir a frecuencias relativas
-#relative_counts = {key: value / total_shots for key, value in absolute_counts.items()}
-#plot_histogram(relative_counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
-#circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
