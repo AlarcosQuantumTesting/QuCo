@@ -326,7 +326,7 @@ public class BinaryTree {
 		if (this.leftProbability==0) {
 			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
 			child = usedNodesMap.get(this.rightChild.hashCode());
-			code.append("\tU.append(get" + child.name + "(), []" + this.getTargetQubits(1, nodeDepth) + "])\n");
+			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
 			code.append("\treturn U.to_gate()\n\n");
 			this.code = code.toString();
 			return this;
