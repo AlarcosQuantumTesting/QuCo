@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BinaryTree",
+            "request": "launch",
+            "mainClass": "edu.uclm.tp3.common.deterministic.BinaryTree",
+            "projectName": "tp3"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

@@ -20,51 +20,51 @@ public class GroverRudolphSolver extends Solver {
 	}
 
 	@Override
-		public Map<String, Object> solve(int shots) throws IOException {
-			this.depth = this.tree.getDepth();
-			List<String> gatesCode = new ArrayList<>();
-			StringBuilder circuitsToPrint = new StringBuilder();
-			
-			StringBuilder code = new StringBuilder();
-			
-			if (this.depth==1) {
-				RY ry0 = this.getRY(0, this.tree.leftAngle);
-				code.append(ry0.getCode());
-				circuitsToPrint.append("\tprint(\"0\")\n\tprint(U)\n");
-			} else if (this.depth==2) {
-				X x = (X) new X().setQubit(0);
-				CRY cryLeft = this.getCRY(0, this.tree.leftChild.leftAngle);
-				code.append(x.getCode());
-				code.append(cryLeft.getCode());
-				code.append(x.getCode());
-				CRY cryRight = this.getCRY(0, this.tree.rightChild.leftAngle);
-				code.append(cryRight.getCode());
-			} else {
-				RY ry0 = this.getRY(0, this.tree.leftAngle);
-				code.append(ry0.getCode());
-				X x1 = this.getX(0);
-				code.append(x1.getCode());
-				code.append("circuit.append(get" + this.tree.leftChild.name + "(), [" + this.getTargetQubits(0, depth) + "])\n");
-				X x2 = this.getX(0);
-				code.append(x2.getCode());
-				code.append("circuit.append(get" + this.tree.rightChild.name + "(), [" + this.getTargetQubits(0, depth) + "])\n");
+	public Map<String, Object> solve(int shots) throws IOException {
+		this.depth = this.tree.getDepth();
+		List<String> gatesCode = new ArrayList<>();
+		StringBuilder circuitsToPrint = new StringBuilder();
 		
-				circuitsToPrint.append("\tprint(\"" + this.tree.leftChild.name + "\")\n\tprint(U)\n");
-				circuitsToPrint.append("\tprint(\"" + this.tree.rightChild.name + "\")\n\tprint(U)\n");
-
-				buildGates(this.tree, 0, depth, gatesCode, circuitsToPrint);
-			}
+		StringBuilder code = new StringBuilder();
+		
+		if (this.depth==1) {
+			RY ry0 = this.getRY(0, this.tree.leftAngle);
+			code.append(ry0.getCode());
+			circuitsToPrint.append("\tprint(\"0\")\n\tprint(U)\n");
+		} else if (this.depth==2) {
+			X x = (X) new X().setQubit(0);
+			CRY cryLeft = this.getCRY(0, this.tree.leftChild.leftAngle);
+			code.append(x.getCode());
+			code.append(cryLeft.getCode());
+			code.append(x.getCode());
+			CRY cryRight = this.getCRY(0, this.tree.rightChild.leftAngle);
+			code.append(cryRight.getCode());
+		} else {
+			RY ry0 = this.getRY(0, this.tree.leftAngle);
+			code.append(ry0.getCode());
+			X x1 = this.getX(0);
+			code.append(x1.getCode());
+			code.append("circuit.append(get" + this.tree.leftChild.name + "(), [" + this.getTargetQubits(0, depth) + "])\n");
+			X x2 = this.getX(0);
+			code.append(x2.getCode());
+			code.append("circuit.append(get" + this.tree.rightChild.name + "(), [" + this.getTargetQubits(0, depth) + "])\n");
 	
-			Map<String, Object> result = new HashMap<>();
-			result.put("#QUBITS#", this.circuit.getQubits());
-			result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
-			result.put("#SHOTS#", shots);
-			result.put("#INITIALIZE#", this.getInitialize(gatesCode));
-			result.put("#CALCULUS#", code);
-			result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
-			result.put("tree", this.tree.toMap());
-			return result;
+			circuitsToPrint.append("\tprint(\"" + this.tree.leftChild.name + "\")\n\tprint(U)\n");
+			circuitsToPrint.append("\tprint(\"" + this.tree.rightChild.name + "\")\n\tprint(U)\n");
+
+			buildGates(this.tree, 0, depth, gatesCode, circuitsToPrint);
 		}
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("#QUBITS#", this.circuit.getQubits());
+		result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
+		result.put("#SHOTS#", shots);
+		result.put("#INITIALIZE#", this.getInitialize(gatesCode));
+		result.put("#CALCULUS#", code);
+		result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
+		result.put("tree", this.tree.toMap());
+		return result;
+	}
 
 	private void buildGates(BinaryTree node, int startQubit, int depth, List<String> gatesCode, StringBuilder circuitsToPrint) {
 		if (node.leftChild.leftChild == null) {

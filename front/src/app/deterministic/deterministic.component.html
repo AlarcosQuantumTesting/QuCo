@@ -75,21 +75,14 @@
 <div style="display: flex; align-items: flex-start; gap: 20px;">
     <!-- Tabla -->
     <table border="1">
-      <tr style="color:blue">
-        <td align="center" colspan="5">
-          <button (click)="getCircuit()">Get whole Qiskit code</button>
-          &nbsp;
-          <u style="color:blue" (click)="goToCode()">Go to code</u>
-        </td>
-      </tr>
       <tr>
         <th colspan="5" align="left">
           Physical angle:
           &nbsp;
-          <input type="checkbox" [(ngModel)]="usePhysicalAngle">
           <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
+          <button (click)="getCircuit()">Get whole Qiskit code</button>
           &nbsp;
-          <input type="checkbox" [(ngModel)]="unifySimiliarNodes" [disabled]="!usePhysicalAngle">Unify similar nodes
+          <u style="color:blue" (click)="goToCode()">Go to code</u>
         </th>
       </tr>
       <tr>

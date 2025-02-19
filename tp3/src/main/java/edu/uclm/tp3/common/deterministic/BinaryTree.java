@@ -19,6 +19,8 @@ public class BinaryTree {
     BinaryTree parent;
     BinaryTree leftChild;
     BinaryTree rightChild;
+
+	String code;
     
     public BinaryTree() {
 		this.value = -1;
@@ -311,149 +313,109 @@ public class BinaryTree {
 		}
 	}
 
-	public String getCode(int nodeDepth, Map<Integer, String> usedNodesMap) {
-		if (this.name.equals("0")) {
-			StringBuilder code = new StringBuilder("def get0():\n");
-			code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"0\")\n");
-			if (this.leftProbability==0) {
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-				code.append ("\tU.append(get" + this.rightChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-				code.append("\treturn U.to_gate()\n\n");
-			} else if (this.rightProbability==0) {
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-				if (usedNodesMap.containsKey(this.leftChild.hashCode()))
-					code.append ("\tU.append(get" + this.leftChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-				code.append("\treturn U.to_gate()\n\n");
-			} else {
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-				if (usedNodesMap.containsKey(this.leftChild.hashCode())) {
-					code.append("\tU.x(0)\n");
-					code.append ("\tU.append(get" + this.leftChild.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-					code.append("\tU.x(0)\n");
-				}
-				if (usedNodesMap.containsKey(this.rightChild.hashCode()))
-					code.append ("\tU.append(get" + this.rightChild.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-				code.append("\treturn U.to_gate()\n\n");
-			}
-			return code.toString();
-		}
-		
+	public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
 		if (nodeDepth==2)
-			return this.getLeafCode();
+			return this.getLeafCode(usedNodesMap);
 
-		if (this.leftChild==this.rightChild) {
-			if (usedNodesMap.get(this.leftChild.hashCode())==null)
-				return null;
-			
-			StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-			code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-			code.append ("\tU.append(get" + this.leftChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			return code.toString();
-		}
-		
-		if (this.rightChild==null) {
-			if (usedNodesMap.get(this.leftChild.hashCode())==null) {
-				StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-				code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-				code.append("\treturn U.to_gate()\n\n");
-				return code.toString();
-			}
-			
-			StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-			code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-			code.append("\tU.append(get" + this.leftChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			return code.toString();
-		}
-		
-		if (this.leftChild==null) {
-			if (usedNodesMap.get(this.rightChild.hashCode())==null) {
-				StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-				code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-				code.append("\treturn U.to_gate()\n\n");
-				return code.toString();
-			}
-			
-			StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-			code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-			code.append("\tU.append(get" + this.rightChild.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			return code.toString();
-		}
-		
+		if (this.leftProbability==0 && this.rightProbability==0)
+			return null;
+
 		StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
 		code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-		if (this.leftAngle!=0) 
+		BinaryTree child;
+		if (this.leftProbability==0) {
 			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-		
-		if (usedNodesMap.get(this.leftChild.hashCode())!=null) {
-			code.append("\tU.x(0)\n");
-			code.append("\tU.append(get" + this.leftChild.name + "().control(1), [0," + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\tU.x(0)\n");
+			child = usedNodesMap.get(this.rightChild.hashCode());
+			code.append("\tU.append(get" + child.name + "(), []" + this.getTargetQubits(1, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
 		}
-		
-		if (usedNodesMap.get(this.rightChild.hashCode())!=null)
-			code.append("\tU.append(get" + this.rightChild.name + "().control(1), [0, " + this.getTargetQubits(1, nodeDepth) + "])\n");
+
+		if (this.rightProbability==0) {
+			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+			child = usedNodesMap.get(this.leftChild.hashCode());
+			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
+		}
+
+		if (this.leftProbability==this.rightProbability) {
+			if (this.leftAngle!=0)
+				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+			code.append("\tU.x(0)\n");
+			child = usedNodesMap.get(this.leftChild.hashCode());
+			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+			code.append("\tU.x(0)\n");
+			child = usedNodesMap.get(this.rightChild.hashCode());
+			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
+		}
+
+		code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+		code.append("\tU.x(0)\n");
+		child = usedNodesMap.get(this.leftChild.hashCode());
+		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+		code.append("\tU.x(0)\n");
+		child = usedNodesMap.get(this.rightChild.hashCode());
+		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
 		code.append("\treturn U.to_gate()\n\n");
-		return code.toString();
+		this.code = code.toString();
+		return this;
 	}
 
-	private String getLeafCode() {
+	private BinaryTree getLeafCode(Map<Integer, BinaryTree> usedNodesMap) {
+		if (usedNodesMap.get(this.hashCode())!=null)
+			return null;
+		if (this.leftProbability==0 && this.rightProbability==0)
+			return null;
+		
 		String code = "def get" + this.name + "():\n";
 		code+="\tU = QuantumCircuit(2, name=\"" + this.name + "\")\n";
-		if (this.leftChild==this.rightChild) {
-			if (this.leftAngle!=0)
-				code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-
-			if (this.leftChild.leftAngle!=0) {
-				code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
-				code+="\treturn U.to_gate()\n\n";
-				return code;
-			} else 
-				return null;
+		if (this.leftProbability==0) {
+			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
+			code+="\tU.ry(" + this.rightChild.leftAngle + ", 1)\n";
+			code+="\treturn U.to_gate()\n\n";
+			this.code = code;
+			return this;
 		}
-		if (this.rightChild==null) {
+
+		if (this.rightProbability==0) {
 			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
 			if (this.leftChild.leftAngle!=0)
 				code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
-			
 			code+="\treturn U.to_gate()\n\n";
-			return code;
+			this.code = code;
+			return this;
 		}
-		if (this.leftChild==null) {
-			code+="\tU.ry(" + this.rightAngle + ", 0)\n";
+
+		if (this.leftProbability==this.rightProbability) {
+			if (this.leftChild.leftAngle!=0) {
+				code+="\tU.x(0)\n";
+				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
+				code+="\tU.x(0)\n";
+			}
 			if (this.rightChild.leftAngle!=0)
-				code+="\tU.ry(" + this.rightChild.leftAngle + ", 1)\n";
-			
+				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
 			code+="\treturn U.to_gate()\n\n";
-			return code;
+			this.code = code;
+			return this;
 		}
-		if (this.leftChild.leftAngle==this.rightChild.leftAngle) {
-			if (this.leftChild.leftAngle==0)
-				return null;
-			
-			code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
-			code+="\treturn U.to_gate()\n\n";
-			return code;
-		}
-		if (this.leftAngle!=0)
-			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-		
+
+		code+="\tU.ry(" + this.leftAngle + ", 0)\n";
 		if (this.leftChild.leftAngle!=0) {
 			code+="\tU.x(0)\n";
-			code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n"; 
+			code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
 			code+="\tU.x(0)\n";
 		}
 		if (this.rightChild.leftAngle!=0)
 			code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
 		code+="\treturn U.to_gate()\n\n";
-		
-		return code;
+		this.code = code;
+			return this;
 	}
 	
 	private String getTargetQubits(int startQubit, int depth) {

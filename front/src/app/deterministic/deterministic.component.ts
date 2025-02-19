@@ -25,9 +25,7 @@ export class DeterministicComponent extends GroverStyle {
   expandedArray: number[] = [];
   relativeFrequencies : number[] = []
 
-  physicalAngle : number = Math.PI/16
-  usePhysicalAngle : boolean = true
-  unifySimiliarNodes : boolean = true
+  physicalAngle : number = 0
 
   running : boolean = false
   state? : string 
@@ -173,7 +171,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.usePhysicalAngle, this.unifySimiliarNodes).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
