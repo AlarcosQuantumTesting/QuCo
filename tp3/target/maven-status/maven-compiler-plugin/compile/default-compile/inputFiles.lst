@@ -1,5 +1,4 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/Product.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/MinimizerSubcircuitsSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/Eq.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/TemplatesController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/services/BlocksService.java
@@ -9,6 +8,7 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/model/ICircuit.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/QiskitController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/qiskit/GroverSolver.java
+/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/DeterministicController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/U.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/genetic/fitnessers/SpearmanFitnesser.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/MatrixColumn.java
@@ -36,11 +36,12 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/UnitaryMatrixController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/ws/WSTP3.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/QuirkController.java
+/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/UnifierSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/services/TemplatesService.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/symbolic/ICoord.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/utils/Files.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/GeneralTree.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/EqSystem.java
+/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/services/DeterministicService.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/CCX.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/CY.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/Manager.java
@@ -51,7 +52,6 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/Gate.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/model/GateEncoding.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/parallel/Task.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/OptimizedSubcircuitsSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/elonging/strategies/GenerateNewPopulation.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/MatrixSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/qiskit/NewGroverCoder.java
@@ -61,7 +61,6 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/ElongingController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/genetic/fitnessers/FitnessersService.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/BlocksController.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/SubcircuitsSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/symbolic/CoordProduct.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/Z.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/blocks/strategies/StrategyWrapper.java
@@ -71,7 +70,7 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/elonging/strategies/AllMutants.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/http/EvolutionaryController.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/genetic/GeneticService.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/DeterministicController.java
+/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/GroverRudolphSolver.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/OneQubitGate.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/CRY.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/quirk/QuirkReducedSolver.java
@@ -120,7 +119,6 @@
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/OpCry.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/sparse/QMatrix.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/Utils.java
-/Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/deterministic/DeterministicService.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/symbolic/Coord.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/CSwap.java
 /Users/macariopolousaola/git/tfg_patricia/tp3/src/main/java/edu/uclm/tp3/common/gates/Identity.java

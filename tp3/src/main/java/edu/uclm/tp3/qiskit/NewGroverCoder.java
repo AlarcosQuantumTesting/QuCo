@@ -61,9 +61,8 @@ public class NewGroverCoder {
 		code = code.replace("#SHOTS#", "1000");
 		
 		String measures = "";
-		int contC = qubits-1;
 		for (int i=0; i<qubits; i++) 
-			measures = measures + "circuit.measure(qreg[" + i + "], creg[" + contC-- + "])\n";
+			measures = measures + "circuit.measure(qreg[" + i + "], creg[" + i + "])\n";
 		code = code.replace("#MEASURES#", measures);
 		return code;
 	}

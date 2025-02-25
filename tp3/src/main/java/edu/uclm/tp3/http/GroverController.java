@@ -32,6 +32,7 @@ public class GroverController {
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Function not implemented yet");
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
 	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info) {
 		try {
