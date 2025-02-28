@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { EdCircuit, EdGate } from './EdGate';
-import { DeterministicService } from '../deterministic.service';
 import * as jsonData from '../../assets/factorize667.json';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
+import { StoragesService } from '../storages.service';
+import { QubitsConfiguration } from '../qubits-configuration/QubitConfiguration';
 
 @Component({
   selector: 'app-quantum-editor',
@@ -15,52 +18,60 @@ export class QuantumEditorComponent {
   selectedGate?: EdGate;
   code? : string;
 
-  customizedGates : EdGate[] = [];
-  
-  templates : any[] = []
-  selectedTemplate? : any;
   showInstructions: any;
 
   measureFrom : number = 0;
   measureTo : number = this.circuit.qubits.length;
-  existingCircuits : EdCircuit[] = [];
+
+  qubitsConfiguration? : QubitsConfiguration
 
   f667 : any = jsonData
 
-  constructor(private service : DeterministicService) {
-    this.service.loadTemplates().subscribe(templates => {
-      this.templates = templates
-      this.selectedTemplate = this.templates[0]
-    })
-    let existingGates : any = localStorage.getItem('customizedGates');
-    if (existingGates) {
-      existingGates = JSON.parse(existingGates); 
-      for (let i=0; i<existingGates.length; i++) {
-        let gate = new EdGate(existingGates[i].name, existingGates[i].qubits);
-        gate.description = existingGates[i].description;
-        gate.code = existingGates[i].code;
-        this.customizedGates.push(gate);
-      }
-    }
-
-    let existingCircuits : any = localStorage.getItem('circuits');
-    if (existingCircuits) {
-      existingCircuits = JSON.parse(existingCircuits); 
-      for (let i=0; i<existingCircuits.length; i++) {
-        let circuit = Object.assign(new EdCircuit(), existingCircuits[i]);
-        this.existingCircuits.push(circuit);
-      }
-    }
+  constructor(public manager : ManagerService, public storages: StoragesService) {
     this.f667 = this.f667[0]
     this.f667 = Object.assign(new EdCircuit(), this.f667)
-    this.existingCircuits.push(this.f667)
+    this.storages.existingCircuits.push(this.f667)
+  }
+
+  onCircuitChange() {
+    if (this.circuit) {
+      this.storages.openCircuit(this.circuit);
+      this.checkSizes()
+    }
+  }
+
+  onQubitsConfigurationChange() {
+    if (this.qubitsConfiguration) {
+      this.storages.openQubitsConfiguration(this.qubitsConfiguration);
+      this.checkSizes()
+    }
+  }
+
+  private checkSizes() {
+    if (this.qubitsConfiguration && this.qubitsConfiguration.qubits < this.circuit.qubits.length) {
+      alert("The circuit is not big enough for the selected qubits configuration")
+      this.qubitsConfiguration = undefined
+    } else if (this.qubitsConfiguration && this.qubitsConfiguration.qubits > this.circuit.qubits.length) {
+      this.circuit.resizeTo(this.qubitsConfiguration?.qubits)
+    }
+  }
+
+  getPhysicalQubit(qubit: number) {
+    if (!this.qubitsConfiguration)
+      return qubit
+    return this.qubitsConfiguration.matrix[qubit]
   }
 
   generateCode() {
-    if (!this.code) 
-      this.code = this.selectedTemplate.code
+    this.code = this.manager.selectedTemplate.code
     this.code = this.code?.replace("#QUBITS#", this.circuit.qubits.length.toString())
     this.code = this.code?.replace("#OUTPUT_QUBITS#", this.circuit.qubits.length.toString())
+
+    if (this.qubitsConfiguration) {
+      this.code = this.code?.replace("#QUBITS_LAYOUT#", this.qubitsConfiguration.matrix.join(", "))
+    } else {
+      this.code = this.code?.replace(", initial_layout=[#QUBITS_LAYOUT#])", ")")
+    }
 
     let usedGates = new Map<string, EdGate>()
 
@@ -110,10 +121,7 @@ export class QuantumEditorComponent {
     this.code = this.code?.replace("#INITIALIZE#", initialize)
     this.code = this.code?.replace("#CALCULUS#", calculus)
     this.code = this.code?.replace("#MEASURES#", measures)
-  }
-
-  buildCode() {
-    this.code = this.selectedTemplate.code
+    this.code = this.code?.replace("#SHOTS#", "1000")
   }
 
   addColumn() {
@@ -129,24 +137,20 @@ export class QuantumEditorComponent {
     if (!this.selectedGate) return;
 
     if (this.selectedGate.name === 'M') {
-      for (let i=this.measureFrom; i<this.measureTo; i++) 
+      for (let i=this.measureFrom; i<=this.measureTo; i++) 
         this.circuit.setGate(i, this.circuit.columns-1, this.selectedGate.copy());
       this.selectedGate = undefined;
       return;
     }
   
     const requiredQubits = this.selectedGate.qubits;
-    if (startQubit + requiredQubits -1 > this.circuit.qubits.length) {
-      console.warn("No hay suficientes qubits para colocar esta puerta aquí.");
+    if (startQubit + requiredQubits > this.circuit.qubits.length) {
+      alert("Not enough qubits for this gate");
       return;
     }
   
-    // Coloca la puerta en todas las celdas correspondientes
-    //for (let i = 0; i < requiredQubits; i++) {
     let gate = this.selectedGate.copy()
-      this.circuit.setGate(startQubit, column, gate);
-    //}
-    this.selectedGate = undefined;
+    this.circuit.setGate(startQubit, column, gate);
   }
 
   getGate(qubit: number, column: number): EdGate | null {
@@ -173,9 +177,13 @@ export class QuantumEditorComponent {
   }
 
   setQubits(event : any) {
-    let qubits = parseInt(event.target.value) - this.circuit.qubits.length;
-    for (let i=0; i<qubits; i++) 
-      this.addQubit()
+    let qubits = parseInt(event.target.value) // - this.circuit.qubits.length;
+    if (qubits < this.circuit.qubits.length) 
+      for (let i=0; i<qubits; i++) 
+        this.removeQubit()
+    else 
+      for (let i=this.circuit.qubits.length; i<qubits; i++) 
+        this.addQubit()
   }
 
   removeQubit() {
@@ -190,10 +198,8 @@ export class QuantumEditorComponent {
   }
 
   addCustomizedGate() {
-    if (this.selectedGate && !this.customizedGates.some(g => g.name === this.selectedGate!.name))
-      this.customizedGates.push(this.selectedGate);
     this.creatingNewGate = false;
-    localStorage.setItem('customizedGates', JSON.stringify(this.customizedGates));
+    this.storages.saveCustomizedGate(this.selectedGate!);
     this.selectedGate = undefined;
   }
   
@@ -223,26 +229,8 @@ export class QuantumEditorComponent {
   seeOrHideInstructions() {
     this.showInstructions = !this.showInstructions;
   }
-
-  saveCircuit() {
-    for (let i=0; i<this.existingCircuits.length; i++) {
-      if (this.existingCircuits[i].name == this.circuit.name) {
-        this.existingCircuits[i] = this.circuit;
-        localStorage.setItem('circuits', JSON.stringify(this.existingCircuits));
-        return;
-      }
-    }
-    this.existingCircuits.push(this.circuit);
-    localStorage.setItem('circuits', JSON.stringify(this.existingCircuits));
-  }
-    
-  openCircuit(event : any) {
-    let circuitName = event.target.value;
-    for (let i=0; i<this.existingCircuits.length; i++) {
-      if (this.existingCircuits[i].name == circuitName) {
-        this.circuit = this.existingCircuits[i];
-        break;
-      }
-    }
+   
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
 }

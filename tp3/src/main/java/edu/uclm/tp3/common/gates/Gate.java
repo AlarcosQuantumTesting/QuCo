@@ -3,7 +3,6 @@ package edu.uclm.tp3.common.gates;
 import java.io.Serializable;
 import java.util.List;
 
-import edu.uclm.tp3.classic.QMatrix;
 import edu.uclm.tp3.common.model.Circuit;
 
 public abstract class Gate implements Serializable {

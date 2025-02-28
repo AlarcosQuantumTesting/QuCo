@@ -46,11 +46,21 @@
   <div class="editor-container">
     <div class="controls-container">
       Existing circuits: 
-      <select (change)="openCircuit($event)">
-        <option value="">Select a circuit</option>
-        <option *ngFor="let circuit of existingCircuits" [ngValue]="circuit">{{ circuit.name }}</option>
+      <select (change)="onCircuitChange()" [(ngModel)]="circuit">
+        <option [ngValue]="null" disabled selected>Select a circuit</option>
+        <option *ngFor="let circuit of storages.existingCircuits" [ngValue]="circuit">{{ circuit.name }}</option>
+      </select>      
+
+      &nbsp;
+
+      Existing qubits configurations: 
+      <select (change)="onQubitsConfigurationChange()" [(ngModel)]="qubitsConfiguration">
+        <option [ngValue]="null" disabled selected>Select a configuration</option>
+        <option *ngFor="let cfg of storages.existingConfigurations" [ngValue]="cfg">{{ cfg.name }}</option>
       </select>
+      
     </div>
+
     <div class="controls-container">
       Number of qubits: <input type="number" step="1" min="2" (change)="setQubits($event)">
       <br>
@@ -65,6 +75,13 @@
 
     <div>
       <button (click)="generateCode()">Generate code</button>
+      &nbsp;
+      Available templates:
+      <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+          <option *ngFor="let template of manager.templates" [ngValue]="template">
+              {{ template.fileName }}
+          </option>
+      </select> 
     </div>
 
     <div *ngIf="selectedGate">
@@ -80,7 +97,7 @@
     </div>
 
     <div>
-      <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
+      <button *ngFor="let cg of storages.customizedGates" (click)="selectGate(cg)"
         [ngClass]="{'selected-gate': selectedGate === cg}">
         {{ cg.name }}
       </button>
@@ -97,6 +114,7 @@
           <th *ngFor="let col of [].constructor(circuit.columns); let i = index">
             {{ i }}
           </th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -104,40 +122,30 @@
           <th>q<sub>{{ i }}</sub></th>
 
           <ng-container *ngFor="let col of [].constructor(circuit.columns); let j = index">
-
-            <!-- Renderizar solo una celda con rowspan si la puerta comienza en esta posición -->
             <td *ngIf="circuit.getGate(i, j) && !circuit.isCovered(i, j)" [rowSpan]="circuit.getGate(i, j)?.qubits"
               (click)="placeGate(i, j)" (dblclick)="removeGate(i, j)">
               <button class="gate-button">
                 {{ circuit.getGate(i, j)?.name }}
               </button>
             </td>
-
-            <!-- Renderizar celdas normales solo si no están cubiertas por otra puerta -->
             <td *ngIf="!circuit.getGate(i, j) && !circuit.isCovered(i, j)" (click)="placeGate(i, j)">
             </td>
-
           </ng-container>
+          <td>
+            {{ getPhysicalQubit(i) }}
+          </td>
         </tr>
       </tbody>
     </table>
 
     <div>
       <input type="text" [(ngModel)]="circuit.name" placeholder="Circuit name">
-      <button (click)="saveCircuit()">Save circuit</button>
+      <button (click)="storages.saveCircuit(circuit)">Save circuit</button>
     </div>
     <div id="divCode" #codeArea>
       <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
-      <div>
-        <strong>Available templates:</strong>
-        <span *ngFor="let template of templates; let i=index">
-          <input type="radio" name="template" [(ngModel)]="selectedTemplate" (change)="buildCode()"
-            [value]="template">{{ template.name }} {{ i}}
-        </span>
-      </div>
       <small id="codeArea">
         <pre *ngIf="code">{{ code }}</pre>
-        <pre *ngIf="!code && selectedTemplate">{{ selectedTemplate.code }}</pre>
       </small>
     </div>
   </div>

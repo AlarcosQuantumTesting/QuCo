@@ -58,6 +58,15 @@
     </div>
     <br>
     <button (click)="fillTableWithUserExpressions()">Fill table with these expressions</button>
+
+    &nbsp;
+    Available templates:
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+        <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">
+            {{ template.fileName }}
+        </option>
+    </select> 
+
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>
     </div>
@@ -66,21 +75,14 @@
 <div style="display: flex; align-items: flex-start; gap: 20px;">
     <!-- Tabla -->
     <table border="1">
-      <tr style="color:blue">
-        <td align="center" colspan="5">
-          <button (click)="getCircuit('subcircuitsSolver')">Get whole Qiskit code</button>
-          &nbsp;
-          <u style="color:blue" (click)="goToCode()">Go to code</u>
-        </td>
-      </tr>
       <tr>
         <th colspan="5" align="left">
           Physical angle:
           &nbsp;
-          <input type="checkbox" [(ngModel)]="usePhysicalAngle">
           <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
+          <button (click)="getCircuit()">Get whole Qiskit code</button>
           &nbsp;
-          <input type="checkbox" [(ngModel)]="unifySimiliarNodes" [disabled]="!usePhysicalAngle">Unify similar nodes
+          <u style="color:blue" (click)="goToCode()">Go to code</u>
         </th>
       </tr>
       <tr>
@@ -134,14 +136,7 @@
   
 <div id="divCode" #codeArea>
   <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
-  <div>
-      <strong>Available templates:</strong>
-      <span *ngFor="let template of templates; let i=index">
-          <input type="radio" name="template" [(ngModel)]="selectedTemplate" (change)="buildCode()" [value]="template">{{ template.name }} {{ i}}
-      </span>
-  </div>
   <small id="codeArea">
       <pre *ngIf="code">{{ code }}</pre>
-      <pre *ngIf="!code && selectedTemplate">{{ selectedTemplate.code }}</pre>
   </small>
 </div>

@@ -159,6 +159,13 @@
         <br>&nbsp;&nbsp;Maximum times of consecutive massive mutations: <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
     </div>
     <br>
+    &nbsp;
+    Available templates:
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+        <option *ngFor="let template of manager.templates" [ngValue]="template">
+            {{ template.fileName }}
+        </option>
+    </select> 
     <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running">Generate initial population and start running</button>
     &nbsp;
     <button (click)="stop()" [disabled]="!running">Stop</button>

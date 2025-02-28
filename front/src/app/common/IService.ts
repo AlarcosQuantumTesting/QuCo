@@ -4,6 +4,7 @@ import { Gate } from "./Gate"
 import { HttpClient } from "@angular/common/http"
 import { environment } from '../../environments/environment';
 import { Strategy } from './Strategy';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 
 @Injectable({
@@ -61,10 +62,11 @@ export abstract class IService {
         return this.client.put<any>(environment.beUrl + this.controller + "/selectFitnesser", info, { withCredentials: true })
     }
 
-    generateInitialPopulation(pc: ProblemConfiguration, gates: Gate[]) {
+    generateInitialPopulation(pc: ProblemConfiguration, gates: Gate[], template : CodeTemplate) {
         pc.gateNames = []
         for (let i = 0; i < gates.length; i++)
             pc.gateNames.push(gates[i].name!)
+        pc.codeTemplate = template
         return this.client.put<any>(environment.beUrl + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
     }
 

@@ -1,4 +1,5 @@
 import { BlockCircuit } from "../blocks/BlockCircuit"
+import { CodeTemplate } from "../templates/CodeTemplate"
 
 export class ProblemConfiguration {
     iterationIndex : number = 0
@@ -19,6 +20,7 @@ export class ProblemConfiguration {
     lastExecutionResults : Map<string, ExecutionResults> = new Map<string, ExecutionResults>();
 
     gateNames : string[] = []
+    codeTemplate? : CodeTemplate
 
     constructor(conf? : any) {
         this.inputConfiguration = new ProblemInputConfiguration()

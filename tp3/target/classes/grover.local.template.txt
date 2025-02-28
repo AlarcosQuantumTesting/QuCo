@@ -1,0 +1,75 @@
+from qiskit_ibm_runtime import SamplerV2
+from qiskit_ibm_runtime.fake_provider import FakeAlgiers, FakeAlmadenV2, FakeBrisbane
+from qiskit import transpile
+from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
+from qiskit.circuit.library.standard_gates import *
+from qiskit.visualization import plot_histogram
+from qiskit.quantum_info.operators import Operator
+from math import pi
+import numpy 
+from qiskit.visualization import plot_state_city 
+from qiskit.visualization import plot_histogram
+from qiskit.circuit.library import MCMT
+import time
+
+
+start_time = time.time()
+
+qreg = QuantumRegister(#QUBITS#, 'q') 
+creg = ClassicalRegister(#OUTPUT_QUBITS#, 'c')
+circuit = QuantumCircuit(qreg, creg)
+  
+ONE = [0, 1]
+ZERO = [1, 0]
+#INITIALIZE#
+
+#CALCULUS#
+
+#MEASURES#
+
+end_time = time.time()
+assembly_time = end_time - start_time
+
+print("ORIGINAL CIRCUIT:")
+print(circuit)
+print("**********************")
+
+# Check other fake providers at https://docs.quantum.ibm.com/api/qiskit-ibm-runtime/fake-provider
+#backend = FakeAlmadenV2()  # 21 qubits
+#backend = FakeAlgiers()  # 27 qubits
+#backend = FakeBrisbane()  # 127 qubits
+
+start_time = time.time()
+transpiled_circuit = transpile(circuit, backend)
+end_time = time.time()
+transpilation_time = end_time - start_time
+
+print("TRANSPILED CIRCUIT:")
+print(transpiled_circuit)
+print("**********************")
+
+start_time = time.time()
+sampler = SamplerV2(backend)
+job = sampler.run([transpiled_circuit])
+end_time = time.time()
+execution_time = end_time - start_time
+
+start_time = time.time()
+result = job.result()[0]
+counts = result.data.c.get_counts()
+end_time = time.time()
+result_time = end_time - start_time
+
+
+print(f"Assembly time: {assembly_time:.4f} seconds")
+print(f"Transpilation time: {transpilation_time:.4f} seconds")
+print(f"Execution time: {execution_time:.4f} seconds")
+print(f"Result time: {result_time:.4f} seconds")
+
+print("Gates (original):", sum(circuit.count_ops().values()))
+print("Gates (transpiled):", sum(transpiled_circuit.count_ops().values()))
+print("Results: ", counts)
+
+plot_histogram(counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
+circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
+#transpiled_circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_transpiled_circuit.png') 

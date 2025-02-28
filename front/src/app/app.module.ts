@@ -12,6 +12,8 @@ import { ElongingComponent } from './elonging/elonging.component';
 import { GroverComponent } from './grover/grover.component';
 import { DeterministicComponent } from './deterministic/deterministic.component';
 import { QuantumEditorComponent } from './quantum-editor/quantum-editor.component';
+import { TemplatesComponent } from './templates/templates.component';
+import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -30,6 +32,8 @@ const appRoutes : Routes = [
     GroverComponent,
     DeterministicComponent,
     QuantumEditorComponent,
+    TemplatesComponent,
+    QubitsConfigurationComponent
   ],
   imports: [
     BrowserModule,

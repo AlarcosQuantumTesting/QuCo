@@ -14,7 +14,6 @@ import org.reflections.Reflections;
 import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.Manager;
-import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.gates.Gate;
 import edu.uclm.tp3.common.gates.NQubitsGate;
 import edu.uclm.tp3.common.gates.OneQubitGate;
@@ -61,7 +60,7 @@ public abstract class EvolutionaryService {
 				FileUtils.deleteDirectory(f);
 		}
 		
-		String template = Utils.readFileAsString(this, "qiskitTemplate2.txt");
+		String template = pc.getCodeTemplate().getCode();
 		
 		String start = template.substring(0, template.indexOf("#CALCULUS#")) + "#CALCULUS#\n";
 		int qubits = pc.getInputConfiguration().getQubits();
@@ -296,6 +295,8 @@ public abstract class EvolutionaryService {
 		Iterator<Class<? extends OneQubitGate>> classes1 = reflections.getSubTypesOf(OneQubitGate.class).iterator();
 		while (classes1.hasNext()) {
 			Class<? extends OneQubitGate> class1 = classes1.next();
+			if (Modifier.isAbstract(class1.getModifiers()))
+				continue;
 			gd = new GateDescription(class1, 1);
 			oneQubitGates.add(gd);
 			gatesByName.put(class1.getSimpleName(), gd);

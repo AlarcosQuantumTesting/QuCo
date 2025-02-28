@@ -3,6 +3,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { QuirkService } from '../quirk.service';
 import { QiskitService } from '../qiskit.service';
 import { FillingService } from '../filling.service';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 @Component({
   selector: 'app-matrixes',
@@ -88,7 +90,7 @@ export class MatrixesComponent  {
 
   dialogo : any = undefined
 
-  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, public sanitizer : DomSanitizer) {}
+  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, public sanitizer : DomSanitizer, public manager : ManagerService) {}
 
   addUserExpression(): void {
     this.error = undefined
@@ -198,6 +200,9 @@ export class MatrixesComponent  {
         this.rows = result.numberOfRows
         this.cols = result.numberOfCols
         this.load(result.matrix)
+      },
+      error => {
+        this.error = (error as any).error.message
       }
     )
   }
@@ -255,7 +260,15 @@ export class MatrixesComponent  {
     )
   }
 
-  getQiskitCode(matrix : any[], type : string, rowIndex? : number) {
+  getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
+    let functionName
+    if (asFunction) {
+      functionName = prompt("Enter the name of the function")
+      if (!functionName || functionName.trim().length==0) {
+        this.error = "You must enter a name for the function"
+        return
+      }
+    }
     this.reset()
     let info = {
       matrix : matrix,
@@ -263,7 +276,8 @@ export class MatrixesComponent  {
       qubits : this.inputQubits + this.outputQubits,
       reduce : this.reduceQuiskit,
       domain : this.domain,
-      type : type
+      template : this.manager.selectedTemplate,
+      functionName : functionName
     }
     if (rowIndex!=undefined)
       info.matrix = matrix[rowIndex]
@@ -279,7 +293,7 @@ export class MatrixesComponent  {
     if (!this.qiskitCode)
       return
     for (let i=0; i<this.qiskitCode.length; i++)
-      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
+      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", shots)
   }
 
   addHadamardGates() {
@@ -393,4 +407,9 @@ export class MatrixesComponent  {
       this.matrix![rowIndex][i] = parseInt(s[i-this.inputQubits])
     }
   }
+
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+  }
+    
 }

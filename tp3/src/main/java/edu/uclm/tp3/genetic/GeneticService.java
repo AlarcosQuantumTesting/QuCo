@@ -30,7 +30,7 @@ public class GeneticService extends EvolutionaryService {
 			Circuit circuit = generateRandomCircuit(pc, initialLength);
 			if (i%10==0 || i==populationSize-1)
 				hw.send((i+1) + " of " + populationSize);
-			circuit.save(token, targetGeneration, i, null);
+			circuit.save(pc, token, targetGeneration, i, null);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(startEnd[0]).append(gatesCode).append(startEnd[1]);
 			circuit.saveCode(token, targetGeneration, i, null, sb.toString());

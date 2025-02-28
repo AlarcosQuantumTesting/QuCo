@@ -1,0 +1,54 @@
+<div>
+    <strong>Available templates:</strong>
+    <span *ngFor="let template of manager.templates; let i=index">
+      <input type="radio" name="template" [(ngModel)]="manager.selectedTemplate" (change)="show(template)"
+        [value]="template">{{ template.fileName }}
+    </span>
+
+    <div>
+        <button (click)="create()">Create new template</button>
+        &nbsp;
+        <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
+    </div>
+
+    <br>
+
+    <div *ngIf="creatingTemplate">
+        <input type="text" [(ngModel)]="manager.selectedTemplate.fileName" placeholder="Template name"><code>.template.txt</code>
+        <br>
+        <input type="text" [(ngModel)]="manager.selectedTemplate.description" size="100" placeholder="Description">
+        <div>
+            Remind to use the following tokens. They will be replaced by the actual values when the circuit code is generated.
+            <br>
+            <b>See the existing templates to have examples.</b>
+            <br>
+            <ol>
+                <li>
+                    <code>#QUBITS#</code>: number of qubits in the circuit.
+                </li>
+                <li>
+                    <code>#OUTPUT_QUBITS#</code>: number of output qubits in the circuit.
+                </li>
+                <li>
+                    <code>#INITIALIZE#</code>: statements for initializating the circuit.
+                </li>
+                <li>
+                    <code>#CALCULUS#</code>: statements for doing the circuit calculus.
+                </li>
+                <li>
+                    <code>#MEASURES#</code>: statements for measuring the circuit.
+                </li>
+                <li>
+                    <code>#SHOTS#</code>: it will be replaced by the number of shots.
+                </li>
+            </ol>
+        </div>
+        <div>
+            <textarea [(ngModel)]="manager.selectedTemplate.code" placeholder="Template code"></textarea>
+        </div>
+    </div>
+
+    <div *ngIf="manager.selectedTemplate && !creatingTemplate">
+        <pre>{{ manager.selectedTemplate.code }}</pre>
+    </div>
+</div>

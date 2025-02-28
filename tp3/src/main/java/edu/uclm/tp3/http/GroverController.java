@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import edu.uclm.tp3.grover.GroverSolver;
-import edu.uclm.tp3.grover.QiskitGroverCoder;
+import edu.uclm.tp3.common.model.CodeTemplate;
+import edu.uclm.tp3.qiskit.GroverSolver;
+import edu.uclm.tp3.qiskit.NewGroverCoder;
 import edu.uclm.tp3.quirk.QuirkSolver;
 
 @RestController
@@ -24,21 +25,31 @@ import edu.uclm.tp3.quirk.QuirkSolver;
 public class GroverController {
 	
 	@Autowired
-	private QiskitGroverCoder coder;
+	private NewGroverCoder coder;
 	
 	@PutMapping("/getQiskitMatrix")
 	public Map<String, String[]> getQiskitMatrix(@RequestBody List<List<Integer>> receivedMatrixes) {
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Function not implemented yet");
 	}
 	
+	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
-	public Map<String, String[]> getCode(@RequestBody List<List<Integer>> receivedMatrixes) {
+	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info) {
 		try {
+			List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
+			Map<String, Object> receivedTemplate = (Map<String, Object>) info.get("template");
+			CodeTemplate template = new CodeTemplate();
+			template.setFileName(receivedTemplate.get("fileName").toString());
+			template.setCode(receivedTemplate.get("code").toString());
+
+			String functionName = null;
+			if (info.containsKey("functionName"))
+				functionName = info.get("functionName").toString();
+			
 			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes);
-			String[] code = this.coder.getCode(quirk);				
+			String[] code = this.coder.getCode(quirk, template, functionName);		
 			
 			Map<String, String[]> result = new HashMap<>();
-			
 			result.put("code", code);
 			return result;
 		} catch (Exception e) {

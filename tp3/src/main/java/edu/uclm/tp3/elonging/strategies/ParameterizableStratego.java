@@ -77,47 +77,6 @@ public class ParameterizableStratego implements IStratego {
 			return null;
 		}
 		
-		/*History history = pc.getHistory(fitnesser.getClass().getSimpleName());
-		if (tirada<0.5) {
-			if (pc.getMassiveMutationPolicy().getCounter()<pc.getMassiveMutationPolicy().getMaxConsecutiveApplications()) {
-				if (pc.getMassiveMutationPolicy().getFallsThreshold()>0) {
-					if (pc.getMassiveMutationPolicy().isApplicableWhenMeanFitnessFalls()) {
-						if (history.getMeanFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
-							pc.getMassiveMutationPolicy().increaseCounter();
-							return new AllMutants(gt, pc, fitnesser, manager);
-						}
-					}
-				
-					if (pc.getMassiveMutationPolicy().isApplicableWhenBestFitnessFalls()) {
-						if (history.getBestFitnessDecrements()>=pc.getMassiveMutationPolicy().getFallsThreshold()) {
-							pc.getMassiveMutationPolicy().increaseCounter();
-							return new AllMutants(gt, pc, fitnesser, manager);
-						} 
-					}
-				}
-			}
-		}
-		
-		pc.getMassiveMutationPolicy().setCounter(0);
-		
-		tirada = EvolutionaryService.dado.nextDouble();
-		double goodThreshold = pc.getMassiveMutationPolicy().getFitnessPercentage()*fitnesser.getExpectedFitness();
-		
-		if (history.getLastBestFitness()>=goodThreshold && tirada<0.7)
-			return new AllMutants(gt, pc, fitnesser, manager);
-		
-		if (pc.getSourceGeneration()>5) {
-			tirada = EvolutionaryService.dado.nextDouble();
-			if (tirada<0.40)
-				return new ClassicRoulette(gt, pc, fitnesser, manager);
-			if (tirada<0.50)
-				return new GenerateNewPopulation(gt, pc, fitnesser, manager);
-			if (tirada<0.60)
-				return new PopulationWithBests(gt, pc, fitnesser, manager);
-		}
-		
-		return new AddOrRemoveGate(gt, pc, fitnesser, manager);*/
-		
 	}
 
 }

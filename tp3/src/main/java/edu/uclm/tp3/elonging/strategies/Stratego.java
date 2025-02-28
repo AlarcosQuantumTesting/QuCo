@@ -15,7 +15,6 @@ public class Stratego implements IStratego {
 		if (pc.getNextStrategy()!=null)
 			return pc.getNextStrategy();
 		
-		
 		double tirada = EvolutionaryService.dado.nextDouble();
 		
 		History history = pc.getHistory(fitnesser.getClass().getSimpleName());
@@ -44,8 +43,13 @@ public class Stratego implements IStratego {
 		tirada = EvolutionaryService.dado.nextDouble();
 		double goodThreshold = pc.getMassiveMutationPolicy().getFitnessPercentage()*fitnesser.getExpectedFitness();
 		
-		if (history.getLastBestFitness()>=goodThreshold && tirada<0.7)
-			return new AllMutants(gt, pc, fitnesser, manager);
+		if (history.getLastBestFitness()>=goodThreshold) {
+			if (tirada<0.7) {
+				return new SmallRotations(gt, pc, fitnesser, manager);
+			} else {
+				return new AllMutants(gt, pc, fitnesser, manager);
+			}
+		}
 		
 		if (pc.getSourceGeneration()>5) {
 			tirada = EvolutionaryService.dado.nextDouble();

@@ -16,39 +16,39 @@ public class MatrixSolver extends Solver {
 
 	private int depth;
 	
-	protected MatrixSolver(BinaryTree tree, Circuit circuit) {
+	public MatrixSolver(BinaryTree tree, Circuit circuit) {
 		super(tree, circuit);
 	}
 
 	@Override
-	protected Map<String, Object> solve(int shots) throws IOException {
-		this.depth = this.tree.getDepth();
-		
-		MatrixCircuit mc = new MatrixCircuit();
-		if (this.depth == 1) {
-			QMatrix matrix = this.getRY(0, this.tree.leftAngle);
-			mc.add(matrix);
-		} else if (this.depth==2) {
-			mc.add(this.buildLeaf(this.tree, 0));
-		} else {
-			mc.add(this.buildGeneral(this.tree, 0));
+		public Map<String, Object> solve(int shots) throws IOException {
+			this.depth = this.tree.getDepth();
+			
+			MatrixCircuit mc = new MatrixCircuit();
+			if (this.depth == 1) {
+				QMatrix matrix = this.getRY(0, this.tree.leftAngle);
+				mc.add(matrix);
+			} else if (this.depth==2) {
+				mc.add(this.buildLeaf(this.tree, 0));
+			} else {
+				mc.add(this.buildGeneral(this.tree, 0));
+			}
+	
+			Map<String, Object> result = new HashMap<>();
+			result.put("#QUBITS#", this.circuit.getQubits());
+			result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
+			result.put("#SHOTS#", shots);
+			
+			StringBuilder h = this.getCode("H", this.getInitialize());
+			StringBuilder u = this.getCode("U", QMatrix.multiply(mc.getMatrixes()));
+			result.put("#INITIALIZE#", h.toString() + "\n" + u.toString() + "\n");
+			
+			String calculus = "circuit.unitary(H, qreg)\ncircuit.unitary(U, qreg)\n";
+			result.put("#CALCULUS#", calculus);
+			result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
+			result.put("tree", this.tree.toMap());
+			return result;
 		}
-
-		Map<String, Object> result = new HashMap<>();
-		result.put("#QUBITS#", this.circuit.getQubits());
-		result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
-		result.put("#SHOTS#", shots);
-		
-		StringBuilder h = this.getCode("H", this.getInitialize());
-		StringBuilder u = this.getCode("U", QMatrix.multiply(mc.getMatrixes()));
-		result.put("#INITIALIZE#", h.toString() + "\n" + u.toString() + "\n");
-		
-		String calculus = "circuit.unitary(H, qreg)\ncircuit.unitary(U, qreg)\n";
-		result.put("#CALCULUS#", calculus);
-		result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
-		result.put("tree", this.tree.toMap());
-		return result;
-	}
 	
 	private StringBuilder getCode(String name, QMatrix matrix) {
 		StringBuilder code = new StringBuilder(name + " = Operator([");
@@ -136,7 +136,6 @@ public class MatrixSolver extends Solver {
 			return null;
 		RY ry = new RY();
 		ry.setQubit(qubit);
-		ry.setTheta(theta, qubit);
 		return ry.getMatrix();
 	}
 }

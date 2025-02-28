@@ -70,7 +70,7 @@
                 &nbsp;
                 <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
                 &nbsp;
-                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, 'program')">As a whole program</u>&nbsp;<u href="#" (click)="getQiskitCode(matrix, 'function')">As a function</u>
+                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">As a whole program</u>&nbsp;<u href="#" (click)="getQiskitCode(matrix, true)">As a function</u>
             </td>
         </tr>
         <tr>
@@ -98,7 +98,7 @@
                 &nbsp;
                 <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
                 &nbsp;
-                <u href="#" (click)="getQiskitCode(matrix, 'program')">Qiskit code</u>
+                <u href="#" (click)="getQiskitCode(matrix, false)">Qiskit code</u>
             </td>
         </tr>
     </table>
@@ -106,6 +106,13 @@
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>
     </div>
+
+    Available templates:
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+        <option *ngFor="let template of manager.getTemplatesStartingBy('grover')" [ngValue]="template">
+            {{ template.fileName }}
+        </option>
+    </select> 
 
     <div  style="border: solid 1px;" id="wholeCode">
         <strong (click)="copyCode()">Copy code</strong><span style="font-size: 30px;">&#x2398;</span>

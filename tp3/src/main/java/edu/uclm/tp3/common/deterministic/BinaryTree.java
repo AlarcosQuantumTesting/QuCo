@@ -2,6 +2,7 @@ package edu.uclm.tp3.common.deterministic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class BinaryTree {
 	
@@ -18,6 +19,8 @@ public class BinaryTree {
     BinaryTree parent;
     BinaryTree leftChild;
     BinaryTree rightChild;
+
+	String code;
     
     public BinaryTree() {
 		this.value = -1;
@@ -40,7 +43,7 @@ public class BinaryTree {
     
     public void removeLowAngles(double physicalAngle) {
     	this.removeLowAnglesRecursive(this, physicalAngle);
-    	this.removeEmptyNodes();
+    	this.prune();
     }
 
     private void removeLowAnglesRecursive(BinaryTree node, double physicalAngle) {
@@ -79,8 +82,8 @@ public class BinaryTree {
         
         node.leftAngle = 2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2;
         node.rightAngle = Math.PI - node.leftAngle;
-        if (node.rightAngle>=Math.PI)
-        	node.rightAngle = node.rightAngle-Math.PI;
+        //if (node.rightAngle>=Math.PI)
+        //	node.rightAngle = node.rightAngle-Math.PI;
 
         normalizeProbabilitiesRecursive(node.leftChild);
         normalizeProbabilitiesRecursive(node.rightChild);
@@ -203,11 +206,11 @@ public class BinaryTree {
         return sb.toString();
     }
 
-	public void removeEmptyNodes() {
-		this.removeEmptyNodesRecursive(this);
+	public void prune() {
+		this.pruneRecursive(this);
 	}
 
-	private void removeEmptyNodesRecursive(BinaryTree node) {
+	private void pruneRecursive(BinaryTree node) {
 		if (node == null)
 	        return;
 
@@ -223,15 +226,203 @@ public class BinaryTree {
 
 	    // Continuar recursivamente para los hijos no nulos
 	    if (node.leftChild != null) {
-	        removeEmptyNodesRecursive(node.leftChild);
+	    	pruneRecursive(node.leftChild);
 	    }
 	    if (node.rightChild != null) {
-	        removeEmptyNodesRecursive(node.rightChild);
+	    	pruneRecursive(node.rightChild);
 	    }
 	}
 
 	public boolean hasGrandchildren() {
 		return (this.leftChild!=null && (this.leftChild.leftChild!=null || this.leftChild.rightChild!=null)) 
 				|| (this.rightChild!=null && (this.rightChild.leftChild!=null || this.rightChild.rightChild!=null));
+	}
+
+    public Map<Integer, BinaryTree> hashing() {
+    	Map<Integer, BinaryTree> nodes = new HashMap<>();
+		nodes.put(this.hashCode(), this);
+    	hashingRecursive(this, nodes);
+    	return nodes;
+    }
+
+	private void hashingRecursive(BinaryTree node, Map<Integer, BinaryTree> nodes) {
+		BinaryTree existingNode;
+		int childHash;
+		
+		if (node.leftChild!=null) {
+			childHash = node.leftChild.hashCode();
+			existingNode = nodes.get(childHash);
+			
+			if (existingNode!=null) {
+				node.leftChild = existingNode;
+				node.leftChild.parent = existingNode.parent;
+			} else {
+				nodes.put(childHash, node.leftChild);
+			}
+			this.hashingRecursive(node.leftChild, nodes);
+		}
+		if (node.rightChild!=null) {
+			childHash = node.rightChild.hashCode();
+			existingNode = nodes.get(childHash);
+			
+			if (existingNode!=null) {
+				node.rightChild = existingNode;
+				node.rightChild.parent = existingNode.parent;
+			} else {
+				nodes.put(childHash, node.rightChild);
+			}
+			this.hashingRecursive(node.rightChild, nodes);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(leftAngle, leftChild, rightAngle, rightChild);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BinaryTree other = (BinaryTree) obj;
+		return Double.doubleToLongBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
+				&& Objects.equals(leftChild, other.leftChild)
+				&& Double.doubleToLongBits(rightAngle) == Double.doubleToLongBits(other.rightAngle)
+				&& Objects.equals(rightChild, other.rightChild);
+	}
+
+	public Map<String, BinaryTree> getSeparatedNodes() {
+		Map<String, BinaryTree> nodesByName = new HashMap<>();
+		nodesByName.put(this.name, this);
+		getSeparatedNodesRecursive(nodesByName, this);
+		return nodesByName;
+	}
+
+	private void getSeparatedNodesRecursive(Map<String, BinaryTree> nodeNames, BinaryTree node) {
+		if (node.leftChild!=null) {
+			nodeNames.put(node.leftChild.name, node.leftChild);
+			this.getSeparatedNodesRecursive(nodeNames, node.leftChild);
+		}
+		if (node.rightChild!=null) {
+			nodeNames.put(node.rightChild.name, node.rightChild);
+			this.getSeparatedNodesRecursive(nodeNames, node.rightChild);
+		}
+	}
+
+	public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
+		if (nodeDepth==2)
+			return this.getLeafCode(usedNodesMap);
+
+		if (this.leftProbability==0 && this.rightProbability==0)
+			return null;
+
+		StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
+		code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
+		BinaryTree child;
+		if (this.leftProbability==0) {
+			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+			child = usedNodesMap.get(this.rightChild.hashCode());
+			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
+		}
+
+		if (this.rightProbability==0) {
+			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+			child = usedNodesMap.get(this.leftChild.hashCode());
+			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
+		}
+
+		if (this.leftProbability==this.rightProbability) {
+			if (this.leftAngle!=0)
+				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+			code.append("\tU.x(0)\n");
+			child = usedNodesMap.get(this.leftChild.hashCode());
+			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+			code.append("\tU.x(0)\n");
+			child = usedNodesMap.get(this.rightChild.hashCode());
+			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+			code.append("\treturn U.to_gate()\n\n");
+			this.code = code.toString();
+			return this;
+		}
+
+		code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
+		code.append("\tU.x(0)\n");
+		child = usedNodesMap.get(this.leftChild.hashCode());
+		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+		code.append("\tU.x(0)\n");
+		child = usedNodesMap.get(this.rightChild.hashCode());
+		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
+		code.append("\treturn U.to_gate()\n\n");
+		this.code = code.toString();
+		return this;
+	}
+
+	private BinaryTree getLeafCode(Map<Integer, BinaryTree> usedNodesMap) {
+		if (usedNodesMap.get(this.hashCode())!=null)
+			return null;
+		if (this.leftProbability==0 && this.rightProbability==0)
+			return null;
+		
+		String code = "def get" + this.name + "():\n";
+		code+="\tU = QuantumCircuit(2, name=\"" + this.name + "\")\n";
+		if (this.leftProbability==0) {
+			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
+			code+="\tU.ry(" + this.rightChild.leftAngle + ", 1)\n";
+			code+="\treturn U.to_gate()\n\n";
+			this.code = code;
+			return this;
+		}
+
+		if (this.rightProbability==0) {
+			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
+			if (this.leftChild.leftAngle!=0)
+				code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
+			code+="\treturn U.to_gate()\n\n";
+			this.code = code;
+			return this;
+		}
+
+		if (this.leftProbability==this.rightProbability) {
+			if (this.leftChild.leftAngle!=0) {
+				code+="\tU.x(0)\n";
+				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
+				code+="\tU.x(0)\n";
+			}
+			if (this.rightChild.leftAngle!=0)
+				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
+			code+="\treturn U.to_gate()\n\n";
+			this.code = code;
+			return this;
+		}
+
+		code+="\tU.ry(" + this.leftAngle + ", 0)\n";
+		if (this.leftChild.leftAngle!=0) {
+			code+="\tU.x(0)\n";
+			code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
+			code+="\tU.x(0)\n";
+		}
+		if (this.rightChild.leftAngle!=0)
+			code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
+		code+="\treturn U.to_gate()\n\n";
+		this.code = code;
+			return this;
+	}
+	
+	private String getTargetQubits(int startQubit, int depth) {
+		StringBuilder sb = new StringBuilder();
+		for (int i=startQubit; i<depth-1; i++)
+			sb.append(i + ",");
+		sb.append(depth-1);
+		return sb.toString();
 	}
 }

@@ -8,7 +8,6 @@ import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.common.utils.Files;
-import edu.uclm.tp3.genetic.Mutator;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 
 public class PopulationWithBests extends Strategy {
@@ -35,21 +34,19 @@ public class PopulationWithBests extends Strategy {
 			Circuit circuit = null;
 			try {
 				circuit = Files.readBestCircuit(this.gt, goodGeneration, this.fitnesser);
+				circuit.save(pc, this.gt, targetGeneration, cont, this.fitnesser);
+				String gatesCode = circuit.getGatesCode();
+				StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
+				circuit.saveCode(gt, targetGeneration, cont, this.fitnesser, sb.toString());
+				cont++;				
 			} catch (Exception e) {
 				System.out.println();
 			}
-			if (EvolutionaryService.dado.nextDouble()<0.05)
-				Mutator.mutate(pc, circuit);
-			circuit.save(this.gt, targetGeneration, cont, this.fitnesser);
-			String gatesCode = circuit.getGatesCode();
-			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
-			circuit.saveCode(gt, targetGeneration, cont, this.fitnesser, sb.toString());
-			cont++;
 		}
 		
 		for (int i=cont; i<this.pc.getInputConfiguration().getPopulationSize(); i++) {
 			Circuit circuit = EvolutionaryService.generateRandomCircuit(this.pc, 0);
-			circuit.save(this.gt, targetGeneration, cont, this.fitnesser);
+			circuit.save(pc, this.gt, targetGeneration, cont, this.fitnesser);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 			circuit.saveCode(gt, targetGeneration, cont, this.fitnesser, sb.toString());

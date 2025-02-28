@@ -8,6 +8,7 @@ import edu.uclm.tp3.common.model.Pair;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.common.utils.Files;
+import edu.uclm.tp3.genetic.Mutator;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 
 public class AddOrRemoveGate extends Strategy {
@@ -36,19 +37,19 @@ public class AddOrRemoveGate extends Strategy {
 					if (tirada<0.8)
 						EvolutionaryService.addGate(pc, circuit);
 					else if (tirada<0.9)
-						EvolutionaryService.removeGate(pc, circuit);
-					else
 						EvolutionaryService.changeGate(pc, circuit);
+					else
+						EvolutionaryService.removeGate(pc, circuit);
 				} else {
 					if (tirada<0.5)
-						EvolutionaryService.removeGate(pc, circuit);
-					else
 						EvolutionaryService.changeGate(pc, circuit);
+					else
+						EvolutionaryService.removeGate(pc, circuit);
 				}
 			} else {
 				EvolutionaryService.addGate(pc, circuit);
 			}
-			circuit.save(gt, targetGeneration, i, fitnesser);
+			circuit.save(pc, gt, targetGeneration, i, fitnesser);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 			circuit.saveCode(gt, targetGeneration, i, fitnesser, sb.toString());

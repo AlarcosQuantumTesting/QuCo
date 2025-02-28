@@ -3,6 +3,8 @@ import { Chart, registerables } from 'chart.js';
 import { Individual } from '../common/Individual';
 import { EvolutionaryService } from '../evolutionary.service';
 import { EvolutionaryComponent } from '../common/evolutionary.component';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 Chart.register(...registerables)
 
@@ -13,7 +15,7 @@ Chart.register(...registerables)
 })
 export class ElongingComponent extends EvolutionaryComponent {
 
-  constructor(private evolutionaryService : EvolutionaryService) {
+  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService) {
     super(evolutionaryService, "elonging")
   }
 
@@ -42,7 +44,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
         this.evolutionaryService.connectWS()
 
-      this.service.generateInitialPopulation(this.pc, selectedGates).subscribe(
+      this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -70,5 +72,9 @@ export class ElongingComponent extends EvolutionaryComponent {
         }
       )
     }
+  }
+     
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
 }

@@ -8,6 +8,19 @@ export class EdCircuit {
         this.columns = 5
     }
 
+    resizeTo(qubits: number) {
+        if (qubits < this.qubits.length) {
+            this.qubits = this.qubits.slice(0, qubits);
+        } else {
+            for (let i = this.qubits.length; i < qubits; i++) {
+                this.qubits.push(new EdQubit());
+                for (let j = 0; j < this.columns; j++) {
+                    this.qubits[i].add(new EdGate('I', 1));
+                }
+            }
+        }
+    }  
+
     add() {
         this.qubits.push(new EdQubit());
         for (let i=0; i<this.columns; i++)
@@ -15,11 +28,14 @@ export class EdCircuit {
     }
 
     getGate(qubit: number, column: number): EdGate | null {
-        return this.qubits[qubit].gates.find(gate => gate.x === column) || null;
+        return this.qubits[qubit].gates.find(gate => gate.column === column) || null;
     }
 
     setGate(qubit: number, column: number, selectedGate: EdGate) {
-        selectedGate.x = column; // Establecer la posición en la columna
+        let selectedQubit = this.qubits[qubit];
+        if (selectedQubit.gates.find(gate => gate.column === column)) 
+            return
+        selectedGate.column = column; 
         this.qubits[qubit].add(selectedGate);
     }
 
@@ -49,24 +65,29 @@ export class EdQubit {
         if (!this.gates.includes(gate))
             this.gates.push(gate)
 
-        this.gates.sort((a, b) => a.x! - b.x!)
+        this.gates.sort((a, b) => a.column! - b.column!)
     }
 
     removeGate(column: number) {
-        this.gates = this.gates.slice().filter(gate => gate.x !== column);
+        this.gates = this.gates.slice().filter(gate => gate.column !== column);
     }
 }
 
 export class EdGate {
     name?: string;
     qubits: number = 1;
-    x: number = -1;
-    y: number = -1;
+    column: number = -1;
     code: string = ''; // Texto asociado
     description: string = ''; // Descripción de la puerta
 
     constructor(name: string, qubits: number) {
+        if (!name) 
+            name = "XXX"
         this.name = name;
+        this.code = "def " + name + "() : \n"
+            + "\tU = QuantumCircuit(" + qubits + ")\n" +
+            "\t# Add code here\n" + 
+            "\treturn U.to_gate()\n";
         this.qubits = qubits;
     }
 

@@ -83,6 +83,13 @@
         Amplitude domain: <input type="radio" [(ngModel)]="domain" [value]="'amplitude'" name="domain">
         &nbsp;
         Phase domain: <input type="radio" [(ngModel)]="domain" [value]="'phase'" name="domain">
+        &nbsp;
+        Available templates:
+        <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+            <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">
+              {{ template.fileName }}
+            </option>
+        </select> 
     </div>
 
     <table border="1">
@@ -99,9 +106,9 @@
                 <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
             </th>
             <th rowspan="2">
-                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, 'program')">as a whole program</u>
+                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">as a whole program</u>
                 &nbsp;
-                <u href="#" (click)="getQiskitCode(matrix, 'function')">as a function</u>
+                <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
                 <br>
                 <small><input type="checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
             </th>
@@ -141,9 +148,9 @@
                 <u href="#" (click)="getUnitaryMatrix(matrix, rowIndex)">Unitary matrix</u>
             </td>
             <td>
-                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, 'program')">as a whole program</u>
+                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">as a whole program</u>
                 &nbsp;
-                <u href="#" (click)="getQiskitCode(matrix, 'function')">as a function</u>
+                <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
                 <br>
                 <small><input type="checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
             </td>

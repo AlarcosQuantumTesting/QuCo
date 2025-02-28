@@ -4,6 +4,8 @@ import { Individual } from '../common/Individual';
 import { BlocksService } from './blocks.service';
 import { EvolutionaryComponent } from '../common/evolutionary.component';
 import { Gate } from '../common/Gate';
+import { ManagerService } from '../manager.service';
+import { CodeTemplate } from '../templates/CodeTemplate';
 
 Chart.register(...registerables)
 
@@ -14,7 +16,7 @@ Chart.register(...registerables)
 })
 export class BlocksComponent extends EvolutionaryComponent {
 
-  constructor(private blocksService : BlocksService) {
+  constructor(private blocksService : BlocksService, public manager : ManagerService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
     this.pc.inputConfiguration.maxNumberOfColumns = 3
@@ -69,7 +71,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.error = "You must select one fitnesser at least"
     } else {
       this.prepareCharts()
-      this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected)).subscribe(
+      this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected), this.manager.selectedTemplate).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -96,5 +98,9 @@ export class BlocksComponent extends EvolutionaryComponent {
         }
       )
     }
+  }
+
+  onTemplateChange(selected: CodeTemplate) {
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
 }

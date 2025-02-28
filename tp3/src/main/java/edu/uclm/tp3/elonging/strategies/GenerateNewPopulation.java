@@ -17,7 +17,7 @@ public class GenerateNewPopulation extends Strategy {
 		int targetGeneration = this.pc.getTargetGeneration();
 		for (int i=0; i<this.pc.getInputConfiguration().getPopulationSize(); i++) {
 			Circuit circuit = EvolutionaryService.generateRandomCircuit(this.pc, 0);
-			circuit.save(this.gt, targetGeneration, i, this.fitnesser);
+			circuit.save(pc, this.gt, targetGeneration, i, this.fitnesser);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(templateStart).append(gatesCode).append(templateEnd);
 			circuit.saveCode(gt, targetGeneration, i, this.fitnesser, sb.toString());
