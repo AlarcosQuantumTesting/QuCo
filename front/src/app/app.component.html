@@ -1,298 +1,3 @@
-<style>
-  :host {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 14px;
-    color: #333;
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 8px 0;
-  }
-
-  p {
-    margin: 0;
-  }
-
-  .spacer {
-    flex: 1;
-  }
-
-  .toolbar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    background-color: #1976d2;
-    color: white;
-    font-weight: 600;
-  }
-
-  .toolbar img {
-    margin: 0 16px;
-  }
-
-  .toolbar #twitter-logo {
-    height: 40px;
-    margin: 0 8px;
-  }
-
-  .toolbar #youtube-logo {
-    height: 40px;
-    margin: 0 16px;
-  }
-
-  .toolbar #twitter-logo:hover,
-  .toolbar #youtube-logo:hover {
-    opacity: 0.8;
-  }
-
-  .content {
-    display: block;
-    margin: 82px auto 32px;
-    padding: 0 16px;
-    
-    
-    align-items: center;
-  }
-
-  svg.material-icons {
-    height: 24px;
-    width: auto;
-  }
-
-  svg.material-icons:not(:last-child) {
-    margin-right: 8px;
-  }
-
-  .card svg.material-icons path {
-    fill: #888;
-  }
-
-  .card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 16px;
-  }
-
-  .card {
-    all: unset;
-    border-radius: 4px;
-    border: 1px solid #eee;
-    background-color: #fafafa;
-    height: 40px;
-    width: 200px;
-    margin: 0 8px 16px;
-    padding: 16px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.2s ease-in-out;
-    line-height: 24px;
-  }
-
-  .card-container .card:not(:last-child) {
-    margin-right: 0;
-  }
-
-  .card.card-small {
-    height: 16px;
-    width: 168px;
-  }
-
-  .card-container .card:not(.highlight-card) {
-    cursor: pointer;
-  }
-
-  .card-container .card:not(.highlight-card):hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 17px rgba(0, 0, 0, 0.35);
-  }
-
-  .card-container .card:not(.highlight-card):hover .material-icons path {
-    fill: rgb(105, 103, 103);
-  }
-
-  .card.highlight-card {
-    background-color: #1976d2;
-    color: white;
-    font-weight: 600;
-    border: none;
-    width: auto;
-    min-width: 30%;
-    position: relative;
-  }
-
-  .card.card.highlight-card span {
-    margin-left: 60px;
-  }
-
-  svg#rocket {
-    width: 80px;
-    position: absolute;
-    left: -10px;
-    top: -24px;
-  }
-
-  svg#rocket-smoke {
-    height: calc(100vh - 95px);
-    position: absolute;
-    top: 10px;
-    right: 180px;
-    z-index: -10;
-  }
-
-  a,
-  a:visited,
-  a:hover {
-    color: #1976d2;
-    text-decoration: none;
-  }
-
-  a:hover {
-    color: #125699;
-  }
-
-  .terminal {
-    position: relative;
-    width: 80%;
-    max-width: 600px;
-    border-radius: 6px;
-    padding-top: 45px;
-    margin-top: 8px;
-    overflow: hidden;
-    background-color: rgb(15, 15, 16);
-  }
-
-  .terminal::before {
-    content: "\2022 \2022 \2022";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 4px;
-    background: rgb(58, 58, 58);
-    color: #c2c3c4;
-    width: 100%;
-    font-size: 2rem;
-    line-height: 0;
-    padding: 14px 0;
-    text-indent: 4px;
-  }
-
-  .terminal pre {
-    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
-    color: white;
-    padding: 0 1rem 1rem;
-    margin: 0;
-  }
-
-  .circle-link {
-    height: 40px;
-    width: 40px;
-    border-radius: 40px;
-    margin: 8px;
-    background-color: white;
-    border: 1px solid #eeeeee;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    transition: 1s ease-out;
-  }
-
-  .circle-link:hover {
-    transform: translateY(-0.25rem);
-    box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
-  }
-
-  footer {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    line-height: 20px;
-  }
-
-  footer a {
-    display: flex;
-    align-items: center;
-  }
-
-  .github-star-badge {
-    color: #24292e;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    padding: 3px 10px;
-    border: 1px solid rgba(27,31,35,.2);
-    border-radius: 3px;
-    background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
-    margin-left: 4px;
-    font-weight: 600;
-  }
-
-  .github-star-badge:hover {
-    background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
-    border-color: rgba(27,31,35,.35);
-    background-position: -.5em;
-  }
-
-  .github-star-badge .material-icons {
-    height: 16px;
-    width: 16px;
-    margin-right: 4px;
-  }
-
-  svg#clouds {
-    position: fixed;
-    bottom: -160px;
-    left: -230px;
-    z-index: -10;
-    width: 1920px;
-  }
-
-  /* Responsive Styles */
-  @media screen and (max-width: 767px) {
-    .card-container > *:not(.circle-link) ,
-    .terminal {
-      width: 100%;
-    }
-
-    .card:not(.highlight-card) {
-      height: 16px;
-      margin: 8px 0;
-    }
-
-    .card.highlight-card span {
-      margin-left: 72px;
-    }
-
-    svg#rocket-smoke {
-      right: 120px;
-      transform: rotate(-5deg);
-    }
-  }
-
-  @media screen and (max-width: 575px) {
-    svg#rocket-smoke {
-      display: none;
-      visibility: hidden;
-    }
-  }
-</style>
-
 <!--<nav>
   <ul>
     <li>
@@ -302,11 +7,13 @@
       <a routerLink="words">Work with several qubits</a>
     </li>
   </ul>
-  
+
   &nbsp;&nbsp;
 </nav>
 -->
 
+
+<!--
 <h1>Quantum code generation</h1>
 <nav  class="navbar navbar-expand-sm bd-dark navbar-dark">
   <a routerLink="matrixes" routerLinkActive="active" ariaCurrentWhenActive="page">Matrices</a>
@@ -320,10 +27,6 @@
   <a routerLink="grenoble" routerLinkActive="active" ariaCurrentWhenActive="page">Grover and Rudolph + Grenoble</a>
   &nbsp;
   <a routerLink="editor" routerLinkActive="active" ariaCurrentWhenActive="page">Circuits editor</a>
-  &nbsp;
-  <a routerLink="qubits-configuration" routerLinkActive="active" ariaCurrentWhenActive="page">Qubits configurations</a>
-  &nbsp;
-  <a routerLink="templates" routerLinkActive="active" ariaCurrentWhenActive="page">Code templates</a>
 </nav>
 <router-outlet></router-outlet>
 
@@ -333,3 +36,126 @@
 
 
 <router-outlet></router-outlet>
+-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<body>
+  
+  
+  <!-- Contenedor principal con el menú y el contenido -->
+  <div class="main-container">
+    <!-- Menú lateral -->
+    <div class="sidebar" [class.open]="menuAbierto">
+      <button class="toggle-btn" (click)="toggleMenu()" aria-label="Toggle menu">
+        <i class="fas" [ngClass]="menuAbierto ? 'fa-times' : 'fa-bars'"></i>
+      </button>
+
+      <ul>
+        <li>
+          <a routerLink="matrixes" routerLinkActive="active">
+            <i class="fas fa-table"></i>
+            <span *ngIf="menuAbierto">Matrices</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="grover" routerLinkActive="active">
+            <i class="fas fa-search"></i>
+            <span *ngIf="menuAbierto">Grover</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="elonging" routerLinkActive="active">
+            <i class="fas fa-dna"></i>
+            <span *ngIf="menuAbierto">Genetic algorithm</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="blocks" routerLinkActive="active">
+            <i class="fas fa-th-large"></i>
+            <span *ngIf="menuAbierto">Blocks genetic algorithm</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="grenoble" routerLinkActive="active">
+            <i class="fas fa-project-diagram"></i>
+            <span *ngIf="menuAbierto">Grover and Rudolph + Grenoble</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="editor" routerLinkActive="active">
+            <i class="fas fa-microchip"></i>
+            <span *ngIf="menuAbierto">Circuits editor</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="qubits-configuration" routerLinkActive="active">
+            <i class="fas fa-cubes"></i>
+            <span *ngIf="menuAbierto">Qubits configurations</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="templates" routerLinkActive="active">
+            <i class="fas fa-file-code"></i>
+            <span *ngIf="menuAbierto">Code templates</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="content">
+      <div class="header">
+        <h1 class="title fade-in" (click)="goToHome()" style="cursor: pointer;" title="Go to home">
+          <img src="assets/img/logo1.jpg" alt="Logo" class="logo"> Quantum Code Generation
+        </h1>
+      </div>
+    
+      <div *ngIf="mostrarInicio" class="container">
+        <div class="titulo">
+          <h1 class="main-title" class="fade-in">Welcome to Quantum Code Generation</h1>
+          <p class="fade-in">
+            This web allows you to design, simulate, and execute quantum circuits efficiently. 
+            <!-- Use powerful algorithms such as Grover's search and genetic optimization to solve complex problems. -->
+          </p>
+        </div>
+        
+        <div class="info-container">
+          <!-- Quantum Code Introduction -->
+          <div class="intro-section container fade-in">
+            <h2 class="intro-title">About quantum code</h2>
+            <div class="content-container">
+              <p class="intro-text">
+                Quantum code leverages the power of quantum computing to solve complex problems faster than traditional computers. 
+                By harnessing qubits and quantum gates, it enables advanced algorithms like Grover's search and quantum optimization. 
+                This makes it incredibly useful for tasks such as cryptography, data analysis, and simulation of quantum systems. 
+                As quantum technology continues to evolve, learning and experimenting with quantum code opens the door to groundbreaking possibilities in computing and problem-solving.
+              </p>
+              <div class="image-container">
+                <img src="assets/img/posicionesQubit.png" alt="qubitsImg" class="posicionesQubit">
+              </div>
+            </div>
+          </div>
+          <div class="features-section fade-in">
+            <h2 class="intro-title">Available Features:</h2>
+            <p class="features-text">
+              In this web, you can access the following features to explore quantum computing and quantum code generation:
+            </p>
+            <ul class="features-list">
+              <li routerLink="matrixes" routerLinkActive="active" class="option fade-in"><strong>- Matrices:</strong> work with single matrices to perform quantum operations.</li>
+              <li routerLink="grover" routerLinkActive="active" class="option fade-in"><strong>- Grover:</strong> implement Grover’s algorithm to work with multiple qubits.</li>
+              <li routerLink="elonging" routerLinkActive="active" class="option fade-in"><strong>- Genetic algorithm:</strong> use evolutionary techniques to optimize solutions.</li>
+              <li routerLink="blocks" routerLinkActive="active" class="option fade-in"><strong>- Blocks genetic algorithm:</strong> enhance solutions using a block-based genetic algorithm approach.</li>
+              <li routerLink="grenoble" routerLinkActive="active" class="option fade-in"><strong>- Grover and Rudolph + Grenoble:</strong> combine Grover's and Grenoble's algorithms for improved problem-solving.</li>
+              <li routerLink="editor" routerLinkActive="active" class="option fade-in"><strong>- Circuits editor:</strong> create and customize quantum circuits interactively.</li>
+              <li routerLink="grenoble" routerLinkActive="active" class="option fade-in"><strong>- Qubits configurations:</strong> text</li>
+              <li routerLink="editor" routerLinkActive="active" class="option fade-in"><strong>- Code templates:</strong> text</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+      <router-outlet (activate)="onActivate()"></router-outlet>
+    </div>
+    
+  </div>
+</body>

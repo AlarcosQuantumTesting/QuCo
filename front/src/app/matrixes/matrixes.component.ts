@@ -5,7 +5,6 @@ import { QiskitService } from '../qiskit.service';
 import { FillingService } from '../filling.service';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
-
 @Component({
   selector: 'app-matrixes',
   templateUrl: './matrixes.component.html',
@@ -14,6 +13,9 @@ import { CodeTemplate } from '../templates/CodeTemplate';
 export class MatrixesComponent  {
   inputQubits : number = 3
   outputQubits : number = 3
+
+  mensajeTemporal: string = '';
+  showHelp = false;
 
   cols : number = 0
   rows : number = 0
@@ -99,6 +101,9 @@ export class MatrixesComponent  {
       return
     }
     this.userExpressions.push(this.currentUserExpression)
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
   }
 
   openTextArea(c : MatrixesComponent, e : Event, title : string, elementIndex? : number) {
@@ -110,47 +115,167 @@ export class MatrixesComponent  {
     this.dialogo.getElementsByTagName("textarea")[0].focus();
   }
 
-  protected createDialog(cc : MatrixesComponent, caja : any, title : string, parameterIndex? : number) {
+  // protected createDialog(cc : MatrixesComponent, caja : any, title : string, parameterIndex? : number) {
+  //   let selfCaja = caja
+  //   let textArea : any
+  //   if (!this.dialogo) {
+  //       this.dialogo = document.createElement("dialog")
+  //       this.dialogo.setAttribute("id", "dialogo");
+  //       let label = document.createElement("strong")
+  //       label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+  //       let a = document.createElement("u")
+  //       a.innerHTML = "Close"
+  //       let self = this
+  //       a.onclick = function() {
+  //           if (textArea!.value.trim().length>0) {
+  //               let expressions = textArea!.value.split("\n")
+  //               for (let i=0; i<expressions.length; i++) {
+  //                 if (expressions[i].trim().length==0)
+  //                   continue
+  //                 self.currentUserExpression = expressions[i]
+  //                 self.addUserExpression()
+  //               }
+  //           }
+
+  //           selfCaja.parentElement.removeChild(self.dialogo)
+  //           self.dialogo = null
+  //           selfCaja.focus()
+  //       }
+  //       this.dialogo.appendChild(label)
+  //       this.dialogo.appendChild(a)
+
+  //       this.dialogo.appendChild(document.createElement("br"))
+  //       textArea = document.createElement("textarea"); 
+  //       this.dialogo.appendChild(textArea);
+  //       textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 = q0\n" + 
+  //         "q4 = q1\nq5 = (q0&&q1)^q2\n")
+  //       textArea.setAttribute("rows", "15");
+  //       textArea.setAttribute("cols", "60");
+  //       textArea.ondblclick = function() {
+  //         textArea.value = "q3 = q0\nq4 = q1\nq5 = (q0&&q1)^q2\n"
+  //       }
+
+  //   }
+  //   caja.parentElement.appendChild(this.dialogo);
+  // }
+
+  protected createDialog(cc: MatrixesComponent, caja: any, title: string, parameterIndex? : number) {
     let selfCaja = caja
-    let textArea : any
+    let textArea: any
     if (!this.dialogo) {
         this.dialogo = document.createElement("dialog")
         this.dialogo.setAttribute("id", "dialogo");
+
+        // Estilos para el modal
+        this.dialogo.style.backgroundColor = "#eaf7f7";
+        this.dialogo.style.borderRadius = "12px";
+        this.dialogo.style.padding = "20px";
+        this.dialogo.style.maxWidth = "80%";
+        this.dialogo.style.boxShadow = "0px 10px 30px rgba(0, 0, 0, 0.2)";
+        this.dialogo.style.position = "relative";
+        this.dialogo.style.border = "2px solid #007d86"; 
+
+        // Crear y configurar el título
         let label = document.createElement("strong")
         label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+
+        // Crear y configurar la "X" para cerrar el modal
         let a = document.createElement("u")
-        a.innerHTML = "Close"
+        a.innerHTML = "&times;"
+        a.style.fontSize = "24px";
+        a.style.position = "absolute";
+        a.style.top = "10px";
+        a.style.right = "10px";
+        a.style.cursor = "pointer";
+
         let self = this
         a.onclick = function() {
-            if (textArea!.value.trim().length>0) {
+            // if (textArea!.value.trim().length > 0) {
+            //     let expressions = textArea!.value.split("\n")
+            //     for (let i = 0; i < expressions.length; i++) {
+            //         if (expressions[i].trim().length == 0)
+            //             continue
+            //         self.currentUserExpression = expressions[i]
+            //         self.addUserExpression()
+            //     }
+            // }
+            selfCaja.parentElement.removeChild(self.dialogo)
+            self.dialogo = null
+            selfCaja.focus()
+        }
+
+        // Agregar el título y la "X" al modal
+        this.dialogo.appendChild(label)
+        this.dialogo.appendChild(a)
+
+        this.dialogo.appendChild(document.createElement("br"))
+
+        // Crear y configurar el textarea
+        textArea = document.createElement("textarea");
+        textArea.style.width = "95%";
+        textArea.style.height = "150px";
+        textArea.style.padding = "10px";
+        textArea.style.fontSize = "16px";
+        textArea.style.borderRadius = "8px";
+        textArea.style.border = "2px solid #ccc";
+        textArea.style.backgroundColor = "#f9f9f9";
+        textArea.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
+        textArea.style.transition = "all 0.3s ease";
+        textArea.style.border = "2px solid #007d86"; 
+
+        this.dialogo.appendChild(textArea);
+        textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 = q0\n" +
+            "q4 = q1\nq5 = (q0&&q1)^q2\n")
+        textArea.setAttribute("rows", "15");
+        textArea.setAttribute("cols", "60");
+        textArea.ondblclick = function() {
+            textArea.value = "q3 = q0\nq4 = q1\nq5 = (q0&&q1)^q2\n"
+        }
+
+        // Crear y configurar el botón "Add"
+        let addButton = document.createElement("button");
+        addButton.innerHTML = "Add";
+        addButton.style.marginTop = "10px";
+        addButton.style.padding = "8px 15px";
+        addButton.style.borderRadius = "5px";
+        addButton.style.border = "1px solid #ccc";
+        addButton.style.backgroundColor = "#008b95";
+        addButton.style.color = "#fff";
+        addButton.style.fontSize = "16px";
+        addButton.style.cursor = "pointer";
+
+        addButton.addEventListener("mouseenter", () => {
+          addButton.style.backgroundColor = "#006f78";
+          addButton.style.transform = "scale(1.05)";
+          addButton.style.transition = "all 0.3s ease";
+      });
+      
+      addButton.addEventListener("mouseleave", () => {
+          addButton.style.backgroundColor = "#008b95";
+          addButton.style.transform = "scale(1)";
+      });      
+
+        addButton.onclick = function() {
+            if (textArea!.value.trim().length > 0) {
                 let expressions = textArea!.value.split("\n")
-                for (let i=0; i<expressions.length; i++) {
-                  if (expressions[i].trim().length==0)
-                    continue
-                  self.currentUserExpression = expressions[i]
-                  self.addUserExpression()
+                for (let i = 0; i < expressions.length; i++) {
+                    if (expressions[i].trim().length == 0)
+                        continue
+                    self.currentUserExpression = expressions[i]
+                    self.addUserExpression()
                 }
             }
             selfCaja.parentElement.removeChild(self.dialogo)
             self.dialogo = null
             selfCaja.focus()
         }
-        this.dialogo.appendChild(label)
-        this.dialogo.appendChild(a)
 
-        this.dialogo.appendChild(document.createElement("br"))
-        textArea = document.createElement("textarea"); 
-        this.dialogo.appendChild(textArea);
-        textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 = q0\n" + 
-          "q4 = q1\nq5 = (q0&&q1)^q2\n")
-        textArea.setAttribute("rows", "15");
-        textArea.setAttribute("cols", "60");
-        textArea.ondblclick = function() {
-          textArea.value = "q3 = q0\nq4 = q1\nq5 = (q0&&q1)^q2\n"
-        }
+        this.dialogo.appendChild(addButton);
     }
+
     caja.parentElement.appendChild(this.dialogo);
 }
+
 
   removeUserExpression(index : number) {
     this.userExpressions.splice(index, 1)
@@ -171,6 +296,9 @@ export class MatrixesComponent  {
     } catch (error) {
       this.error = error
     }
+
+
+    this.goToTable();
   }
 
   tryFill(index : number) {
@@ -180,6 +308,8 @@ export class MatrixesComponent  {
     this.rows = matrix.length
     this.cols = matrix[0].length
     this.load(matrix)
+
+    this.javaExamples[index].attempted = true;
   }
 
   private reset() {
@@ -200,9 +330,6 @@ export class MatrixesComponent  {
         this.rows = result.numberOfRows
         this.cols = result.numberOfCols
         this.load(result.matrix)
-      },
-      error => {
-        this.error = (error as any).error.message
       }
     )
   }
@@ -285,6 +412,12 @@ export class MatrixesComponent  {
       result => {
         this.qiskitCode = result.code
         this.replaceShotsToken(1000)
+
+
+        // Mostrar modal solo si el usuario ingresó un nombre válido
+        if (asFunction) {
+          this.mostrarModal = true;
+        }
       }
     )
   }
@@ -293,8 +426,9 @@ export class MatrixesComponent  {
     if (!this.qiskitCode)
       return
     for (let i=0; i<this.qiskitCode.length; i++)
-      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", shots)
+      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
   }
+
 
   addHadamardGates() {
     let start = 0
@@ -311,6 +445,12 @@ export class MatrixesComponent  {
     for (let i=0; i<this.inputQubits; i++) {
       this.qiskitCode!.splice(start++, 0, "circuit.h(" + i + ")\n")
     }
+
+
+    this.mensajeTemporal = 'Added Hadamard gates!';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000); // Se oculta después de 2 segundos
   }
 
   countLastQubit() {
@@ -320,7 +460,14 @@ export class MatrixesComponent  {
       "print(f\"Probability of getting 1 in the output qubit: {result}\")"
     ]
     for (let i=0; i<code.length; i++)
-      this.qiskitCode?.push(code[i])    
+      this.qiskitCode?.push(code[i])   
+    
+    
+
+    this.mensajeTemporal = 'Counted last qubit!';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
   }
 
   private loadMatrixes(result : any) {
@@ -408,8 +555,144 @@ export class MatrixesComponent  {
     }
   }
 
+
+
+
+  isInvalid: boolean = true;
+
+  ngOnInit() {
+    // Valida cuando se inicializan los valores
+    this.validateInputs();
+  }
+
+  validateInputs() {
+    if (this.inputQubits === null || this.outputQubits === null) {
+      this.error = 'Both fields are required';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.inputQubits < 2 || this.inputQubits > 15) {
+      this.error = 'Input qubits must be between 2 and 15';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.outputQubits < 0) {
+      this.error = 'Output qubits must be 0 or more';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
+
+
+
+
+
+  goToTable(): void {
+    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
+    const table = document.getElementById('myTable');
+    if (table) {
+      table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+  
+  goToSpecifications(): void {
+    const specifications = document.getElementById('specifications');
+    if (specifications) {
+      specifications.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  onTryClick(i: number): void {
+    this.tryFill(i);
+    this.goToTable();
+  }
+
+  onAddExampleClick(i: number): void {
+    this.addExample(i);
+    this.mensajeTemporal = 'Example added';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  addExample(index: number): void {
+    this.error = undefined;
+    this.reset();
+  
+    let exprs = this.javaExamples[index].exprs;
+
+    for (let i = 0; i < exprs.length; i++) {
+        if (exprs[i].trim().length === 0) continue;
+
+        // Agrega la expresión a la lista
+        this.userExpressions.push(exprs[i]);
+    }
+
+    // Si deseas actualizar la variable `currentUserExpression`
+    if (exprs.length > 0) {
+        this.currentUserExpression = exprs[0];
+    }
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
+
     
+  }
+
+  onAddExample2Click(expr: string): void {
+    this.addExample2(expr);
+  }
+
+  addExample2(expression: string): void {
+    this.error = undefined;
+    this.reset();
+
+    // Agrega la expresión completa en lugar de iterar sobre caracteres
+    if (expression.trim().length > 0) {
+      this.userExpressions.push(expression);
+    }
+
+    // Si deseas actualizar `currentUserExpression`
+    this.currentUserExpression = expression;
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
+
+    this.mensajeTemporal = 'Expression added';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  buildMatrixActions() {
+    this.getEmptyMatrix();
+    this.goToSpecifications();
+  }
+
+
+  mostrarModal: boolean = false;
+
+  copiarCodigo() {
+    const codigo = this.qiskitCode ? this.qiskitCode.join('\n') : '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      alert('Code copied to clipboard');
+        }).catch(err => {
+          console.error('Error copying code: ', err);
+      });
+  }
+  
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
+  }
+
 }
