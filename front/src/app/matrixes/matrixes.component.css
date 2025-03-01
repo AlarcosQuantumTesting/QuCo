@@ -108,12 +108,15 @@ h1:after {
     background-color: #e7eeed;
     
     border-radius: 12px;
-    margin-top: 40px;
+    margin-top: 10px;
+
+    padding: 15px;
     /* box-shadow: 1px 0px 2px 30px #f1f1ef; */
 
     /* box-shadow: 1px 0px 2px 10px #e7c7b35d; */
     /* box-shadow: 1px 0px 2px 10px #f2f9f8; */
-    box-shadow: 1px 0px 2px 10px #e7eeed;
+
+    /* box-shadow: 1px 0px 2px 10px #e7eeed; */
 }
 
 .form-container {
@@ -350,13 +353,13 @@ h2 {
     color: #0b555a;
     text-align: center;
     font-weight: bold;
-    margin-bottom: 20px;
-    margin-top: 40px;
+    margin-bottom: 10px;
+    margin-top: 23px;
 }
 
 /* secciones */
 .section {
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     padding: 15px;
     /* background: #ffffff; */
     /* border-radius: 8px; */
@@ -462,7 +465,7 @@ h3.title-instructions {
     border-bottom: none;
     border-radius: 6px;
     margin-top: 10px;
-    box-shadow: 1px 0px 2px 30px rgb(158, 207, 207);
+    box-shadow: 1px 0px 2px 20px rgb(158, 207, 207);
     background-color: rgba(158, 207, 207, 0.096);
 }
 
@@ -478,7 +481,7 @@ li {
 
 /* codigo */
 code {
-    font-family: 'Courier New', monospace;
+    /* font-family: 'Courier New', monospace; */
     background-color: #dfe3e4;
     padding: 4px 6px;
     border-radius: 4px;
@@ -555,6 +558,8 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.3s;
+
+    min-width: 17%;
 }
 
 .expression-list a:hover {
@@ -672,6 +677,8 @@ input[type="radio"] {
 
 .examples-code {
     background-color: #f7faf8;
+    /* font-family: 'Courier New', Courier, monospace; */
+    font-style: normal !important;
 }
 
 
@@ -690,7 +697,8 @@ input[type="radio"] {
 }
 
 .btn-add {
-    background-color: #128c7e;
+    /* background-color: #128c7e; */
+    background-color: #4c9696;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -701,13 +709,45 @@ input[type="radio"] {
 }
 
 .btn-add:hover {
-    background-color: #218838;
+    /* background-color: #218838; */
+    background-color: #386161;
     transform: scale(1.05);
 }
 
 .btn-container {
     text-align: center;
     margin-top: 15px;
+
+    display: flex;
+    /* justify-content: space-between; */
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+
+    position: relative;
+}
+
+.btn-clear {
+    background-color: #c94855;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-items: end;
+    gap: 5px;
+
+    position: absolute;
+    right: 0;
+}
+
+.btn-clear:hover {
+    background-color: #86222c;
+    transform: scale(1.05);
 }
 
 .btn-apply {
@@ -765,7 +805,7 @@ input[type="radio"] {
 }
 
 th, td {
-    padding: 10px;
+    padding: 3px;
     border: 1px solid black;
 }
 
@@ -795,12 +835,12 @@ th {
     color: white;
     font-weight: bold;
     /* text-transform: uppercase; */
-    padding: 12px;
+    padding: 5px;
     border: 1px solid #ddd;
 }
 
 td {
-    padding: 12px;
+    padding: 3px;
     border: 1px solid #ddd;
     text-align: center;
 }
@@ -818,7 +858,7 @@ tr:hover {
 }
 
 th, td {
-    border-radius: 5px;
+    border-radius: 3px;
 }
 
 
@@ -853,13 +893,18 @@ u:hover {
     align-items: first baseline;
     margin-bottom: 10px;
     width: 100%;
-
+    font-style: normal !important;
   }
 
   .expressions-section ol {
     padding-left: 20px;
     justify-content: left;
 
+  }
+
+  i {
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-style: normal !important;
   }
 
   .btn-addExample2 {
@@ -891,7 +936,8 @@ u:hover {
   /* Estilo general del botón */
 
   .btn-addExample {
-    background-color: #4c9652;
+    /* background-color: #4c9652; */
+    background-color: #4c9696;
     color: white;
     padding: 5px 10px;
     border: none;
@@ -907,7 +953,8 @@ u:hover {
 
   .btn-addExample:hover {
     /* background-color: #0056b3; */
-    background-color: #315a34;
+    /* background-color: #315a34; */
+    background-color: #386161;
     transform: scale(1.05);
     transition: all 0.2s ease-in-out;
   }
@@ -1442,6 +1489,7 @@ u:hover {
     display: flex;
     justify-content: space-between; /* Distribuye los elementos en la misma fila */
     width: 100%;
+    margin-top: -20px;
 }
 
 .template-group {
@@ -1459,4 +1507,10 @@ u:hover {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+}
+
+.disabled {
+    pointer-events: none; /* Bloquea los clics */
+    opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
+    cursor: not-allowed; /* Cambia el cursor */
 }

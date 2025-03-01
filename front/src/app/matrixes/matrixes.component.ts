@@ -16,6 +16,8 @@ export class MatrixesComponent  {
 
   mensajeTemporal: string = '';
   showHelp = false;
+  isDisabled = false;
+  isDisabled2 = false;
 
   cols : number = 0
   rows : number = 0
@@ -395,6 +397,10 @@ export class MatrixesComponent  {
         this.error = "You must enter a name for the function"
         return
       }
+      if (this.isDisabled) return;
+      this.isDisabled = true;
+      if (this.isDisabled2) return;
+      this.isDisabled2 = true;
     }
     this.reset()
     let info = {
@@ -429,8 +435,12 @@ export class MatrixesComponent  {
       this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
   }
 
-
   addHadamardGates() {
+
+    if (this.isDisabled) return; // Si ya está deshabilitado, no hace nada
+    this.isDisabled = true;
+
+
     let start = 0
     for (let i=0; i<this.qiskitCode!.length; i++) {
       if (this.qiskitCode![i].startsWith("#Output qubits")) {
@@ -454,6 +464,10 @@ export class MatrixesComponent  {
   }
 
   countLastQubit() {
+    
+    if (this.isDisabled2) return; // Si ya está deshabilitado, no hace nada
+    this.isDisabled2 = true;
+
     let code = [ "counts_output_qubit" + " = absolute_frequencies.get('1', 1)\n",
       "probability_output_qubit = counts_output_qubit / 1000\n",
       "result" + " = " + (2**this.inputQubits) + " * probability_output_qubit\n",
@@ -628,6 +642,9 @@ export class MatrixesComponent  {
   addExample(index: number): void {
     this.error = undefined;
     this.reset();
+
+    // Eliminar todas las expresiones antes de agregar nuevas
+    this.userExpressions = [];
   
     let exprs = this.javaExamples[index].exprs;
 
@@ -676,7 +693,8 @@ export class MatrixesComponent  {
 
   buildMatrixActions() {
     this.getEmptyMatrix();
-    this.goToSpecifications();
+    // this.goToSpecifications();
+    this.goToTable();
   }
 
 
@@ -693,6 +711,16 @@ export class MatrixesComponent  {
   
   toggleHelp() {
     this.showHelp = !this.showHelp;
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.isDisabled = false;
+    this.isDisabled2 = false;
+  }
+
+  clearExpressions() {
+    this.userExpressions = [];
   }
 
 }
