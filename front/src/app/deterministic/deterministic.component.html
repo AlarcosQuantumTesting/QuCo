@@ -4,13 +4,14 @@
 <span style="color : red">{{ error }}</span>
 
 <div>
-    <p>You can use this code and circuits generator in two ways:</p>
+    <p>You can use this code and circuits generator in three ways:</p>
     <ol>
         <li>In the <strong>first time</strong>, you can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.</li>
-        <li>In the <strong>second time</strong>, you can use it in a <i>"Grover approach"</i>: i.e, you can type an expression for highlighting those 
+        <li>In the <strong>second time</strong>, you can fill-in the absolute frequencies using JavaScript expressions.</li>
+        <li>In the <strong>third time</strong>, you can use it in a <i>"Grover approach"</i>: i.e, you can type an expression for highlighting those 
             elements that must be searched by the circuit or program.
-        <br>For this second case, press <a style="color : blue" (click)="hideExamples=!hideExamples">here</a> to show or hide some examples.<br>
-        If you want to use this approach, you can add the expressions you desire to mark the elements that must be selected.
+        <br>For the second and third cases, press <a style="color : blue" (click)="hideExamples=!hideExamples">here</a> to show or hide some examples.<br>
+        If you want to use this approach, you can add the expressions you desire to set the output frequencies (second case) or to mark the elements that must be selected (third case).
     </li>
     </ol>
 </div>
@@ -57,9 +58,11 @@
         <code>{{ userExpression }}</code>&nbsp;<a style="color : blue" (click)="removeUserExpression(i)">Remove</a>
     </div>
     <br>
-    <button (click)="fillTableWithUserExpressions()">Fill table with these expressions</button>
-
+    <button (click)="setFrequenciesWithUserExpressions()">Fill frequencies with these expressions</button>
     &nbsp;
+    <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button>
+    &nbsp;
+
     Available templates:
     <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
         <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">

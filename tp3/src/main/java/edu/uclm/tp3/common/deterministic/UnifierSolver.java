@@ -1,6 +1,7 @@
 package edu.uclm.tp3.common.deterministic;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,24 @@ public class UnifierSolver extends Solver {
 		this.depth = this.tree.getDepth();
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
 		List<String> nodeNames = nodes.keySet().stream()
-				.filter(key -> key.length()<this.depth)
+				//.filter(key -> key.length()<this.depth)
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
 				.collect(Collectors.toList());
+
+		for (int i=nodeNames.size()-1; i>=0; i--) {
+			String nodeName = nodeNames.get(i);
+			String sLevel = "";
+			for (int j=0; j<nodeName.length(); j++) {
+				char c = nodeName.charAt(j);
+				if (c>='0' && c<='9')
+					sLevel = sLevel + c;
+				else
+					break;
+			}
+			int level = Integer.parseInt(sLevel);
+			if (level == this.depth-1)
+				nodeNames.remove(i);
+		}
 		
 		Map<Integer, BinaryTree> usedNodesMap = new HashMap<>();
 		for (int i=nodeNames.size()-1; i>=0; i--) {

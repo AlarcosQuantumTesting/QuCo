@@ -32,7 +32,7 @@ export class GroverComponent extends GroverStyle {
     let exprs = this.javaExamples[index].exprs
     this.userExpressions = []
     this.userExpressions = this.userExpressions.concat(exprs)
-    this.fillTableWithUserExpressions()
+    this.markElementsWithUserExpressions()
   }
 
   fillTable() {

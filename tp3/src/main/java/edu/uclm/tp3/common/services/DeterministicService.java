@@ -36,6 +36,7 @@ public class DeterministicService {
 		}
 		
 		tree.normalizeProbabilities();
+		System.out.println(tree);
 		
 		Circuit circuit = new Circuit();
 		circuit.setQubits(qubits);

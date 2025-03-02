@@ -55,10 +55,24 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      this.fillTableWithUserExpressions()
+      this.markElementsWithUserExpressions()
   }
 
-  fillTable() {
+  setFrequenciesWithUserExpressions() {
+    this.error = undefined
+    if (this.userExpressions.length == 0) {
+      this.error = "There are no expressions to fill-in the table"
+      return
+    }
+    this.reset()
+    try {
+      this.fillTable(true)
+    } catch (error) {
+      this.error = error
+    }
+}
+
+  fillTable(marking? : boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.expectedFrequencies)
@@ -78,7 +92,9 @@ export class DeterministicComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
-      if (eval(wholeExpression))
+      if (marking)
+        this.expectedFrequencies[i] = eval(wholeExpression)
+      else if (eval(wholeExpression))
         this.expectedFrequencies[i] = 100
     }
     this.updateOutputs()
@@ -196,7 +212,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   private shouldDisplay(node : any) : boolean {
-    return true //node && (node.leftProbability>0 || node.rightProbability>0)
+    return node && (node.leftProbability>0 || node.rightProbability>0)
   }
 
   generateSvgFromBottom(
