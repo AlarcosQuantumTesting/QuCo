@@ -502,6 +502,8 @@ input[type="text"] {
     max-width: 500px;
     display: block;
     margin-top: 5px;
+
+    height: auto;
 }
 
 /* Botones */
@@ -714,6 +716,14 @@ input[type="radio"] {
     transform: scale(1.05);
 }
 
+.btn-add:disabled {
+    /* background-color: #a7afb9; */
+    background-color: #386161ab;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
 .btn-container {
     text-align: center;
     margin-top: 15px;
@@ -766,12 +776,19 @@ input[type="radio"] {
     transform: scale(1.05);
 }
 
+.btn-apply:disabled {
+    /* background-color: #a7afb9; */
+    background-color: #0f5d639c;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* Contenedor de la tabla */
 .table-container {
     display: flex;
     justify-content: center;
-    height: 100vh;
     width: 100%;
+    clear: both;
 }
 
 .custom-checkbox {
@@ -1514,3 +1531,33 @@ u:hover {
     opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
     cursor: not-allowed; /* Cambia el cursor */
 }
+
+
+
+.input-group {
+    position: relative;
+  }
+  
+  .suggestions {
+    position: absolute;
+    top: 100%;  /* Justo debajo del input */
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;  /* Si hay muchas sugerencias, permite hacer scroll */
+    z-index: 10;  /* Asegúrate de que esté encima del input */
+  }
+  
+  .suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  .suggestion-item:hover {
+    background-color: #f0f0f0;
+  }
+  

@@ -782,12 +782,36 @@
             <!-- <h3>Your Expressions</h3> -->
             <h3>Editor access</h3>
             
-            <div class="input-group">
+            <!-- <div class="input-group">
                 <input type="text" [(ngModel)]="currentUserExpression" 
+                    (input)="checkForExpressions()"
                     (dblclick)="openTextArea(this, $event, 'Expressions')" 
                     placeholder="Double click to add multiple expressions">
                 <button class="btn-add" (click)="addUserExpression()"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
+            </div> -->
+
+            <div class="input-group">
+                <input type="text"
+                       [(ngModel)]="currentUserExpression"
+                       (input)="checkForExpressions()"
+                       (dblclick)="openTextArea(this, $event, 'Expressions')" 
+                       (keydown)="onTabPress($event)"
+                       (focus)="onFocusInput()"
+                       placeholder="Double click to add multiple expressions">
+                <button class="btn-add" (click)="addUserExpression()"
+                    [disabled]="isAddDisabled()">
+                  <i class="fa fa-plus" aria-hidden="true"></i> Add
+                </button>
+              
+                <!-- Contenedor para mostrar las sugerencias -->
+                <div class="suggestions" *ngIf="showRecommendations">
+                  <div class="suggestion-item" (click)="selectRecommendation()">
+                    {{ recommendation }}
+                  </div>
+                </div>
             </div>
+              
+                      
     
             <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
                 <code>{{ userExpression }}</code> 
@@ -795,7 +819,8 @@
             </div>
     
             <div class="btn-container">
-                <button class="btn-apply" (click)="fillTableWithUserExpressions()">
+                <button class="btn-apply" (click)="fillTableWithUserExpressions()" 
+                    [disabled]="userExpressions.length <= 0">
                     <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
                 </button>
                 <button *ngIf="userExpressions.length > 0" class="btn-clear" (click)="clearExpressions()">
