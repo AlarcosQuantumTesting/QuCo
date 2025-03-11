@@ -357,6 +357,10 @@ h2 {
     margin-top: 23px;
 }
 
+.buildTitle {
+    margin-top: 0px;
+}
+
 /* secciones */
 .section {
     /* margin-bottom: 20px; */
@@ -718,7 +722,7 @@ input[type="radio"] {
 
 .btn-add:disabled {
     /* background-color: #a7afb9; */
-    background-color: #386161ab;
+    background-color: #38616156;
     cursor: not-allowed;
     transform: none;
 }
@@ -778,7 +782,7 @@ input[type="radio"] {
 
 .btn-apply:disabled {
     /* background-color: #a7afb9; */
-    background-color: #0f5d639c;
+    background-color: #0f5d6354;
     cursor: not-allowed;
     transform: none;
 }
@@ -1532,8 +1536,6 @@ u:hover {
     cursor: not-allowed; /* Cambia el cursor */
 }
 
-
-
 .input-group {
     position: relative;
   }
@@ -1560,4 +1562,121 @@ u:hover {
   .suggestion-item:hover {
     background-color: #f0f0f0;
   }
+
+
+
+
+
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
   
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .info-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* centra los elementos hijos horizontalmente */
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+  }
+
+  .input-button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 60%;
+  }
+  
+  .input-function {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .input-function:hover {
+    border-color: #2980b9;
+  }
+
+  .input-function:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+  }
+  
+  .modal-buttons-function {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .modal-buttons-function button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+.btn-confirm,
+.btn-cancel {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-width: 100px;
+  margin-top: 5px;
+}
+
+.btn-confirm {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-confirm:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.btn-confirm:disabled {
+    background-color: #8f929073;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-cancel {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+

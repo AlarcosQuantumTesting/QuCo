@@ -194,7 +194,7 @@
     <!-- <h1 class="title"><img src="assets/img/matrix2.png" alt="matrix" class="matrix" style="margin-right: 40px;"> MATRIX <img src="assets/img/matrix2.png" alt="matrix" class="matrix"  style="margin-left: 40px;"></h1> -->
     <h1>MATRIX</h1>
 </div>
-<h2>Build matrix</h2>
+<h2 class="buildTitle">Build matrix</h2>
 
 <!-- <div class="container matrix-container">
     <div class="section">
@@ -411,7 +411,8 @@
                 q<sub>{{cont}}</sub>
             </th>
             <th>
-                <u><small>Decimal value</small></u>
+                <!-- <u><small class="decimal">Decimal value</small></u> -->
+                <small class="decimal">Decimal value</small>
             </th>
         </tr>
 
@@ -929,5 +930,36 @@
         </div>
     </div>
 </div>
+
+
+
+
+    <!-- Modal para ingresar el nombre de la función -->
+    <div class="modal" *ngIf="mostrarModalNombreFuncion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Qiskit Code</h2>
+                <span class="close" (click)="mostrarModal = false;cancelarModal()">&times;</span>
+            </div>
+            <div class="info-form">
+                <h3>Enter function name</h3>
+                <!-- <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
+                <button class="btn-confirm" (click)="confirmarNombreFuncion()">Confirm</button> -->
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
+                    <button class="btn-confirm" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
+                        <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                    </button>
+                </div>                  
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>                  
+                <div class="error" *ngIf="error">{{ error }}</div>
+            </div>
+        </div>
+    </div>
+  
 
 </body>

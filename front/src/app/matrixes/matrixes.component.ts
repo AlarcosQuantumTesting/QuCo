@@ -402,18 +402,34 @@ export class MatrixesComponent  {
     )
   }
 
+
+  //mio
+  mostrarModalNombreFuncion = false;
+  nombreFuncion = '';
+  matrixTmp: any[] = [];
+  asFunctionTmp = false;
+  rowIndexTmp?: number;
+
   getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
     let functionName
     if (asFunction) {
-      functionName = prompt("Enter the name of the function")
-      if (!functionName || functionName.trim().length==0) {
-        this.error = "You must enter a name for the function"
-        return
-      }
-      if (this.isDisabled) return;
-      this.isDisabled = true;
-      if (this.isDisabled2) return;
-      this.isDisabled2 = true;
+      // functionName = prompt("Enter the name of the function")
+      // if (!functionName || functionName.trim().length==0) {
+      //   this.error = "You must enter a name for the function"
+      //   return
+      // }
+      // if (this.isDisabled) return;
+      // this.isDisabled = true;
+      // if (this.isDisabled2) return;
+      // this.isDisabled2 = true;
+
+      this.matrixTmp = matrix;
+      this.asFunctionTmp = asFunction;
+      this.rowIndexTmp = rowIndex;
+      this.nombreFuncion = '';
+      this.error = '';
+      this.mostrarModalNombreFuncion = true;
+      return;
     }
     this.reset()
     let info = {
@@ -440,6 +456,54 @@ export class MatrixesComponent  {
       }
     )
   }
+
+
+
+
+  confirmarNombreFuncion() {
+    if (!this.nombreFuncion.trim()) {
+      this.error = "You must enter a name for the function";
+      return;
+    }
+  
+    this._getQiskitCode(this.matrixTmp, this.asFunctionTmp, this.rowIndexTmp, this.nombreFuncion);
+    this.cancelarModal();
+  }
+  
+  cancelarModal() {
+    this.mostrarModalNombreFuncion = false;
+    this.error = '';
+  }
+  
+  private _getQiskitCode(matrix: any[], asFunction: boolean, rowIndex: number | undefined, functionName?: string) {
+    if (this.isDisabled || this.isDisabled2) return;
+    this.isDisabled = true;
+    this.isDisabled2 = true;
+  
+    this.reset();
+  
+    let info = {
+      matrix: matrix,
+      inputQubits: this.inputQubits,
+      qubits: this.inputQubits + this.outputQubits,
+      reduce: this.reduceQuiskit,
+      domain: this.domain,
+      template: this.manager.selectedTemplate,
+      functionName: functionName
+    };
+  
+    if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
+  
+    this.qiskitService.getCode(info).subscribe(result => {
+      this.qiskitCode = result.code;
+      this.replaceShotsToken(1000);
+      this.mostrarModal = true;
+    });
+  }
+
+
+  //mio
+
 
   replaceShotsToken(shots : any) {
     if (!this.qiskitCode)
@@ -743,6 +807,10 @@ export class MatrixesComponent  {
   isAddDisabled(): boolean {
     return !this.currentUserExpression || this.currentUserExpression.trim() === '';
   }
+
+  isConfirmDisabled(): boolean {
+    return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
+  }  
   
   recommendation: string = '';  // La recomendación actual
   showRecommendations: boolean = false;  // Controla si mostrar las recomendaciones
