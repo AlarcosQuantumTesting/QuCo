@@ -16,16 +16,16 @@ from qiskit.visualization import plot_histogram
 
 qreg = QuantumRegister(#QUBITS#, 'q') 
 creg = ClassicalRegister(#OUTPUT_QUBITS#, 'c')
-
 circuit = QuantumCircuit(qreg, creg)
 
 ONE = [0, 1]
 ZERO = [1, 0]
 #INITIALIZE#
-
+#HADAMARDS#
 #CALCULUS#
 
-#MEASURES#
+for i in range(0, #OUTPUT_QUBITS#) :
+	circuit.measure(i, #OUTPUT_QUBITS#-i-1)
 
 print("ORIGINAL CIRCUIT:")
 print(circuit)

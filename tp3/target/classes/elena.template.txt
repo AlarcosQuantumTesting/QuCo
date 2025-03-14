@@ -9,12 +9,13 @@ from qiskit.visualization import plot_state_city
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import MCMT
 
+qubits = #QUBITS#
 qreg = QuantumRegister(#QUBITS#, 'q') 
 creg = ClassicalRegister(#OUTPUT_QUBITS#, 'c')
 circuit = QuantumCircuit(qreg, creg)
 
 #INITIALIZE#
-
+#HADAMARD#
 #CALCULUS#
 
 #MEASURES#

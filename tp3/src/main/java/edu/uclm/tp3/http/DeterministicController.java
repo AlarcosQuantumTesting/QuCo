@@ -43,6 +43,8 @@ public class DeterministicController {
 		int qubits = jso.getInt("qubits");
 		
 		double physicalAngle = jso.getDouble("physicalAngle");
+
+		String functionPrefix = jso.optString("functionPrefix");
 		
 		JSONArray jsa = jso.getJSONArray("expectedFrequencies");
 		List<Integer> expectedFrequencies = IntStream.range(0, jsa.length())
@@ -50,7 +52,7 @@ public class DeterministicController {
                 .collect(Collectors.toList());
 		
 		try {
-			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle);
+			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

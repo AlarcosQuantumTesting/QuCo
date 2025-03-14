@@ -84,6 +84,10 @@
       </select> 
     </div>
 
+    <div *ngIf="error">
+      <strong style="color: red;">{{ error }}</strong>
+    </div>
+
     <div *ngIf="selectedGate">
       <input type="text" [(ngModel)]="selectedGate!.name" placeholder="Gate name">
       <input type="number" [(ngModel)]="selectedGate!.qubits" placeholder="Number of qubits" min="1">
@@ -97,7 +101,7 @@
     </div>
 
     <div>
-      <button *ngFor="let cg of storages.customizedGates" (click)="selectGate(cg)"
+      <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
         [ngClass]="{'selected-gate': selectedGate === cg}">
         {{ cg.name }}
       </button>

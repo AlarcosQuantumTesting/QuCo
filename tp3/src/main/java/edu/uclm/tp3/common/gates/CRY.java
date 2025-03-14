@@ -16,8 +16,9 @@ public class CRY extends TwoQubitsGate implements IRotableGate {
 		return "cry(" + this.theta + ", " + this.qubit0 + ", " + this.qubit1 + ")\n";
 	}
 
-	public void setTheta(double theta) {
+	public CRY setTheta(double theta) {
 		this.theta = theta;
+		return this;
 	}
 
 	@Override
@@ -25,9 +26,9 @@ public class CRY extends TwoQubitsGate implements IRotableGate {
 		QMatrix m = new QMatrix();
 		m.setValues(
 				1.0, 0.0, 0.0, 0.0, 
-				0.0, Math.cos(this.theta/2), 0.0, -Math.sin(this.theta/2),
-				0.0, 0.0, 1.0, 0.0,
-				0, Math.sin(theta/2), 0, Math.cos(theta/2));
+				0.0, 1, 0, 0,
+				0.0, 0.0, Math.cos(theta/2), -Math.sin(theta/2),
+				0, 0, Math.sin(theta/2), Math.cos(theta/2));
 		return m;
 	}
 

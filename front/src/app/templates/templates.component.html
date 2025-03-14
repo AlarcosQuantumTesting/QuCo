@@ -49,6 +49,10 @@
     </div>
 
     <div *ngIf="manager.selectedTemplate && !creatingTemplate">
+        <div>
+            <strong>Template description:</strong>
+            <mark>{{ manager.selectedTemplate.description }}</mark>
+        </div>
         <pre>{{ manager.selectedTemplate.code }}</pre>
     </div>
 </div>

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { QubitsConfiguration } from './qubits-configuration/QubitConfiguration';
 import { EdCircuit, EdGate } from './quantum-editor/EdGate';
+import { QiskitService } from './qiskit.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoragesService {
 
-  constructor() {
+  constructor(private qiskitService : QiskitService) {
     this.loadCustomizedGates();
     this.loadCircuits();
     this.loadQubitsConf();
@@ -53,7 +54,7 @@ export class StoragesService {
   customizedGates : EdGate[] = [];
   
   private loadCustomizedGates()  {
-    let existingGates : any = localStorage.getItem('customizedGates');
+    /*let existingGates : any = localStorage.getItem('customizedGates');
     if (existingGates) {
       existingGates = JSON.parse(existingGates); 
       for (let i=0; i<existingGates.length; i++) {
@@ -62,7 +63,8 @@ export class StoragesService {
         gate.code = existingGates[i].code;
         this.customizedGates.push(gate);
       }
-    }    
+    }  */
+    //this.customizedGates = this.qiskitService.getCustomizedGates()
   }
 
   saveCustomizedGate(gate : EdGate) {

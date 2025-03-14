@@ -5,6 +5,7 @@ import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { StoragesService } from '../storages.service';
 import { QubitsConfiguration } from '../qubits-configuration/QubitConfiguration';
+import { QiskitService } from '../qiskit.service';
 
 @Component({
   selector: 'app-quantum-editor',
@@ -17,6 +18,7 @@ export class QuantumEditorComponent {
   creatingNewGate: boolean = false;
   selectedGate?: EdGate;
   code? : string;
+  error? : any
 
   showInstructions: any;
 
@@ -27,10 +29,24 @@ export class QuantumEditorComponent {
 
   f667 : any = jsonData
 
-  constructor(public manager : ManagerService, public storages: StoragesService) {
+  customizedGates : EdGate[] = [];
+
+  constructor(public manager : ManagerService, public storages: StoragesService, private qiskitService : QiskitService) {
     this.f667 = this.f667[0]
     this.f667 = Object.assign(new EdCircuit(), this.f667)
     this.storages.existingCircuits.push(this.f667)
+    this.qiskitService.getCustomizedGates().subscribe(
+      gates => {
+        for (let i=0; i<gates.length; i++) {
+          let edGate = new EdGate(gates[i].name, gates[i].qubits)
+          edGate.description = gates[i].description
+          edGate.code = gates[i].code
+          this.customizedGates.push(edGate)
+        }
+      },
+      error => {
+        this.error = error.error.message
+      })
   }
 
   onCircuitChange() {
@@ -199,7 +215,15 @@ export class QuantumEditorComponent {
 
   addCustomizedGate() {
     this.creatingNewGate = false;
-    this.storages.saveCustomizedGate(this.selectedGate!);
+    //this.storages.saveCustomizedGate(this.selectedGate!);
+    this.qiskitService.saveGate(this.selectedGate!).subscribe(
+        ok=> {
+          alert("Gate saved")
+        },
+        error => {
+          this.error = error.error.message
+        }
+    )
     this.selectedGate = undefined;
   }
   

@@ -31,7 +31,7 @@ public class NewGroverCoder {
 	}
 
     private String prepareCodeAsAFunction(int qubits, StringBuilder sbCalculus, String functionName) {
-		StringBuilder function = new StringBuilder("def get" + functionName + "() : \n");
+		StringBuilder function = new StringBuilder("def " + functionName + "() : \n");
 		function.append("\tU = QuantumCircuit(" + qubits + ")\n");
 		String[] lines = sbCalculus.toString().split("\n");
 		for (String line : lines) {

@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
@@ -15,12 +16,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.model.CodeTemplate;
+import edu.uclm.tp3.dao.TemplateDao;
 
 @Service
 public class TemplatesService {
 
+    @Autowired
+    private TemplateDao templateDao;
+
 	public List<CodeTemplate> getTemplates() throws IOException {
-		List<CodeTemplate> templates = new ArrayList<>();
+		/*List<CodeTemplate> templates = new ArrayList<>();
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = resolver.getResources("classpath*:*.template.txt");
         for (Resource resource : resources) {
@@ -30,7 +35,8 @@ public class TemplatesService {
         	template.setFileName(fn);
             templates.add(template);
         }
-		return templates;
+		return templates;*/
+        return this.templateDao.findAll();
 	}
 
 	public CodeTemplate createTemplate(CodeTemplate template) {
@@ -41,11 +47,11 @@ public class TemplatesService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fileName and code are mandatory");
 
         try {
-            // Obtener la ruta real de src/main/resources
-            String resourcePath = getClass().getClassLoader().getResource("").getPath();
+            /*String resourcePath = getClass().getClassLoader().getResource("").getPath();
             Path filePath = Paths.get(resourcePath, fileName);
 
-            Files.write(filePath, code.getBytes());
+            Files.write(filePath, code.getBytes());*/
+            this.templateDao.save(template);
             return template;
         } catch (Exception e) {
         	throw new ResponseStatusException(HttpStatus.valueOf(500), "Error saving the file");

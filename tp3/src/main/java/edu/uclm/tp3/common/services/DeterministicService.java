@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.deterministic.BinaryTree;
+import edu.uclm.tp3.common.deterministic.MatrixSolver;
 import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.common.deterministic.Solver;
 import edu.uclm.tp3.common.model.Circuit;
@@ -20,7 +21,7 @@ import edu.uclm.tp3.common.model.Circuit;
 @Service
 public class DeterministicService {
 	
-	public Map<String, Object> calculate(int qubits, List<Integer> expectedFrequencies, double physicalAngle) throws Exception {
+	public Map<String, Object> calculate(int qubits, List<Integer> expectedFrequencies, double physicalAngle, String functionPrefix) throws Exception {
 		
 		int nOfOutputs = (int) Math.pow(2, qubits);
 		int shots = expectedFrequencies.stream().mapToInt(Integer::intValue).sum();
@@ -35,8 +36,7 @@ public class DeterministicService {
 			tree.setFrequencies(binary, freq);
 		}
 		
-		tree.normalizeProbabilities();
-		System.out.println(tree);
+		tree.normalizeProbabilities(functionPrefix);
 		
 		Circuit circuit = new Circuit();
 		circuit.setQubits(qubits);
@@ -45,7 +45,7 @@ public class DeterministicService {
 		if (physicalAngle>0)
 			tree.removeLowAngles(physicalAngle);
 
-		solver = new UnifierSolver(tree, circuit);
+		solver = new UnifierSolver(tree, circuit, functionPrefix);
 		return solver.solve(shots);
 	}
 

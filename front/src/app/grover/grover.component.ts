@@ -4,6 +4,8 @@ import { GroverService } from '../grover.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
+import { QiskitCode } from './QiskitCode';
+import { QiskitService } from '../qiskit.service';
 @Component({
   selector: 'app-grover',
   templateUrl: './grover.component.html',
@@ -23,8 +25,8 @@ export class GroverComponent extends GroverStyle {
 
   max: number = 50000
 
-  constructor(private groverService: GroverService, public sanitizer: DomSanitizer, public manager : ManagerService) {
-    super()
+  constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, public sanitizer: DomSanitizer, public manager : ManagerService) {
+    super(qiskitService)
   }
 
   override tryFill(index: number): void {
@@ -136,7 +138,7 @@ export class GroverComponent extends GroverStyle {
     this.finalMatrix = []
     this.dataReceived = false
     this.numberOfReceivedMatrixes = 0
-    this.qiskitCode = []
+    this.qiskitCode = new QiskitCode()
     this.calculusTime = 0
     this.qiskitMatrixStart = ""
     this.qiskitMatrixEnd = ""
@@ -222,15 +224,18 @@ export class GroverComponent extends GroverStyle {
 
   getQiskitCode(matrix: any[], asFunction : boolean) {
     let name
+
+    this.reset()
+
     if (asFunction) {
       name = prompt("Enter the name of the function")
       if (!name || name.trim().length==0) {
         this.error = "You must enter a name for the function"
         return
       }
+      this.qiskitCode.name = name
+      this.qiskitCode.isFunction = true
     }
-
-    this.reset()
 
     let info = {
       matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
@@ -243,7 +248,7 @@ export class GroverComponent extends GroverStyle {
     }
     this.groverService.getCode(info).subscribe(
       result => {
-        this.qiskitCode = result.code
+        this.qiskitCode.lines = result.code
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
         this.copyCode()
         // Sacar un tooltip que diga que se ha copiado el código

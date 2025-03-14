@@ -1,3 +1,7 @@
+import { GroverService } from "../grover.service"
+import { QiskitCode } from "../grover/QiskitCode"
+import { QiskitService } from "../qiskit.service"
+
 export abstract class GroverStyle {
     qubits: number = 4
     hideExamples: boolean = true
@@ -6,7 +10,7 @@ export abstract class GroverStyle {
     finalMatrixNumberOfRows: number = 0
     dataReceived: boolean = false
     numberOfReceivedMatrixes: number = 0
-    qiskitCode?: string[]
+    qiskitCode : QiskitCode = new QiskitCode()
     calculusTime?: number
     qiskitMatrixStart: string = ""
     qiskitMatrixEnd: string = ""
@@ -59,6 +63,21 @@ export abstract class GroverStyle {
         }
     ]
     hideInstructions: boolean = true
+
+    constructor(protected qiskitService: QiskitService) {}
+
+    saveCode() {
+        this.error = undefined
+        this.qiskitCode.qubits = this.qubits
+        this.qiskitService.saveCode(this.qiskitCode).subscribe(
+        result => {
+            alert("Code saved")
+        },
+        error => {
+            this.error = error.error ? error.error.message : error
+        }
+        )
+    }
 
     abstract tryFill(index : number) : void
     abstract reset() : void

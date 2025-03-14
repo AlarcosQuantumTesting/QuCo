@@ -114,10 +114,17 @@
         </option>
     </select> 
 
-    <div  style="border: solid 1px;" id="wholeCode">
+    <div style="border: solid 1px;" id="wholeCode">
         <strong (click)="copyCode()">Copy code</strong><span style="font-size: 30px;">&#x2398;</span>
+        <div>
+            <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
+        </div>
+        <div>
+            <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
+            <button (click)="saveCode()">Save</button>
+        </div>
         <div style="font-size: x-small;">
-            <pre *ngFor="let line of qiskitCode">{{ line }}</pre>
+            <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
         </div>
     </div>
 </div>
