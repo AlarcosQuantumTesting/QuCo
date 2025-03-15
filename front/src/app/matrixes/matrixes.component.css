@@ -291,7 +291,9 @@ label {
     transition: all 0.3s ease; */
 
 
-    background-color: #d49547;
+    /* background-color: #d49547; */
+    background-color: #0b555a;
+    
     /* background-color: #008b95; */
     color: white;
     padding: 10px 20px;
@@ -306,7 +308,9 @@ label {
 
 .btn:hover {
     /* background: linear-gradient(135deg, #2980b9, #1e6f9f); */
-    background-color: #bb8343;
+    /* background-color: #bb8343; */
+    background-color: #149099;
+
     /* background-color: #196369; */
     /* transform: scale(0.990); */
     transform: scale(1.05);
@@ -401,7 +405,49 @@ span.highlight {
 }
 
 /* Estilo para el botón */
-.btn-toggle-help, .btn-toggle-examples {
+
+.header-with-button {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    position: relative;
+  }
+  
+  .btn-toggle-examples {
+    /* background-color: #722929; */
+    border: none;
+    padding: 7px 10px;
+    /* border-radius: 2000px; */
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-self: start;
+    background: #007b7f;
+    color: white;
+    border-radius: 50%;
+  }
+
+  .btn-toggle-examples:hover {
+    /* background-color: #0056b3; */
+    background-color: #2d5f7a;
+    border-color: #2e607a;
+    transform: scale(1.05);
+}
+  
+  .btn-toggle-examples i {
+    font-size: 16px;
+  }
+  
+  .editor-title {
+    text-align: center;
+    justify-self: center;
+    width: 100%;
+    margin: 0;
+  }
+
+.btn-toggle-help {
     background-color: #44a6db;
     color: white;
     padding: 10px 20px;
@@ -415,7 +461,7 @@ span.highlight {
 }
 
 
-.btn-toggle-help:hover, .btn-toggle-examples:hover {
+.btn-toggle-help:hover:hover {
     /* background-color: #0056b3; */
     background-color: #38789b;
     border-color: #2e607a;
@@ -505,7 +551,6 @@ input[type="text"] {
     width: 100%;
     max-width: 500px;
     display: block;
-    margin-top: 5px;
 
     height: auto;
 }
@@ -521,7 +566,6 @@ button {
     cursor: pointer;
     transition: 0.3s;
     display: inline-block;
-    margin-top: 10px;
 }
 
 button:hover {
@@ -663,7 +707,8 @@ input[type="radio"] {
 
 .full-width-centered {
     width: 80%;
-    max-width: 600px;
+    max-width: 700px;
+    min-width: fit-content;
     margin: auto;
     display: block;
     float: none;
@@ -702,6 +747,13 @@ input[type="radio"] {
     border-radius: 5px;
 }
 
+.buttons-container {
+    display: flex;
+    flex-direction: row; /* Asegura que sea en fila */
+    align-items: center;
+    gap: 10px;
+  }
+
 .btn-add {
     /* background-color: #128c7e; */
     background-color: #4c9696;
@@ -711,7 +763,6 @@ input[type="radio"] {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    margin-bottom: 5px;
 }
 
 .btn-add:hover {
@@ -754,9 +805,10 @@ input[type="radio"] {
     align-items: center;
     justify-items: end;
     gap: 5px;
+    /* gap: 5px;
 
     position: absolute;
-    right: 0;
+    right: 0; */
 }
 
 .btn-clear:hover {
@@ -1680,3 +1732,46 @@ u:hover {
   transform: scale(1.05);
 }
 
+
+.intructions-content {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.instructions-link {
+    /* color : #298b7e; */
+    /* color : rgb(40, 76, 124); */
+    color: #e74c3c;
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.instructions-link:hover {
+    cursor: pointer;
+    color : #297fb975;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    justify-content: center;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 2px solid #ccc;
+    max-width: 400px;
+  }
+  
+  .divider span {
+    padding: 0 12px;
+    color: #666;
+    font-weight: bold;
+  }
+  

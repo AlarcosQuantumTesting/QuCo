@@ -810,7 +810,10 @@ export class MatrixesComponent  {
 
   isConfirmDisabled(): boolean {
     return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
-  }  
+  }
+
+
+  mostrarInstrucciones: boolean = false;
   
   recommendation: string = '';  // La recomendación actual
   showRecommendations: boolean = false;  // Controla si mostrar las recomendaciones

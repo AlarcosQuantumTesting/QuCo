@@ -560,10 +560,9 @@
   }
 
   .option::before {
-    content: "➤";
-    font-size: 0.8em; /* Reduce el tamaño */
+    /* content: "➤"; */
+    content: "●";
     margin-right: 5px;
-    display: inline-block;
     color: #007d86;
   }
 
