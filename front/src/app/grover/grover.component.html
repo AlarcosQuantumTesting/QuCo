@@ -16,14 +16,14 @@
     </p>
 
     <div [hidden]="hideExamples">
-        <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
+        <p>The expressions you can introduce msut be JavaScript <u><strong><mark>boolean</mark></strong></u> expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
         <p>
             You can use the following <i>reseved words:</i>
         </p>
         <ul>
             <li><b>q0</b>, <b>q1</b>...<b>q<i>x</i></b> to reference a given qubit.</li>
             <li><b>input</b> to reference the decimal value of the input.</li>
-            <li><b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>x</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.</li>
+            <li><b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.</li>
         </ul>        
         <strong>Examples of expressions to fill-in the table:</strong>
         <ol>
@@ -65,16 +65,20 @@
 
     <table border="1">
         <tr style="color:blue">
-            <td [colSpan]="qubits+2" align="left">
+            <td [colSpan]="2" align="left">
                 <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
                 &nbsp;
                 <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
                 &nbsp;
+            <td [colSpan]="qubits" align="center">
                 Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">As a whole program</u>&nbsp;<u href="#" (click)="getQiskitCode(matrix, true)">As a function</u>
+                <br>
+                <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">Use MCX
+                <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">Use H-MCZ-H
             </td>
         </tr>
         <tr>
-            <th rowspan="2"></th>
+            <th rowspan="2">Index</th>
             <th [colSpan]="qubits+1">Inputs</th>
         </tr>
         <tr>

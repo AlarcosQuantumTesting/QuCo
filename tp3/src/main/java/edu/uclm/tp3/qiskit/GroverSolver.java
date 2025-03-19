@@ -12,21 +12,21 @@ public class GroverSolver {
 		return init;
 	}
 
-	public static List<List<Object>> guessGroverOracle(List<List<Integer>> sRows, int qubits) {
+	public static List<List<Object>> guessGroverOracle(List<List<Integer>> sRows, int qubits, Boolean useMCX) {
 		List<List<Object>> requiredMatrixes = new ArrayList<>();
 		List<Integer> sRow;
 		int rows = sRows.size();
 		for (int i=0; i<rows; i++) {
 			sRow = sRows.get(i);
-			requiredMatrixes.addAll(guessGates(sRow, qubits));
+			requiredMatrixes.addAll(guessGates(sRow, qubits, useMCX));
 		}
 		return requiredMatrixes;
 	}
 	
-	public static List<List<Object>> guessDifussor(int qubits) {
+	public static List<List<Object>> guessDifussor(int qubits, Boolean useMCX) {
 		List<Object> hh = getGate(qubits, "H");
 		List<Object> xx = getGate(qubits, "X");
-		List<List<Object>> column2 = getCCZ(qubits);
+		List<List<Object>> column2 = useMCX ? getMCX(qubits) : getHMCZH(qubits);
 		
 		List<List<Object>> result = new ArrayList<>();
 		result.add(hh);
@@ -37,7 +37,7 @@ public class GroverSolver {
 		return result;
 	}
 
-	private static List<List<Object>> guessGates(List<Integer> sRow, int qubits) {
+	private static List<List<Object>> guessGates(List<Integer> sRow, int qubits, Boolean useMCX) {
 		List<List<Object>> requiredMatrixes = new ArrayList<>();
 		List<Object> column0 = newColumn(qubits);
 		Integer value;
@@ -47,12 +47,26 @@ public class GroverSolver {
 				column0.set(qubits-i-1, "X");
 		}
 		requiredMatrixes.add(column0);
-		requiredMatrixes.addAll(getCCZ(qubits));
+		if (useMCX)
+			requiredMatrixes.addAll(getMCX(qubits));
+		else
+			requiredMatrixes.addAll(getHMCZH(qubits));
 		requiredMatrixes.add(column0);
 		return requiredMatrixes;
 	}
 
-	private static List<List<Object>> getCCZ(int qubits) {
+	private static List<List<Object>> getHMCZH(int qubits) {
+		List<Object> column1 = newColumn(qubits);
+		for (int i=0; i<qubits-1; i++) {
+			column1.set(i, "%E2%80%A2");
+		}
+		column1.set(qubits-1, "Z");
+		List<List<Object>> ccz = new ArrayList<>();
+		ccz.add(column1);
+		return ccz;
+	}
+
+	private static List<List<Object>> getMCX(int qubits) {
 		List<Object> column0 = newColumn(qubits);
 		List<Object> column1 = newColumn(qubits);
 		for (int i=0; i<qubits-1; i++) {

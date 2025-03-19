@@ -81,8 +81,8 @@ export abstract class GroverStyle {
 
     abstract tryFill(index : number) : void
     abstract reset() : void
-    abstract fillTable() : void
-
+    abstract fillTable(marking : boolean) : void
+    
     markElementsWithUserExpressions() {
         this.error = undefined
         if (this.userExpressions.length == 0) {
@@ -91,7 +91,7 @@ export abstract class GroverStyle {
         }
         this.reset()
         try {
-          this.fillTable()
+          this.fillTable(true)
         } catch (error) {
           this.error = error
         }

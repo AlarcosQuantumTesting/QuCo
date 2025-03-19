@@ -23,6 +23,8 @@ export class GroverComponent extends GroverStyle {
   qiskitMatrix?: any
   values?: number[]
 
+  useMCX : boolean = false
+
   max: number = 50000
 
   constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, public sanitizer: DomSanitizer, public manager : ManagerService) {
@@ -37,7 +39,7 @@ export class GroverComponent extends GroverStyle {
     this.markElementsWithUserExpressions()
   }
 
-  fillTable() {
+  fillTable(marking : boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.matrix)
@@ -57,7 +59,8 @@ export class GroverComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
-      row[row.length - 1] = eval(wholeExpression)
+      let result = eval(wholeExpression)
+      row[row.length - 1] = result!=0
       if (row[row.length - 1])
         this.selectedElements++
     }
@@ -186,7 +189,7 @@ export class GroverComponent extends GroverStyle {
       return
     }
 
-    this.groverService.getAllQuirk(info).subscribe(
+    this.groverService.getAllQuirk(info, this.useMCX).subscribe(
       result => {
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
@@ -246,7 +249,7 @@ export class GroverComponent extends GroverStyle {
       this.error = "Select some output"
       return
     }
-    this.groverService.getCode(info).subscribe(
+    this.groverService.getCode(info, this.useMCX).subscribe(
       result => {
         this.qiskitCode.lines = result.code
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });

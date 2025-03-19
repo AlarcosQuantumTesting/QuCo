@@ -45,43 +45,35 @@
 
   <div class="editor-container">
     <div class="controls-container">
-      Existing circuits: 
-      <select (change)="onCircuitChange()" [(ngModel)]="circuit">
-        <option [ngValue]="null" disabled selected>Select a circuit</option>
-        <option *ngFor="let circuit of storages.existingCircuits" [ngValue]="circuit">{{ circuit.name }}</option>
-      </select>      
-
-      &nbsp;
-
       Existing qubits configurations: 
-      <select (change)="onQubitsConfigurationChange()" [(ngModel)]="qubitsConfiguration">
+      <select [(ngModel)]="selectedQubitsConfigurationName" (ngModelChange)="onQubitsConfigurationChange($event)">
         <option [ngValue]="null" disabled selected>Select a configuration</option>
-        <option *ngFor="let cfg of storages.existingConfigurations" [ngValue]="cfg">{{ cfg.name }}</option>
+        <option *ngFor="let cfgName of existingConfigurationNames" [ngValue]="cfgName">{{ cfgName }}</option>
       </select>
-      
+      &nbsp;
+      Existing circuits: 
+      <select [(ngModel)]="selectedCircuitName" (ngModelChange)="onCircuitChange($event)" [disabled]="selectedQubitsConfigurationName==null">
+        <option [ngValue]="null" disabled selected>Select a circuit</option>
+        <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
+      </select>    
     </div>
 
     <div class="controls-container">
-      Number of qubits: <input type="number" step="1" min="2" (change)="setQubits($event)">
-      <br>
-
-      <button (click)="addQubit()">Add qubit</button>
-      <button (click)="removeQubit()">Remove last qubit</button>
-      <button (click)="addColumn()">Add column</button>
-      <button (click)="removeColumn()">Remove last column</button>
+      <button (click)="addColumn()" *ngIf="circuit">Add column</button>
+      <button (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2">Remove last column</button>
       <br>
       <button (click)="createCustomizedGate()">Create customized gate</button>
     </div>
 
     <div>
-      <button (click)="generateCode()">Generate code</button>
-      &nbsp;
       Available templates:
       <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
           <option *ngFor="let template of manager.templates" [ngValue]="template">
               {{ template.fileName }}
           </option>
       </select> 
+      &nbsp;
+      <button (click)="generateCode()">Generate code</button>
     </div>
 
     <div *ngIf="error">
@@ -100,40 +92,39 @@
       <button (click)="cancel()">Cancel</button>
     </div>
 
-    <div>
-      <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
-        [ngClass]="{'selected-gate': selectedGate === cg}">
-        {{ cg.name }}
-      </button>
-      &nbsp;
-      Measure from: <input type="number" min="0" max="{{ circuit.qubits }}" [(ngModel)]="measureFrom">
-      to: <input type="number" min="0" max="{{ circuit.qubits }}" [(ngModel)]="measureTo">
+    <div *ngIf="customizedGates.length > 0">
+      <span *ngFor="let cg of customizedGates">
+        <button (click)="selectGate(cg)"
+          [ngClass]="{'selected-gate': selectedGate === cg}">
+          {{ cg.name }}
+        </button>
+        &nbsp;
+      </span>
       <button (click)="selectMeasurementGate()">M 📐</button>
     </div>
 
-    <table border="1">
+    <table border="1" *ngIf="qubitsConfiguration">
       <thead>
         <tr>
           <th></th>
-          <th *ngFor="let col of [].constructor(circuit.columns); let i = index">
+          <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
             {{ i }}
+            <sub title="Measure all" (click)="measureColumn(i)">📐</sub>
           </th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let qubit of circuit.qubits; let i = index">
+        <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
           <th>q<sub>{{ i }}</sub></th>
+          <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
+            
+            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
+                [attr.rowspan]="circuit!.qubits[i].gates[j].qubits" (click)="removeGate(i, j)">
+              <button>{{ circuit!.qubits[i].gates[j].name }}</button> 
+            </td>
 
-          <ng-container *ngFor="let col of [].constructor(circuit.columns); let j = index">
-            <td *ngIf="circuit.getGate(i, j) && !circuit.isCovered(i, j)" [rowSpan]="circuit.getGate(i, j)?.qubits"
-              (click)="placeGate(i, j)" (dblclick)="removeGate(i, j)">
-              <button class="gate-button">
-                {{ circuit.getGate(i, j)?.name }}
-              </button>
-            </td>
-            <td *ngIf="!circuit.getGate(i, j) && !circuit.isCovered(i, j)" (click)="placeGate(i, j)">
-            </td>
+            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGate(i, j)"></td>
           </ng-container>
           <td>
             {{ getPhysicalQubit(i) }}
@@ -142,9 +133,9 @@
       </tbody>
     </table>
 
-    <div>
+    <div *ngIf="circuit">
       <input type="text" [(ngModel)]="circuit.name" placeholder="Circuit name">
-      <button (click)="storages.saveCircuit(circuit)">Save circuit</button>
+      <button (click)="saveCircuit(circuit)">Save circuit</button>
     </div>
     <div id="divCode" #codeArea>
       <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>

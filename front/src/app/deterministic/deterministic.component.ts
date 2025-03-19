@@ -70,13 +70,13 @@ export class DeterministicComponent extends GroverStyle {
     }
     this.reset()
     try {
-      this.fillTable(true)
+      this.fillTable(false)
     } catch (error) {
       this.error = error
     }
 }
 
-  fillTable(marking? : boolean) {
+  fillTable(marking : boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.expectedFrequencies)
@@ -96,10 +96,11 @@ export class DeterministicComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
+      let result = eval(wholeExpression )
       if (marking)
-        this.expectedFrequencies[i] = eval(wholeExpression)
-      else if (eval(wholeExpression))
-        this.expectedFrequencies[i] = 100
+        this.expectedFrequencies[i] = result ? 100 : 0
+      else 
+        this.expectedFrequencies[i] = result
     }
     this.updateOutputs()
   }

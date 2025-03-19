@@ -6,7 +6,7 @@ import { ManagerService } from '../manager.service';
 @Component({
   selector: 'app-templates',
   templateUrl: './templates.component.html',
-  styleUrls: ['../quantum-editor/quantum-editor.component.css']
+  styleUrls: ['../circuit-editor/circuit-editor.component.css']
 })
 export class TemplatesComponent implements OnInit {
 

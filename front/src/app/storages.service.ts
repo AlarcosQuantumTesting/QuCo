@@ -1,17 +1,13 @@
 import { Injectable } from '@angular/core';
 import { QubitsConfiguration } from './qubits-configuration/QubitConfiguration';
-import { EdCircuit, EdGate } from './quantum-editor/EdGate';
-import { QiskitService } from './qiskit.service';
+import { EdCircuit, EdGate } from './circuit-editor/EdCircuit';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoragesService {
 
-  constructor(private qiskitService : QiskitService) {
-    this.loadCustomizedGates();
-    this.loadCircuits();
-    this.loadQubitsConf();
+  constructor() {
     this.qubitsConfiguration.updateQubits();
   }
 
@@ -50,29 +46,6 @@ export class StoragesService {
     return null;
   }  
 
-  /******* Customized gates (en Circuit's Editor) *******/
-  customizedGates : EdGate[] = [];
-  
-  private loadCustomizedGates()  {
-    /*let existingGates : any = localStorage.getItem('customizedGates');
-    if (existingGates) {
-      existingGates = JSON.parse(existingGates); 
-      for (let i=0; i<existingGates.length; i++) {
-        let gate = new EdGate(existingGates[i].name, existingGates[i].qubits);
-        gate.description = existingGates[i].description;
-        gate.code = existingGates[i].code;
-        this.customizedGates.push(gate);
-      }
-    }  */
-    //this.customizedGates = this.qiskitService.getCustomizedGates()
-  }
-
-  saveCustomizedGate(gate : EdGate) {
-    if (gate && !this.customizedGates.some(g => g.name === gate!.name))
-      this.customizedGates.push(gate);
-    localStorage.setItem('customizedGates', JSON.stringify(this.customizedGates));
-  }
-
   /******* Qubits configurations ***********/
 
   qubitsConfiguration: QubitsConfiguration = new QubitsConfiguration();
@@ -80,14 +53,14 @@ export class StoragesService {
 
   private loadQubitsConf() {
     let existingConfigurations : any = localStorage.getItem('qubitsConfigurations');
-        if (existingConfigurations) {
-          existingConfigurations = JSON.parse(existingConfigurations); 
-          for (let i=0; i<existingConfigurations.length; i++) {
-            let cfg = Object.assign(new QubitsConfiguration(), existingConfigurations[i]);
-            this.existingConfigurations.push(cfg);
-          }
-        }
+    if (existingConfigurations) {
+      existingConfigurations = JSON.parse(existingConfigurations); 
+      for (let i=0; i<existingConfigurations.length; i++) {
+        let cfg = Object.assign(new QubitsConfiguration(), existingConfigurations[i]);
+        this.existingConfigurations.push(cfg);
       }
+    }
+  }
     
   saveQubitsConf(cfg : QubitsConfiguration) {
     for (let i=0; i<this.existingConfigurations.length; i++) {

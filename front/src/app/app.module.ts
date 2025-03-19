@@ -11,7 +11,7 @@ import { BlocksComponent } from './blocks/blocks.component';
 import { ElongingComponent } from './elonging/elonging.component';
 import { GroverComponent } from './grover/grover.component';
 import { DeterministicComponent } from './deterministic/deterministic.component';
-import { QuantumEditorComponent } from './quantum-editor/quantum-editor.component';
+import { CircuitEditorComponent } from './circuit-editor/circuit-editor.component';
 import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 
@@ -31,7 +31,7 @@ const appRoutes : Routes = [
     ElongingComponent,
     GroverComponent,
     DeterministicComponent,
-    QuantumEditorComponent,
+    CircuitEditorComponent,
     TemplatesComponent,
     QubitsConfigurationComponent
   ],
