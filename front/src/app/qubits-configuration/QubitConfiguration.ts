@@ -7,6 +7,15 @@ export class QubitsConfiguration {
     this.initializeMatrix();
   }
 
+  randomize() {
+    for (let i=0; i<this.qubits/2; i++) {
+      let row = Math.floor(Math.random() * this.qubits)
+      let aux = this.matrix[i]
+      this.matrix[i] = this.matrix[row]
+      this.matrix[row] = aux
+    }
+  }
+
   // Inicializa la matriz con la diagonal principal en X
   initializeMatrix() {
     for (let i=0; i<this.qubits; i++) 

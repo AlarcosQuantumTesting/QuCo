@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,7 +35,7 @@ public class GroverController {
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
-	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info) {
+	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info, @RequestParam Boolean useMCX) {
 		try {
 			List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
 			Map<String, Object> receivedTemplate = (Map<String, Object>) info.get("template");
@@ -46,7 +47,7 @@ public class GroverController {
 			if (info.containsKey("functionName"))
 				functionName = info.get("functionName").toString();
 			
-			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes);
+			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes, useMCX);
 			String[] code = this.coder.getCode(quirk, template, functionName);		
 			
 			Map<String, String[]> result = new HashMap<>();
@@ -58,14 +59,14 @@ public class GroverController {
 	}
 	
 	@PutMapping("/getQuirk")
-	public Map<String, Object> getQuirk(@RequestBody List<Integer> info) {
+	public Map<String, Object> getQuirk(@RequestBody List<Integer> info, @RequestParam Boolean useMCX) {
 		List<List<Integer>> receivedMatrixes = new ArrayList<>();
 		receivedMatrixes.add(info);
-		return this.getAllQuirk(receivedMatrixes);
+		return this.getAllQuirk(receivedMatrixes, useMCX);
 	}
 
 	@PutMapping("/getAllQuirk")
-	public Map<String, Object> getAllQuirk(@RequestBody List<List<Integer>> receivedMatrixes) {
+	public Map<String, Object> getAllQuirk(@RequestBody List<List<Integer>> receivedMatrixes, @RequestParam Boolean useMCX) {
 		int qubits = receivedMatrixes.get(0).size();
 		double N = Math.pow(2, qubits);
 		double M = receivedMatrixes.size();
@@ -79,9 +80,9 @@ public class GroverController {
 		List<Object> init = QuirkSolver.getInit(qubits);
 		List<Object> hh = GroverSolver.getGate(qubits, "H");
 		
-		List<List<Object>> oracle = GroverSolver.guessGroverOracle(receivedMatrixes, qubits);
+		List<List<Object>> oracle = GroverSolver.guessGroverOracle(receivedMatrixes, qubits, useMCX);
 		List<Object> barriers = GroverSolver.getGate(qubits, "…");
-		List<List<Object>> difussor = GroverSolver.guessDifussor(qubits);
+		List<List<Object>> difussor = GroverSolver.guessDifussor(qubits, useMCX);
 		
 		List<List<Object>> matrixes = new ArrayList<>();
 		matrixes.add(hh);

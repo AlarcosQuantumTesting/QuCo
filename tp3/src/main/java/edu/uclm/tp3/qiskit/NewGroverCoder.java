@@ -31,7 +31,7 @@ public class NewGroverCoder {
 	}
 
     private String prepareCodeAsAFunction(int qubits, StringBuilder sbCalculus, String functionName) {
-		StringBuilder function = new StringBuilder("def get" + functionName + "() : \n");
+		StringBuilder function = new StringBuilder("def " + functionName + "() : \n");
 		function.append("\tU = QuantumCircuit(" + qubits + ")\n");
 		String[] lines = sbCalculus.toString().split("\n");
 		for (String line : lines) {
@@ -76,7 +76,7 @@ public class NewGroverCoder {
 			else if (gateName.equals("X"))
 				sb.append("circuit.x(" + i + ")\n");
 			else if (gateName.equals("%E2%80%A2")) {
-				sb.append(getMCX(quirkColumn));
+				sb.append(getControlledGate(quirkColumn));
 				break;
 			} else if (gateName.equals("…")) {
 				sb.append("circuit.barrier()\n");
@@ -86,9 +86,13 @@ public class NewGroverCoder {
 		return sb;
 	}
 
-	private StringBuilder getMCX(List<Object> quirkColumn) {
+	private StringBuilder getControlledGate(List<Object> quirkColumn) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("circuit.mcx([");
+		char last = quirkColumn.get(quirkColumn.size()-1).toString().charAt(0);
+		if (last=='z' || last=='Z')
+			sb.append("circuit.mcp(pi, [");
+		else
+			sb.append("circuit.mcx([");
 		for (int i=0; i<quirkColumn.size()-2; i++)
 			sb.append(i + ", ");
 		sb.append((quirkColumn.size()-2) + "], " + (quirkColumn.size()-1) + ")\n");

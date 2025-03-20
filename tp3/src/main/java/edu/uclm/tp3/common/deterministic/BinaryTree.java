@@ -4,6 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import edu.uclm.tp3.sparse.QMatrix;
+import edu.uclm.tp3.Complex;
+import edu.uclm.tp3.common.gates.CRY;
+import edu.uclm.tp3.common.gates.Identity;
+import edu.uclm.tp3.common.gates.RY;
+import edu.uclm.tp3.common.gates.X;
+
 public class BinaryTree {
 	
 	static final boolean DEBUG = false; 
@@ -21,6 +28,7 @@ public class BinaryTree {
     BinaryTree rightChild;
 
 	String code;
+	QMatrix matrix;
     
     public BinaryTree() {
 		this.value = -1;
@@ -64,8 +72,8 @@ public class BinaryTree {
 		this.removeLowAnglesRecursive(node.rightChild, physicalAngle);
 	}
 
-	public void normalizeProbabilities() {
-    	this.assignNames();
+	public void normalizeProbabilities(String functionPrefix) {
+    	this.assignNames(functionPrefix);
 		normalizeProbabilitiesRecursive(this);
     }
 
@@ -131,8 +139,8 @@ public class BinaryTree {
         addChildrenToLeaves(node.rightChild, probability);
     }
     
-    public void assignNames() {
-        assignNamesRecursive(this, 0, "");
+    public void assignNames(String functionPrefix) {
+        assignNamesRecursive(this, 0, functionPrefix);
     }
 
     private void assignNamesRecursive(BinaryTree node, int depth, String position) {
@@ -329,6 +337,10 @@ public class BinaryTree {
 			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
 			code.append("\treturn U.to_gate()\n\n");
 			this.code = code.toString();
+
+			int rows = (int) Math.pow(2, nodeDepth);
+			this.matrix = QMatrix.i(rows);
+			matrix.set(rows/2, rows/2, child.matrix);
 			return this;
 		}
 
@@ -338,6 +350,10 @@ public class BinaryTree {
 			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
 			code.append("\treturn U.to_gate()\n\n");
 			this.code = code.toString();
+			
+			int rows = (int) Math.pow(2, nodeDepth);
+			this.matrix = QMatrix.i(rows);
+			matrix.set(rows/2, rows/2, child.matrix);
 			return this;
 		}
 
@@ -352,6 +368,10 @@ public class BinaryTree {
 			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
 			code.append("\treturn U.to_gate()\n\n");
 			this.code = code.toString();
+
+			int rows = (int) Math.pow(2, nodeDepth);
+			this.matrix = QMatrix.i(rows);
+			this.matrix.set(rows/2, rows/2, child.matrix);
 			return this;
 		}
 
@@ -364,12 +384,17 @@ public class BinaryTree {
 		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
 		code.append("\treturn U.to_gate()\n\n");
 		this.code = code.toString();
+
+		int rows = (int) Math.pow(2, nodeDepth);
+		this.matrix = QMatrix.i(rows);
+		matrix.set(rows/2, rows/2, child.matrix);
 		return this;
 	}
 
 	private BinaryTree getLeafCode(Map<Integer, BinaryTree> usedNodesMap) {
 		if (usedNodesMap.get(this.hashCode())!=null)
 			return null;
+
 		if (this.leftProbability==0 && this.rightProbability==0)
 			return null;
 		
@@ -379,14 +404,22 @@ public class BinaryTree {
 			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
 			code+="\tU.ry(" + this.rightChild.leftAngle + ", 1)\n";
 			code+="\treturn U.to_gate()\n\n";
+			
+			this.matrix = new RY().setTheta(this.leftAngle).getMatrix().tp(new RY().setTheta(this.rightChild.leftAngle).getMatrix());
+
 			this.code = code;
 			return this;
 		}
 
 		if (this.rightProbability==0) {
 			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-			if (this.leftChild.leftAngle!=0)
+			this.matrix = new RY().setTheta(this.leftAngle).getMatrix();
+			if (this.leftChild.leftAngle!=0) {
 				code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
+				this.matrix = this.matrix.tp(new RY().setTheta(this.leftChild.leftAngle).getMatrix());
+			} else {
+				this.matrix = this.matrix.tp(new Identity().getMatrix());
+			}
 			code+="\treturn U.to_gate()\n\n";
 			this.code = code;
 			return this;
@@ -397,9 +430,19 @@ public class BinaryTree {
 				code+="\tU.x(0)\n";
 				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
 				code+="\tU.x(0)\n";
+
+				QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
+				QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
+				this.matrix = QMatrix.multiply(x0, cry, x0);
 			}
-			if (this.rightChild.leftAngle!=0)
+			if (this.rightChild.leftAngle!=0) {
 				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
+				QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
+				if (this.matrix==null)
+					this.matrix = cry;
+				else
+					this.matrix = QMatrix.multiply(this.matrix, cry);
+			}
 			code+="\treturn U.to_gate()\n\n";
 			this.code = code;
 			return this;
@@ -410,12 +453,23 @@ public class BinaryTree {
 			code+="\tU.x(0)\n";
 			code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
 			code+="\tU.x(0)\n";
+
+			QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
+			QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
+			this.matrix = QMatrix.multiply(x0, cry, x0);
 		}
-		if (this.rightChild.leftAngle!=0)
+		if (this.rightChild.leftAngle!=0) {
 			code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
+			QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
+			if (this.matrix==null)
+			this.matrix = cry;
+			else
+			this.matrix = QMatrix.multiply(this.matrix, cry);
+		}
+
 		code+="\treturn U.to_gate()\n\n";
 		this.code = code;
-			return this;
+		return this;
 	}
 	
 	private String getTargetQubits(int startQubit, int depth) {

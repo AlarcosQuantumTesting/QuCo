@@ -3,47 +3,50 @@
 
   <div class="controls-container">
     Existing configurations: 
-    <select (change)="onQubitsConfigurationChange()" [(ngModel)]="qubitsConfiguration">
+    <select [(ngModel)]="selectedQubitsConfigurationName" (ngModelChange)="onQubitsConfigurationChange($event)">
       <option [ngValue]="null" disabled selected>Select a configuration</option>
-      <option *ngFor="let cfg of storages.existingConfigurations" [ngValue]="cfg">{{ cfg.name }}</option>
+      <option *ngFor="let cfgName of existingConfigurationNames" [ngValue]="cfgName">{{ cfgName }}</option>
     </select>
   </div>
 
-  <div>
+  <div *ngIf="error" style="color : red">{{ error }}</div>
+  <div *ngIf="qubitsConfiguration">
     <label for="name">Configuration name:</label>
-    <input id="name" type="text" size="50" [(ngModel)]="storages.qubitsConfiguration.name"/>
+    <input id="name" type="text" size="50" [(ngModel)]="qubitsConfiguration.name"/>
   </div>
 
   <div>
     <label for="qubits">Number of qubits:</label>
-    <input id="qubits" type="number" min="2" max="200" [(ngModel)]="storages.qubitsConfiguration.qubits" (change)="storages.qubitsConfiguration.updateQubits()" />
+    <input id="qubits" type="number" min="2" max="200" [(ngModel)]="qubitsConfiguration.qubits" (change)="qubitsConfiguration.updateQubits()" />
     &nbsp;
-    <button (click)="storages.saveQubitsConf(storages.qubitsConfiguration)" [disabled]="!storages.qubitsConfiguration.name">Save</button>
+    <button (click)="randomize()">Randomize assignments</button>
+    &nbsp;
+    <button (click)="saveQubitsConf()" [disabled]="!qubitsConfiguration.name">Save</button>
   </div>
 
   <table>
     <thead>
       <tr>
         <th></th>
-        <th [attr.colspan]="storages.qubitsConfiguration.qubits" class="header">
+        <th [attr.colspan]="qubitsConfiguration.qubits" class="header">
           <small>Physical qubit</small>
         </th>
       </tr>
       <tr>
         <th></th>
-        <th *ngFor="let col of [].constructor(storages.qubitsConfiguration.qubits); let colIndex = index" class="header">
+        <th *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" class="header">
           q<sub>{{ colIndex }}</sub>
         </th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of [].constructor(storages.qubitsConfiguration.qubits); let rowIndex = index">
+      <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
         <th class="header">q<sub>{{ rowIndex }}</sub></th>
-        <td *ngFor="let col of [].constructor(storages.qubitsConfiguration.qubits); let colIndex = index" 
+        <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
             (click)="moveX(rowIndex, colIndex)"
-            [class.x-cell]="storages.qubitsConfiguration.matrix[rowIndex] === colIndex"
+            [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
             [class.conflict]="isConflict(colIndex)">
-          <span *ngIf="storages.qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
+          <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
         </td>
       </tr>
     </tbody>

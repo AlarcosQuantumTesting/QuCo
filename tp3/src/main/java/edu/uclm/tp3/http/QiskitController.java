@@ -1,11 +1,14 @@
 package edu.uclm.tp3.http;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.tp3.common.model.CodeTemplate;
+import edu.uclm.tp3.common.model.QiskitCode;
+import edu.uclm.tp3.dao.QiskitCodeDao;
 import edu.uclm.tp3.qiskit.NewQiskitCoder;
 
 @RestController
@@ -22,6 +27,30 @@ public class QiskitController {
 	
 	@Autowired
 	private NewQiskitCoder coder;
+
+	@Autowired
+	private QiskitCodeDao qiskitCodeDao;
+
+	@GetMapping("/getCustomizedGates")
+	public List<QiskitCode> getCustomizedGates() {
+		return this.qiskitCodeDao.findAll();
+	}
+
+	@SuppressWarnings("unchecked")
+	@PostMapping("/saveCode")
+	public void saveCode(@RequestBody Map<String, Object> info) {
+		QiskitCode code = new QiskitCode();
+		code.setName(info.get("name").toString());
+		code.setDescription(info.get("description").toString());
+		code.setFunction((boolean) info.get("isFunction"));
+		List<String> lines = (List<String>) info.get("lines");
+		StringBuilder sb = new StringBuilder();
+		for (String line : lines)
+			sb.append(line).append("\n");
+		code.setCode(sb.toString());
+		code.setQubits((Integer) info.get("qubits"));
+		this.qiskitCodeDao.save(code);
+	}
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
@@ -44,18 +73,7 @@ public class QiskitController {
 
 			Object receivedMatrixes = info.get("matrix");
 
-			String[] code = this.coder.getCode(receivedMatrixes, inputQubits, qubits, domain, reduce, template, functionName);
-
-
-			/*if (reduce) {
-				List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
-
-				List<List<List<Integer>>> reducedMatrixes = QuirkReducer.reduce(receivedMatrixes, inputQubits, qubits);
-				code = this.coder.getCodeReduced(reducedMatrixes, inputQubits, qubits, domain, template, functionName);
-			} else {
-				code = this.coder.getCode(info, template);				
-			}*/
-			
+			String[] code = this.coder.getCode(receivedMatrixes, inputQubits, qubits, domain, reduce, template, functionName);			
 			Map<String, String[]> result = new HashMap<>();
 			
 			result.put("code", code);

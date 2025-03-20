@@ -94,7 +94,8 @@ export class MatrixesComponent  {
 
   dialogo : any = undefined
 
-  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, public sanitizer : DomSanitizer, public manager : ManagerService) {}
+  constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, 
+    public sanitizer : DomSanitizer, public manager : ManagerService) {}
 
   addUserExpression(): void {
     this.error = undefined

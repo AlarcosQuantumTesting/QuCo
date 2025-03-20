@@ -10,18 +10,34 @@ import edu.uclm.tp3.common.model.Circuit;
 
 public class UnifierSolver extends Solver {
 	private int depth;
+	private String functionPrefix;
 	
-	public UnifierSolver(BinaryTree tree, Circuit circuit) {
+	public UnifierSolver(BinaryTree tree, Circuit circuit, String functionPrefix) {
 		super(tree, circuit);
+		this.functionPrefix = functionPrefix;
 	}
 
 	public Map<String, Object> solve(int shots) throws IOException {
 		this.depth = this.tree.getDepth();
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
 		List<String> nodeNames = nodes.keySet().stream()
-				.filter(key -> key.length()<this.depth)
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
 				.collect(Collectors.toList());
+
+		for (int i=nodeNames.size()-1; i>=0; i--) {
+			String nodeName = nodeNames.get(i);
+			String sLevel = "";
+			for (int j=0; j<nodeName.length(); j++) {
+				char c = nodeName.charAt(j);
+				if (c>='0' && c<='9')
+					sLevel = sLevel + c;
+				else
+					break;
+			}
+			int level = Integer.parseInt(sLevel);
+			if (level == this.depth-1)
+				nodeNames.remove(i);
+		}
 		
 		Map<Integer, BinaryTree> usedNodesMap = new HashMap<>();
 		for (int i=nodeNames.size()-1; i>=0; i--) {
@@ -37,29 +53,34 @@ public class UnifierSolver extends Solver {
 		}
 		
 		StringBuilder code = new StringBuilder();	
-		code.append("circuit.append(get0(), [" + this.getTargetQubits(0, this.depth) + "])\n");
+		code.append("circuit.append(get0" + this.functionPrefix + "(), [" + this.getTargetQubits(0, this.depth) + "]) # Use this line to use functions\n");
+		code.append("#circuit.unitary(U, qreg)   # Use this line for applying the unitary matrix\n");
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("#QUBITS#", this.circuit.getQubits());
 		result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
 		result.put("#SHOTS#", shots);
+		result.put("#HADAMARDS#", this.getHadamards(usedNodesMap));
 		result.put("#INITIALIZE#", this.getInitialize(usedNodesMap));
 		result.put("#CALCULUS#", code);
 		result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
 		result.put("tree", this.tree.toMap());
+		result.put("unitaryMatrix", this.tree.matrix);
 		return result;
+	}
+
+	private String getHadamards(Map<Integer, BinaryTree> usedNodesMap) {
+		String h = "for i in range (0, qubits) :\n";
+		h = h + "\tcircuit.h(i)\n";
+		return h;
 	}
 	
 	private String getInitialize(Map<Integer, BinaryTree> usedNodesMap) {
-		String h = "";
-		for (int i=0; i<depth; i++)
-			h = h + "circuit.h(" + i + ")\n";
-		
 		StringBuilder sbSubcircuits = new StringBuilder();
 		for (BinaryTree m : usedNodesMap.values())
 			sbSubcircuits.append(m.code);
 		
-		return sbSubcircuits + "\n" + h + "\n";
+		return sbSubcircuits + "\n";
 	}
 	
 	private String getTargetQubits(int startQubit, int depth) {

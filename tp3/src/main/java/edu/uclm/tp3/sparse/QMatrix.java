@@ -57,6 +57,14 @@ public class QMatrix {
 				this.set(i, j, value);
 			}
 	}
+
+	public void set(int rowIndex, int colIndex, QMatrix matrix) {
+		for (int i=0; i<matrix.numberOfRows; i++) {
+			for (int j=0; j<matrix.numberOfColumns; j++) {
+				this.set(rowIndex+i, colIndex+j, matrix.getElement(i, j));
+			}
+		}
+	}
 	
 	public synchronized void set(int rowIndex, int colIndex, double value) {
 		if (rowIndex>=this.numberOfRows)
