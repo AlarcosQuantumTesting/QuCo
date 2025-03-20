@@ -16,8 +16,9 @@ public class RY extends OneQubitGate implements IRotableGate {
 		return "ry(" + this.angle + ", " + this.qubit + ")\n";
 	}
 
-	public void setTheta(double theta) {
+	public RY setTheta(double theta) {
 		this.angle = theta;
+		return this;
 	}
 	
 	@Override

@@ -22,6 +22,7 @@ circuit = QuantumCircuit(qreg, creg)
 ONE = [0, 1]
 ZERO = [1, 0]
 #INITIALIZE#
+#HADAMARDS#
 
 #CALCULUS#
 
@@ -45,7 +46,7 @@ end_time = time.time()
 transpilation_time = end_time - start_time
 
 print("TRANSPILED CIRCUIT:")
-print(transpiled_circuit)
+#print(transpiled_circuit)
 print("**********************")
 
 start_time = time.time()
@@ -68,9 +69,14 @@ print(f"Result time: {result_time:.4f} seconds")
 
 print("Gates (original):", sum(circuit.count_ops().values()))
 print("Gates (transpiled):", sum(transpiled_circuit.count_ops().values()))
-print("Results: ", counts)
+sorted_counts = dict(sorted(counts.items(), key=lambda item: int(item[0], 2)))
+print("Results:", sorted_counts)
 
-plot_histogram(counts, bar_labels=True, filename='/Users/macariopolousaola/Desktop/det_histo.png')
-circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
+fig = plot_histogram(counts, bar_labels=True)
+
+# Guardar la imagen asegurando que se incluya todo el contenido
+fig.savefig('/Users/macariopolousaola/Desktop/det_histo.png', bbox_inches='tight')
+#plt.show()
+
+#circuit.draw(output="mpl", scale=0.6, plot_barriers=True, filename='/Users/macariopolousaola/Desktop/det_circuit.png') 
 #transpiled_circuit.draw(output="mpl", scale=0.6, plot_barriers=False, filename='/Users/macariopolousaola/Desktop/det_transpiled_circuit.png') 
-

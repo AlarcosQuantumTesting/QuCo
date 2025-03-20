@@ -5,6 +5,9 @@ import { GroverStyle } from '../common/GroverStyleComponent';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
+import { GroverService } from '../grover.service';
+import { QiskitCode } from '../grover/QiskitCode';
+import { QiskitService } from '../qiskit.service';
 
 Chart.register(...registerables)
 
@@ -26,19 +29,20 @@ export class DeterministicComponent extends GroverStyle {
   relativeFrequencies : number[] = []
 
   physicalAngle : number = 0
+  prefix? : string
 
   running : boolean = false
   state? : string 
 
-  code? : string
+  codeAsFunctions = true
   svgTree: SafeHtml | null = null; // SVG seguro para renderizar
   svgWidth : number = 0
   svgHeight : number = 0
 
   responseReceived? : any
 
-  constructor(private service : DeterministicService, private sanitizer : DomSanitizer, public manager : ManagerService) {
-    super()
+  constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
+    super(qiskitService)
 
     for (let i=0; i<Math.pow(2, this.qubits); i++)
       this.expectedFrequencies.push(Math.round(Math.random()*10))
@@ -55,10 +59,24 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      this.fillTableWithUserExpressions()
+      this.markElementsWithUserExpressions()
   }
 
-  fillTable() {
+  setFrequenciesWithUserExpressions() {
+    this.error = undefined
+    if (this.userExpressions.length == 0) {
+      this.error = "There are no expressions to fill-in the table"
+      return
+    }
+    this.reset()
+    try {
+      this.fillTable(false)
+    } catch (error) {
+      this.error = error
+    }
+}
+
+  fillTable(marking : boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.expectedFrequencies)
@@ -78,8 +96,11 @@ export class DeterministicComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
-      if (eval(wholeExpression))
-        this.expectedFrequencies[i] = 100
+      let result = eval(wholeExpression )
+      if (marking)
+        this.expectedFrequencies[i] = result ? 100 : 0
+      else 
+        this.expectedFrequencies[i] = result
     }
     this.updateOutputs()
   }
@@ -154,16 +175,56 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   buildCode() {
-    this.code = this.manager.selectedTemplate.code
+    let code = this.manager.selectedTemplate.code
     if (!this.responseReceived)
       return
 
-    for (let key in this.responseReceived) {
-      if (key!='tree') {
-        let value = this.responseReceived[key]
-        this.code = this.code?.replace(key, value)
+    if (this.codeAsFunctions) {
+      for (let key in this.responseReceived) {
+        if (key!='tree' && key!='unitaryMatrix') {
+          let value = this.responseReceived[key]
+          code = code?.replace(key, value)
+        }
       }
+    } else {
+      for (let key in this.responseReceived) {
+        if (key!='tree' && key!='#INITIALIZE#' && key!='unitaryMatrix') {
+          let value = this.responseReceived[key]
+          code = code?.replace(key, value)
+        }
+      }
+      code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
+    this.qiskitCode = new QiskitCode()
+    this.qiskitCode.lines = code?.split("\n") || []
+  }
+
+  private drawMatrix(matrixReceived : any) : string {
+    let matrix = []
+    for (let i=0; i<matrixReceived.numberOfRows; i++) {    
+      let row =  new Array(matrixReceived.numberOfRows).fill(0)
+      let colsWithData = Object.keys(matrixReceived.rows[i].values)      
+      for (let k=0; k<colsWithData.length; k++) {
+        let colIndex = parseInt(colsWithData[k])
+        row[colIndex] = matrixReceived.rows[i].values[colIndex].re
+      }
+      matrix.push(row)
+    }
+
+    let result : string = "U = Operator([\n"
+    for (let i=0; i<matrix.length; i++) {
+      result = result + "\t["
+      for (let j=0; j<matrix.length; j++)
+        result = result + matrix[i][j] + ", "
+      result = result + "],\n"
+    }
+    result += "\n])\n"
+    return result
+  }
+
+  switchOutput() {
+    this.codeAsFunctions = !this.codeAsFunctions
+    this.buildCode()
   }
 
   getCircuit() {
@@ -171,7 +232,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.prefix).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
@@ -196,7 +257,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   private shouldDisplay(node : any) : boolean {
-    return true //node && (node.leftProbability>0 || node.rightProbability>0)
+    return node && (node.leftProbability>0 || node.rightProbability>0)
   }
 
   generateSvgFromBottom(

@@ -4,6 +4,8 @@ import { GroverService } from '../grover.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
+import { QiskitCode } from './QiskitCode';
+import { QiskitService } from '../qiskit.service';
 @Component({
   selector: 'app-grover',
   templateUrl: './grover.component.html',
@@ -21,10 +23,12 @@ export class GroverComponent extends GroverStyle {
   qiskitMatrix?: any
   values?: number[]
 
+  useMCX : boolean = false
+
   max: number = 50000
 
-  constructor(private groverService: GroverService, public sanitizer: DomSanitizer, public manager : ManagerService) {
-    super()
+  constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, public sanitizer: DomSanitizer, public manager : ManagerService) {
+    super(qiskitService)
   }
 
   override tryFill(index: number): void {
@@ -32,10 +36,10 @@ export class GroverComponent extends GroverStyle {
     let exprs = this.javaExamples[index].exprs
     this.userExpressions = []
     this.userExpressions = this.userExpressions.concat(exprs)
-    this.fillTableWithUserExpressions()
+    this.markElementsWithUserExpressions()
   }
 
-  fillTable() {
+  fillTable(marking : boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.matrix)
@@ -55,7 +59,8 @@ export class GroverComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
-      row[row.length - 1] = eval(wholeExpression)
+      let result = eval(wholeExpression)
+      row[row.length - 1] = result!=0
       if (row[row.length - 1])
         this.selectedElements++
     }
@@ -136,7 +141,7 @@ export class GroverComponent extends GroverStyle {
     this.finalMatrix = []
     this.dataReceived = false
     this.numberOfReceivedMatrixes = 0
-    this.qiskitCode = []
+    this.qiskitCode = new QiskitCode()
     this.calculusTime = 0
     this.qiskitMatrixStart = ""
     this.qiskitMatrixEnd = ""
@@ -184,7 +189,7 @@ export class GroverComponent extends GroverStyle {
       return
     }
 
-    this.groverService.getAllQuirk(info).subscribe(
+    this.groverService.getAllQuirk(info, this.useMCX).subscribe(
       result => {
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
@@ -222,15 +227,18 @@ export class GroverComponent extends GroverStyle {
 
   getQiskitCode(matrix: any[], asFunction : boolean) {
     let name
+
+    this.reset()
+
     if (asFunction) {
       name = prompt("Enter the name of the function")
       if (!name || name.trim().length==0) {
         this.error = "You must enter a name for the function"
         return
       }
+      this.qiskitCode.name = name
+      this.qiskitCode.isFunction = true
     }
-
-    this.reset()
 
     let info = {
       matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
@@ -241,9 +249,9 @@ export class GroverComponent extends GroverStyle {
       this.error = "Select some output"
       return
     }
-    this.groverService.getCode(info).subscribe(
+    this.groverService.getCode(info, this.useMCX).subscribe(
       result => {
-        this.qiskitCode = result.code
+        this.qiskitCode.lines = result.code
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
         this.copyCode()
         // Sacar un tooltip que diga que se ha copiado el código

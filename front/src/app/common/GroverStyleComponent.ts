@@ -1,3 +1,7 @@
+import { GroverService } from "../grover.service"
+import { QiskitCode } from "../grover/QiskitCode"
+import { QiskitService } from "../qiskit.service"
+
 export abstract class GroverStyle {
     qubits: number = 4
     hideExamples: boolean = true
@@ -6,7 +10,7 @@ export abstract class GroverStyle {
     finalMatrixNumberOfRows: number = 0
     dataReceived: boolean = false
     numberOfReceivedMatrixes: number = 0
-    qiskitCode?: string[]
+    qiskitCode : QiskitCode = new QiskitCode()
     calculusTime?: number
     qiskitMatrixStart: string = ""
     qiskitMatrixEnd: string = ""
@@ -60,11 +64,26 @@ export abstract class GroverStyle {
     ]
     hideInstructions: boolean = true
 
+    constructor(protected qiskitService: QiskitService) {}
+
+    saveCode() {
+        this.error = undefined
+        this.qiskitCode.qubits = this.qubits
+        this.qiskitService.saveCode(this.qiskitCode).subscribe(
+        result => {
+            alert("Code saved")
+        },
+        error => {
+            this.error = error.error ? error.error.message : error
+        }
+        )
+    }
+
     abstract tryFill(index : number) : void
     abstract reset() : void
-    abstract fillTable() : void
-
-    fillTableWithUserExpressions() {
+    abstract fillTable(marking : boolean) : void
+    
+    markElementsWithUserExpressions() {
         this.error = undefined
         if (this.userExpressions.length == 0) {
           this.error = "There are no expressions to fill-in the table"
@@ -72,7 +91,7 @@ export abstract class GroverStyle {
         }
         this.reset()
         try {
-          this.fillTable()
+          this.fillTable(true)
         } catch (error) {
           this.error = error
         }
