@@ -16,6 +16,8 @@ export class MatrixesComponent  {
 
   mensajeTemporal: string = '';
   showHelp = false;
+  isDisabled = false;
+  isDisabled2 = false;
 
   cols : number = 0
   rows : number = 0
@@ -286,6 +288,11 @@ export class MatrixesComponent  {
     this.error = undefined
     if (this.userExpressions.length==0) {
       this.error = "There are no expressions to fill-in the table"
+      this.mensajeTemporal = 'There are no expressions to fill-in the table';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+        
       return
     }
     this.reset()
@@ -294,12 +301,20 @@ export class MatrixesComponent  {
       this.rows = matrix.length
       this.cols = matrix[0].length
       this.load(matrix)
+
+
+      this.goToTable();
     } catch (error) {
       this.error = error
+
+      this.mensajeTemporal = 'The expression is not valid';
+      setTimeout(() => {
+          this.mensajeTemporal = '';
+      }, 2000);
     }
 
 
-    this.goToTable();
+    
   }
 
   tryFill(index : number) {
@@ -388,14 +403,34 @@ export class MatrixesComponent  {
     )
   }
 
+
+  //mio
+  mostrarModalNombreFuncion = false;
+  nombreFuncion = '';
+  matrixTmp: any[] = [];
+  asFunctionTmp = false;
+  rowIndexTmp?: number;
+
   getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
     let functionName
     if (asFunction) {
-      functionName = prompt("Enter the name of the function")
-      if (!functionName || functionName.trim().length==0) {
-        this.error = "You must enter a name for the function"
-        return
-      }
+      // functionName = prompt("Enter the name of the function")
+      // if (!functionName || functionName.trim().length==0) {
+      //   this.error = "You must enter a name for the function"
+      //   return
+      // }
+      // if (this.isDisabled) return;
+      // this.isDisabled = true;
+      // if (this.isDisabled2) return;
+      // this.isDisabled2 = true;
+
+      this.matrixTmp = matrix;
+      this.asFunctionTmp = asFunction;
+      this.rowIndexTmp = rowIndex;
+      this.nombreFuncion = '';
+      this.error = '';
+      this.mostrarModalNombreFuncion = true;
+      return;
     }
     this.reset()
     let info = {
@@ -423,6 +458,54 @@ export class MatrixesComponent  {
     )
   }
 
+
+
+
+  confirmarNombreFuncion() {
+    if (!this.nombreFuncion.trim()) {
+      this.error = "You must enter a name for the function";
+      return;
+    }
+  
+    this._getQiskitCode(this.matrixTmp, this.asFunctionTmp, this.rowIndexTmp, this.nombreFuncion);
+    this.cancelarModal();
+  }
+  
+  cancelarModal() {
+    this.mostrarModalNombreFuncion = false;
+    this.error = '';
+  }
+  
+  private _getQiskitCode(matrix: any[], asFunction: boolean, rowIndex: number | undefined, functionName?: string) {
+    if (this.isDisabled || this.isDisabled2) return;
+    this.isDisabled = true;
+    this.isDisabled2 = true;
+  
+    this.reset();
+  
+    let info = {
+      matrix: matrix,
+      inputQubits: this.inputQubits,
+      qubits: this.inputQubits + this.outputQubits,
+      reduce: this.reduceQuiskit,
+      domain: this.domain,
+      template: this.manager.selectedTemplate,
+      functionName: functionName
+    };
+  
+    if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
+  
+    this.qiskitService.getCode(info).subscribe(result => {
+      this.qiskitCode = result.code;
+      this.replaceShotsToken(1000);
+      this.mostrarModal = true;
+    });
+  }
+
+
+  //mio
+
+
   replaceShotsToken(shots : any) {
     if (!this.qiskitCode)
       return
@@ -430,8 +513,12 @@ export class MatrixesComponent  {
       this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
   }
 
-
   addHadamardGates() {
+
+    if (this.isDisabled) return; // Si ya está deshabilitado, no hace nada
+    this.isDisabled = true;
+
+
     let start = 0
     for (let i=0; i<this.qiskitCode!.length; i++) {
       if (this.qiskitCode![i].startsWith("#Output qubits")) {
@@ -455,6 +542,10 @@ export class MatrixesComponent  {
   }
 
   countLastQubit() {
+    
+    if (this.isDisabled2) return; // Si ya está deshabilitado, no hace nada
+    this.isDisabled2 = true;
+
     let code = [ "counts_output_qubit" + " = absolute_frequencies.get('1', 1)\n",
       "probability_output_qubit = counts_output_qubit / 1000\n",
       "result" + " = " + (2**this.inputQubits) + " * probability_output_qubit\n",
@@ -564,6 +655,9 @@ export class MatrixesComponent  {
   ngOnInit() {
     // Valida cuando se inicializan los valores
     this.validateInputs();
+
+
+    // this.recommendOrExpression();
   }
 
   validateInputs() {
@@ -629,6 +723,9 @@ export class MatrixesComponent  {
   addExample(index: number): void {
     this.error = undefined;
     this.reset();
+
+    // Eliminar todas las expresiones antes de agregar nuevas
+    this.userExpressions = [];
   
     let exprs = this.javaExamples[index].exprs;
 
@@ -677,7 +774,9 @@ export class MatrixesComponent  {
 
   buildMatrixActions() {
     this.getEmptyMatrix();
-    this.goToSpecifications();
+    // this.goToSpecifications();
+    this.goToTable();
+    this.clearExpressions();
   }
 
 
@@ -695,5 +794,287 @@ export class MatrixesComponent  {
   toggleHelp() {
     this.showHelp = !this.showHelp;
   }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.isDisabled = false;
+    this.isDisabled2 = false;
+  }
+
+  clearExpressions() {
+    this.userExpressions = [];
+  }
+
+  isAddDisabled(): boolean {
+    return !this.currentUserExpression || this.currentUserExpression.trim() === '';
+  }
+
+  isConfirmDisabled(): boolean {
+    return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
+  }
+
+
+  mostrarInstrucciones: boolean = false;
+  
+  recommendation: string = '';  // La recomendación actual
+  showRecommendations: boolean = false;  // Controla si mostrar las recomendaciones
+
+  checkForExpressions() {
+    if (!this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;  // Si el campo está vacío, salir sin hacer más verificaciones
+    }
+    
+    // Revisa todas las expresiones y establece la recomendación adecuada
+    this.checkForOrExpression();
+    this.checkForAndExpression();
+    this.isPrimeNumber();
+    this.isEvenNumber();
+    this.sumQubits();
+    this.xorExpression();
+    this.isPowerOfTwo();
+  }
+
+  // Maneja el evento 'Tab' y actualiza currentUserExpression
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab' && this.showRecommendations) {
+      this.currentUserExpression = this.recommendation;
+      this.showRecommendations = false;
+    }
+  }
+
+  onFocusInput() {
+    this.checkForExpressions();  // Verifica las expresiones cuando el input recibe el foco
+  }
+
+  selectRecommendation() {
+    this.currentUserExpression = this.recommendation;
+    this.showRecommendations = false;
+  }
+
+  checkForOrExpression() {
+    // Verifica si contiene '||' y si la recomendación es diferente
+    if (this.currentUserExpression.includes('||') && this.currentUserExpression !== this.recommendation) {
+      this.recommendOrExpression();
+    }
+  }
+
+  // recommendOrExpression() {
+  //   const qubits = [];
+
+  //   // Generar las recomendaciones de '||' para las entradas y salidas
+  //   for (let i = 0; i < this.inputQubits; i++) {
+  //     qubits.push(`q${i}`);
+  //   }
+
+  //   for (let i = 0; i < this.outputQubits; i++) {
+  //     qubits.push(`q${this.inputQubits + i}`);
+  //   }
+
+  //   this.recommendation = `|| (${qubits.join(' || ')})`;
+  //   this.showRecommendations = true; 
+  // }
+
+  // Devuelve 1 si al menos un qubit es 1.
+  recommendOrExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const orExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a | b, 0)`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${orExpression }`;
+    this.showRecommendations = true;
+  }
+
+  checkForAndExpression() {
+    // Verifica si contiene '&&' y si la recomendación es diferente
+    if (this.currentUserExpression.includes('&&') && this.currentUserExpression !== this.recommendation) {
+      this.recommendAndExpression();
+    }
+  }
+
+  // recommendAndExpression() {
+  //   const qubits = [];
+
+  //   for (let i = 0; i < this.outputQubits; i++) {
+  //     qubits.push(`q${this.inputQubits + i}${i === this.outputQubits - 1 ? '' : ' = '}`);
+  //   }
+
+  //   qubits.push(' = (');
+    
+  //   for (let i = 0; i < this.inputQubits; i++) {
+  //     qubits.push(`q${i}${i === this.inputQubits - 1 ? '' : ' && '}`);
+  //   }
+
+  //   qubits.push(')');
+  //   this.recommendation = qubits.join('');
+  //   this.showRecommendations = true;
+  // }
+
+  // Solo devuelve 1 si todos los qubits son 1, de lo contrario 0.
+  recommendAndExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const andExpression  = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a & b, 1)`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${andExpression}`;
+    this.showRecommendations = true;
+  }
+
+  isPrimeNumber() {
+    // Verifica si contiene 'isPrime' y si la recomendación es diferente
+    if (/is\s*prime/i.test(this.currentUserExpression) && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPrimeExpression();
+    }
+  }
+
+  recommendIsPrimeExpression() {
+    // const qubits = [];
+
+    // for (let i = 0; i < this.outputQubits; i++) {
+    //   qubits.push(`q${this.inputQubits + i}`);
+    // }
+
+    // this.recommendation = `isPrime(${qubits.join('')})`;
+    // this.showRecommendations = true;
+
+
+    const qubitIndices = [];
+  
+    // Capturar los qubits de entrada para formar el número en binario
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    // Construcción de la expresión para obtener el número en decimal desde binario
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+
+    // Lógica en JavaScript para comprobar si el número es primo
+    const isPrimeLogic = `(function(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    })(${binaryToDecimal})`;
+
+    // El resultado se almacena en el primer qubit de salida
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    // Generar la recomendación final
+    this.recommendation = `${outputQubit} = ${isPrimeLogic}`;
+    this.showRecommendations = true;
+
+  }
+
+  isEvenNumber() {
+    if (this.currentUserExpression.includes('isEven') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsEvenExpression();
+    }
+  }
+
+  recommendIsEvenExpression() {
+
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].map(Number).join(''), 2)`;
+
+    const isEvenExpression = `(${binaryToDecimal} % 2 === 0 ? 1 : 0)`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${isEvenExpression}`;
+    this.showRecommendations = true;
+
+  }
+
+  sumQubits() {
+    if (this.currentUserExpression.includes('sum') && this.currentUserExpression !== this.recommendation) {
+      this.recommendSumQubitsExpression();
+    }
+  }
+
+  recommendSumQubitsExpression() {
+
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const sumExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a + b, 0)`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${sumExpression}`;
+    this.showRecommendations = true;
+
+  }
+
+  xorExpression() {
+    if (this.currentUserExpression.includes('xor') && this.currentUserExpression !== this.recommendation) {
+      this.recommendXorExpression();
+    }
+  }
+
+  // Devuelve 1 si el número de 1s es impar, 0 si es par.
+  recommendXorExpression() {
+
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const xorExpression  = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a ^ b, 0)`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${xorExpression}`;
+    this.showRecommendations = true;
+
+  }
+
+  isPowerOfTwo() {
+    if (this.currentUserExpression.includes('two') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPowerOfTwoExpression();
+    }
+  }
+
+  // Devuelve 1 si el número de 1s es impar, 0 si es par.
+  recommendIsPowerOfTwoExpression() {
+
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.inputQubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+
+    const isPowerOfTwoExpression = `(function(n) { return (n > 0 && (n & (n - 1)) === 0) ? 1 : 0; })(${binaryToDecimal})`;
+
+    const outputQubit = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    this.recommendation = `${outputQubit} = ${isPowerOfTwoExpression}`;
+    this.showRecommendations = true;
+
+  }
+  
 
 }

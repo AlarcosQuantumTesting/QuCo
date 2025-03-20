@@ -194,7 +194,7 @@
     <!-- <h1 class="title"><img src="assets/img/matrix2.png" alt="matrix" class="matrix" style="margin-right: 40px;"> MATRIX <img src="assets/img/matrix2.png" alt="matrix" class="matrix"  style="margin-left: 40px;"></h1> -->
     <h1>MATRIX</h1>
 </div>
-<h2>Build matrix</h2>
+<h2 class="buildTitle">Build matrix</h2>
 
 <!-- <div class="container matrix-container">
     <div class="section">
@@ -281,243 +281,6 @@
     </div>
 </div>
 
-<div class="container">
-    <h2>Quantum circuit expressions</h2>
-
-    <!-- Introducción -->
-    <div class="section">
-        <p>
-            Do click on an <span class="highlight">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span class="highlight">output qubits</span>.
-            <br>
-            Or write JavaScript expressions to assign values to the output qubits.
-            <br>
-            <button (click)="hideInstructions=!hideInstructions" class="btn-toggle-help">{{ hideInstructions ? 'Show instructions' : 'Hide instructions' }}</button>
-        </p>
-    </div>
-
-    <div class="flex-container">
-
-        <!-- Instrucciones (izquierda) -->
-        <!-- <div class="section box half" [hidden]="hideInstructions"> -->
-            <div class="section box half" [hidden]="hideInstructions">
-                <h3 class="title-instructions">Instructions</h3>
-                <p class="text-instructions">The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment, and is mandatory that:</p>
-                <ol class="list-instructions">
-                    <li>
-                        The left side of the assignment must reference an output qubit with the notation <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits' indexes. 
-                        Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code>, or <code><strong>q10</strong></code> (if <code><strong>q10</strong></code> is an output qubit).
-                        So, <strong>qn</strong> or <strong>qi</strong> won't work.
-                    </li>
-                    <li>
-                        The right side must fulfill the form <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>. 
-                        <br> Values different than <code>0</code> or <code>1</code>, such as <strong><code>5</code></strong> or <strong><code>-1</code></strong> likely won't work.
-                    </li>
-                    <li>
-                        The <code><strong>condition</strong></code> may reference an input qubit (<code><strong>q0</strong></code> or <code><strong>q1</strong></code>, for example) or the row index of the table with the word <code><strong>index</strong></code>.
-                    </li>
-                    <li>
-                        Complex values, such as the <strong>bold text</strong> in <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are not allowed. Likely you'll get an unexplicit error message.
-                    </li>
-                    <li>
-                        Every expression you write will be processed on the server using the <code>ScriptEngineManager</code> Java class, instantiated to the <code>JavaScript</code> engine.
-                    </li>
-                </ol>
-            </div>
-    
-        <!-- Ejemplos (derecha) -->
-        <!-- <div class="section box half" [hidden]="hideExamples">
-            <h3 class="title-examples">Examples</h3>
-            <ol>
-                <li *ngFor="let javaExample of javaExamples; let i = index">
-                  <div class="example-item">
-
-                        <div *ngIf="javaExample.exprs.length==1">
-                            <code>{{ javaExample.exprs[0] }}</code> → 
-                            <i>{{ javaExample.explanation }}</i>
-                        </div>
-                        <button *ngIf="matrix && javaExample.exprs.length==1"
-                            (click)="onTryClick(i)"
-                            [ngClass]="{'btn-tried': javaExample.attempted}" 
-                            class="btn-try">
-                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                            {{ javaExample.attempted ? '' : 'Try' }}
-                            
-                        </button>
-                    
-                    <span *ngIf="javaExample.exprs.length>1">
-                        <i>{{ javaExample.explanation }}</i> → 
-                        <ol *ngFor="let expr of javaExample.exprs; let j=index">
-                            <div *ngIf="j<=javaExample.exprs.length-1">
-                                <code>{{ expr }}</code>
-                            </div>
-                            <br>
-                        </ol>
-                    </span>
-                    <button *ngIf="matrix && javaExample.exprs.length>1" 
-                            (click)="onTryClick(i)"
-                            [ngClass]="{'btn-tried': javaExample.attempted}" 
-                            class="btn-try">
-                                <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                {{ javaExample.attempted ? '' : 'Try' }}
-                    </button>
-                  </div>
-                </li>
-              </ol>
-        </div> -->
-    
-        
-    
-    </div>
-    
-    <h2 id="specifications">Your specifications</h2>
-
-    
-
-    <div *ngIf="!matrix" class="section">
-        <p>
-            No matrix has been created yet. Please, fill the number of input and output qubits to build the matrix.
-            <br>
-        </p>
-    </div>
-
-    <div *ngIf="matrix" class="section">
-        <p>
-            Once the matrix is built, you can write JavaScript expressions in the input you see below
-            to assign values to the output qubits.
-            <br>
-            <button (click)="hideExamples=!hideExamples" class="btn-toggle-examples">{{ hideExamples ? 'Show examples' : 'Hide examples' }}</button>
-        </p>
-    </div>
-
-    <!-- Expresiones del usuario -->
-    <div class="flex-container" *ngIf="matrix">
-        <!-- Expresiones del usuario (izquierda) -->
-        <div class="section half expressions-section" [hidden]="hideExamples">
-            
-                <h3 class="title-examples">Examples</h3>
-                <!-- <ol>
-                    <li *ngFor="let javaExample of javaExamples; let i = index">
-                        <code>{{ javaExample.exprs[0] }}</code> → 
-                        <i>{{ javaExample.explanation }}</i>
-                        <a *ngIf="matrix" (click)="tryFill(i)"> Try</a>
-                    </li>
-                </ol> -->
-                <!-- <a (click)="hideInstructions=!hideInstructions">Show/hide instructions</a> -->
-                <ol>
-                    <li *ngFor="let javaExample of javaExamples; let i = index">
-                        <div class="example-item">
-                            <!-- <div>
-                                <code>{{ javaExample.exprs[0] }}</code> → 
-                                <i>{{ javaExample.explanation }}</i>
-                            </div>
-                            <button *ngIf="matrix"
-                                    (click)="onTryClick(i)"
-                                    [ngClass]="{'btn-tried': javaExample.attempted}" 
-                                    class="btn-try">
-                                    <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                    {{ javaExample.attempted ? '' : 'Try' }}
-                                    
-                            </button> -->
-    
-                            <div *ngIf="javaExample.exprs.length==1">
-                                <code class="examples-code">{{ javaExample.exprs[0] }}</code> → 
-                                <i>{{ javaExample.explanation }}</i>
-                            </div>
-                            <div class="button-container">
-                                <button *ngIf="matrix && javaExample.exprs.length==1"
-                                    (click)="onTryClick(i)"
-                                    [ngClass]="{'btn-tried': javaExample.attempted}" 
-                                    class="btn-try">
-                                    <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                    {{ javaExample.attempted ? '' : 'Try' }}
-                                    
-                                </button>
-
-                                <button *ngIf="matrix && javaExample.exprs.length==1"
-                                    (click)="onAddExampleClick(i)"
-                                    [ngClass]="{'btn-added': javaExample.attempted}" 
-                                    class="btn-addExample">
-                                    <!-- <span *ngIf="javaExample.attempted">Added</span> -->
-                                    Add
-                                        
-                                </button>
-                            </div>
-                            
-                            <div *ngIf="javaExample.exprs.length>1" style="width: 100%;">
-                                <i>{{ javaExample.explanation }}</i> →
-                                <ol>
-                                    <li *ngFor="let expr of javaExample.exprs; let j = index">
-                                        <code class="examples-code">{{ expr }}</code>
-                                        <button *ngIf="matrix && javaExample.exprs.length > 1"
-                                            (click)="onAddExample2Click(expr)"
-                                            [ngClass]="{'btn-added': javaExample.attempted}" 
-                                            class="btn-addExample2">
-                                            <i class="fas fa-plus-square"></i>
-                                        </button>
-                                    </li>
-                                </ol>
-                            </div>
-                            
-                            <div class="button-container">
-                                <button *ngIf="matrix && javaExample.exprs.length>1" 
-                                        (click)="onTryClick(i)"
-                                        [ngClass]="{'btn-tried': javaExample.attempted}" 
-                                        class="btn-try">
-                                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                            {{ javaExample.attempted ? '' : 'Try' }}
-                                </button>
-                                <button *ngIf="matrix && javaExample.exprs.length>1"
-                                        (click)="onAddExampleClick(i)"
-                                        [ngClass]="{'btn-added': javaExample.attempted}" 
-                                        class="btn-addExample">
-                                        <!-- <span *ngIf="javaExample.attempted">Added</span> -->
-                                        Add
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                </ol>
-                
-        </div>
-        <div class="section half expressions-section"
-            [ngClass]="{'half': !hideExamples, 'full-width-centered': hideExamples}">
-            <h3>Your Expressions</h3>
-            
-            <div class="input-group">
-                <input type="text" [(ngModel)]="currentUserExpression" 
-                    (dblclick)="openTextArea(this, $event, 'Expressions')" 
-                    placeholder="Double click to add multiple expressions">
-                <button class="btn-add" (click)="addUserExpression()"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
-            </div>
-    
-            <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
-                <code>{{ userExpression }}</code> 
-                <a (click)="removeUserExpression(i)"><i class="fas fa-trash-alt" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
-            </div>
-    
-            <div class="btn-container">
-                <button class="btn-apply" (click)="fillTableWithUserExpressions()"><i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions</button>
-            </div>
-        </div>
-    
-        <!-- Opciones de dominio (derecha) -->
-        <!-- <div class="section half domain-section">
-            <h3>Domain Selection</h3>
-            <br>
-            <div class="radio-group">
-                <label class="custom-radio">
-                    <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
-                </label>
-                <label class="custom-radio">
-                    <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
-                </label>
-            </div>
-        </div> -->
-    
-    </div>
-    
-    
-</div>
 
 
 
@@ -648,7 +411,8 @@
                 q<sub>{{cont}}</sub>
             </th>
             <th>
-                <u><small>Decimal value</small></u>
+                <!-- <u><small class="decimal">Decimal value</small></u> -->
+                <small class="decimal">Decimal value</small>
             </th>
         </tr>
 
@@ -807,6 +571,288 @@
 </div>
 
 
+
+
+<div class="container" *ngIf="matrix">
+    <h2>Output qubits value</h2>
+
+    <!-- Introducción -->
+    <div class="section">
+        <p>
+            Do click on an <span class="highlight">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span class="highlight">output qubits</span>.
+        </p>
+        <div class="divider"><span>Or</span></div>
+        <p>
+            Write 
+            <span (click)="mostrarInstrucciones = true" class="instructions-link">
+                JavaScript expressions
+            </span> 
+            to assign values to the output qubits.
+            <br>
+            <!-- <button (click)="hideInstructions=!hideInstructions" class="btn-toggle-help">{{ hideInstructions ? 'Show instructions' : 'Hide instructions' }}</button> -->
+        </p>
+    </div>
+
+    <!-- Modal de instrucciones -->
+    <div class="modal" *ngIf="mostrarInstrucciones">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Instructions</h2>
+                <span class="close" (click)="mostrarInstrucciones = false">&times;</span>
+            </div>
+            <div class="intructions-content">
+                <p class="text-instructions">The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment, and is mandatory that:</p>
+                <ol class="list-instructions">
+                    <li>
+                    The left side of the assignment must reference an output qubit with the notation <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits' indexes. 
+                    Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code>, or <code><strong>q10</strong></code>.
+                    </li>
+                    <li>
+                    The right side must fulfill the form <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>.
+                    </li>
+                    <li>
+                    The <code><strong>condition</strong></code> may reference an input qubit or the row index <code><strong>index</strong></code>.
+                    </li>
+                    <li>
+                    Complex values like <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are not allowed.
+                    </li>
+                    <li>
+                    Every expression will be processed using Java's <code>ScriptEngineManager</code> with <code>JavaScript</code>.
+                    </li>
+                </ol>
+                <div class="help-actions">
+                    <button class="action-btn" (click)="mostrarInstrucciones = false">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>  
+
+    <!-- <div class="flex-container">
+    
+            <div class="section box half" [hidden]="hideInstructions">
+                <h3 class="title-instructions">Instructions</h3>
+                <p class="text-instructions">The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment, and is mandatory that:</p>
+                <ol class="list-instructions">
+                    <li>
+                        The left side of the assignment must reference an output qubit with the notation <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits' indexes. 
+                        Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code>, or <code><strong>q10</strong></code> (if <code><strong>q10</strong></code> is an output qubit).
+                        So, <strong>qn</strong> or <strong>qi</strong> won't work.
+                    </li>
+                    <li>
+                        The right side must fulfill the form <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>. 
+                        <br> Values different than <code>0</code> or <code>1</code>, such as <strong><code>5</code></strong> or <strong><code>-1</code></strong> likely won't work.
+                    </li>
+                    <li>
+                        The <code><strong>condition</strong></code> may reference an input qubit (<code><strong>q0</strong></code> or <code><strong>q1</strong></code>, for example) or the row index of the table with the word <code><strong>index</strong></code>.
+                    </li>
+                    <li>
+                        Complex values, such as the <strong>bold text</strong> in <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are not allowed. Likely you'll get an unexplicit error message.
+                    </li>
+                    <li>
+                        Every expression you write will be processed on the server using the <code>ScriptEngineManager</code> Java class, instantiated to the <code>JavaScript</code> engine.
+                    </li>
+                </ol>
+            </div>
+    </div> -->
+    
+    <!-- <h2 id="specifications" *ngIf="matrix">Your specifications</h2>
+
+    <div *ngIf="matrix" class="section">
+        <p>
+            Once the matrix is built, you can write JavaScript expressions in the input you see below
+            to assign values to the output qubits.
+            <br>
+            <button (click)="hideExamples=!hideExamples" class="btn-toggle-examples">{{ hideExamples ? 'Show examples' : 'Hide examples' }}</button>
+        </p>
+    </div> -->
+
+    <!-- Expresiones del usuario -->
+    <div class="flex-container" *ngIf="matrix">
+        <!-- Expresiones del usuario (izquierda) -->
+        <div class="section half expressions-section" [hidden]="hideExamples">
+            
+                <h3 class="title-examples">Examples</h3>
+                <!-- <ol>
+                    <li *ngFor="let javaExample of javaExamples; let i = index">
+                        <code>{{ javaExample.exprs[0] }}</code> → 
+                        <i>{{ javaExample.explanation }}</i>
+                        <a *ngIf="matrix" (click)="tryFill(i)"> Try</a>
+                    </li>
+                </ol> -->
+                <!-- <a (click)="hideInstructions=!hideInstructions">Show/hide instructions</a> -->
+                <ol>
+                    <li *ngFor="let javaExample of javaExamples; let i = index">
+                        <div class="example-item">
+                            <!-- <div>
+                                <code>{{ javaExample.exprs[0] }}</code> → 
+                                <i>{{ javaExample.explanation }}</i>
+                            </div>
+                            <button *ngIf="matrix"
+                                    (click)="onTryClick(i)"
+                                    [ngClass]="{'btn-tried': javaExample.attempted}" 
+                                    class="btn-try">
+                                    <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                    {{ javaExample.attempted ? '' : 'Try' }}
+                                    
+                            </button> -->
+    
+                            <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
+                                <!-- <code class="examples-code">{{ javaExample.exprs[0] }}</code> → 
+                                <i>{{ javaExample.explanation }}</i> -->
+                                <i>{{ javaExample.explanation }}</i> → 
+                                <br>
+                                <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
+                            </div>
+                            <div class="button-container">
+                                <!-- <button *ngIf="matrix && javaExample.exprs.length==1"
+                                    (click)="onTryClick(i)"
+                                    [ngClass]="{'btn-tried': javaExample.attempted}" 
+                                    class="btn-try">
+                                        <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                        {{ javaExample.attempted ? '' : 'Try' }}
+                                    
+                                </button> -->
+
+                                <button *ngIf="matrix && javaExample.exprs.length==1"
+                                    (click)="onAddExampleClick(i)"
+                                    [ngClass]="{'btn-added': javaExample.attempted}" 
+                                    class="btn-addExample">
+                                    <!-- <span *ngIf="javaExample.attempted">Added</span> -->
+                                    <!-- Add -->
+                                        <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                        {{ javaExample.attempted ? '' : 'Try' }}
+                                </button>
+                            </div>
+                            
+                            <div *ngIf="javaExample.exprs.length>1" style="width: 100%;">
+                                <i>{{ javaExample.explanation }}</i> →
+                                <ol>
+                                    <li *ngFor="let expr of javaExample.exprs; let j = index">
+                                        <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ expr }}</code>
+                                        <button *ngIf="matrix && javaExample.exprs.length > 1"
+                                            (click)="onAddExample2Click(expr)"
+                                            [ngClass]="{'btn-added': javaExample.attempted}" 
+                                            class="btn-addExample2">
+                                            <i class="fas fa-plus-square"></i>
+                                        </button>
+                                    </li>
+                                </ol>
+                            </div>
+                            
+                            <div class="button-container">
+                                <!-- <button *ngIf="matrix && javaExample.exprs.length>1" 
+                                        (click)="onTryClick(i)"
+                                        [ngClass]="{'btn-tried': javaExample.attempted}" 
+                                        class="btn-try">
+                                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                            {{ javaExample.attempted ? '' : 'Try' }}
+                                </button> -->
+
+                                <button *ngIf="matrix && javaExample.exprs.length>1"
+                                        (click)="onAddExampleClick(i)"
+                                        [ngClass]="{'btn-added': javaExample.attempted}" 
+                                        class="btn-addExample">
+                                        <!-- <span *ngIf="javaExample.attempted">Added</span> -->
+                                        <!-- Add -->
+                                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                            {{ javaExample.attempted ? '' : 'Try' }}
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+                
+        </div>
+        <div class="section half expressions-section" [ngClass]="{'half': !hideExamples, 'full-width-centered': hideExamples}">
+            <!-- <h3>Your Expressions</h3> -->
+            <!-- <h3>Editor access</h3>
+
+            <button (click)="hideExamples=!hideExamples" class="btn-toggle-examples">{{ hideExamples ? 'Show examples' : 'Hide examples' }}</button> -->
+            
+            <div class="header-with-button">
+                <button (click)="hideExamples = !hideExamples" class="btn-toggle-examples">
+                  <i class="fa" [ngClass]="hideExamples ? 'fa-lightbulb' : 'fa-minus'"></i>
+                </button>
+              
+                <h3>Editor access</h3>
+            </div>              
+
+            <!-- <div class="input-group">
+                <input type="text" [(ngModel)]="currentUserExpression" 
+                    (input)="checkForExpressions()"
+                    (dblclick)="openTextArea(this, $event, 'Expressions')" 
+                    placeholder="Double click to add multiple expressions">
+                <button class="btn-add" (click)="addUserExpression()"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
+            </div> -->
+
+            <div class="input-group">
+                <input type="text"
+                       [(ngModel)]="currentUserExpression"
+                       (input)="checkForExpressions()"
+                       (dblclick)="openTextArea(this, $event, 'Expressions')" 
+                       (keydown)="onTabPress($event)"
+                       (focus)="onFocusInput()"
+                       placeholder="Double click to add multiple expressions">
+
+                <div class="buttons-container">
+                    <button class="btn-add" (click)="addUserExpression()"
+                        [disabled]="isAddDisabled()">
+                    <i class="fa fa-plus" aria-hidden="true"></i> Add
+                    </button>
+                    <button *ngIf="userExpressions.length > 0" class="btn-clear" (click)="clearExpressions()">
+                        <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
+                    </button>
+                </div>
+                
+                <!-- Contenedor para mostrar las sugerencias -->
+                <div class="suggestions" *ngIf="showRecommendations">
+                  <div class="suggestion-item" (click)="selectRecommendation()">
+                    {{ recommendation }}
+                  </div>
+                </div>
+            </div>
+              
+                      
+    
+            <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
+                <code>{{ userExpression }}</code> 
+                <a (click)="removeUserExpression(i)"><i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
+            </div>
+    
+            <div class="btn-container">
+                <button class="btn-apply" (click)="fillTableWithUserExpressions()" 
+                    [disabled]="userExpressions.length <= 0">
+                    <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
+                </button>
+                <!-- <button *ngIf="userExpressions.length > 0" class="btn-clear" (click)="clearExpressions()">
+                    <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
+                </button> -->
+            </div>
+        </div>
+    
+        <!-- Opciones de dominio (derecha) -->
+        <!-- <div class="section half domain-section">
+            <h3>Domain Selection</h3>
+            <br>
+            <div class="radio-group">
+                <label class="custom-radio">
+                    <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
+                </label>
+            </div>
+        </div> -->
+    
+    </div>
+    
+    
+</div>
+
+
+<!-- Aqui iba la tabla -->
+
+
 <!-- Modal -->
 <div class="modal" *ngIf="mostrarModal">
     <div class="modal-content">
@@ -814,12 +860,12 @@
         <div class="modal-header">
             <h2 class="title-modal">Qiskit Code</h2>
             <div class="enlaces-modal">
-                <a (click)="addHadamardGates()"><i class="fas fa-plus-circle"></i> Start with Hadamard gates</a>
+                <a (click)="addHadamardGates()" [class.disabled]="isDisabled"><i class="fas fa-plus-circle"></i> Start with Hadamard gates</a>
                 &nbsp;
-                <a (click)="countLastQubit()"><i class="fas fa-plus-circle"></i> Count last qubit</a>
+                <a (click)="countLastQubit()" [class.disabled]="isDisabled2"><i class="fas fa-plus-circle"></i> Count last qubit</a>
             </div>  
 
-            <span class="close" (click)="mostrarModal = false">&times;</span>
+            <span class="close" (click)="mostrarModal = false; cerrarModal()">&times;</span>
         </div>
 
         <!-- Contenido del modal -->
@@ -884,5 +930,36 @@
         </div>
     </div>
 </div>
+
+
+
+
+    <!-- Modal para ingresar el nombre de la función -->
+    <div class="modal" *ngIf="mostrarModalNombreFuncion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Qiskit Code</h2>
+                <span class="close" (click)="mostrarModal = false;cancelarModal()">&times;</span>
+            </div>
+            <div class="info-form">
+                <h3>Enter function name</h3>
+                <!-- <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
+                <button class="btn-confirm" (click)="confirmarNombreFuncion()">Confirm</button> -->
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
+                    <button class="btn-confirm" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
+                        <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                    </button>
+                </div>                  
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>                  
+                <div class="error" *ngIf="error">{{ error }}</div>
+            </div>
+        </div>
+    </div>
+  
 
 </body>
