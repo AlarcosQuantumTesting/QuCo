@@ -14,6 +14,7 @@ import { DeterministicComponent } from './deterministic/deterministic.component'
 import { CircuitEditorComponent } from './circuit-editor/circuit-editor.component';
 import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -40,6 +41,7 @@ const appRoutes : Routes = [
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
+    DragDropModule,
     RouterModule.forRoot(appRoutes)
   ],
   providers: [ ],

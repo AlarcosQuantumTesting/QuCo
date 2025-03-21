@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { QuirkService } from '../quirk.service';
 import { QiskitService } from '../qiskit.service';
@@ -655,8 +655,6 @@ export class MatrixesComponent  {
   ngOnInit() {
     // Valida cuando se inicializan los valores
     this.validateInputs();
-
-
     // this.recommendOrExpression();
   }
 
@@ -813,8 +811,64 @@ export class MatrixesComponent  {
     return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
   }
 
+  actionsHidden = true; // Estado para ocultar/mostrar la columna "Actions"
+
+  // Función para alternar la visibilidad de la columna
+  toggleActions() {
+    this.actionsHidden = !this.actionsHidden;
+  }
+
+  tooltipVisible: boolean = false;
+  tooltipTableVisible: boolean = false;
+
+  toggleTooltipTable(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipTableVisible) {
+      this.tooltipTableVisible = false;
+      this.tooltipVisible = false;
+    } else {
+      this.tooltipTableVisible = true;
+      this.tooltipVisible = false;
+    }
+  }
+
+  toggleTooltip(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipVisible) {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+    } else {
+      this.tooltipVisible = true;
+      this.tooltipTableVisible = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Verifica si el clic fue fuera del tooltip y el botón
+    const tooltipElement = document.querySelector('.tooltip');
+    const tooltipCustomElement = document.querySelector('.custom-tooltip');
+    const buttonElement = document.querySelector('button');
+    
+    if (this.tooltipVisible && 
+        tooltipElement && !tooltipElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipVisible = false;
+    }
+
+    if (this.tooltipTableVisible && 
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
+  }
 
   mostrarInstrucciones: boolean = false;
+  mostrarEjemplos: boolean = false;
   
   recommendation: string = '';  // La recomendación actual
   showRecommendations: boolean = false;  // Controla si mostrar las recomendaciones
@@ -859,22 +913,6 @@ export class MatrixesComponent  {
     }
   }
 
-  // recommendOrExpression() {
-  //   const qubits = [];
-
-  //   // Generar las recomendaciones de '||' para las entradas y salidas
-  //   for (let i = 0; i < this.inputQubits; i++) {
-  //     qubits.push(`q${i}`);
-  //   }
-
-  //   for (let i = 0; i < this.outputQubits; i++) {
-  //     qubits.push(`q${this.inputQubits + i}`);
-  //   }
-
-  //   this.recommendation = `|| (${qubits.join(' || ')})`;
-  //   this.showRecommendations = true; 
-  // }
-
   // Devuelve 1 si al menos un qubit es 1.
   recommendOrExpression() {
     const qubitIndices = [];
@@ -897,24 +935,6 @@ export class MatrixesComponent  {
       this.recommendAndExpression();
     }
   }
-
-  // recommendAndExpression() {
-  //   const qubits = [];
-
-  //   for (let i = 0; i < this.outputQubits; i++) {
-  //     qubits.push(`q${this.inputQubits + i}${i === this.outputQubits - 1 ? '' : ' = '}`);
-  //   }
-
-  //   qubits.push(' = (');
-    
-  //   for (let i = 0; i < this.inputQubits; i++) {
-  //     qubits.push(`q${i}${i === this.inputQubits - 1 ? '' : ' && '}`);
-  //   }
-
-  //   qubits.push(')');
-  //   this.recommendation = qubits.join('');
-  //   this.showRecommendations = true;
-  // }
 
   // Solo devuelve 1 si todos los qubits son 1, de lo contrario 0.
   recommendAndExpression() {

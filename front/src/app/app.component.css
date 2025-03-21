@@ -415,6 +415,16 @@
     transition: all 0.3s ease;
     background-color: #0b555a9c;
    }
+
+  li.separador:hover {
+    background-color: #008b95;
+    transform: scale(1);
+  }
+   
+  a.separador:hover {
+    background-color: #008b95;
+    transform: scale(1);
+  }
    
    /* Estilos de los enlaces del menú */
    .sidebar ul {
