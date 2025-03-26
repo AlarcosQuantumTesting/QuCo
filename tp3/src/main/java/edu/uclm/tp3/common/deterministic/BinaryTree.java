@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import edu.uclm.tp3.sparse.QMatrix;
-import edu.uclm.tp3.Complex;
 import edu.uclm.tp3.common.gates.CRY;
 import edu.uclm.tp3.common.gates.Identity;
 import edu.uclm.tp3.common.gates.RY;
@@ -194,11 +193,10 @@ public class BinaryTree {
 
         String r = repeat("  ", level) + "[" + node.name + "]-> " +
         		"freqs.: (" + node.leftFreq + ", " + node.rightFreq + "); " +
-                "probs: (" + (Math.round(node.leftProbability * 100.0) / 100.0) +
-                ", " + (Math.round(node.rightProbability * 100.0) / 100.0) + "); " +
-                
-                "angles: (" + (Math.round(node.leftAngle * 100.0) / 100.0) +
-                ", " + (Math.round(node.rightAngle * 100.0) / 100.0) + "); " +
+                "probs: (" + node.leftProbability +
+                ", " + node.rightProbability + "); " +                 
+                "angles: (" + node.leftAngle +
+                ", " + node.rightAngle +
                 ")\n";
 
         r = r + printTreeRecursive(node.leftChild, level + 1);
@@ -449,22 +447,31 @@ public class BinaryTree {
 		}
 
 		code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-		if (this.leftChild.leftAngle!=0) {
-			code+="\tU.x(0)\n";
-			code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
-			code+="\tU.x(0)\n";
+		if (this.leftChild.leftAngle==this.rightChild.leftAngle) {
+			code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
+			RY ry0 = new RY().setTheta(this.leftAngle);
+			RY ry1 = new RY().setTheta(this.leftChild.leftAngle);
 
-			QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
-			QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
-			this.matrix = QMatrix.multiply(x0, cry, x0);
-		}
-		if (this.rightChild.leftAngle!=0) {
-			code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
-			QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
-			if (this.matrix==null)
-			this.matrix = cry;
-			else
-			this.matrix = QMatrix.multiply(this.matrix, cry);
+			this.matrix = ry0.getMatrix().tp(ry1.getMatrix());
+			this.rightChild = null;
+		} else {
+			if (this.leftChild.leftAngle!=0) {
+				code+="\tU.x(0)\n";
+				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
+				code+="\tU.x(0)\n";
+
+				QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
+				QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
+				this.matrix = QMatrix.multiply(x0, cry, x0);
+			}
+			if (this.rightChild.leftAngle!=0) {
+				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
+				QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
+				if (this.matrix==null)
+				this.matrix = cry;
+				else
+				this.matrix = QMatrix.multiply(this.matrix, cry);
+			}
 		}
 
 		code+="\treturn U.to_gate()\n\n";

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.deterministic.BinaryTree;
-import edu.uclm.tp3.common.deterministic.MatrixSolver;
 import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.common.deterministic.Solver;
 import edu.uclm.tp3.common.model.Circuit;
@@ -42,8 +41,11 @@ public class DeterministicService {
 		circuit.setQubits(qubits);
 		
 		Solver solver = null;
-		if (physicalAngle>0)
+		if (physicalAngle>0) {
+			double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
+			minProb = minProb * minProb;
 			tree.removeLowAngles(physicalAngle);
+		}
 
 		solver = new UnifierSolver(tree, circuit, functionPrefix);
 		return solver.solve(shots);
