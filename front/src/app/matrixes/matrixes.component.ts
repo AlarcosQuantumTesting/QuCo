@@ -301,8 +301,17 @@ export class MatrixesComponent  {
       return
     }
     this.reset()
+
+    // Calculamos el valor de qn
+    const qnValue = `q${this.inputQubits + this.outputQubits - 1}`;
+
+    // Reemplazamos todas las ocurrencias de "qn" en cada expresión
+    const processedExpressions = this.userExpressions.map(expr =>
+        expr.replace(/\bqn\b/g, qnValue)
+    );
+
     try {
-      let matrix = this.fillingService.fillTable(this.userExpressions, this.inputQubits, this.outputQubits)
+      let matrix = this.fillingService.fillTable(processedExpressions, this.inputQubits, this.outputQubits)
       this.rows = matrix.length
       this.cols = matrix[0].length
       this.load(matrix)
@@ -317,9 +326,6 @@ export class MatrixesComponent  {
           this.mensajeTemporal = '';
       }, 2000);
     }
-
-
-    
   }
 
   tryFill(index : number) {
@@ -1106,6 +1112,5 @@ export class MatrixesComponent  {
     this.showRecommendations = true;
 
   }
-  
 
 }
