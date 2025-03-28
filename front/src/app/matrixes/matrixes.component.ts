@@ -119,50 +119,6 @@ export class MatrixesComponent  {
     this.dialogo.getElementsByTagName("textarea")[0].focus();
   }
 
-  // protected createDialog(cc : MatrixesComponent, caja : any, title : string, parameterIndex? : number) {
-  //   let selfCaja = caja
-  //   let textArea : any
-  //   if (!this.dialogo) {
-  //       this.dialogo = document.createElement("dialog")
-  //       this.dialogo.setAttribute("id", "dialogo");
-  //       let label = document.createElement("strong")
-  //       label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-  //       let a = document.createElement("u")
-  //       a.innerHTML = "Close"
-  //       let self = this
-  //       a.onclick = function() {
-  //           if (textArea!.value.trim().length>0) {
-  //               let expressions = textArea!.value.split("\n")
-  //               for (let i=0; i<expressions.length; i++) {
-  //                 if (expressions[i].trim().length==0)
-  //                   continue
-  //                 self.currentUserExpression = expressions[i]
-  //                 self.addUserExpression()
-  //               }
-  //           }
-
-  //           selfCaja.parentElement.removeChild(self.dialogo)
-  //           self.dialogo = null
-  //           selfCaja.focus()
-  //       }
-  //       this.dialogo.appendChild(label)
-  //       this.dialogo.appendChild(a)
-
-  //       this.dialogo.appendChild(document.createElement("br"))
-  //       textArea = document.createElement("textarea"); 
-  //       this.dialogo.appendChild(textArea);
-  //       textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 = q0\n" + 
-  //         "q4 = q1\nq5 = (q0&&q1)^q2\n")
-  //       textArea.setAttribute("rows", "15");
-  //       textArea.setAttribute("cols", "60");
-  //       textArea.ondblclick = function() {
-  //         textArea.value = "q3 = q0\nq4 = q1\nq5 = (q0&&q1)^q2\n"
-  //       }
-
-  //   }
-  //   caja.parentElement.appendChild(this.dialogo);
-  // }
-
   protected createDialog(cc: MatrixesComponent, caja: any, title: string, parameterIndex? : number) {
     let selfCaja = caja
     let textArea: any
@@ -194,15 +150,6 @@ export class MatrixesComponent  {
 
         let self = this
         a.onclick = function() {
-            // if (textArea!.value.trim().length > 0) {
-            //     let expressions = textArea!.value.split("\n")
-            //     for (let i = 0; i < expressions.length; i++) {
-            //         if (expressions[i].trim().length == 0)
-            //             continue
-            //         self.currentUserExpression = expressions[i]
-            //         self.addUserExpression()
-            //     }
-            // }
             selfCaja.parentElement.removeChild(self.dialogo)
             self.dialogo = null
             selfCaja.focus()
@@ -317,6 +264,12 @@ export class MatrixesComponent  {
       this.load(matrix)
 
 
+      localStorage.setItem('matrix', JSON.stringify(matrix));
+      localStorage.setItem('inputQubits', JSON.stringify(this.inputQubits));
+      localStorage.setItem('outputQubits', JSON.stringify(this.outputQubits));
+      localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
+
+
       this.goToTable();
     } catch (error) {
       this.error = error
@@ -335,6 +288,10 @@ export class MatrixesComponent  {
     this.rows = matrix.length
     this.cols = matrix[0].length
     this.load(matrix)
+
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
+    localStorage.setItem('cols', JSON.stringify(this.cols));
+    localStorage.setItem('rows', JSON.stringify(this.rows));
 
     this.javaExamples[index].attempted = true;
   }
@@ -666,7 +623,29 @@ export class MatrixesComponent  {
   ngOnInit() {
     // Valida cuando se inicializan los valores
     this.validateInputs();
-    // this.recommendOrExpression();
+
+    // Recuperar valores desde localStorage con valores por defecto
+    this.inputQubits = JSON.parse(localStorage.getItem('inputQubits') || '3');
+    this.outputQubits = JSON.parse(localStorage.getItem('outputQubits') || '3');
+   
+
+    // Verificar si hay datos guardados
+    const savedInputQubits = localStorage.getItem('inputQubits');
+    const savedOutputQubits = localStorage.getItem('outputQubits');
+    const savedUserExpressions = localStorage.getItem('processedExpressions');
+
+    
+
+    if (savedInputQubits && savedOutputQubits) {
+        this.buildMatrixActions();
+
+        if (savedUserExpressions) {
+            // Agregar expresiones guardadas al sistema
+            this.userExpressions = JSON.parse(savedUserExpressions);
+            this.fillingService.fillTable(this.userExpressions, this.inputQubits, this.outputQubits);
+        }
+    }
+
   }
 
   validateInputs() {
@@ -788,6 +767,10 @@ export class MatrixesComponent  {
   buildMatrixActions() {
     this.numberOfInputQubits = this.inputQubits;
     this.numberOfOutputQubits = this.outputQubits;
+
+    localStorage.setItem('inputQubits', JSON.stringify(this.numberOfInputQubits));
+    localStorage.setItem('outputQubits', JSON.stringify(this.numberOfOutputQubits));
+
     this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
@@ -977,15 +960,6 @@ export class MatrixesComponent  {
   }
 
   recommendIsPrimeExpression() {
-    // const qubits = [];
-
-    // for (let i = 0; i < this.outputQubits; i++) {
-    //   qubits.push(`q${this.inputQubits + i}`);
-    // }
-
-    // this.recommendation = `isPrime(${qubits.join('')})`;
-    // this.showRecommendations = true;
-
 
     const qubitIndices = [];
   
