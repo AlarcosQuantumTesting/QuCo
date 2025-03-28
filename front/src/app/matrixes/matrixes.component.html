@@ -298,7 +298,7 @@
             <table id="myTable" border="1">
                 <tr>
                     <th></th>
-                    <th [colSpan]="inputQubits">Input</th>
+                    <th [colSpan]="numberOfInputQubits">Input</th>
                     <th [colSpan]="outputQubits + 1">
                         <!-- output-info.component.html -->
                         <div style="display: flex; justify-content: center; align-items: center; position: relative;">
@@ -326,7 +326,7 @@
                     <th *ngIf="!actionsHidden">
                         <div style="display: flex; justify-content: center; align-items: center;">
                             <span>Actions</span>
-                            <label title="Reduce Qiskit output" style="color: white; font-weight: normal; font-size: small;">
+                            <label title="Reduce Qiskit and Quirk" style="color: white; font-weight: normal; font-size: small;">
                                 <input type="checkbox" class="custom-checkbox" [checked]="reduceQuiskit && reduceQuirk"
                                     (change)="reduceQuiskit = $any($event.target).checked; reduceQuirk = $any($event.target).checked"/>
                             </label>
@@ -434,7 +434,8 @@
 
         <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
             <code>{{ userExpression }}</code> 
-            <a (click)="removeUserExpression(i)"><i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
+            <a class="deleteButton" (click)="removeUserExpression(i)"><i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
+            <a class="saveButton" title="Save expression" (click)="saveUserExpression(i)"><i class="fas fa-save" style="font-size: 13px;"></i></a>
         </div>
 
         <div class="btn-container">

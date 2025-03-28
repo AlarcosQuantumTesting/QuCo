@@ -11,6 +11,7 @@ import { CodeTemplate } from '../templates/CodeTemplate';
   styleUrls: ['./matrixes.component.css']
 })
 export class MatrixesComponent  {
+  
   inputQubits : number = 3
   outputQubits : number = 3
 
@@ -282,6 +283,10 @@ export class MatrixesComponent  {
 
   removeUserExpression(index : number) {
     this.userExpressions.splice(index, 1)
+  }
+
+  saveUserExpression(index : number) {
+    // this.userExpressions.splice(index, 1)
   }
 
   fillTableWithUserExpressions() {
@@ -770,7 +775,13 @@ export class MatrixesComponent  {
     }, 2000);
   }
 
+
+  numberOfInputQubits : number | null = null;
+  numberOfOutputQubits : number | null = null;
+
   buildMatrixActions() {
+    this.numberOfInputQubits = this.inputQubits;
+    this.numberOfOutputQubits = this.outputQubits;
     this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
