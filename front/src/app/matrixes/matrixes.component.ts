@@ -867,6 +867,17 @@ export class MatrixesComponent  {
     }
   }
 
+  resetValues() {
+    // Eliminar valores guardados en localStorage
+    localStorage.removeItem('inputQubits');
+    localStorage.removeItem('outputQubits');
+    localStorage.removeItem('processedExpressions');
+    localStorage.removeItem('matrix');
+
+    location.reload();  // Reiniciar
+  }
+
+
   mostrarInstrucciones: boolean = false;
   mostrarEjemplos: boolean = false;
   

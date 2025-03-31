@@ -1875,3 +1875,28 @@ u:hover {
     border-bottom: 5px solid transparent;
     border-right: 5px solid #f9f9f9;
   }
+
+  .matrixTitle-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+  .btn-reset {
+    padding-bottom: 10px;
+    padding-top: 3px;
+    background: none;
+    color: #0b555a;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+    .btn-reset:hover {
+        background: none;
+    }
+
+    .fa-refresh:hover {
+        color: #0f3436;
+        transform: scale(1.05);
+    }
