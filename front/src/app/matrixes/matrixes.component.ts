@@ -237,10 +237,6 @@ export class MatrixesComponent  {
     this.userExpressions.splice(index, 1)
   }
 
-  saveUserExpression(index : number) {
-    // this.userExpressions.splice(index, 1)
-  }
-
   fillTableWithUserExpressions() {
     this.error = undefined
     if (this.userExpressions.length==0) {
@@ -647,12 +643,16 @@ export class MatrixesComponent  {
 
     if (savedInputQubits && savedOutputQubits) {
         this.buildMatrixActions();
+        setTimeout(() => {
 
-        if (savedUserExpressions) {
-            // Agregar expresiones guardadas al sistema
-            this.userExpressions = JSON.parse(savedUserExpressions);
-            this.fillingService.fillTable(this.userExpressions, this.inputQubits, this.outputQubits);
-        }
+            if (savedUserExpressions) {
+              // Agregar expresiones guardadas al sistema
+              this.userExpressions = JSON.parse(savedUserExpressions);
+              this.fillTableWithUserExpressions();
+              this.fillingService.fillTable(this.userExpressions, this.inputQubits, this.outputQubits);
+          }
+        }, 50);
+        
     }
 
   }
@@ -919,7 +919,11 @@ export class MatrixesComponent  {
       );
     }
   }
-    
+
+  saveUserExpression(index: number) {
+    this.expressionToSave.jsExpression = this.userExpressions[index];
+    this.mostrarModalCrearExp = true;
+}
 
   isValid() {
     return this.expressionToSave.expressionName && this.expressionToSave.jsExpression;

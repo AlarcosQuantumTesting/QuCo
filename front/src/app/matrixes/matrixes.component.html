@@ -411,7 +411,7 @@
             <h3>Editor access</h3>
 
             
-            <button (click)="create()">Create expression</button>
+            <button (click)="create()" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
             <!-- &nbsp;
             <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button> -->
             
@@ -922,8 +922,6 @@
     
             <!-- Contenido del modal -->
             <div class="expression-output">
-                <p class="text-instructions">The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment.</p>>
-                
                 <div>
                     <p class="radioTitle">Your expressions:</p>
                     <select>
@@ -933,7 +931,7 @@
                     </select>
                 </div>
 
-                <div class="section expressionsContainer">
+                <div class="expressionsContainer">
                     <div class="form-group">
                         <div class="label-container">
                             <label for="expressionName">Expression name:</label>
