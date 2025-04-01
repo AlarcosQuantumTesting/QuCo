@@ -5,6 +5,8 @@ import { QiskitService } from '../qiskit.service';
 import { FillingService } from '../filling.service';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
+import { ExpressionsService } from '../expressions.service';
+import { Expression } from './Expression';
 @Component({
   selector: 'app-matrixes',
   templateUrl: './matrixes.component.html',
@@ -94,9 +96,12 @@ export class MatrixesComponent  {
   userExpressions : string[] = []
 
   dialogo : any = undefined
+  expressions: Expression[] | undefined;
+  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '' };
+
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService, 
-    public sanitizer : DomSanitizer, public manager : ManagerService) {}
+    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService) {}
 
   addUserExpression(): void {
     this.error = undefined
@@ -624,6 +629,10 @@ export class MatrixesComponent  {
     // Valida cuando se inicializan los valores
     this.validateInputs();
 
+    this.service.getExpressions().subscribe((data: Expression[]) => {
+      this.expressions = data;
+    });
+
     // Recuperar valores desde localStorage con valores por defecto
     this.inputQubits = JSON.parse(localStorage.getItem('inputQubits') || '3');
     this.outputQubits = JSON.parse(localStorage.getItem('outputQubits') || '3');
@@ -875,6 +884,45 @@ export class MatrixesComponent  {
     localStorage.removeItem('matrix');
 
     location.reload();  // Reiniciar
+  }
+
+  creatingExpression: boolean = false;
+  mostrarModalCrearExp: boolean = false;
+
+  create() {
+    this.creatingExpression = true
+    this.mostrarModalCrearExp = true
+    // this.manager.selectedTemplate = new CodeTemplate("", "", "")
+  }
+
+  save() {
+    if (this.isValid()) {
+      this.service.createExpression(this.expressionToSave).subscribe(
+        data => {
+          // Asegurar que `this.expressions` esté inicializado
+          if (!this.expressions) {
+            this.expressions = [];
+          }
+
+          // Agregar la expresión guardada a la lista
+          this.expressions.push(data);
+          this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+          // Limpiar el formulario después de la respuesta exitosa
+          this.expressionToSave = { expressionName: '', jsExpression: '', description: '' };
+          this.creatingExpression = false;
+          this.mostrarModalCrearExp = false;
+        },
+        error => {
+          console.error(error);
+        }
+      );
+    }
+  }
+    
+
+  isValid() {
+    return this.expressionToSave.expressionName && this.expressionToSave.jsExpression;
   }
 
 
