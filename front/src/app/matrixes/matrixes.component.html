@@ -408,24 +408,33 @@
             <i class="fa" [ngClass]="hideExamples ? 'fa-lightbulb' : 'fa-minus'"></i>
             </button>
 
-            <h3>Editor access</h3>
-
+            <div class="editorTitle-container">
+                <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
+                <button class="btn-search" (click)="showExpressions()">
+                    <i class="fa fa-magnifying-glass" title="Search for expressions"></i>
+                </button>
+            </div>
             
             <button (click)="create()" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
             <!-- &nbsp;
             <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button> -->
-            
 
         </div>
 
         <div class="input-group">
             <input type="text"
-                [(ngModel)]="currentUserExpression"
-                (input)="checkForExpressions()"
+                [(ngModel)]="searchQuery"
+                (input)="onSearchInput()"
                 (dblclick)="openTextArea(this, $event, 'Expressions')"
                 (keydown)="onTabPress($event)"
                 (focus)="onFocusInput()"
-                placeholder="Double click to add multiple expressions">
+                placeholder="Double click to add multiple expressions"
+                
+                list="expressionsList">
+
+            <datalist id="expressionsList">
+                <option class="expOpt" *ngFor="let expression of expressions" [value]="expression.jsExpression"></option>
+            </datalist>
 
             <div class="buttons-container">
                 <button class="btn-add" (click)="addUserExpression()"
@@ -937,7 +946,8 @@
                             <label for="expressionName">Expression name:</label>
                         </div>
         
-                        <input id="expressionName" type="text" [(ngModel)]="expressionToSave.expressionName" class="form-control">
+                        <input id="expressionName" type="text" [disabled]="isNameDisabled" 
+                        [(ngModel)]="expressionToSave.expressionName" class="form-control">
                     </div>
         
                     <div class="form-group">
@@ -960,7 +970,7 @@
                 </div>
 
                 <div class="help-actions">
-                    <button class="action-btn" (click)="mostrarModalCrearExp = false">Cancel</button>
+                    <button class="action-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
     
@@ -970,4 +980,49 @@
             </div> -->
         </div>
     </div>
+
+    <div class="modal" *ngIf="mostrarModalVerExp">
+        <div class="modal-content">
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+                <h2 class="title-modal">Manage Expressions</h2>
+                <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
+            </div>
+    
+            <!-- Tabla de expresiones -->
+            <div class="table-container">
+                <table class="expressions-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>JavaScript Expression</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let expression of expressions; let i = index">
+                            <td>{{ expression.expressionName }}</td>
+                            <td>{{ expression.jsExpression }}</td>
+                            <td>{{ expression.description }}</td>
+                            <td>
+                                <button class="update-btn" (click)="editExpression(expression, i)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-btn" (click)="deleteExpression(expression.expressionName, i)">
+                                    <i class="fas fa-trash"></i> 
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    
+            <!-- Botón de cerrar -->
+            <div class="help-actions">
+                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
 </body>

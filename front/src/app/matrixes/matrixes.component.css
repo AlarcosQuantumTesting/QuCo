@@ -1944,3 +1944,61 @@ u:hover {
   .btn-toggle-createExp i {
     font-size: 16px;
   }
+
+  .editorTitle-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .btn-search {
+    background: none;
+    color: #0b555a;
+    font-weight: bold;
+    font-size: 14px;
+    margin-left: 0px;
+  }
+
+.btn-search:hover {
+   background: none;
+}
+
+.fa-magnifying-glass:hover {
+    color: #0f3436;
+    transform: scale(1.05);
+}
+
+.input-container {
+    width: 100%;
+}
+
+.search-input {
+    width: 100%; /* Asegura que el input tenga un ancho completo */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Para navegadores que soportan estilos en datalist */
+datalist {
+    position: absolute;
+    top: 100%; /* Justo debajo del input */
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+    background-color: #f0f0f0; /* Color de fondo gris claro */
+    border: 1px solid #ddd;    /* Borde gris claro */
+    cursor: not-allowed;       /* Cambia el cursor a no permitido */
+    color: black;
+}
+
+input[disabled], textarea[disabled], select[disabled] {
+    opacity: 0.7;              /* Opacidad reducida para dar un aspecto deshabilitado */
+}

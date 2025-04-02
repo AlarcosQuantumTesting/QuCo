@@ -27,9 +27,9 @@ export class ManagerService {
     return this.templates.filter(t => t.fileName.startsWith(prefix))
   }
 
-  // getExpressionsStartingBy(prefix: string): Expression[] {
-  //   return this.expressions.filter(t => t.expressionName.startsWith(prefix))
-  // }
+  getExpressionsStartingBy(name: string): Expression[] {
+    return this.expressions.filter(t => t.expressionName.startsWith(name))
+  }
   
   
 }
