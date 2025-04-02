@@ -897,8 +897,9 @@ export class MatrixesComponent  {
   isNameDisabled: boolean = false;
 
   create() {
-    this.creatingExpression = true
-    this.mostrarModalCrearExp = true
+    this.creatingExpression = true;
+    this.mostrarModalCrearExp = true;
+    this.mostrarModalVerExp = false;
     // this.manager.selectedTemplate = new CodeTemplate("", "", "")
   }
 

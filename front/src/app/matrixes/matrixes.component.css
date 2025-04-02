@@ -1472,7 +1472,8 @@ u:hover {
     position: absolute;
     top: 100%;  /* Justo debajo del input */
     left: 0;
-    width: 100%;
+    width: auto;
+    max-width: 200px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -2001,4 +2002,65 @@ select:disabled {
 
 input[disabled], textarea[disabled], select[disabled] {
     opacity: 0.7;              /* Opacidad reducida para dar un aspecto deshabilitado */
+}
+
+.header-with-button {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos al principio */
+    align-items: center; /* Centra los elementos verticalmente */
+}
+
+.btn-createExp-edit {
+    background: none;
+    padding: 7px;
+}
+
+.edit-create-icon:hover {
+    transform: scale(1.2);
+    color: rgb(180, 180, 180);
+}
+
+.btn-createExp-edit:hover {
+    background: none;
+}
+
+.table-container-expressions {
+    margin: 20px;
+}
+
+.edit-expression-icon:hover {
+    color: white;
+    transform: scale(1);
+}
+
+.update-btn {
+    background-color: #149099;
+    border-radius: 20%;
+    padding: 10px;
+}
+
+.update-btn:hover {
+    background-color: #0b555a;
+    transform: scale(1.05);
+}
+
+.delete-expression-btn {
+    background-color: rgb(219, 67, 67);
+    border-radius: 20%;
+    padding: 10px;
+}
+
+.delete-expression-btn:hover {
+    background-color: rgb(139, 70, 70);
+    transform: scale(1.05);
+}
+
+.cancel-btn {
+    background-color: rgb(219, 67, 67);
+    border-radius: 12px;
+}
+
+.cancel-btn:hover {
+    background-color: rgb(139, 70, 70);
+    transform: scale(1.05);
 }

@@ -411,7 +411,7 @@
             <div class="editorTitle-container">
                 <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
                 <button class="btn-search" (click)="showExpressions()">
-                    <i class="fa fa-magnifying-glass" title="Search for expressions"></i>
+                    <i class="fa fa-edit editorIcon" title="Edit your expressions"></i>
                 </button>
             </div>
             
@@ -429,7 +429,6 @@
                 (keydown)="onTabPress($event)"
                 (focus)="onFocusInput()"
                 placeholder="Double click to add multiple expressions"
-                
                 list="expressionsList">
 
             <datalist id="expressionsList">
@@ -931,14 +930,6 @@
     
             <!-- Contenido del modal -->
             <div class="expression-output">
-                <div>
-                    <p class="radioTitle">Your expressions:</p>
-                    <select>
-                        <option *ngFor="let expression of expressions" [ngValue]="expression">
-                            {{ expression.expressionName }}
-                        </option>
-                    </select>
-                </div>
 
                 <div class="expressionsContainer">
                     <div class="form-group">
@@ -970,7 +961,7 @@
                 </div>
 
                 <div class="help-actions">
-                    <button class="action-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
+                    <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
     
@@ -985,12 +976,15 @@
         <div class="modal-content">
             <!-- Encabezado del modal -->
             <div class="modal-header">
-                <h2 class="title-modal">Manage Expressions</h2>
+                <div class="header-with-button">
+                    <h2 class="title-modal">Manage Expressions</h2>
+                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                </div>
                 <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
             </div>
-    
+            
             <!-- Tabla de expresiones -->
-            <div class="table-container">
+            <div class="table-container-expressions">
                 <table class="expressions-table">
                     <thead>
                         <tr>
@@ -1006,10 +1000,10 @@
                             <td>{{ expression.jsExpression }}</td>
                             <td>{{ expression.description }}</td>
                             <td>
-                                <button class="update-btn" (click)="editExpression(expression, i)">
-                                    <i class="fas fa-edit"></i>
+                                <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
+                                    <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
-                                <button class="delete-btn" (click)="deleteExpression(expression.expressionName, i)">
+                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -1019,8 +1013,8 @@
             </div>
     
             <!-- Botón de cerrar -->
-            <div class="help-actions">
-                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Cancel</button>
+            <div class="help-actions" style="margin-bottom: 15px;">
+                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
             </div>
         </div>
     </div>
