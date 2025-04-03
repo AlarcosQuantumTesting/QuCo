@@ -9,13 +9,12 @@ import java.util.Map;
 import edu.uclm.tp3.common.gates.CRY;
 import edu.uclm.tp3.common.gates.RY;
 import edu.uclm.tp3.common.gates.X;
-import edu.uclm.tp3.common.model.Circuit;
 
 public class GroverRudolphSolver extends Solver {
 
 	private int depth;
 
-	public GroverRudolphSolver(BinaryTree tree, Circuit circuit) {
+	public GroverRudolphSolver(BinaryTree tree, GRCircuit circuit) {
 		super(tree, circuit);
 	}
 
@@ -56,13 +55,8 @@ public class GroverRudolphSolver extends Solver {
 		}
 
 		Map<String, Object> result = new HashMap<>();
-		result.put("#QUBITS#", this.circuit.getQubits());
-		result.put("#OUTPUT_QUBITS#", this.circuit.getQubits());
-		result.put("#SHOTS#", shots);
 		result.put("#INITIALIZE#", this.getInitialize(gatesCode));
 		result.put("#CALCULUS#", code);
-		result.put("#MEASURES#", this.getMeasures(this.circuit.getQubits()));
-		result.put("tree", this.tree.toMap());
 		return result;
 	}
 

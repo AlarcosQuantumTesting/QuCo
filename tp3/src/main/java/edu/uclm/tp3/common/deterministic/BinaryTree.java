@@ -4,16 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import edu.uclm.tp3.sparse.QMatrix;
-import edu.uclm.tp3.common.gates.CRY;
-import edu.uclm.tp3.common.gates.Identity;
-import edu.uclm.tp3.common.gates.RY;
-import edu.uclm.tp3.common.gates.X;
-
 public class BinaryTree {
 	
 	static final boolean DEBUG = false; 
 	static final boolean PRINT = true; 
+
+	private Coder coder;
 	
 	String name;
     int value;
@@ -26,12 +22,21 @@ public class BinaryTree {
     BinaryTree leftChild;
     BinaryTree rightChild;
 
-	String code;
-	QMatrix matrix;
+    int depth;
+
+    GRCircuit circuit;
     
     public BinaryTree() {
 		this.value = -1;
 		this.name = "";
+	}
+
+    public String getCode() {
+        return this.circuit.toString();
+    }
+
+	public void setCoder(Coder coder) {
+		this.coder = coder;
 	}
     
     public int getDepth() {
@@ -71,8 +76,7 @@ public class BinaryTree {
 		this.removeLowAnglesRecursive(node.rightChild, physicalAngle);
 	}
 
-	public void normalizeProbabilities(String functionPrefix) {
-    	this.assignNames(functionPrefix);
+	public void normalizeProbabilities() {
 		normalizeProbabilitiesRecursive(this);
     }
 
@@ -112,47 +116,49 @@ public class BinaryTree {
         }
     }
     
-    public void addChildren(double probability) {
-        addChildrenToLeaves(this, probability);
+    public void addChildren() {
+        addChildrenToLeaves(this);
     }
 
-    private void addChildrenToLeaves(BinaryTree node, double probability) {
+    private void addChildrenToLeaves(BinaryTree node) {
         if (node == null)
             return;
 
         if (node.leftChild == null && node.rightChild == null) {
             node.leftChild = new BinaryTree();
             node.leftChild.value = 0;
-            node.leftProbability = probability;
+            node.leftProbability = 0;
+            node.leftChild.depth = node.depth + 1;
             node.leftChild.parent = node;
 
             node.rightChild = new BinaryTree();
             node.rightChild.value = 1;
-            node.rightProbability = probability;
+            node.rightProbability = 0;
+            node.rightChild.depth = node.depth + 1;
             node.rightChild.parent = node;
             
             return;
         }
 
-        addChildrenToLeaves(node.leftChild, probability);
-        addChildrenToLeaves(node.rightChild, probability);
+        addChildrenToLeaves(node.leftChild);
+        addChildrenToLeaves(node.rightChild);
     }
     
-    public void assignNames(String functionPrefix) {
-        assignNamesRecursive(this, 0, functionPrefix);
+    public void assignNames(String splitIndex, String functionPrefix) {
+        assignNamesRecursive(this, 0, splitIndex, functionPrefix);
     }
 
-    private void assignNamesRecursive(BinaryTree node, int depth, String position) {
+    private void assignNamesRecursive(BinaryTree node, int depth, String splitIndex, String position) {
         if (node == null)
             return;
 
-        node.name = depth + (position.isEmpty() ? "" : "" + position);
+        node.name = splitIndex + depth + (position.isEmpty() ? "" : "" + position);
 
         if (node.leftChild != null) {
-            assignNamesRecursive(node.leftChild, depth + 1, position + "L");
+            assignNamesRecursive(node.leftChild, depth + 1, splitIndex, position + "L");
         }
         if (node.rightChild != null) {
-            assignNamesRecursive(node.rightChild, depth + 1, position + "R");
+            assignNamesRecursive(node.rightChild, depth + 1, splitIndex, position + "R");
         }
     }
 
@@ -191,7 +197,7 @@ public class BinaryTree {
         if (node == null)
             return "";
 
-        String r = repeat("  ", level) + "[" + node.name + "]-> " +
+        String r = repeat("  ", level) + "depth = " + node.depth + " [" + node.name + "]-> " +
         		"freqs.: (" + node.leftFreq + ", " + node.rightFreq + "); " +
                 "probs: (" + node.leftProbability +
                 ", " + node.rightProbability + "); " +                 
@@ -320,170 +326,8 @@ public class BinaryTree {
 	}
 
 	public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
-		if (nodeDepth==2)
-			return this.getLeafCode(usedNodesMap);
-
-		if (this.leftProbability==0 && this.rightProbability==0)
-			return null;
-
-		StringBuilder code = new StringBuilder("def get" + this.name + "():\n");
-		code.append("\tU = QuantumCircuit(" + nodeDepth + ", name=\"" + this.name + "\")\n");
-		BinaryTree child;
-		if (this.leftProbability==0) {
-			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-			child = usedNodesMap.get(this.rightChild.hashCode());
-			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			this.code = code.toString();
-
-			int rows = (int) Math.pow(2, nodeDepth);
-			this.matrix = QMatrix.i(rows);
-			matrix.set(rows/2, rows/2, child.matrix);
-			return this;
-		}
-
-		if (this.rightProbability==0) {
-			code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-			child = usedNodesMap.get(this.leftChild.hashCode());
-			code.append("\tU.append(get" + child.name + "(), [" + this.getTargetQubits(1, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			this.code = code.toString();
-			
-			int rows = (int) Math.pow(2, nodeDepth);
-			this.matrix = QMatrix.i(rows);
-			matrix.set(rows/2, rows/2, child.matrix);
-			return this;
-		}
-
-		if (this.leftProbability==this.rightProbability) {
-			if (this.leftAngle!=0)
-				code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-			code.append("\tU.x(0)\n");
-			child = usedNodesMap.get(this.leftChild.hashCode());
-			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-			code.append("\tU.x(0)\n");
-			child = usedNodesMap.get(this.rightChild.hashCode());
-			code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-			code.append("\treturn U.to_gate()\n\n");
-			this.code = code.toString();
-
-			int rows = (int) Math.pow(2, nodeDepth);
-			this.matrix = QMatrix.i(rows);
-			this.matrix.set(rows/2, rows/2, child.matrix);
-			return this;
-		}
-
-		code.append("\tU.ry(" + this.leftAngle + ", 0)\n");
-		code.append("\tU.x(0)\n");
-		child = usedNodesMap.get(this.leftChild.hashCode());
-		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-		code.append("\tU.x(0)\n");
-		child = usedNodesMap.get(this.rightChild.hashCode());
-		code.append("\tU.append(get" + child.name + "().control(1), [" + this.getTargetQubits(0, nodeDepth) + "])\n");
-		code.append("\treturn U.to_gate()\n\n");
-		this.code = code.toString();
-
-		int rows = (int) Math.pow(2, nodeDepth);
-		this.matrix = QMatrix.i(rows);
-		matrix.set(rows/2, rows/2, child.matrix);
-		return this;
+		return this.coder.getCode(nodeDepth, usedNodesMap);
 	}
 
-	private BinaryTree getLeafCode(Map<Integer, BinaryTree> usedNodesMap) {
-		if (usedNodesMap.get(this.hashCode())!=null)
-			return null;
 
-		if (this.leftProbability==0 && this.rightProbability==0)
-			return null;
-		
-		String code = "def get" + this.name + "():\n";
-		code+="\tU = QuantumCircuit(2, name=\"" + this.name + "\")\n";
-		if (this.leftProbability==0) {
-			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-			code+="\tU.ry(" + this.rightChild.leftAngle + ", 1)\n";
-			code+="\treturn U.to_gate()\n\n";
-			
-			this.matrix = new RY().setTheta(this.leftAngle).getMatrix().tp(new RY().setTheta(this.rightChild.leftAngle).getMatrix());
-
-			this.code = code;
-			return this;
-		}
-
-		if (this.rightProbability==0) {
-			code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-			this.matrix = new RY().setTheta(this.leftAngle).getMatrix();
-			if (this.leftChild.leftAngle!=0) {
-				code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
-				this.matrix = this.matrix.tp(new RY().setTheta(this.leftChild.leftAngle).getMatrix());
-			} else {
-				this.matrix = this.matrix.tp(new Identity().getMatrix());
-			}
-			code+="\treturn U.to_gate()\n\n";
-			this.code = code;
-			return this;
-		}
-
-		if (this.leftProbability==this.rightProbability) {
-			if (this.leftChild.leftAngle!=0) {
-				code+="\tU.x(0)\n";
-				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
-				code+="\tU.x(0)\n";
-
-				QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
-				QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
-				this.matrix = QMatrix.multiply(x0, cry, x0);
-			}
-			if (this.rightChild.leftAngle!=0) {
-				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
-				QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
-				if (this.matrix==null)
-					this.matrix = cry;
-				else
-					this.matrix = QMatrix.multiply(this.matrix, cry);
-			}
-			code+="\treturn U.to_gate()\n\n";
-			this.code = code;
-			return this;
-		}
-
-		code+="\tU.ry(" + this.leftAngle + ", 0)\n";
-		if (this.leftChild.leftAngle==this.rightChild.leftAngle) {
-			code+="\tU.ry(" + this.leftChild.leftAngle + ", 1)\n";
-			RY ry0 = new RY().setTheta(this.leftAngle);
-			RY ry1 = new RY().setTheta(this.leftChild.leftAngle);
-
-			this.matrix = ry0.getMatrix().tp(ry1.getMatrix());
-			this.rightChild = null;
-		} else {
-			if (this.leftChild.leftAngle!=0) {
-				code+="\tU.x(0)\n";
-				code+="\tU.cry(" + this.leftChild.leftAngle + ", 0, 1)\n";
-				code+="\tU.x(0)\n";
-
-				QMatrix x0 = new X().getMatrix().tp(new Identity().getMatrix());
-				QMatrix cry = new CRY().setTheta(this.leftChild.leftAngle).getMatrix();
-				this.matrix = QMatrix.multiply(x0, cry, x0);
-			}
-			if (this.rightChild.leftAngle!=0) {
-				code+="\tU.cry(" + this.rightChild.leftAngle + ", 0, 1)\n";
-				QMatrix cry = new CRY().setTheta(this.rightChild.leftAngle).getMatrix();
-				if (this.matrix==null)
-				this.matrix = cry;
-				else
-				this.matrix = QMatrix.multiply(this.matrix, cry);
-			}
-		}
-
-		code+="\treturn U.to_gate()\n\n";
-		this.code = code;
-		return this;
-	}
-	
-	private String getTargetQubits(int startQubit, int depth) {
-		StringBuilder sb = new StringBuilder();
-		for (int i=startQubit; i<depth-1; i++)
-			sb.append(i + ",");
-		sb.append(depth-1);
-		return sb.toString();
-	}
 }

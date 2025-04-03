@@ -1,4 +1,3 @@
-import { GroverService } from "../grover.service"
 import { QiskitCode } from "../grover/QiskitCode"
 import { QiskitService } from "../qiskit.service"
 
@@ -19,6 +18,8 @@ export abstract class GroverStyle {
 
     userExpressions: string[] = []
     currentUserExpression: string = ""
+
+    Math : any = Math
 
     javaExamples: any[] = [
         {

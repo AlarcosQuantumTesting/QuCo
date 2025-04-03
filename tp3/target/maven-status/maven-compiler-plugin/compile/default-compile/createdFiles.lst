@@ -22,7 +22,6 @@ edu/uclm/tp3/common/services/EvolutionaryService.class
 edu/uclm/tp3/symbolic/CoordProduct.class
 edu/uclm/tp3/quirk/QuirkSolver.class
 edu/uclm/tp3/common/model/MassiveMutationPolicy.class
-edu/uclm/tp3/common/deterministic/MatrixSolver.class
 edu/uclm/tp3/elonging/strategies/Stratego.class
 edu/uclm/tp3/common/gates/Identity.class
 edu/uclm/tp3/genetic/fitnessers/MannWhitneyWilcoxonSignedRanKTestFitnesser.class
@@ -32,7 +31,6 @@ edu/uclm/tp3/common/services/DeterministicService.class
 edu/uclm/tp3/common/strategies/Strategy.class
 edu/uclm/tp3/http/TemplatesController.class
 edu/uclm/tp3/common/services/TemplatesService.class
-edu/uclm/tp3/common/deterministic/MatrixColumn.class
 edu/uclm/tp3/common/gates/Swap.class
 edu/uclm/tp3/common/gates/TwoQubitsGate.class
 edu/uclm/tp3/http/EvolutionaryController.class
@@ -108,7 +106,6 @@ edu/uclm/tp3/elonging/strategies/Roulette.class
 edu/uclm/tp3/http/BlocksController.class
 edu/uclm/tp3/common/gates/RZ.class
 edu/uclm/tp3/sparse/QCol.class
-edu/uclm/tp3/common/deterministic/MatrixCircuit.class
 edu/uclm/tp3/qiskit/NewGroverCoder.class
 edu/uclm/tp3/common/deterministic/Solver.class
 edu/uclm/tp3/blocks/strategies/StrategyWrapper.class

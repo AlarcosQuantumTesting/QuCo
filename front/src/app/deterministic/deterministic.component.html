@@ -1,5 +1,7 @@
 <div>
     Number of qubits: <input type="number" min="1" [(ngModel)]="qubits" (change)="updateOutputs()">
+    &nbsp;
+    <i>(The table shows only the first {{ maxRows}} rows)</i>
 </div>
 <span style="color : red">{{ error }}</span>
 
@@ -80,11 +82,15 @@
     <table border="1">
       <tr>
         <th colspan="5" align="left">
+          <input type="checkbox" [(ngModel)]="originalGR"> Original Grover & Rudolph
+          <br>
           Physical angle:
           &nbsp;
           <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
           <br>
           Functions' prefix: <input type="text" [(ngModel)]="prefix">
+          &nbsp;
+          <input type="checkbox" [(ngModel)]="splitCircuits">Split per values
           &nbsp;
           <button (click)="getCircuit()">Get whole Qiskit code</button>
           &nbsp;
@@ -92,7 +98,13 @@
         </th>
       </tr>
       <tr>
-        <th rowspan="2">Output</th>
+        <th rowspan="2">
+          Output
+          <br>
+          <small>
+            ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
+          </small>
+        </th>
         <th colspan="3">Expected frequency</th>
       </tr>
       <tr>
@@ -110,16 +122,16 @@
           <small><small style="color: blue" (click)="reset()">Reset</small></small>
         </th>
       </tr>
-      <tr *ngFor="let i of [].constructor(expectedFrequencies.length); let rowIndex = index" align="center">
+      <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">
         <td>
           {{ rowIndex }}
           <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
         </td>
         <td>
-          <input type="number" min="0" step="1" [(ngModel)]="expectedFrequencies[rowIndex]" (change)="updateOutputs()">
+          <input type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
         </td>
         <td>
-          <span>{{ relativeFrequencies[rowIndex].toFixed(2) }}%</span>
+          <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
         </td>
       </tr>
     </table>
@@ -132,8 +144,14 @@
     </div>
 </div>
 
-<div id="divCode" #codeArea>
-  <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
+<div id="divCode">
+  <strong 
+      (click)="copyCode(copyTooltip)" 
+      #copyTooltip 
+      title="Copy code"
+      style="cursor: pointer;"
+    >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
+  </strong>
   <br>
   <u (click)="switchOutput()">
     Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
@@ -146,7 +164,7 @@
       <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
       <button (click)="saveCode()">Save</button>
   </div>
-  <div style="font-size: x-small;">
+  <div style="font-size: x-small;" #codeArea>
       <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
   </div>
 </div>

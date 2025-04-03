@@ -5,9 +5,9 @@ import { GroverStyle } from '../common/GroverStyleComponent';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
-import { GroverService } from '../grover.service';
 import { QiskitCode } from '../grover/QiskitCode';
 import { QiskitService } from '../qiskit.service';
+import { FreqTable } from './FreqTable';
 
 Chart.register(...registerables)
 
@@ -24,12 +24,13 @@ export class DeterministicComponent extends GroverStyle {
 
   probOf0 : number = 0.5
 
-  expectedFrequencies : number[] = []
-  expandedArray: number[] = [];
-  relativeFrequencies : number[] = []
+  expectedFrequencies : FreqTable = new FreqTable()
 
   physicalAngle : number = 0
   prefix? : string
+
+  originalGR : boolean = false
+  splitCircuits : boolean = false
 
   running : boolean = false
   state? : string 
@@ -39,18 +40,13 @@ export class DeterministicComponent extends GroverStyle {
   svgWidth : number = 0
   svgHeight : number = 0
 
+  maxRows = 1024
+
   responseReceived? : any
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
     super(qiskitService)
 
-    for (let i=0; i<Math.pow(2, this.qubits); i++)
-      this.expectedFrequencies.push(Math.round(Math.random()*10))
-    this.expectedFrequencies = [63, 126, 188, 250, 188, 126, 63, 0]
-    this.expectedFrequencies = [125, 125, 125, 125, 125, 125, 125, 125]
-    this.expectedFrequencies = [10, 40, 30, 20, 20, 30, 40, 10]
-    this.expectedFrequencies = [0, 0, 0, 0, 0, 0, 0, 100, 100, 0, 100, 0, 0, 0, 0, 0]
-    //this.expectedFrequencies = [250, 250, 250, 250]
     this.updateOutputs()
   }
 
@@ -84,7 +80,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedElements = 0
     let expr, row, wholeExpression
-    for (let i = 0; i < this.expectedFrequencies.length; i++) {
+    for (let i = 0; i < this.expectedFrequencies.rows; i++) {
       wholeExpression = ""
       row = i.toString(2).padStart(this.qubits, '0')
       for (let j = 0; j < this.userExpressions.length; j++) {
@@ -97,10 +93,10 @@ export class DeterministicComponent extends GroverStyle {
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
       let result = eval(wholeExpression )
-      if (marking)
-        this.expectedFrequencies[i] = result ? 100 : 0
-      else 
-        this.expectedFrequencies[i] = result
+      if (marking && result)
+        this.expectedFrequencies.setFreq(i, 100)
+      else if (result)
+        this.expectedFrequencies.setFreq(i, result)
     }
     this.updateOutputs()
   }
@@ -180,12 +176,12 @@ export class DeterministicComponent extends GroverStyle {
       return
 
     if (this.codeAsFunctions) {
-      for (let key in this.responseReceived) {
-        if (key!='tree' && key!='unitaryMatrix') {
-          let value = this.responseReceived[key]
-          code = code?.replace(key, value)
+        for (let key in this.responseReceived) {
+          if (key!='tree' && key!='unitaryMatrix') {
+            let value = this.responseReceived[key]
+            code = code?.replace(key, value)
+          }
         }
-      }
     } else {
       for (let key in this.responseReceived) {
         if (key!='tree' && key!='#INITIALIZE#' && key!='unitaryMatrix') {
@@ -232,7 +228,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.prefix).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.splitCircuits, this.prefix).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
@@ -373,84 +369,77 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   updateOutputs() {
-    let max = Math.pow(2, this.qubits)
-    if (max<this.expectedFrequencies.length) {
-      this.expectedFrequencies.splice(max)
-    } else {
-      let l = this.expectedFrequencies.length
-      for (let i=l; i<max; i++)
-        this.expectedFrequencies.push(0)
-    }
+    this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
-    this.expandedArray = [];
-    this.expectedFrequencies.forEach((count, index) => {
-      // Agregar `index` al array expandido `count` veces
-      for (let i = 0; i < count; i++) {
-          this.expandedArray.push(index);
-      }
-    });
-    let shots = this.expectedFrequencies.reduce((total, freq)=> total + freq, 0)
-    this.relativeFrequencies = []
-    for (let i=0; i<this.expectedFrequencies.length; i++)
-      this.relativeFrequencies.push(this.expectedFrequencies[i]*100/shots)
+    
+    let shots = this.expectedFrequencies.getShots()
+   // for (let i=0; i<this.expectedFrequencies.rows; i++)
+     // this.relativeFrequencies.push(this.expectedFrequencies[i]*100/shots)
   }
 
   reset() {
-    let max = Math.pow(2, this.qubits)
-    this.expectedFrequencies = []
-    for (let i=0; i<max; i++)
-        this.expectedFrequencies.push(0)
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
     this.updateOutputs()
   }
 
   random(factor : number) {
-    let max = Math.pow(2, this.qubits)
-    this.expectedFrequencies = []
-    for (let i=0; i<max; i++)
-        this.expectedFrequencies.push(Math.round(Math.random()*100*factor))
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
+    for (let i=0; i<this.expectedFrequencies.rows; i++)
+        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100*factor))
     this.calculateShots()
     this.updateOutputs()
   }
 
   zeroTo2N() {
-    let max = Math.pow(2, this.qubits)
-    this.expectedFrequencies = []
-    for (let i=1; i<=max; i++)
-      this.expectedFrequencies.push(i)
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
+    for (let i=0; i<this.expectedFrequencies.rows; i++)
+      this.expectedFrequencies.setFreq(i, i)
     this.calculateShots()
     this.updateOutputs()
   }
 
   withProb() {
-    let max = Math.pow(2, this.qubits)
-    this.expectedFrequencies = []
-    for (let i=0; i<max; i++)
-      if (Math.random() < this.probOf0)
-        this.expectedFrequencies.push(0)
-      else
-        this.expectedFrequencies.push(Math.round(Math.random()*100))
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
+    
+    for (let i=0; i<this.expectedFrequencies.rows; i++)
+      if (Math.random() >= this.probOf0)
+        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100))
     this.calculateShots()
     this.updateOutputs()
   }
 
   private calculateShots() {
-    this.shots = 0
-    for (let i=0; i<this.expectedFrequencies.length; i++)
-      this.shots = this.shots + this.expectedFrequencies[i]
+    this.shots = this.expectedFrequencies.getShots()
   }
 
-  copyCode() {
-    let wholeCode = document.getElementById("codeArea") 
-    let range = document.createRange()
-    range.selectNode(wholeCode!)
-    window.getSelection()!.removeAllRanges(); // clear current selection
-    window.getSelection()!.addRange(range); // to select text
-    document.execCommand("copy")
-    window.getSelection()!.removeAllRanges()
+  copyCode(copyTooltip: HTMLElement): void {
+    this.codeArea.nativeElement.click()
+    const text = this.codeArea.nativeElement.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const originalTitle = copyTooltip.title;
+      copyTooltip.title = 'Copied!';
+      
+      // Opcional: forzar el tooltip actualizando el atributo
+      copyTooltip.click(); // Algunos navegadores lo fuerzan así
+  
+      setTimeout(() => {
+        copyTooltip.title = originalTitle;
+      }, 1500); // Vuelve al tooltip original después de 1.5 segundos
+    }).catch(err => {
+    });
   }
 
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+  }
+
+  setFreq(event : any, rowIndex : number) {
+    let freq = parseInt(event.target.value)
+    this.expectedFrequencies.setFreq(rowIndex, freq)
   }
 }
