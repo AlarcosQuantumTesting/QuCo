@@ -278,26 +278,7 @@
 
 </div>
 
-<!-- <div *ngIf="matrix" class="selection-container">
-    <div class="radio-group">
-        <p class="radioTitle">Select domain:</p>
-        <label class="custom-radio">
-            <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
-        </label>
-        <label class="custom-radio">
-            <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
-        </label>
-    </div>
 
-    <div class="template-group">
-        <p class="radioTitle">Available templates:</p>
-        <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-            <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">
-                {{ template.fileName }}
-            </option>
-        </select>
-    </div>
-</div> -->
 <div *ngIf="matrix" class="matrix-editor-container">
     <div class="table-button-container">
         <div class="table-container" *ngIf="matrix">
@@ -971,7 +952,7 @@
             </div> -->
         </div>
     </div>
-
+<app-editor *ngIf="mostrarModalVerExp"></app-editor>
     <div class="modal" *ngIf="mostrarModalVerExp">
         <div class="modal-content">
             <!-- Encabezado del modal -->

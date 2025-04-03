@@ -1,10 +1,66 @@
-<div>
+<head>
+    <!-- Agregar Font Awesome desde CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <!-- Floating Help Button -->
+    <!-- <button class="help-button" (click)="toggleHelp()">
+        ❔
+    </button> -->
+
+    <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+    <div class="titulo">
+        <h1>GROVER</h1>
+    </div>
+
+    <div class="matrixTitle-container">
+        <h2 class="buildTitle">Build matrix</h2>
+        <!-- <button class="btn-reset" (click)="resetValues()">
+            <i class="fa fa-refresh" title="Reset matrix"></i>
+        </button> -->
+    </div>
+
+    <div class="container matrix-container">
+        <div class="form-row">
+            <div class="section buildText">
+                <p>
+                    In this section you can build a matrix with the desired number of qubits.
+                    <br>
+                    To do so, fill the number of qubits and press the button to build the matrix.
+                </p>
+            </div>
+            <div class="section qubitsContainer">
+                <div class="form-group">
+                    <div class="label-container">
+                        <label for="numberOfQubits">Number of  qubits:</label>
+                        <small class="input-hint">[2 - 12]</small>
+                    </div>
+
+                    <input id="numberOfQubits" type="number" min="2" max="12" [(ngModel)]="qubits" (input)="validateInputs()" class="form-control">
+                    <span *ngIf="qubits !== null && (qubits < 2 || qubits > 12)" class="error-text">
+                        Must be between 2 and 12
+                    </span>
+                </div>
+
+                <div class="form-actions">
+                    <button (click)="buildMatrixActions()" class="btn btn-primary">Build matrix</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- <div>
     Number of  qubits: <input type="number" min="2" [(ngModel)]="qubits">
     <br>
     <button (click)="getEmptyMatrix()">Build input matrix</button>
     <br>
     <h3><mark style="color : red">{{ error }}</mark></h3>
-</div>
+</div> -->
 
 <div *ngIf="matrix">
     <p>
@@ -63,7 +119,7 @@
         </div>
     </div>
 
-    <table border="1">
+    <table id="myTable" border="1">
         <tr style="color:blue">
             <td [colSpan]="2" align="left">
                 <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>

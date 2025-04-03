@@ -15,6 +15,7 @@ import { CircuitEditorComponent } from './circuit-editor/circuit-editor.componen
 import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { EditorComponent } from './editor/editor.component';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -34,7 +35,8 @@ const appRoutes : Routes = [
     DeterministicComponent,
     CircuitEditorComponent,
     TemplatesComponent,
-    QubitsConfigurationComponent
+    QubitsConfigurationComponent,
+    EditorComponent
   ],
   imports: [
     BrowserModule,

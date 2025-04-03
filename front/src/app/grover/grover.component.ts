@@ -27,6 +27,14 @@ export class GroverComponent extends GroverStyle {
 
   max: number = 50000
 
+
+
+
+  mensajeTemporal: string = '';
+  numberOfQubits : number | null = null;
+  isInvalid: boolean = true;
+
+
   constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, public sanitizer: DomSanitizer, public manager : ManagerService) {
     super(qiskitService)
   }
@@ -155,6 +163,8 @@ export class GroverComponent extends GroverStyle {
     }
     this.reset()
     this.matrix = this.emptyMatrix(this.qubits, 0)
+
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
   }
 
   private emptyMatrix(inputQubits: number, outputQubits: number): number[][] {
@@ -307,5 +317,53 @@ export class GroverComponent extends GroverStyle {
 
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+  }
+
+
+
+
+
+
+
+
+
+  goToTable(): void {
+    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
+    const table = document.getElementById('myTable');
+    if (table) {
+      table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  validateInputs() {
+    if (this.qubits === null || this.qubits === undefined) {
+      this.error = 'Number of qubits is required';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.qubits < 2 || this.qubits > 12) {
+      this.error = 'Number of qubits must be between 2 and 12';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
+  buildMatrixActions() {
+    this.numberOfQubits = this.qubits;
+
+    localStorage.removeItem('processedExpressions');
+    localStorage.removeItem('matrix');
+
+    localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
+
+    this.getEmptyMatrix();
+    // this.goToSpecifications();
+    this.goToTable();
+    // this.clearExpressions();
   }
 }
