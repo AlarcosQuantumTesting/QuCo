@@ -305,7 +305,7 @@
                 <tr>
                     <th></th>
                     <th [colSpan]="numberOfInputQubits">Input</th>
-                    <th [colSpan]="outputQubits + 1">
+                    <th [colSpan]="(numberOfOutputQubits ?? 0) + 1">
                         <!-- output-info.component.html -->
                         <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                             <span>Output</span>

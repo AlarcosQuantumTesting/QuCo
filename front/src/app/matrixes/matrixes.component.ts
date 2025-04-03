@@ -109,6 +109,7 @@ export class MatrixesComponent  {
       this.error = "Write some expression"
       return
     }
+    
     this.userExpressions.push(this.currentUserExpression)
 
     // Limpiar el campo de texto
@@ -250,6 +251,10 @@ export class MatrixesComponent  {
     }
     this.reset()
 
+
+    const maxQubit = this.inputQubits + this.outputQubits - 1;
+
+
     // Calculamos el valor de qn
     const qnValue = `q${this.inputQubits + this.outputQubits - 1}`;
 
@@ -258,27 +263,51 @@ export class MatrixesComponent  {
         expr.replace(/\bqn\b/g, qnValue)
     );
 
-    try {
-      let matrix = this.fillingService.fillTable(processedExpressions, this.inputQubits, this.outputQubits)
-      this.rows = matrix.length
-      this.cols = matrix[0].length
-      this.load(matrix)
+    const qubitRegex = /\bq(\d+)\b/g;
+    let isValid = true;
+
+    for (const expr of processedExpressions) {
+        let match;
+        while ((match = qubitRegex.exec(expr)) !== null) {
+            const qubitNumber = parseInt(match[1], 10); // Extrae el número de qubit
+
+            // Comprueba si está fuera del rango permitido
+            if (qubitNumber < 0 || qubitNumber > maxQubit) {
+                isValid = false;
+                // alert(`Invalid qubit: q${qubitNumber}. Allowed range: q0 to q${maxQubit}`);
+                this.mensajeTemporal = `Invalid qubit: q${qubitNumber}. Allowed range: q0 to q${maxQubit}`;
+                setTimeout(() => {
+                    this.mensajeTemporal = '';
+                }, 2000);
+                break;
+            }
+        }
+    }
+
+    if (isValid) {
+      try {
+
+        let matrix = this.fillingService.fillTable(processedExpressions, this.inputQubits, this.outputQubits)
+        this.rows = matrix.length
+        this.cols = matrix[0].length
+        this.load(matrix)
 
 
-      localStorage.setItem('matrix', JSON.stringify(matrix));
-      localStorage.setItem('inputQubits', JSON.stringify(this.inputQubits));
-      localStorage.setItem('outputQubits', JSON.stringify(this.outputQubits));
-      localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
+        localStorage.setItem('matrix', JSON.stringify(matrix));
+        localStorage.setItem('inputQubits', JSON.stringify(this.inputQubits));
+        localStorage.setItem('outputQubits', JSON.stringify(this.outputQubits));
+        localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
 
 
-      this.goToTable();
-    } catch (error) {
-      this.error = error
+        this.goToTable();
+      } catch (error) {
+        this.error = error
 
-      this.mensajeTemporal = 'The expression is not valid';
-      setTimeout(() => {
-          this.mensajeTemporal = '';
-      }, 2000);
+        this.mensajeTemporal = 'The expression is not valid';
+        setTimeout(() => {
+            this.mensajeTemporal = '';
+        }, 2000);
+      }
     }
   }
 
@@ -776,6 +805,9 @@ export class MatrixesComponent  {
   buildMatrixActions() {
     this.numberOfInputQubits = this.inputQubits;
     this.numberOfOutputQubits = this.outputQubits;
+
+    localStorage.removeItem('processedExpressions');
+    localStorage.removeItem('matrix');
 
     localStorage.setItem('inputQubits', JSON.stringify(this.numberOfInputQubits));
     localStorage.setItem('outputQubits', JSON.stringify(this.numberOfOutputQubits));

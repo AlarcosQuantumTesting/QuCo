@@ -1480,7 +1480,7 @@ u:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     max-height: 200px;
     overflow-y: auto;  /* Si hay muchas sugerencias, permite hacer scroll */
-    z-index: 10;  /* Asegúrate de que esté encima del input */
+    z-index: 10;  /* Encima del input */
   }
   
   .suggestion-item {
