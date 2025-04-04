@@ -104,8 +104,58 @@
             </li>
         </ol>
     </div>
+    <div *ngIf="matrix" class="matrix-editor-container">
+        <div class="table-button-container">
+            <table id="myTable" border="1">
+                <tr style="color:blue">
+                    <td [colSpan]="2" align="left">
+                        <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
+                        &nbsp;
+                        <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
+                        &nbsp;
+                    <td [colSpan]="qubits" align="center">
+                        Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">As a whole program</u>&nbsp;<u href="#" (click)="getQiskitCode(matrix, true)">As a function</u>
+                        <br>
+                        <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">Use MCX
+                        <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">Use H-MCZ-H
+                    </td>
+                </tr>
+                <tr>
+                    <th rowspan="2">Index</th>
+                    <th [colSpan]="qubits+1">Inputs</th>
+                </tr>
+                <tr>
+                    <th *ngFor="let i of [].constructor(qubits); let cont = index" align="center">
+                        q<sub>{{cont}}</sub>
+                    </th>
+                    <th>Marked</th>
+                </tr>
+        
+                <tr *ngFor="let row of matrix; let rowIndex = index" align="center" (click)="mark(rowIndex)">
+                    <th [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }">
+                        {{rowIndex}}
+                    </th>
+                    <td *ngFor="let value of row; let colIndex = index" align="center" [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }">
+                        {{ value }}
+                    </td>
+                </tr>
+                <tr style="color:blue">
+                    <td [colSpan]="qubits+2" align="left">
+                        <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
+                        &nbsp;
+                        <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
+                        &nbsp;
+                        <u href="#" (click)="getQiskitCode(matrix, false)">Qiskit code</u>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="section half expressions-section">
+            <app-editor [parent]="this"></app-editor>
+        </div>
+    </div>
 
-    <div>
+    <!-- <div>
         <strong>Your expressions:</strong>
         <br>
         <input type="text" size="50" [(ngModel)]="currentUserExpression">&nbsp;<a style="color : blue" (click)="addUserExpression()">Add</a>
@@ -117,9 +167,9 @@
         <div *ngIf="selectedElements>0">
             <i style="color : blue">{{ selectedElements }} elements selected </i>
         </div>
-    </div>
+    </div> -->
 
-    <table id="myTable" border="1">
+    <!-- <table id="myTable" border="1">
         <tr style="color:blue">
             <td [colSpan]="2" align="left">
                 <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
@@ -161,7 +211,7 @@
                 <u href="#" (click)="getQiskitCode(matrix, false)">Qiskit code</u>
             </td>
         </tr>
-    </table>
+    </table> -->
 
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>

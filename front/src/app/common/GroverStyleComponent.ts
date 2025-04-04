@@ -83,7 +83,21 @@ export abstract class GroverStyle {
     abstract reset() : void
     abstract fillTable(marking : boolean) : void
     
-    markElementsWithUserExpressions() {
+    // markElementsWithUserExpressions() {
+    //     this.error = undefined
+    //     if (this.userExpressions.length == 0) {
+    //       this.error = "There are no expressions to fill-in the table"
+    //       return
+    //     }
+    //     this.reset()
+    //     try {
+    //       this.fillTable(true)
+    //     } catch (error) {
+    //       this.error = error
+    //     }
+    // }
+
+    fillTableWithUserExpressions() {
         this.error = undefined
         if (this.userExpressions.length == 0) {
           this.error = "There are no expressions to fill-in the table"

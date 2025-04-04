@@ -170,3 +170,124 @@ p {
     text-align: center;
     background-color: none;
 }
+
+.matrix-editor-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+
+    max-width: 100%;
+    max-height: 700px;
+}
+
+.table-button-container {
+    display: flex;
+    align-items: stretch;  /* Hace que la tabla y el botón tengan la misma altura */
+    justify-content: flex-start;  /* Alinea los elementos al principio */
+    width: 100%;
+}
+
+.section {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.half {
+    flex: 1;
+    padding: 15px;
+    overflow: auto;
+    width: 50%;
+    float: right;
+}
+
+
+.expressions-section {
+    background: #e0f1f1;
+    padding: 15px;
+    border-radius: 8px;
+    border-top: 4px solid #128c7e;
+    border-bottom: 4px solid #128c7e;
+    width: 100%;
+    
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.expressions-section ol {
+    padding-left: 20px;
+    justify-content: left;
+}
+
+
+.table-container {
+    display: flex;
+    justify-content: center;
+    clear: both;
+    height: 100%;
+    width: 100%;
+    max-height: 700px;
+    flex: 1 1 50%;
+    overflow-x: auto;
+}
+.table-button-container {
+    display: flex;
+    align-items: stretch; 
+    justify-content: flex-start;
+    width: 100%;
+}
+
+
+th, td {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border: none;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+}
+
+.table-input {
+    border-radius: 5px;
+    border-width: 1px;
+    width: 90%;
+}
+
+.table-input:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+}
+
+th {
+    background-color: #0b555a;
+    color: white;
+    font-weight: bold;
+    padding: 2px;
+    border: 1px solid #ddd;
+}
+
+td {
+    padding: 3px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #4377612a;
+}
+
+tr:hover {
+    background-color: #e8f3ed;
+    transition: 0.3s;
+}
+
+th, td {
+    border-radius: 3px;
+}

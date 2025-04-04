@@ -59,7 +59,8 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      this.markElementsWithUserExpressions()
+      // this.markElementsWithUserExpressions()
+      this.fillTableWithUserExpressions()
   }
 
   setFrequenciesWithUserExpressions() {
