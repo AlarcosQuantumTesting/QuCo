@@ -1,4 +1,6 @@
 import { Component, Input } from '@angular/core';
+
+
 import { Expression } from '../matrixes/Expression';
 import { MatrixesComponent } from '../matrixes/matrixes.component';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -14,6 +16,20 @@ import { QuirkService } from '../quirk.service';
   styleUrl: './editor.component.scss'
 })
 export class EditorComponent {
+
+  @Input() parent: any; // Puede ser MatrixesComponent o null si está en otro componente
+
+  callParentMethodEx() {
+    if (this.parent) {
+      this.parent.someMethodInMatrixes();
+    }
+  }
+
+  callParentMethod(methodName: string, ...args: any[]) {
+    if (this.parent && typeof this.parent[methodName] === 'function') {
+      this.parent[methodName](...args);
+    }
+  }
 
 //   mostrarInstrucciones: boolean = false;
 //   mostrarEjemplos: boolean = false;

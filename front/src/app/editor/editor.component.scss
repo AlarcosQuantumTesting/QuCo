@@ -1,0 +1,287 @@
+.header-with-button {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos al principio */
+    align-items: center; /* Centra los elementos verticalmente */
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.editorTitle-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .fa-edit:hover {
+    color: #0f3436;
+    transform: scale(1.05);
+}
+
+.btn-toggle-createExp {
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #007b7f;
+    color: white;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .btn-toggle-createExp:hover {
+    background-color: #2d5f7a;
+    border-color: #2e607a;
+    transform: scale(1.05);
+}
+  
+  .btn-toggle-createExp i {
+    font-size: 16px;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.input-group {
+    position: relative;
+  }
+
+  .buttons-container {
+    display: flex;
+    flex-direction: row; /* Asegura que sea en fila */
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-clear {
+    background-color: #c94855;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-items: end;
+    gap: 5px;
+}
+
+.btn-clear:hover {
+    background-color: #86222c;
+    transform: scale(1.05);
+}
+
+.expression-list {
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.expression-list code {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.expression-list .deleteButton {
+    background-color: rgb(173, 88, 88);
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    font-weight: normal;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-align: center;
+
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+
+    min-width: 24%;
+}
+
+.expression-list .saveButton {
+    background-color: #008b95;
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    font-weight: normal;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-align: center;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.expression-list .deleteButton:hover {
+    background-color: rgb(219, 67, 67);
+    transform: scale(1.05);
+}
+
+.expression-list .saveButton:hover {
+    background-color: #0a565c;
+    transform: scale(1.05);
+}
+
+.btn-container {
+    text-align: center;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    position: relative;
+}
+
+.section {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.expressions-section {
+    background: #e0f1f1;
+    padding: 15px;
+    border-radius: 8px;
+    border-top: 4px solid #128c7e;
+    border-bottom: 4px solid #128c7e;
+    width: 100%;
+    
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.expressions-section ol {
+    padding-left: 20px;
+    justify-content: left;
+}
+
+.half {
+    flex: 1;
+    padding: 15px;
+    overflow: auto;
+    width: 50%;
+    float: right;
+}
+
+.btn-toggle-examples {
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #007b7f;
+    color: white;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .btn-toggle-examples:hover {
+    background-color: #2d5f7a;
+    border-color: #2e607a;
+    transform: scale(1.05);
+}
+  
+  .btn-toggle-examples i {
+    font-size: 16px;
+  }
+
+  i {
+    font-style: normal !important;
+  }
+
+  .btn-search {
+    background: none;
+    color: #0b555a;
+    font-weight: bold;
+    font-size: 14px;
+    margin-left: 0px;
+  }
+
+  .btn-search:hover {
+    background: none;
+    transform: scale(1);
+  }
+
+  .btn-add {
+    background-color: #4c9696;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-add:hover {
+    background-color: #386161;
+    transform: scale(1.05);
+}
+
+.btn-add:disabled {
+    background-color: #38616156;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-apply {
+    background-color: #008b95;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-apply:hover {
+    background-color: #0f5d63;
+    transform: scale(1.05);
+}
+
+.btn-apply:disabled {
+    background-color: #0f5d6354;
+    cursor: not-allowed;
+    transform: none;
+} 

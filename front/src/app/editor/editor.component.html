@@ -1,4 +1,67 @@
-<p>editor works!</p>
+<head>
+    <!-- Agregar Font Awesome desde CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+    <div class="header-with-button">
+        <button class="btn-toggle-examples" (click)="callParentMethod('toggleEjemplos')">
+            <i class="fa fa-lightbulb"></i>
+        </button>
+
+        <div class="editorTitle-container">
+            <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
+            <button class="btn-search" (click)="callParentMethod('showExpressions')">
+                <i class="fa fa-edit editorIcon" title="Edit your expressions"></i>
+            </button>
+        </div>
+
+        <button (click)="callParentMethod('create')" class="btn-toggle-createExp">
+            <i class="fa fa-plus"></i>
+        </button>
+    </div>
+
+    <div class="input-group">
+        <input type="text"
+            *ngIf="parent" 
+            [(ngModel)]="parent.searchQuery"
+            (input)="callParentMethod('onSearchInput')"
+            (keydown)="callParentMethod('onTabPress', $event)"
+            placeholder="Double click to add multiple expressions"
+            list="expressionsList">
+
+        <datalist id="expressionsList">
+            <option class="expOpt" *ngFor="let expression of parent.expressions" [value]="expression.jsExpression"></option>
+        </datalist>
+
+        <div class="buttons-container">
+            <button class="btn-add" (click)="callParentMethod('addUserExpression')"
+                [disabled]="parent?.isAddDisabled()">
+                <i class="fa fa-plus" aria-hidden="true"></i> Add
+            </button>
+            <button *ngIf="parent?.userExpressions.length > 0" class="btn-clear" (click)="callParentMethod('clearExpressions')">
+                <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <div class="expression-list" *ngFor="let userExpression of parent.userExpressions; let i = index">
+        <code>{{ userExpression }}</code>
+        <a class="deleteButton" (click)="callParentMethod('removeUserExpression', i)">
+            <i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove
+        </a>
+        <a class="saveButton" title="Save expression" (click)="callParentMethod('saveUserExpression', i)">
+            <i class="fas fa-save" style="font-size: 13px;"></i>
+        </a>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn-apply" (click)="callParentMethod('fillTableWithUserExpressions')"
+            [disabled]="parent?.userExpressions.length <= 0">
+            <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
+        </button>
+</div>
+
+
+
 <!-- <div class="header-with-button">
     <button (click)="mostrarEjemplos = true" class="btn-toggle-examples">
     <i class="fa" [ngClass]="hideExamples ? 'fa-lightbulb' : 'fa-minus'"></i>

@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewChild, AfterViewInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { QuirkService } from '../quirk.service';
 import { QiskitService } from '../qiskit.service';
@@ -7,12 +7,33 @@ import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { ExpressionsService } from '../expressions.service';
 import { Expression } from './Expression';
+import { EditorComponent } from '../editor/editor.component';
+
 @Component({
   selector: 'app-matrixes',
   templateUrl: './matrixes.component.html',
   styleUrls: ['./matrixes.component.css']
 })
-export class MatrixesComponent  {
+export class MatrixesComponent implements AfterViewInit  {
+
+  @ViewChild(EditorComponent) editor!: EditorComponent;
+
+  someMethodInMatrixes() {
+    console.log('Método en matrixes llamado');
+  }
+
+  ngAfterViewInit() {
+    if (this.editor) {
+      this.editor.parent = this; // Pasar la referencia de matrixes
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.editor && !this.editor.parent) {
+      this.editor.parent = this;
+      console.log("Parent asignado en AfterViewChecked:", this.editor.parent);
+    }
+  }
 
   inputQubits : number = 3
   outputQubits : number = 3
@@ -104,6 +125,7 @@ export class MatrixesComponent  {
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService) {}
 
   addUserExpression(): void {
+    console.log('Añadir expresión de usuario');
     this.error = undefined
     if (this.currentUserExpression.trim().length==0) {
       this.error = "Write some expression"
@@ -1091,6 +1113,10 @@ export class MatrixesComponent  {
           exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
+  }
+
+  toggleEjemplos() {
+    this.mostrarEjemplos = !this.mostrarEjemplos;
   }
 
   mostrarInstrucciones: boolean = false;
