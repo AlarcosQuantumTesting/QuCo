@@ -124,7 +124,7 @@ export class MatrixesComponent implements AfterViewInit  {
 
   dialogo : any = undefined
   // expressions: Expression[];
-  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '' };
+  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
 
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
@@ -868,7 +868,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.isDisabled2 = false;
     this.fromEdit = false;
     this.isNameDisabled = false;
-    this.expressionToSave = { expressionName: '', jsExpression: '', description: '' };
+    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
   }
 
   clearExpressions() {
@@ -962,7 +962,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.mostrarModalVerExp = false;
     // this.manager.selectedTemplate = new CodeTemplate("", "", "")
   }
-
+  isType: boolean = true;
   save() {
     if (this.isValid()) {
       
@@ -983,7 +983,7 @@ export class MatrixesComponent implements AfterViewInit  {
                 this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
 
                 // Limpiamos el formulario y cerramos el modal
-                this.expressionToSave = { expressionName: '', jsExpression: '', description: '' };
+                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
               },
@@ -999,7 +999,12 @@ export class MatrixesComponent implements AfterViewInit  {
           }      
         } else {
             // Si la expresión no existe, creamos una nueva
-            this.service.createExpression(this.expressionToSave).subscribe(
+            this.service.createExpression({
+              expressionName: this.expressionToSave.expressionName,
+              jsExpression: this.expressionToSave.jsExpression,
+              description: this.expressionToSave.description,
+              type: 'matrixes'
+            }).subscribe(
                 data => {
                     // Aseguramos que `this.expressions` esté inicializado
                     if (!this.expressions) {
@@ -1011,7 +1016,7 @@ export class MatrixesComponent implements AfterViewInit  {
                     this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
 
                     // Limpiamos el formulario y cerramos el modal
-                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '' };
+                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
                 },
@@ -1026,6 +1031,7 @@ export class MatrixesComponent implements AfterViewInit  {
 
   saveUserExpression(index: number) {
     this.expressionToSave.jsExpression = this.userExpressions[index];
+    this.expressionToSave.type = 'matrixes';
     this.mostrarModalCrearExp = true;
   }
 

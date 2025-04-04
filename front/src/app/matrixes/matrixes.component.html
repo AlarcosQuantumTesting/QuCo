@@ -934,6 +934,14 @@
                         </div>
                         <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control">
                     </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionDescription">Type:</label>
+                        </div>
+                        <input id="expDescription" type="text" [disabled]="isType"
+                        [(ngModel)]="expressionToSave.type" class="form-control">
+                    </div>
         
                     <div class="form-actions">
                         <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>

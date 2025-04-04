@@ -17,7 +17,7 @@ import { QuirkService } from '../quirk.service';
 })
 export class EditorComponent {
 
-  @Input() parent: any; // Puede ser MatrixesComponent o null si está en otro componente
+  @Input() parent: any;
 
   callParentMethodEx() {
     if (this.parent) {

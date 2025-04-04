@@ -13,6 +13,8 @@ public class Expression {
 	private String jsExpression;
 	@Column(length = 2000)
 	private String description;
+	@Column(length = 2000)
+	private String type;
 
 	public void setExpressionName(String expressionName) {
 		this.expressionName = expressionName;
@@ -37,5 +39,12 @@ public class Expression {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	public void setType(String type) {
+		this.type = type;
+	}
 
+	public String getType() {
+		return type;
+	}
 }
