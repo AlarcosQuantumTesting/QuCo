@@ -682,9 +682,14 @@ export class MatrixesComponent implements AfterViewInit  {
     // Valida cuando se inicializan los valores
     this.validateInputs();
 
+    // this.service.getExpressions().subscribe((data: Expression[]) => {
+    //   this.expressions = data;
+    // });
+
     this.service.getExpressions().subscribe((data: Expression[]) => {
-      this.expressions = data;
+      this.expressions = data.filter(exp => exp.type === 'matrixes');
     });
+    
 
     // Recuperar valores desde localStorage con valores por defecto
     this.inputQubits = JSON.parse(localStorage.getItem('inputQubits') || '3');
@@ -1092,15 +1097,20 @@ export class MatrixesComponent implements AfterViewInit  {
 
   onSearchInput() {
     this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
+    
     this.filteredExpressions = [...this.expressions];
+    
     if (this.searchQuery.trim() != "") {
+
       this.filteredExpressions = this.expressions.filter(exp =>
-        exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+        exp.type === 'matrixes' && 
+        (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
       );
 
       
     const foundExpression = this.manager.expressions.find(exp =>
+      exp.type === 'matrixes' &&
       exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
     );
 
@@ -1122,7 +1132,8 @@ export class MatrixesComponent implements AfterViewInit  {
 
     if (this.searchQuery.trim() != ""){
       this.filteredExpressions = this.expressions.filter(exp =>
-          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+        exp.type === 'matrixes' &&
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
   }
