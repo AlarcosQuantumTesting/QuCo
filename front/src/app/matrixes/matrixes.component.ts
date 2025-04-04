@@ -23,6 +23,12 @@ export class MatrixesComponent implements AfterViewInit  {
   }
 
   ngAfterViewInit() {
+    setTimeout(() => {
+      if (this.editor) {
+        this.editor.parent = this;
+      }
+    }, 0);
+    
     if (this.editor) {
       this.editor.parent = this; // Pasar la referencia de matrixes
     }
@@ -1125,6 +1131,14 @@ export class MatrixesComponent implements AfterViewInit  {
  
 
   checkForExpressions() {
+
+    console.log("✅ checkForExpressions() llamado desde EditorComponent"); // Verifica si se llama
+    if (!this.currentUserExpression || !this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      console.log("🚫 No hay expresión válida. Recomendaciones ocultas.");
+      return;
+    }
+
     if (!this.currentUserExpression.trim()) {
       this.showRecommendations = false;
       return;  // Si el campo está vacío, salir sin hacer más verificaciones
@@ -1178,6 +1192,8 @@ export class MatrixesComponent implements AfterViewInit  {
 
     this.recommendation = `${outputQubit} = ${orExpression }`;
     this.showRecommendations = true;
+
+    console.log("✅ Recomendaciones visibles:", this.showRecommendations);
   }
 
   checkForAndExpression() {

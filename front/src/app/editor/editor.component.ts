@@ -31,6 +31,19 @@ export class EditorComponent {
     }
   }
 
+  onUserInput() {
+    if (this.parent) {
+      this.parent.checkForExpressions();
+    } else {
+      console.error("parent no está definido en EditorComponent");
+    }
+  }
+
+  selectRecommendation() {
+    // Lógica para manejar la selección de una recomendación
+    console.log("Seleccionada la recomendación:", this.parent?.recommendation);
+  }
+
 //   mostrarInstrucciones: boolean = false;
 //   mostrarEjemplos: boolean = false;
 //   hideExamples : boolean = true

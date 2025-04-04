@@ -23,8 +23,10 @@
         <input type="text"
             *ngIf="parent" 
             [(ngModel)]="parent.searchQuery"
-            (input)="callParentMethod('onSearchInput')"
+            (dblclick)="callParentMethod('openTextArea', this, $event, 'Expressions')"
+            (input)="callParentMethod('onSearchInput'); callParentMethod('checkForExpressions')"
             (keydown)="callParentMethod('onTabPress', $event)"
+            (focus)="callParentMethod('onFocusInput')"
             placeholder="Double click to add multiple expressions"
             list="expressionsList">
 
@@ -41,6 +43,14 @@
                 <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
             </button>
         </div>
+
+        <!-- Contenedor de recomendaciones -->
+        <div class="suggestions" *ngIf="parent?.showRecommendations">
+            <div class="suggestion-item" (click)="selectRecommendation()">
+            {{ parent?.recommendation }}
+            </div>
+        </div>
+  
     </div>
 
     <div class="expression-list" *ngFor="let userExpression of parent.userExpressions; let i = index">
