@@ -118,6 +118,7 @@ export abstract class GroverStyle {
             return
         }
         this.userExpressions.push(this.currentUserExpression)
+
     }
     
     removeUserExpression(index: number) {

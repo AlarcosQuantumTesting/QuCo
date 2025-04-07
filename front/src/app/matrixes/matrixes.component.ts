@@ -321,7 +321,7 @@ export class MatrixesComponent implements AfterViewInit  {
         this.load(matrix)
 
 
-        localStorage.setItem('matrix', JSON.stringify(matrix));
+        localStorage.setItem('matrixMatrixes', JSON.stringify(matrix));
         localStorage.setItem('inputQubits', JSON.stringify(this.inputQubits));
         localStorage.setItem('outputQubits', JSON.stringify(this.outputQubits));
         localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
@@ -347,7 +347,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.cols = matrix[0].length
     this.load(matrix)
 
-    localStorage.setItem('matrix', JSON.stringify(this.matrix));
+    localStorage.setItem('matrixMatrixes', JSON.stringify(this.matrix));
     localStorage.setItem('cols', JSON.stringify(this.cols));
     localStorage.setItem('rows', JSON.stringify(this.rows));
 
@@ -840,7 +840,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.numberOfOutputQubits = this.outputQubits;
 
     localStorage.removeItem('processedExpressions');
-    localStorage.removeItem('matrix');
+    localStorage.removeItem('matrixMatrixes');
 
     localStorage.setItem('inputQubits', JSON.stringify(this.numberOfInputQubits));
     localStorage.setItem('outputQubits', JSON.stringify(this.numberOfOutputQubits));
@@ -951,7 +951,7 @@ export class MatrixesComponent implements AfterViewInit  {
     localStorage.removeItem('inputQubits');
     localStorage.removeItem('outputQubits');
     localStorage.removeItem('processedExpressions');
-    localStorage.removeItem('matrix');
+    localStorage.removeItem('matrixMatrixes');
 
     location.reload();  // Reiniciar
   }

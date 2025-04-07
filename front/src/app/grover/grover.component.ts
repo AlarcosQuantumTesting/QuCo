@@ -71,6 +71,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   buscarBtn: boolean = false;
   recommendation: string = '';
   showRecommendations: boolean = false;
+  tooltipVisible: boolean = false;
+  tooltipTableVisible: boolean = false;
+  mostrarInstrucciones: boolean = false;
+  mostrarEjemplos: boolean = false;
 
 
   constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, 
@@ -97,7 +101,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     // Verificar si hay datos guardados
     const savedQubits = localStorage.getItem('qubits');
-    const savedUserExpressions = localStorage.getItem('processedExpressions');
+    const savedUserExpressions = localStorage.getItem('processedExpressionsGrover');
 
 
 
@@ -164,6 +168,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     }
 
       localStorage.setItem('qubits', JSON.stringify(this.qubits));
+      localStorage.setItem('processedExpressionsGrover', JSON.stringify(processedExpressions));
+      localStorage.setItem('matrix', JSON.stringify(this.matrix));
       // localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
   }
 
@@ -449,7 +455,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
 
-    localStorage.removeItem('processedExpressions');
+    localStorage.removeItem('processedExpressionsGrover');
     localStorage.removeItem('matrix');
 
     localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
@@ -579,52 +585,147 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     }
 
     caja.parentElement.appendChild(this.dialogo);
-}
+  }
 
-onSearchInput() {
+  onSearchInput() {
 
-  this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
-  
-  this.filteredExpressions = [...this.expressions];
-  
-  if (this.searchQuery.trim() != "") {
-
-    this.filteredExpressions = this.expressions.filter(exp =>
-      exp.type === 'matrixes' && 
-      (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
-    );
-
+    this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
     
-  const foundExpression = this.manager.expressions.find(exp =>
-    exp.type === 'matrixes' &&
-    exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
-  );
+    this.filteredExpressions = [...this.expressions];
+    
+    if (this.searchQuery.trim() != "") {
 
-  // if (foundExpression) {
-  //     console.log("Expression found:", foundExpression);
-  // }
-  
-  if (foundExpression) {
-      this.recommendation = `${foundExpression.jsExpression}`;
-      this.showRecommendations = true;
-  }
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'matrixes' && 
+        (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      );
 
-  }
-}
-
-
-searchExpressions() {
-  this.filteredExpressions = this.expressions;
-
-  if (this.searchQuery.trim() != ""){
-    this.filteredExpressions = this.expressions.filter(exp =>
+      
+    const foundExpression = this.manager.expressions.find(exp =>
       exp.type === 'matrixes' &&
-      exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
     );
+
+    // if (foundExpression) {
+    //     console.log("Expression found:", foundExpression);
+    // }
+    
+    if (foundExpression) {
+        this.recommendation = `${foundExpression.jsExpression}`;
+        this.showRecommendations = true;
+    }
+
+    }
   }
-}
 
 
+  searchExpressions() {
+    this.filteredExpressions = this.expressions;
+
+    if (this.searchQuery.trim() != ""){
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'matrixes' &&
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+  }
+
+
+  toggleTooltipTable(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipTableVisible) {
+      this.tooltipTableVisible = false;
+      this.tooltipVisible = false;
+    } else {
+      this.tooltipTableVisible = true;
+      this.tooltipVisible = false;
+    }
+  }
+
+  toggleTooltip(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipVisible) {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+    } else {
+      this.tooltipVisible = true;
+      this.tooltipTableVisible = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Verifica si el clic fue fuera del tooltip y el botón
+    const tooltipElement = document.querySelector('.tooltip');
+    const tooltipCustomElement = document.querySelector('.custom-tooltip');
+    const buttonElement = document.querySelector('button');
+    this.showRecommendations = false;
+    
+
+    if (this.tooltipVisible &&
+        tooltipElement && !tooltipElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipVisible = false;
+    }
+
+    if (this.tooltipTableVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
+  }
+
+  resetValues() {
+    // Eliminar valores guardados en localStorage
+    localStorage.removeItem('qubits');
+    localStorage.removeItem('processedExpressionsGrover');
+    localStorage.removeItem('matrix');
+
+    location.reload();  // Reiniciar
+  }
+
+  toggleEjemplos() {
+    this.mostrarEjemplos = !this.mostrarEjemplos;
+  }
+  
+  onAddExampleClick(i: number): void {
+    this.addExample(i);
+    this.mensajeTemporal = 'Example added';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  addExample(index: number): void {
+    this.error = undefined;
+    this.reset();
+
+    // Eliminar todas las expresiones antes de agregar nuevas
+    this.userExpressions = [];
+
+    let exprs = this.javaExamples[index].exprs;
+
+    for (let i = 0; i < exprs.length; i++) {
+        if (exprs[i].trim().length === 0) continue;
+
+        // Agrega la expresión a la lista
+        this.userExpressions.push(exprs[i]);
+    }
+
+    // Si deseas actualizar la variable `currentUserExpression`
+    if (exprs.length > 0) {
+        this.currentUserExpression = exprs[0];
+    }
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
+
+
+  }
 
 }

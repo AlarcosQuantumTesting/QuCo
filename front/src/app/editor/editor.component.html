@@ -35,7 +35,7 @@
         </datalist>
 
         <div class="buttons-container">
-            <button class="btn-add" (click)="callParentMethod('addUserExpression')"
+            <button class="btn-add" (click)="callParentMethod('addUserExpression'); parent.searchQuery = '';"
                 [disabled]="parent?.isAddDisabled()">
                 <i class="fa fa-plus" aria-hidden="true"></i> Add
             </button>
