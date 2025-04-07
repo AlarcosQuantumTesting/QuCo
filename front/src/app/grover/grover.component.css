@@ -325,6 +325,7 @@ td {
     padding: 3px;
     border: 1px solid #ddd;
     text-align: center;
+    cursor: pointer;
 }
 
 tr:nth-child(even) {
@@ -443,6 +444,14 @@ th, td {
 .highlight {
     color: #c2453c; /* Color verde para resaltar texto */
 }
+
+.highlighted-cell {
+    color: #ffffff;
+    background-color: rgba(15, 92, 15, 0.541);
+    /* border-top: solid 2px #0b555a;
+    border-bottom: solid 2px #0b555a; */
+}
+
 
 /* Estilo para los textos dentro del tooltip que estén destacados (highlight) */
 .tooltip .highlight {

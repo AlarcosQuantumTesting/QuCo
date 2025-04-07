@@ -172,10 +172,13 @@
                     </tr>
             
                     <tr *ngFor="let row of matrix; let rowIndex = index" align="center" (click)="mark(rowIndex)">
-                        <th [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }">
+                        <!-- <th [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }"> -->
+                        <th [ngClass]="{ 'highlighted-cell': row[row.length-1] }">
                             {{rowIndex}}
                         </th>
-                        <td *ngFor="let value of row; let colIndex = index" align="center" [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }">
+                        <!-- [ngStyle]="{ 'color' : (row[row.length-1]) ? 'blue' : 'black' }"> -->
+                        <td *ngFor="let value of row; let colIndex = index" align="center" 
+                        [ngClass]="{ 'highlighted-cell': row[row.length-1] }">
                             {{ value }}
                         </td>
                     </tr>
