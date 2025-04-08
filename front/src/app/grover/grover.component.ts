@@ -75,6 +75,16 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   tooltipTableVisible: boolean = false;
   mostrarInstrucciones: boolean = false;
   mostrarEjemplos: boolean = false;
+  mostrarModal: boolean = false;
+  isDisabled: boolean = false;
+  isDisabled2: boolean = false;
+  fromEdit: boolean = false;
+  isNameDisabled: boolean = false;
+  creatingExpression: boolean = false;
+  mostrarModalCrearExp: boolean = false;
+  isType: boolean = true;
+
+  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
 
 
   constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, 
@@ -596,14 +606,14 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     if (this.searchQuery.trim() != "") {
 
       this.filteredExpressions = this.expressions.filter(exp =>
-        exp.type === 'matrixes' && 
+        exp.type === 'grover' && 
         (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
       );
 
       
     const foundExpression = this.manager.expressions.find(exp =>
-      exp.type === 'matrixes' &&
+      exp.type === 'grover' &&
       exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
     );
 
@@ -625,7 +635,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     if (this.searchQuery.trim() != ""){
       this.filteredExpressions = this.expressions.filter(exp =>
-        exp.type === 'matrixes' &&
+        exp.type === 'grover' &&
         exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
@@ -692,7 +702,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   toggleEjemplos() {
     this.mostrarEjemplos = !this.mostrarEjemplos;
   }
-  
+
   onAddExampleClick(i: number): void {
     this.addExample(i);
     this.mensajeTemporal = 'Example added';
@@ -726,6 +736,139 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     this.currentUserExpression = "";
 
 
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.isDisabled = false;
+    this.isDisabled2 = false;
+    this.fromEdit = false;
+    this.isNameDisabled = false;
+    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+  }
+
+  // Expressions actions
+
+  create() {
+    this.creatingExpression = true;
+    this.mostrarModalCrearExp = true;
+    this.mostrarModalVerExp = false;
+    // this.manager.selectedTemplate = new CodeTemplate("", "", "")
+  }
+
+  save() {
+    if (this.isValid()) {
+      
+      const existingExpressionIndex = this.expressions.findIndex(exp => exp.expressionName === this.expressionToSave.expressionName);
+
+      if (existingExpressionIndex !== -1) {
+          // Si la expresión existe, actualizamos los datos
+          if (this.fromEdit) {
+            
+            const updatedExpression = { ...this.expressions[existingExpressionIndex], ...this.expressionToSave };
+
+            this.service.updateExpression(updatedExpression).subscribe(
+              data => {
+                // Actualizamos la expresión en el array
+                this.expressions[existingExpressionIndex] = data;
+
+                // Ordenamos las expresiones por nombre
+                this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                // Limpiamos el formulario y cerramos el modal
+                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                this.creatingExpression = false;
+                this.mostrarModalCrearExp = false;
+              },
+              error => {
+                console.error(error);
+              }
+            );
+            this.fromEdit = false;
+            this.isNameDisabled = false;
+          } else {
+            // Si la expresión existe y no estamos editando, mostramos un mensaje de error
+            alert("Expression with this name already exists. Please choose a different name.");
+          }      
+        } else {
+            // Si la expresión no existe, creamos una nueva
+            this.service.createExpression({
+              expressionName: this.expressionToSave.expressionName,
+              jsExpression: this.expressionToSave.jsExpression,
+              description: this.expressionToSave.description,
+              type: 'grover'
+            }).subscribe(
+                data => {
+                    // Aseguramos que `this.expressions` esté inicializado
+                    if (!this.expressions) {
+                        this.expressions = [];
+                    }
+
+                    // Agregar la nueva expresión a la lista
+                    this.expressions.push(data);
+                    this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                    // Limpiamos el formulario y cerramos el modal
+                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                    this.creatingExpression = false;
+                    this.mostrarModalCrearExp = false;
+                },
+                error => {
+                    console.error(error);
+                }
+            );
+        }
+    }
+  }
+
+
+  saveUserExpression(index: number) {
+    this.expressionToSave.jsExpression = this.userExpressions[index];
+    this.expressionToSave.type = 'grover';
+    this.mostrarModalCrearExp = true;
+  }
+
+  editExpression(expression: any, index: number) {
+    this.expressionToSave = { ...expression };
+    this.fromEdit = true;
+    this.isNameDisabled = true;
+    this.mostrarModalCrearExp = true;
+    this.mostrarModalVerExp = false;
+  }
+
+
+  deleteExpression(id: string, index: number) {
+    if (confirm("Are you sure you want to delete this expression?")) {
+        this.service.deleteExpression(id).subscribe(
+            () => {
+                // Asegurar que `this.expressions` esté inicializado
+                if (!this.expressions) {
+                    this.expressions = [];
+                }
+
+                // Eliminar la expresión de la lista
+                this.expressions.splice(index, 1);
+
+                // Ordenar las expresiones por nombre después de eliminar
+                this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                // Actualizar la tabla
+                this.searchExpressions();
+            },
+            error => {
+                console.error("Error deleting expression:", error);
+                alert("Failed to delete the expression. Please try again.");
+            }
+        );
+    }
+  }
+
+  showExpressions() {
+    this.mostrarModalVerExp = true;
+  }
+
+  isValid() {
+    return this.expressionToSave.expressionName && this.expressionToSave.jsExpression;
   }
 
 }

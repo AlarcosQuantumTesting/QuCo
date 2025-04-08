@@ -306,4 +306,114 @@
     </div>
 
 
+    <!-- Crear y ver expresiones -->
+
+    <div class="modal" *ngIf="mostrarModalCrearExp">
+        <div class="modal-content">
+            <!-- Botón para cerrar el modal -->
+            <div class="modal-header">
+                <h2 class="title-modal">Create expression</h2>
+                <span class="close" (click)="mostrarModalCrearExp = false; cerrarModal()">&times;</span>
+            </div>
+    
+            <!-- Contenido del modal -->
+            <div class="expression-output">
+
+                <div class="expressionsContainer">
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionName">Expression name:</label>
+                        </div>
+        
+                        <input id="expressionName" type="text" [disabled]="isNameDisabled" 
+                        [(ngModel)]="expressionToSave.expressionName" class="form-control">
+                    </div>
+        
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="jsExpression">Expression in javaScript:</label>
+                        </div>
+                        <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionDescription">Description:</label>
+                        </div>
+                        <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionDescription">Type:</label>
+                        </div>
+                        <input id="expDescription" type="text" [disabled]="isType"
+                        [(ngModel)]="expressionToSave.type" class="form-control">
+                    </div>
+        
+                    <div class="form-actions">
+                        <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+
+                <div class="help-actions">
+                    <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
+                </div>
+            </div>
+    
+            <!-- Botón para copiar el código -->
+            <!-- <div class="modal-footer">
+                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div> -->
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalVerExp">
+        <div class="modal-content">
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+                <div class="header-with-button">
+                    <h2 class="title-modal">Manage Expressions</h2>
+                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                </div>
+                <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
+            </div>
+            
+            <!-- Tabla de expresiones -->
+            <div class="table-container-expressions">
+                <table class="expressions-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>JavaScript Expression</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let expression of expressions; let i = index">
+                            <td>{{ expression.expressionName }}</td>
+                            <td>{{ expression.jsExpression }}</td>
+                            <td>{{ expression.description }}</td>
+                            <td>
+                                <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
+                                    <i class="fas fa-edit edit-expression-icon"></i>
+                                </button>
+                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                    <i class="fas fa-trash"></i> 
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    
+            <!-- Botón de cerrar -->
+            <div class="help-actions" style="margin-bottom: 15px;">
+                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+
 </body>
