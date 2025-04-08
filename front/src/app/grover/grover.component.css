@@ -54,6 +54,14 @@ h2 {
     margin-top: 23px;
 }
 
+h3 {
+    /* color: #2980b9; */
+    color: #14645b;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
 button {
     background-color: #3498db;
     color: white;
@@ -93,6 +101,14 @@ button:hover {
     margin-top: 10px;
     padding: 15px;
     margin-bottom: 10px;
+}
+
+.input-button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 60%;
 }
 
 .form-row {
@@ -657,7 +673,80 @@ code {
 
 /* Modales */
 
+.input-function {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .input-function:hover {
+    border-color: #2980b9;
+  }
 
+  .input-function:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+  }
+
+  .info-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* centra los elementos hijos horizontalmente */
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+  }
+  
+  .btn-confirm,
+  .btn-cancel {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 100px;
+    margin-top: 5px;
+  }
+  
+  .btn-confirm {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .btn-confirm:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+  }
+  
+  .btn-confirm:disabled {
+      background-color: #8f929073;
+      cursor: not-allowed;
+      transform: none;
+  }
+  
+  .btn-cancel {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+  
 .modal {
     display: flex;
     justify-content: center;
@@ -908,6 +997,43 @@ ol.list-instructions {
     background-color: #dce0de;
     font-style: normal !important;
   }
+
+  .copy-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0;
+    margin-bottom: 15px;
+    margin-right: 15px;
+}
+
+.copy-btn:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.save-code-btn {
+    background-color: #285ba7;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0;
+    margin-bottom: 15px;
+    margin-right: 15px;
+}
+
+.save-code-btn:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
 
 /* Help */
 

@@ -83,7 +83,12 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   creatingExpression: boolean = false;
   mostrarModalCrearExp: boolean = false;
   isType: boolean = true;
-
+  mostrarModalNombreFuncion: boolean = false;
+  mostrarModalGuargarCode: boolean = false;
+  nombreFuncion = '';
+  matrixTmp: any[] = [];
+  asFunctionTmp = false;
+  
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
 
 
@@ -345,41 +350,108 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
 
   getQiskitCode(matrix: any[], asFunction : boolean) {
-    let name
+     let name
 
-    this.reset()
+     this.reset()
 
-    if (asFunction) {
-      name = prompt("Enter the name of the function")
-      if (!name || name.trim().length==0) {
-        this.error = "You must enter a name for the function"
-        return
-      }
-      this.qiskitCode.name = name
-      this.qiskitCode.isFunction = true
-    }
+     if (asFunction) {
+       name = prompt("Enter the name of the function")
+       if (!name || name.trim().length==0) {
+         this.error = "You must enter a name for the function"
+         return
+       }
 
-    let info = {
-      matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
-      template : this.manager.selectedTemplate,
-      functionName : name
-    }
-    if (info.matrix.length == 0) {
-      this.error = "Select some output"
-      return
-    }
-    this.groverService.getCode(info, this.useMCX).subscribe(
-      result => {
-        this.qiskitCode.lines = result.code
-        document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
-        this.copyCode()
-        // Sacar un tooltip que diga que se ha copiado el código
-      },
-      error => {
+       this.qiskitCode.name = name
+       this.qiskitCode.isFunction = true
+       this.mostrarModal = true
+     }
+
+     let info = {
+       matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+       template : this.manager.selectedTemplate,
+       functionName : name
+     }
+     if (info.matrix.length == 0) {
+       this.error = "Select some output"
+       return
+     }
+     this.groverService.getCode(info, this.useMCX).subscribe(
+       result => {
+         this.qiskitCode.lines = result.code
+         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+         this.mostrarModal = true
+       
+         //this.copyCode()
+
+         // Sacar un tooltip que diga que se ha copiado el código
+       },
+       error => {
         this.error = error.error ? error.error.message : error
+       }
+     )
+   }
+
+    /*getQiskitCode(matrix: any[], asFunction: boolean) {
+      this.reset();
+      let name
+      if (asFunction) {
+        // Guardas los datos temporalmente
+        this.matrixTmp = matrix;
+        this.asFunctionTmp = asFunction;
+        this.mostrarModalNombreFuncion = true; // Mostrar modal para introducir nombre
+      
+        this.qiskitCode.name = this.nombreFuncion;
+        this.qiskitCode.isFunction = true;
+        
+        const info = {
+          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+          template: this.manager.selectedTemplate,
+          functionName: this.qiskitCode.name || ''
+        }
+
+        if (info.matrix.length == 0) {
+          this.error = "Select some output";
+          return;
+        }
+    
+        this.groverService.getCode(info, this.useMCX).subscribe(
+          result => {
+            this.qiskitCode.lines = result.code;
+            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+            this.mostrarModal = true;
+          },
+          error => {
+            this.error = error.error ? error.error.message : error;
+          }
+        )
+      } else {
+        const info = {
+          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+          template: this.manager.selectedTemplate,
+          functionName: name
+        }
+
+        if (info.matrix.length == 0) {
+          this.error = "Select some output";
+          return;
+        }
+    
+        this.groverService.getCode(info, this.useMCX).subscribe(
+          result => {
+            this.qiskitCode.lines = result.code;
+            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+            this.mostrarModal = true;
+          },
+          error => {
+            this.error = error.error ? error.error.message : error;
+          }
+        )
       }
-    )
-  }
+  
+      
+  }*/
+  
+
 
   private loadMatrixes(result: any) {
     this.dataReceived = true
@@ -738,6 +810,32 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   }
 
+  confirmarNombreFuncion() {
+    if (!this.nombreFuncion.trim()) {
+      this.error = "You must enter a name for the function";
+      return;
+    }
+
+    this.mostrarModalNombreFuncion = false;
+
+    this.getQiskitCode(this.matrixTmp, true);
+
+    this.cancelarModalNombreFuncion();
+    this.mostrarModal = true;
+  }
+
+  cancelarModalNombreFuncion() {
+      this.mostrarModalNombreFuncion = false;
+      this.nombreFuncion = '';
+      this.error = '';
+  }
+
+
+
+  isConfirmDisabled(): boolean {
+    return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
+  }
+  
   cerrarModal() {
     this.mostrarModal = false;
     this.isDisabled = false;
@@ -747,6 +845,26 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
   }
 
+  cancelarModal() {
+    this.mostrarModalNombreFuncion = false;
+    this.mostrarModalGuargarCode = false;
+    this.error = '';
+  }
+
+  copiarCodigo() {
+    const codigo = this.qiskitCode ? this.qiskitCode.lines.join('\n') : '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      alert('Code copied to clipboard');
+        }).catch(err => {
+          console.error('Error copying code: ', err);
+      });
+  }
+
+  guardarCodigo() {
+    this.mostrarModalGuargarCode = true;
+    this.mostrarModalNombreFuncion = false;
+    this.mostrarModal = false;
+  }
   // Expressions actions
 
   create() {
