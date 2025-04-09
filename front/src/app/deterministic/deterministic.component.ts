@@ -41,6 +41,14 @@ export class DeterministicComponent extends GroverStyle {
 
   responseReceived? : any
 
+
+
+
+  mensajeTemporal: string = '';
+  numberOfQubits : number | null = null;
+  isInvalid: boolean = true;
+
+
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
     super(qiskitService)
 
@@ -454,4 +462,59 @@ export class DeterministicComponent extends GroverStyle {
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
+
+
+
+
+  resetValues() {
+    // Eliminar valores guardados en localStorage
+    localStorage.removeItem('qubits');
+    localStorage.removeItem('processedExpressionsDeterministic');
+    localStorage.removeItem('matrix');
+
+    location.reload();  // Reiniciar
+  }
+
+  validateInputs() {
+    if (this.qubits === null || this.qubits === undefined) {
+      this.error = 'Number of qubits is required';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.qubits < 2 || this.qubits > 12) {
+      this.error = 'Number of qubits must be between 2 and 12';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
+  buildMatrixActions() {
+    this.numberOfQubits = this.qubits;
+
+    localStorage.removeItem('processedExpressionsGrover');
+    localStorage.removeItem('matrix');
+
+    localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
+
+    this.userExpressions = [];
+
+    //this.getEmptyMatrix();
+    // this.goToSpecifications();
+    this.goToTable();
+    // this.clearExpressions();
+  }
+
+  goToTable(): void {
+    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
+    const table = document.getElementById('myTable');
+    if (table) {
+      table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
 }
