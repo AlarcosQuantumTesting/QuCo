@@ -29,7 +29,6 @@
             <div class="section buildText">
                 <p>
                     In this section you can build a matrix with the desired number of qubits.
-                    <br>
                     To do so, fill the number of qubits and press the button to build the matrix.
                 </p>
             </div>
@@ -138,7 +137,7 @@
                     </tr> -->
                     <tr>
                         <th rowspan="2">Index</th>
-                        <th [colSpan]="qubits+1">
+                        <th [colSpan]="(numberOfQubits ?? 0) + 1">
                             <div class="header-with-button">
                                 <div>
                                     <i *ngIf="selectedElements>0" style="font-family: cursive; font-weight: normal; font-size: 12px;">Expressions: {{ selectedElements }} elements selected </i>
@@ -149,6 +148,21 @@
                                     <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
                                         <i class="fa fa-info-circle"></i>
                                     </button>
+
+                                    <div class="tooltip" *ngIf="tooltipVisible">
+                                        <p>
+                                            Do click on any of the <b>input</b> columns of a row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
+                                        </p>
+                                        <div class="divider"><span>Or</span></div>
+                                        <p>
+                                            Write
+                                            <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+                                                JavaScript expressions
+                                            </span>
+                                            to mark the desired rows.
+                                            <br>
+                                        </p>
+                                    </div>
                                 </div>
                                 <div>
                                     <button class="action-icon-header" title="Draw in Quirk" (click)="drawAllQuirk(matrix)">
@@ -164,26 +178,11 @@
                                         f(x)
                                     </button>
                                 </div>
-
-                                <div class="tooltip" *ngIf="tooltipVisible">
-                                    <p>
-                                        Do click on any of the <b>input</b> columns of a row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
-                                    </p>
-                                    <div class="divider"><span>Or</span></div>
-                                    <p>
-                                        Write
-                                        <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
-                                            JavaScript expressions
-                                        </span>
-                                        to mark the desired rows.
-                                        <br>
-                                    </p>
-                                </div>
                             </div>
                         </th>
                     </tr>
                     <tr>
-                        <th *ngFor="let i of [].constructor(qubits); let cont = index" align="center">
+                        <th *ngFor="let i of [].constructor(numberOfQubits); let cont = index" align="center">
                             q<sub>{{cont}}</sub>
                         </th>
                         <th>Marked</th>

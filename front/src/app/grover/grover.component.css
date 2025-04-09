@@ -246,7 +246,7 @@ label {
 }
 
 p {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.6;
     text-align: center;
     background-color: none;
@@ -435,7 +435,6 @@ th, td {
     cursor: pointer;
 }
 
-
 .tooltip {
     position: absolute;
     background: #f9f9f9;;
@@ -443,9 +442,12 @@ th, td {
     padding: 5px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateX(-50%);
+    margin-top: 5px;
     z-index: 10;
-    top: 25px;  /* Ajusta según la posición que desees */
-    left: 0;
+    top: 100%;
+    left: 50%;
+    min-width: 350px;
     font-weight: normal;
     top: 100%;
     border: 1px solid #ccc;

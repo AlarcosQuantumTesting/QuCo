@@ -550,6 +550,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
 
+    this.userExpressions = [];
+
     this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
