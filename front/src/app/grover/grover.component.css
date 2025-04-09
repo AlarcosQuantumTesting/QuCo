@@ -78,6 +78,22 @@ button:hover {
     background-color: #2980b9;
 }
 
+
+.action-icon-header {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: white;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+
+  .action-icon-header:hover {
+    color: #707a7a;
+    background: transparent;
+  }
+
 .matrixTitle-container {
     text-align: center;
     display: flex;
@@ -702,7 +718,7 @@ code {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     min-width: 300px;
   }
-  
+
   .btn-confirm,
   .btn-cancel {
     padding: 10px 20px;

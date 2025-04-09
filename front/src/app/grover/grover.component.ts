@@ -349,7 +349,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     window.getSelection()!.removeAllRanges()
   }
 
-  getQiskitCode(matrix: any[], asFunction : boolean) {
+  /*getQiskitCode(matrix: any[], asFunction : boolean) {
      let name
 
      this.reset()
@@ -389,14 +389,20 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
         this.error = error.error ? error.error.message : error
        }
      )
-   }
+   }*/
 
-    /*getQiskitCode(matrix: any[], asFunction: boolean) {
-      this.reset();
+    getQiskitCode(matrix: any[], asFunction: boolean) {
+      
       let name
       if (asFunction) {
-        // Guardas los datos temporalmente
         this.matrixTmp = matrix;
+        this.asFunctionTmp = asFunction;
+        this.nombreFuncion = '';
+        this.error = '';
+        this.mostrarModalNombreFuncion = true;
+        return;
+        // Guardas los datos temporalmente
+        /*this.matrixTmp = matrix;
         this.asFunctionTmp = asFunction;
         this.mostrarModalNombreFuncion = true; // Mostrar modal para introducir nombre
       
@@ -423,9 +429,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           error => {
             this.error = error.error ? error.error.message : error;
           }
-        )
-      } else {
-        const info = {
+        )*/
+      }
+      this.reset();
+        let info = {
           matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
           template: this.manager.selectedTemplate,
           functionName: name
@@ -446,10 +453,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
             this.error = error.error ? error.error.message : error;
           }
         )
-      }
+      
   
       
-  }*/
+  }
   
 
 
@@ -810,18 +817,52 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   }
 
+  private _getQiskitCode(matrix: any[], asFunction: boolean,  functionName?: string) {
+    if (this.isDisabled || this.isDisabled2) return;
+    this.isDisabled = true;
+    this.isDisabled2 = true;
+    this.mostrarModal = true;
+    this.reset();
+
+    let info = {
+      matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+      template: this.manager.selectedTemplate,
+      functionName: functionName
+    }
+
+    if (info.matrix.length == 0) {
+      this.error = "Select some output";
+      return;
+    }
+
+    this.groverService.getCode(info, this.useMCX).subscribe(
+      result => {
+        this.qiskitCode.lines = result.code;
+        document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+        this.mostrarModal = true;
+      },
+      error => {
+        this.error = error.error ? error.error.message : error;
+      }
+    )
+  
+  }
+
   confirmarNombreFuncion() {
     if (!this.nombreFuncion.trim()) {
       this.error = "You must enter a name for the function";
       return;
     }
 
-    this.mostrarModalNombreFuncion = false;
+    /*this.mostrarModalNombreFuncion = false;
 
     this.getQiskitCode(this.matrixTmp, true);
 
     this.cancelarModalNombreFuncion();
-    this.mostrarModal = true;
+    this.mostrarModal = true;*/
+
+    this._getQiskitCode(this.matrixTmp, this.asFunctionTmp, this.nombreFuncion);
+    this.cancelarModal();
   }
 
   cancelarModalNombreFuncion() {
