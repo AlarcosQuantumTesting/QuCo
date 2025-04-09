@@ -289,6 +289,11 @@ p {
     flex-direction: column;
 }
 
+ol {
+    padding-left: 20px;
+    margin: 0;
+}
+
 .expressions-section ol {
     padding-left: 20px;
     justify-content: left;
@@ -909,6 +914,7 @@ ol.list-instructions {
 
 .list-instructions li {
     margin-bottom: 15px;
+    font-size: 15px;
 }
 
 .modal.ejemplos {
@@ -1143,6 +1149,11 @@ ol.list-instructions {
     color: #0e5c5f;
   }
 
+  .help-text ol {
+    list-style-position: inside;
+    padding: 0;
+  }
+
 .span-help-modal {
     text-align: left;
     font-weight: normal;
@@ -1150,7 +1161,7 @@ ol.list-instructions {
     padding: 15px;
 
     flex: 1;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.5;
 }
 

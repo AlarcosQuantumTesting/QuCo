@@ -15,10 +15,12 @@ ul {
 ul li {
     float: left;
     margin-right: 10px;
+    font-size: 15px;
 }
 
 ul li.right {
     margin-right: 0;
+    font-size: 15px;
 }
 
 
@@ -291,6 +293,7 @@ ol.list-instructions {
 
 .list-instructions li {
     margin-bottom: 15px;
+    font-size: 15px;
 }
 
 /* highlights */
@@ -407,6 +410,7 @@ ol {
 
 li {
     margin-bottom: 8px;
+    font-size: 15px;
 }
 
 /* codigo */
