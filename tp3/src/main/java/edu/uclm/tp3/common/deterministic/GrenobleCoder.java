@@ -9,140 +9,149 @@ public class GrenobleCoder extends Coder {
     }
 
     @Override
-    public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
+    public BinaryTree getCode(BinaryTree rootNode, int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
         if (nodeDepth==2)
-			return this.getLeafCode(usedNodesMap);
+			return this.getLeafCode(rootNode, usedNodesMap);
 
 		if (this.node.leftProbability==0 && this.node.rightProbability==0)
 			return null;
 
 		GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, nodeDepth);
+
 		BinaryTree child;
 		if (this.node.leftProbability==0) {
-			GRY ry = new GRY(0, this.node.leftAngle);
-			circuit.addColumn(ry);
+			GRY ry = new GRY(0, this.node.leftAngle, this.node.name + "-L");
+			circuit.addGate(ry);
 			child = usedNodesMap.get(this.node.rightChild.hashCode());
-
-			GRCU grCU = new GRCU(this.functionPrefix, child.name, 1, nodeDepth);
-			circuit.addColumn(grCU);
-			this.node.circuit = circuit;
+			GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
+			circuit.addGate(cu);
+			this.node.setCircuit(circuit);
 
 			return this.node;
 		}
 
 		if (this.node.rightProbability==0) {
-			GRY ry = new GRY(0, this.node.leftAngle);
-			circuit.addColumn(ry);
+			GRY ry = new GRY(0, this.node.leftAngle, this.node.name + "-R");
+			circuit.addGate(ry);
 
 			child = usedNodesMap.get(this.node.leftChild.hashCode());
-			GRCU grCU = new GRCU(this.functionPrefix, child.name, 1, nodeDepth);
-			circuit.addColumn(grCU);
+			GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
+			circuit.addGate(cu);
+			this.node.setCircuit(circuit);
 
-			this.node.circuit = circuit;
 			return this.node;
 		}
 
 		if (this.node.leftProbability==this.node.rightProbability) {
-			GRCU grCU = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1);
-			circuit.addColumn(grCU);
-			this.node.circuit = circuit;
+			GRCU cu = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.leftChild.name);
+			circuit.addGate(cu);
+			this.node.setCircuit(circuit);
+
 			return this.node;
 		}
 
-		GRY ry = new GRY(0, this.node.leftAngle);
-		circuit.addColumn(ry);
-
-		GRX x = new GRX();
-		circuit.addColumn(x);
-
+		GRY ry = new GRY(0, this.node.leftAngle, this.node.name + "-0");
+		circuit.addGate(ry);
 		child = usedNodesMap.get(this.node.leftChild.hashCode());
-		GRCU cu0 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1);
-		circuit.addColumn(cu0);
-		circuit.addColumn(x);
-
+		GRX x = new GRX();
+		circuit.addGate(x);
+		GRCU cu0 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
+		circuit.addGate(cu0);
+		circuit.addGate(x);
 		child = usedNodesMap.get(this.node.rightChild.hashCode());
-		GRCU cu1 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1);
-		circuit.addColumn(cu1);
-		this.node.circuit = circuit;
+		GRCU cu1 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
+		circuit.addGate(cu1);
+		this.node.setCircuit(circuit);
 
 		return this.node;
     }
 
-    private BinaryTree getLeafCode(Map<Integer, BinaryTree> usedNodesMap) {
+    private BinaryTree getLeafCode(BinaryTree rootNode, Map<Integer, BinaryTree> usedNodesMap) {
 		if (usedNodesMap.get(this.hashCode())!=null)
 			return null;
 
 		if (this.node.leftProbability==0 && this.node.rightProbability==0)
 			return null;
 		
-		if (this.node.leftProbability==0) {
-			GRY ry0 = new GRY(0, this.node.leftAngle);
-			GRY ry1 = new GRY(1, this.node.rightChild.leftAngle);
+		GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2);
 
-			GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2)
-				.addColumn(ry0)
-				.addColumn(ry1);
-			
-			this.node.circuit = circuit;
+		if (this.node.leftProbability==0) {
+			GRY ry0 = new GRY(0, this.node.leftAngle, this.node.name + "-L");
+			circuit.addGate(ry0);
+
+			GRY ry1 = null;
+			GRCU cu = null;
+
+			if (this.node.rightChild.rightAngle!=0) {
+				ry1 = new GRY(1, this.node.rightChild.rightAngle, this.node.name + "-R");
+				circuit.addGate(ry1);
+				cu = new GRCU(this.functionPrefix, this.node.rightChild.name, 0, 1, this.node.name);
+				circuit.addGate(cu);
+			}
+			this.node.setCircuit(circuit);
+
 			return this.node;
 		}
 
 		if (this.node.rightProbability==0) {
-			GRY ry0 = new GRY(0, this.node.leftAngle);
+			GRY ry0 = new GRY(0, this.node.leftAngle, this.node.name + "-L");
+			circuit.addGate(ry0);
 
-			GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2)
-				.addColumn(ry0);
+			GRY ry1 = null;
+			GRCU cu = null;
 
-			if (this.node.leftChild.leftAngle!=0) {
-				GRY ry1 = new GRY(1, this.node.leftChild.leftAngle);
-				circuit.addColumn(ry1);
-			} 
-			this.node.circuit = circuit;
+			if (this.node.leftChild.leftAngle!=0)  {
+				ry1 = new GRY(1, this.node.leftChild.leftAngle, this.node.name + "-R");
+				circuit.addGate(ry1);
+				cu = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, 1, this.node.name);
+				circuit.addGate(cu);
+			}
+			this.node.setCircuit(circuit);
+
 			return this.node;
 		}
 
 		if (this.node.leftProbability==this.node.rightProbability) {
-			GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2);
-
 			if (this.node.leftChild.leftAngle!=0) {
 				GRX x = new GRX();
-				GRCRY cry = new GRCRY(0, 1, this.node.leftChild.leftAngle);
-				circuit.addColumn(x)
-					.addColumn(cry)
-					.addColumn(x);
+				circuit.addGate(x);
+				GRCRY cry = new GRCRY(0, 1, this.node.leftChild.leftAngle, this.node.name);
+				circuit.addGate(cry);
 			}
 			if (this.node.rightChild.leftAngle!=0) {
-				GRCRY cry = new GRCRY(0, 1, this.node.rightChild.leftAngle);
-				circuit.addColumn(cry);
+				GRCRY cry = new GRCRY(0, 1, this.node.rightChild.leftAngle, this.node.name);
+				circuit.addGate(cry);
 			}
-			this.node.circuit = circuit;
+			this.node.setCircuit(circuit);
 			return this.node;
 		}
 
-		GRY ry0 = new GRY(0, this.node.leftAngle);
-		
-		GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2)
-			.addColumn(ry0);
+		GRY ry0 = new GRY(0, this.node.leftAngle, this.node.name + "0");
+		circuit.addGate(ry0);
 
 		if (this.node.leftChild.leftAngle==this.node.rightChild.leftAngle) {
-			GRY ry1= new GRY(1, this.node.leftChild.leftAngle);
-			circuit.addColumn(ry1);
+			GRY ry1= new GRY(1, this.node.leftChild.leftAngle, this.node.name + "1");
+			circuit.addGate(ry1);
 			this.node.rightChild = null;
 		} else {
 			if (this.node.leftChild.leftAngle!=0) {
 				GRX x = new GRX();
-				GRCRY cry = new GRCRY(0, 1, this.node.leftChild.leftAngle);
-				circuit.addColumn(x)
-					.addColumn(cry)
-					.addColumn(x);
+				GRCRY cry = new GRCRY(0, 1, this.node.leftChild.leftAngle, this.node.leftChild.name);
+				circuit.addGate(x);
+				circuit.addGate(cry);
+				circuit.addGate(x);
+				GRY ry = cry.ry;
+				ry.id = cry.id + "-L";
 			}
 			if (this.node.rightChild.leftAngle!=0) {
-				GRCRY cry = new GRCRY(0, 1, this.node.rightChild.leftAngle);
-				circuit.addColumn(cry);
+				GRCRY cry = new GRCRY(0, 1, this.node.rightChild.leftAngle, this.node.rightChild.name);
+				circuit.addGate(cry);
+				GRY ry = cry.ry;
+				ry.id = cry.id + "-R";
 			}
 		}
 
-		this.node.circuit = circuit;
+		this.node.setCircuit(circuit);
 		return this.node;
 	}
 }

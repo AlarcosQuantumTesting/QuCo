@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 public class UnifierSolver extends Solver {
 	private String functionPrefix;
 	private boolean originalGR;
 		
-	public UnifierSolver(BinaryTree tree, GRCircuit circuit, String functionPrefix, boolean originalGR) {
-		super(tree, circuit);
+	public UnifierSolver(BinaryTree tree, String functionPrefix, boolean originalGR) {
+		super(tree);
 		this.functionPrefix = functionPrefix;
 		this.originalGR = originalGR;
 	}
@@ -23,15 +26,17 @@ public class UnifierSolver extends Solver {
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
 				.collect(Collectors.toList());
 
+		int treeDepth = this.tree.getDepth();
 		for (int i=nodeNames.size()-1; i>=0; i--) {
 			String nodeName = nodeNames.get(i);
 			BinaryTree node = nodes.get(nodeName);
-			if (node.depth == circuit.getQubits()-1)
+			if (node.depth == treeDepth-1)
 				nodeNames.remove(i);
 		}
 		
 		Map<Integer, BinaryTree> usedNodesMap = new HashMap<>();
 		List<BinaryTree> usedNodesList = new ArrayList<>();
+
 		for (int i=nodeNames.size()-1; i>=0; i--) {
 			String nodeName = nodeNames.get(i);
 			BinaryTree node = nodes.get(nodeName);
@@ -45,42 +50,117 @@ public class UnifierSolver extends Solver {
 
 			if (originalGR) {
 				int nodeDepth = node.getDepth();
-				node = node.getCode(nodeDepth, null);
+				node = node.getCode(this.tree, nodeDepth, null);
 				usedNodesList.add(node);
 			} else {
 				BinaryTree preexistingNode = usedNodesMap.get(node.hashCode());
 				if (preexistingNode==null) {
 					int nodeDepth = node.getDepth();
-					node = node.getCode(nodeDepth, usedNodesMap);
+					node = node.getCode(this.tree, nodeDepth, usedNodesMap);
 					if (node!=null)
 						usedNodesMap.put(node.hashCode(), node);
 				}
 			}
 		}
-		
-		Map<String, Object> result = new HashMap<>();
 
-		if (!originalGR) {
-			result.put("#INITIALIZE#", this.getInitialize(usedNodesMap));
-		} else {
-			result.put("#INITIALIZE#", this.getInitialize(usedNodesList));
+		Map<String, Object> result = new HashMap<>();
+		QCircuit generalCircuit = new QCircuit();
+		Object[] initialize;
+		if (originalGR)
+			initialize = this.getInitialize(usedNodesList, generalCircuit);
+		else 
+			initialize = this.getInitialize(usedNodesMap, generalCircuit);
+		
+		result.put("#INITIALIZE#", initialize[0]);
+
+		generalCircuit.sortGates();
+		JSONObject jsonGeneralCircuit = generalCircuit.toJson();
+		jsonGeneralCircuit.remove("circuit");
+		jsonGeneralCircuit.remove("id");
+		
+		JSONArray jsaCols = new JSONArray();
+		JSONArray jsaColH = new JSONArray();
+		for (int i=0; i<this.tree.getDepth(); i++) {
+			jsaColH.put("H");
 		}
+		jsaCols.put(jsaColH);
+
+		JSONArray jsaCol0 = new JSONArray()
+			.put("~0");
+		jsaCols.put(jsaCol0);
+
+		jsonGeneralCircuit.put("cols", jsaCols);
+		result.put("QUIRK", jsonGeneralCircuit.toMap());
 		return result;
 	}
 
-	private String getInitialize(List<BinaryTree> usedNodeList) {
+	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit) {
 		StringBuilder sbSubcircuits = new StringBuilder();
-		for (BinaryTree bt : usedNodeList)
+		List<QCircuit> qCircuits = new ArrayList<>();
+		for (BinaryTree bt : usedNodeList) {
 			sbSubcircuits.append(bt.getCode());
+			qCircuits.add(this.buildQuirk(bt, generalCircuit));
+		}
 
-		return sbSubcircuits + "\n";
+		return new Object[]{ sbSubcircuits + "\n", qCircuits };
 	}
 	
-	private String getInitialize(Map<Integer, BinaryTree> usedNodesMap) {
+	private Object[] getInitialize(Map<Integer, BinaryTree> usedNodesMap, QCircuit generalCircuit) {
 		StringBuilder sbSubcircuits = new StringBuilder();
-		for (BinaryTree m : usedNodesMap.values())
-			sbSubcircuits.append(m.getCode());
+		List<QCircuit> qCircuits = new ArrayList<>();
 		
-		return sbSubcircuits + "\n";
+		for (BinaryTree bt : usedNodesMap.values()) {
+			sbSubcircuits.append(bt.getCode());
+			qCircuits.add(this.buildQuirk(bt, generalCircuit));
+		}
+		
+		return new Object[]{ sbSubcircuits + "\n", qCircuits };
+	}
+
+	private QCircuit buildQuirk(BinaryTree node, QCircuit generalCircuit) {
+		QCircuit circuit = new QCircuit();
+		circuit.setName(node.name);
+		if (node.getDepth()==2) {
+			if (node.leftChild!=null && node.rightChild!=null) {
+				QRY ry0 = this.getQRY(node);
+				ry0.name = node.name + "-0";
+				circuit.addColumn(ry0);
+				generalCircuit.addGate(ry0);
+				circuit.addColumn("X");
+				
+				BinaryTree leftChild = node.leftChild;
+				QRY ryLeft = this.getQRY(leftChild);
+				circuit.addColumn("•", ryLeft);
+				generalCircuit.addGate(ryLeft);
+				circuit.addColumn("X");
+
+				BinaryTree rightChild = node.rightChild;
+				QRY ryRight = this.getQRY(rightChild);
+				circuit.addColumn("•", ryRight);
+				generalCircuit.addGate(ryRight);
+			}
+		} else {
+			QRY ry0 = this.getQRY(node);
+			ry0.name = node.name + "-0";
+			circuit.addColumn(ry0);
+			generalCircuit.addGate(ry0);
+			circuit.addColumn("X");
+
+			BinaryTree leftChild = node.leftChild;
+			circuit.addColumn("•", "~"  + leftChild.name);
+
+			circuit.addColumn("X");
+			BinaryTree rightChild = node.rightChild;
+			circuit.addColumn("•", "~"  + rightChild.name);
+		}
+		generalCircuit.addGate(circuit);
+		return circuit;
+	}
+
+	private QRY getQRY(BinaryTree node) {
+		QRY qry = new QRY();
+		qry.setName(node.name);
+		qry.setTheta(node.leftAngle);
+		return qry;
 	}
 }

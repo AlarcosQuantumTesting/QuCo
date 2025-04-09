@@ -40,8 +40,7 @@ public class DeterministicService {
 		tree.assignNames("", functionPrefix);
 		tree.normalizeProbabilities();
 		
-		GRCircuit circuit = new GRCircuit();
-		circuit.setQubits(qubits);
+		tree.getCircuit().setQubits(qubits);
 		
 		Solver solver = null;
 		if (!originalGR && physicalAngle>0) {
@@ -50,7 +49,7 @@ public class DeterministicService {
 			tree.removeLowAngles(physicalAngle);
 		}
 
-		solver = new UnifierSolver(tree, circuit, functionPrefix, originalGR);
+		solver = new UnifierSolver(tree, functionPrefix, originalGR);
 		Map<String, Object> result = solver.solve(shots);
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
@@ -98,7 +97,7 @@ public class DeterministicService {
 				tree.removeLowAngles(physicalAngle);
 			}
 
-			solver = new UnifierSolver(tree, circuit, functionPrefix, originalGR);
+			solver = new UnifierSolver(tree, functionPrefix, originalGR);
 			Map<String, Object> partialResult = solver.solve(shots);
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
@@ -106,13 +105,9 @@ public class DeterministicService {
 			endQubit = startQubit + qubits;
 			code.append("circuit.append(get" + splitIndex + functionPrefix + "0(), [" + Coder.getTargetQubits(startQubit, endQubit) + "]) # Use this line to use functions\n");
 			startQubit = endQubit;
-			System.out.println();
 		}
 
-		code.append("#circuit.unitary(U, qreg)   # Use this line for applying the unitary matrix\n");
-
 		result.put("#CALCULUS#", code.toString());
-
 		result.put("#QUBITS#", qubits*pairs);
 		result.put("#OUTPUT_QUBITS#", qubits*pairs);
 		result.put("#SHOTS#", shots);

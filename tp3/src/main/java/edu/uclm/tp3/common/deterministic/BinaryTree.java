@@ -24,11 +24,12 @@ public class BinaryTree {
 
     int depth;
 
-    GRCircuit circuit;
+    private GRCircuit circuit;
     
     public BinaryTree() {
 		this.value = -1;
 		this.name = "";
+        this.circuit = new GRCircuit();
 	}
 
     public String getCode() {
@@ -38,6 +39,14 @@ public class BinaryTree {
 	public void setCoder(Coder coder) {
 		this.coder = coder;
 	}
+
+    public void setCircuit(GRCircuit circuit) {
+        this.circuit = circuit;
+    }
+
+    public GRCircuit getCircuit() {
+        return circuit;
+    }
     
     public int getDepth() {
         return calculateDepth(this);
@@ -71,7 +80,7 @@ public class BinaryTree {
 			node.leftAngle = node.leftAngle + node.rightAngle;
 			node.rightAngle = 0;
 		}
-		
+		            
 		this.removeLowAnglesRecursive(node.leftChild, physicalAngle);
 		this.removeLowAnglesRecursive(node.rightChild, physicalAngle);
 	}
@@ -93,8 +102,8 @@ public class BinaryTree {
         
         node.leftAngle = 2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2;
         node.rightAngle = Math.PI - node.leftAngle;
-        //if (node.rightAngle>=Math.PI)
-        //	node.rightAngle = node.rightAngle-Math.PI;
+        if (node.rightAngle>=Math.PI)
+            node.rightAngle = node.rightAngle-Math.PI;
 
         normalizeProbabilitiesRecursive(node.leftChild);
         normalizeProbabilitiesRecursive(node.rightChild);
@@ -325,8 +334,8 @@ public class BinaryTree {
 		}
 	}
 
-	public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
-		return this.coder.getCode(nodeDepth, usedNodesMap);
+	public BinaryTree getCode(BinaryTree rootNode, int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
+		return this.coder.getCode(rootNode, nodeDepth, usedNodesMap);
 	}
 
 

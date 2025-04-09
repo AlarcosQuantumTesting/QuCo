@@ -14,8 +14,8 @@ public class GroverRudolphSolver extends Solver {
 
 	private int depth;
 
-	public GroverRudolphSolver(BinaryTree tree, GRCircuit circuit) {
-		super(tree, circuit);
+	public GroverRudolphSolver(BinaryTree tree) {
+		super(tree);
 	}
 
 	@Override

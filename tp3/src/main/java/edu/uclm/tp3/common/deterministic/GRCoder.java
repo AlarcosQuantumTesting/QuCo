@@ -9,41 +9,40 @@ public class GRCoder extends Coder {
     }
 
     @Override
-    public BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
+    public BinaryTree getCode(BinaryTree rootNode, int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
         if (nodeDepth==2)
-			return this.getLeafCode();
+			return this.getLeafCode(rootNode);
 
         GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, nodeDepth);
-        GRY ry = new GRY(0, this.node.leftAngle);
+        GRY ry = new GRY(0, this.node.leftAngle, this.node.name);
         GRX x = new GRX();
-        GRCU cu0 = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1);
-        GRCU cu1 = new GRCU(this.functionPrefix, this.node.rightChild.name, 0, nodeDepth, 1);
+        GRCU cu0 = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.name);
+        GRCU cu1 = new GRCU(this.functionPrefix, this.node.rightChild.name, 0, nodeDepth, 1, this.node.name);
 
-        circuit
-            .addColumn(ry)
-            .addColumn(x)
-            .addColumn(cu0)
-            .addColumn(x)
-            .addColumn(cu1);
+        circuit.addGate(ry)
+            .addGate(x)
+            .addGate(cu0)
+            .addGate(x)
+            .addGate(cu1);
+        this.node.setCircuit(circuit);
 
-        this.node.circuit = circuit;
-		return this.node;		
+		return this.node;
     }
 
-    private BinaryTree getLeafCode() {
+    private BinaryTree getLeafCode(BinaryTree rootNode) {
         GRCircuit circuit = new GRCircuit(this.functionPrefix, this.node.name, 2);
-        GRY ry = new GRY(0, this.node.leftAngle);
+        GRY ry = new GRY(0, this.node.leftAngle, this.node.name);
         GRX x = new GRX();
-        GRCRY cry0 = new GRCRY(0, 1, this.node.leftChild.leftAngle);
-        GRCRY cry1 = new GRCRY(0, 1, this.node.rightChild.leftAngle);
+        GRCRY cry0 = new GRCRY(0, 1, this.node.leftChild.leftAngle, this.node.name);
+        GRCRY cry1 = new GRCRY(0, 1, this.node.rightChild.leftAngle, this.node.name);
 
-        circuit.addColumn(ry)
-            .addColumn(x)
-            .addColumn(cry0)
-            .addColumn(x)
-            .addColumn(cry1);
+        circuit.addGate(ry)
+            .addGate(x)
+            .addGate(cry0)
+            .addGate(x)
+            .addGate(cry1);
+        this.node.setCircuit(circuit);
 
-		this.node.circuit = circuit;
         return this.node;
     }
 }

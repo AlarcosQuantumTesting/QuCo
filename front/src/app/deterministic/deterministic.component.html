@@ -152,6 +152,8 @@
       style="cursor: pointer;"
     >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
   </strong>
+  &nbsp;
+  <u style="color:blue" *ngIf="quirkCode" (click)="showQuirk()">Show in quirk</u>
   <br>
   <u (click)="switchOutput()">
     Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>

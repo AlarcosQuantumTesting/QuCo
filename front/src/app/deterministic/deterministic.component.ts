@@ -43,6 +43,7 @@ export class DeterministicComponent extends GroverStyle {
   maxRows = 1024
 
   responseReceived? : any
+  quirkCode? : string;
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
     super(qiskitService)
@@ -177,14 +178,14 @@ export class DeterministicComponent extends GroverStyle {
 
     if (this.codeAsFunctions) {
         for (let key in this.responseReceived) {
-          if (key!='tree' && key!='unitaryMatrix') {
+          if (key!='tree' && key!='unitaryMatrix' && key!='QUIRK') {
             let value = this.responseReceived[key]
             code = code?.replace(key, value)
           }
         }
     } else {
       for (let key in this.responseReceived) {
-        if (key!='tree' && key!='#INITIALIZE#' && key!='unitaryMatrix') {
+        if (key!='tree' && key!='#INITIALIZE#' && key!='unitaryMatrix' && key!='QUIRK') {
           let value = this.responseReceived[key]
           code = code?.replace(key, value)
         }
@@ -193,6 +194,8 @@ export class DeterministicComponent extends GroverStyle {
     }
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
+
+    this.quirkCode = JSON.stringify(this.responseReceived["QUIRK"])
   }
 
   private drawMatrix(matrixReceived : any) : string {
@@ -442,4 +445,10 @@ export class DeterministicComponent extends GroverStyle {
     let freq = parseInt(event.target.value)
     this.expectedFrequencies.setFreq(rowIndex, freq)
   }
+
+  showQuirk() {
+    let url = "https://algassert.com/quirk#circuit=" + this.quirkCode
+    window.open(url, "_blank")
+  }
+    
 }

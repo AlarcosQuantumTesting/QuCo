@@ -12,7 +12,7 @@ public abstract class Coder {
         this.functionPrefix = functionPrefix;
     }
 
-    public abstract BinaryTree getCode(int nodeDepth, Map<Integer, BinaryTree> usedNodesMap);
+    public abstract BinaryTree getCode(BinaryTree rootNode, int nodeDepth, Map<Integer, BinaryTree> usedNodesMap);
 
     public static String getTargetQubits(int startQubit, int depth) {
 		StringBuilder sb = new StringBuilder();

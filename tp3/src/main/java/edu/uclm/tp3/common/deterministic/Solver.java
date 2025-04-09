@@ -11,11 +11,9 @@ public abstract class Solver {
 	static final boolean PRINT = true; 
 
 	protected BinaryTree tree;
-	protected GRCircuit circuit;
 
-	protected Solver(BinaryTree tree, GRCircuit circuit) {
+	protected Solver(BinaryTree tree) {
 		this.tree = tree;
-		this.circuit = circuit;
 	}
 	
 	protected X getX(int qubit) {

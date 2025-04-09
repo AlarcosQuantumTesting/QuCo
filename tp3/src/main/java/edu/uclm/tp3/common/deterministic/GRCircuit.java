@@ -8,10 +8,10 @@ public class GRCircuit {
     protected String functionPrefix;
     private String name;
     private int qubits;
-    private List<GRColumn> columns;
+    private List<GRGate> gates;
 
     public GRCircuit() {
-        this.columns = new ArrayList<>();
+        this.gates = new ArrayList<>();
     }
 
     public GRCircuit(String functionPrefix, String name, int nodeDepth) {
@@ -25,8 +25,8 @@ public class GRCircuit {
     public String toString() {
         StringBuilder sb = new StringBuilder("def get" + this.functionPrefix + this.name + "():\n");
         sb.append("\tU = QuantumCircuit(" + this.qubits + ", name=\"" + this.functionPrefix + this.name + "\")\n");
-        for (GRColumn column : this.columns)
-            sb.append(column.toString());
+        for (GRGate gate : this.gates)
+            sb.append(gate.toString());
         sb.append("\treturn U.to_gate()\n\n");
         return sb.toString();
     }
@@ -39,18 +39,16 @@ public class GRCircuit {
         return this.qubits;
     }
 
-    public GRCircuit addColumn(GRGate gate) {
-        GRColumn column = new GRColumn();
-        column.add(gate);
-        this.columns.add(column);
+    public GRCircuit addGate(GRGate gate) {
+        this.gates.add(gate);
         return this;
     }
 
-    public GRCircuit addColumn(GRCU grCU) {
-        GRColumn column = new GRColumn();
-        column.add(grCU);
-        this.columns.add(column);
-        return this;
+    public List<GRGate> getGates() {
+        return this.gates;
     }
 
+    public String getName() {
+        return name;
+    }
 }
