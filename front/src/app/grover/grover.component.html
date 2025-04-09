@@ -5,9 +5,9 @@
 
 <body>
     <!-- Floating Help Button -->
-    <!-- <button class="help-button" (click)="toggleHelp()">
+    <button class="help-button" (click)="toggleHelp()">
         ❔
-    </button> -->
+    </button>
 
     <div class="mensaje-temporal" *ngIf="mensajeTemporal">
         {{ mensajeTemporal }}
@@ -98,12 +98,12 @@
                 <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
                            
                     <div>
-                        <p class="radioTitle">Select domain:</p>
+                        <p class="radioTitle">Use:</p>
                         <label class="custom-radio">
-                        <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">Use MCX
+                        <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">MCX
                         </label>
                         <label class="custom-radio">
-                        <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">Use H-MCZ-H
+                        <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">H-MCZ-H
                         </label>
                     </div>
         
@@ -515,5 +515,142 @@
         </div>
     </div>
 
+    <div class="help-modal" *ngIf="showHelp">
+
+        <div class="help-content">
+            <div class="help-modal-header">
+                <h2 class="help-title-modal">Help</h2>
+                <span class="close" (click)="toggleHelp()">&times;</span>
+            </div>
+            <div class="help-text">
+                <h2>💡 How to use 'Grover' 💡</h2>
+    
+                <!-- <h4>🟢 Features:</h4> -->
+                <ol>
+                    <li>Select the number of qubits</li>
+                    <span class="span-help-modal">When you click on grover the first thing you need to do to build your matrix is write the
+                        number of qubits you want to work with in the form you see above. Once
+                        you have written the number of qubits, click on the "Build matrix" button.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/matrixInput.jpg" alt="matrixInputImg" class="matrixInput">
+                    </div>
+                    <li>Show instrucctions</li>
+                    <span class="span-help-modal">You can see some instructions to write your own expressions
+                        to fill-in the table. To do so, click on the "Show instructions" button you
+                        can see on the screen.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/instructions.jpg" alt="instructionsImg" class="instructions">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/instructionsShow.jpg" alt="instructionsShowImg" class="instructionsShow">
+                    </div>
+                    <li>Show examples</li>
+                    <span class="span-help-modal">You can see some examples of expressions to fill-in the table
+                        by clicking on the "Show examples" button you can see on the screen.
+    
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/expressionsButton.jpg" alt="expressionsButtonImg" class="expressionsButton">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/expressionsShow.jpg" alt="expressionsShowImg" class="expressionsShow">
+                    </div>
+                    <li>Try expressions</li>
+                    <span class="span-help-modal">If you want to try some of the examples you see on the screen,
+                        click on the "Try" button you can see next to the example you want to try. Remember that
+                        you need to have built the matrix before trying the examples, if you can't see the
+                        button, it means you haven't built the matrix yet. One you have tried the example, you will be
+                        redicted to the table with the matrix and the results of the example you tried.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/expressionsShow.jpg" alt="expressionsShowImg" class="expressionsShow">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/tryMatrix.jpg" alt="tryMatrixImg" class="tryMatrix">
+                    </div>
+                    <li>Write your own expressions</li>
+                    <span class="span-help-modal">If you want to write your own expressions to fill-in the table,
+                        you can do it by writing the expression in the input you see on the screen. Once you have
+                        written the expression, click on the "Add" button to add the expression to the list of
+                        expressions you want to try. Once you have written all the expressions you want to try, click
+                        on the "Apply expressions" button to fill-in the table with the expressions you have written.
+                        You can delete the expressions you have written by clicking on the "Remove" button you can see
+                        next to the expression you want to delete.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/expressions.jpg" alt="expressionsImg" class="expressions">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/exampleExpressions.jpg" alt="exampleExpressionsImg" class="exampleExpressions">
+                    </div>
+                    <span class="span-help-modal">If you want to write multiple expressions at the same time,
+                        you can do it by double clicking on the input you see on the screen. Once you have written
+                        all the expressions you want to try, click on the "Add" button to add the expressions to the
+                        list of your expressions. Once you have written all the expressions you want to try,
+                        click on the "Apply expressions" button to fill-in the table with the expressions you have
+                        written.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/multipleExp.jpg" alt="multipleExpImg" class="multipleExp">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/someExpressions.jpg" alt="someExpressionsImg" class="someExpressions">
+                    </div>
+                    <li>Select what you want to use</li>
+                    <span class="span-help-modal">You can select the domain you want to work with by clicking on the
+                        radio button you see on the screen. You can choose between the amplitude domain and the phase
+                        domain.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/domain.jpg" alt="domainImg" class="domain">
+                    </div>
+                    <li><strong>Change the boolean value</strong></li>
+                    <span class="span-help-modal">If you want to change the value of a determined output qubit,
+                        you can do it by clicking on the you see on the screen in red (0 or 1), or you can
+                        change the value by writing the decimal value you want to assign to the output qubit
+                        in the input.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/changeValue.jpg" alt="changeValueImg" class="changeValue">
+                    </div>
+                    <li>Draw the circuit</li>
+                    <span class="span-help-modal">To draw the circuit of the matrix you have built, click on the
+                        "Quirk" link you see on the screen. You will be redirected to the Quirk page with the
+                        circuit of the matrix you have built. If you want to see the circuit of a determined row
+                        of the matrix, click on the "Draw" link you see on the screen.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/drawQuirk.jpg" alt="drawQuirkImg" class="drawQuirk">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/circuit.jpg" alt="circuitImg" class="circuit">
+                    </div>
+                    <div class="image-container">
+                        <img src="assets/img/reduce.jpg" alt="reduceImg" class="reduce">
+                    </div>
+                    <li>Generate the Qiskit code</li>
+                    <span class="span-help-modal">To generate the Qiskit code of the matrix you have built, click
+                        on the "Qiskit code" link you see on the screen. An emergent window will appear with the
+                        Qiskit code of the matrix you have built. You can generate the Qiskit code as a whole program
+                        or as a function. You can also generate the Qiskit code of a determined row of the matrix.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/qiskitCode.jpg" alt="qiskitCodeImg" class="qiskitCode">
+                        <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                        <img src="assets/img/windowCode.jpg" alt="windowCodeImg" class="windowCode">
+                    </div>
+                    <span class="span-help-modal">Here you can also start with Hadamard gates and count last quibit
+                        by clicking on the links you can see on the screen. The code will be added and you will
+                        see a short message to confirm the action. To make it easier for you, you can copy the
+                        code by clicking on the "Copy" button you see on the screen at the bottom of the window.
+                    </span>
+                    <div class="image-container">
+                        <img src="assets/img/addCode.jpg" alt="addCodeImg" class="addCode" style="margin-right: 20px;">
+                        <img src="assets/img/copyCode.jpg" alt="copyCodeImg" class="copyCode" style="margin-left: 20px;">
+                    </div>
+                </ol>
+                <div class="help-actions">
+                    <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+                </div>
+    
+            </div>
+        </div>
+    </div>
 
 </body>

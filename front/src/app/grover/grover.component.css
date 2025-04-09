@@ -1053,6 +1053,25 @@ ol.list-instructions {
 
 /* Help */
 
+.help-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #007b7f;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .help-button:hover {
+    background: #005f63;
+  }
+
 /* Asegurar que el modal cubra todo */
 .help-modal {
     position: fixed;
@@ -1107,6 +1126,17 @@ ol.list-instructions {
     padding: 0 30px;
     text-align: left;
 }
+
+.help-text li {
+    display: list-item;
+    text-align: center; 
+    margin: 10px 0;
+    width: 100%;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 15px;
+    color: #0e5c5f;
+  }
 
 .span-help-modal {
     text-align: left;

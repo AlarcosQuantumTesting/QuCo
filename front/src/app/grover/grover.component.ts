@@ -88,6 +88,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   nombreFuncion = '';
   matrixTmp: any[] = [];
   asFunctionTmp = false;
+  showHelp = false;
   
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
 
@@ -675,6 +676,11 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     caja.parentElement.appendChild(this.dialogo);
   }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
+  }
+
 
   onSearchInput() {
 
