@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
     <div class="header-with-button">
-        <button class="btn-toggle-examples" (click)="callParentMethod('toggleEjemplos')">
+        <button class="btn-toggle-examples" title="Show examples" (click)="callParentMethod('toggleEjemplos')">
             <i class="fa fa-lightbulb"></i>
         </button>
 
@@ -14,7 +14,7 @@
             </button>
         </div>
 
-        <button (click)="callParentMethod('create')" class="btn-toggle-createExp">
+        <button (click)="callParentMethod('create')" title="Create expression" class="btn-toggle-createExp">
             <i class="fa fa-plus"></i>
         </button>
     </div>

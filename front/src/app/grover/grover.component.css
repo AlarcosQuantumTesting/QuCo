@@ -66,7 +66,7 @@ button {
     background-color: #3498db;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 2px 15px;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
@@ -115,7 +115,7 @@ button:hover {
     background-color: #e7eeed;
     border-radius: 12px;
     margin-top: 10px;
-    padding: 15px;
+    padding: 5px;
     margin-bottom: 10px;
 }
 
@@ -189,7 +189,7 @@ button:hover {
 }
 
 label {
-    font-size: 16px;
+    font-size: 15px;
     color: #34495e;
     display: block;
     align-items: center;
@@ -349,7 +349,6 @@ th {
     background-color: #0b555a;
     color: white;
     font-weight: bold;
-    padding: 2px;
     border: 1px solid #ddd;
 }
 
@@ -567,6 +566,8 @@ th, td {
     font-weight: bold;
     color: #0b555a;
     text-align: left;
+    margin-bottom: 5px;
+    margin-top: 0px;
 }
 
 .radio-group label {
@@ -1027,6 +1028,7 @@ ol.list-instructions {
     margin: 0;
     margin-bottom: 15px;
     margin-right: 15px;
+    padding: 10px 15px;
 }
 
 .copy-btn:hover {
@@ -1045,10 +1047,11 @@ ol.list-instructions {
     margin: 0;
     margin-bottom: 15px;
     margin-right: 15px;
+    padding: 10px 15px;
 }
 
 .save-code-btn:hover {
-    background-color: #218838;
+    background-color: #1b3763;
     transform: scale(1.05);
 }
 
@@ -1163,6 +1166,7 @@ ol.list-instructions {
 .action-btn {
     background-color: #3aa751;
     border-radius: 12px;
+    padding: 10px 15px;
 }
 
 .action-btn:hover {

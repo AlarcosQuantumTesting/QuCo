@@ -84,7 +84,7 @@ h1:after {
     background-color: #e7eeed;
     border-radius: 12px;
     margin-top: 10px;
-    padding: 15px;
+    padding: 5px;
     margin-bottom: 10px;
 }
 
@@ -135,7 +135,7 @@ h1:after {
 }
 
 label {
-    font-size: 16px;
+    font-size: 15px;
     color: #34495e;
     display: block;
     align-items: center;
@@ -439,7 +439,7 @@ button {
     background-color: #3498db;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 2px 15px;
     font-size: 14px;
     border-radius: 4px;
     cursor: pointer;
@@ -540,6 +540,8 @@ input[type="radio"] {
     font-weight: bold;
     color: #0b555a;
     text-align: left;
+    margin-bottom: 5px;
+    margin-top: 0px;
 }
 
 .radio-group label {
@@ -831,7 +833,6 @@ th {
     background-color: #0b555a;
     color: white;
     font-weight: bold;
-    padding: 2px;
     border: 1px solid #ddd;
 }
 
@@ -1092,6 +1093,7 @@ u:hover {
     margin: 0;
     margin-bottom: 15px;
     margin-right: 15px;
+    padding: 10px 15px;
 }
 
 .copy-btn:hover {
@@ -1390,6 +1392,7 @@ u:hover {
 .action-btn {
     background-color: #3aa751;
     border-radius: 12px;
+    padding: 10px 15px;
 }
 
 .action-btn:hover {
