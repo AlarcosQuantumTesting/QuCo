@@ -1038,4 +1038,37 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     return this.expressionToSave.expressionName && this.expressionToSave.jsExpression;
   }
 
+  checkForExpressions() {
+
+    console.log("✅ checkForExpressions() llamado desde EditorComponent"); // Verifica si se llama
+    if (!this.currentUserExpression || !this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      console.log("🚫 No hay expresión válida. Recomendaciones ocultas.");
+      return;
+    }
+
+    if (!this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;  // Si el campo está vacío, salir sin hacer más verificaciones
+    }
+  }
+
+  // Maneja el evento 'Tab' y actualiza currentUserExpression
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab' && this.showRecommendations) {
+      this.currentUserExpression = this.recommendation;
+      this.showRecommendations = false;
+    }
+  }
+
+  onFocusInput() {
+    this.checkForExpressions();  // Verifica las expresiones cuando el input recibe el foco
+  }
+
+  selectRecommendation() {
+    this.currentUserExpression = this.recommendation;
+    this.showRecommendations = false;
+    this.searchQuery = this.currentUserExpression;
+  }
+
 }

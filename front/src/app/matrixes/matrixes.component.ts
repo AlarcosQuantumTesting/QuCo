@@ -1186,6 +1186,7 @@ export class MatrixesComponent implements AfterViewInit  {
   selectRecommendation() {
     this.currentUserExpression = this.recommendation;
     this.showRecommendations = false;
+    this.searchQuery = this.currentUserExpression;
   }
 
   checkForOrExpression() {

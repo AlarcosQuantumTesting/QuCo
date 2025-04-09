@@ -46,7 +46,7 @@
 
         <!-- Contenedor de recomendaciones -->
         <div class="suggestions" *ngIf="parent?.showRecommendations">
-            <div class="suggestion-item" (click)="selectRecommendation()">
+            <div class="suggestion-item" (click)="callParentMethod('selectRecommendation')">
             {{ parent?.recommendation }}
             </div>
         </div>
