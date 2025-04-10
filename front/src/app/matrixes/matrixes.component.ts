@@ -1210,8 +1210,6 @@ export class MatrixesComponent implements AfterViewInit  {
 
     this.recommendation = `${outputQubit} = ${orExpression }`;
     this.showRecommendations = true;
-
-    console.log("✅ Recomendaciones visibles:", this.showRecommendations);
   }
 
   checkForAndExpression() {

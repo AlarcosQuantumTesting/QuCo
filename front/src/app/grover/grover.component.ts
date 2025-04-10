@@ -1040,20 +1040,25 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   checkForExpressions() {
 
-    console.log("✅ checkForExpressions() llamado desde EditorComponent"); // Verifica si se llama
     if (!this.currentUserExpression || !this.currentUserExpression.trim()) {
       this.showRecommendations = false;
-      console.log("🚫 No hay expresión válida. Recomendaciones ocultas.");
       return;
     }
 
     if (!this.currentUserExpression.trim()) {
       this.showRecommendations = false;
-      return;  // Si el campo está vacío, salir sin hacer más verificaciones
+      return;
     }
+
+    this.checkForOrExpression();
+    this.checkForAndExpression();
+    this.isPrimeNumber();
+    this.isEvenNumber();
+    this.sumQubits();
+    this.xorExpression();
+    this.isPowerOfTwo();
   }
 
-  // Maneja el evento 'Tab' y actualiza currentUserExpression
   onTabPress(event: KeyboardEvent) {
     if (event.key === 'Tab' && this.showRecommendations) {
       this.currentUserExpression = this.recommendation;
@@ -1062,7 +1067,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
 
   onFocusInput() {
-    this.checkForExpressions();  // Verifica las expresiones cuando el input recibe el foco
+    this.checkForExpressions();
   }
 
   selectRecommendation() {
@@ -1070,5 +1075,156 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     this.showRecommendations = false;
     this.searchQuery = this.currentUserExpression;
   }
+
+
+  checkForOrExpression() {
+    if (this.currentUserExpression.includes('||') && this.currentUserExpression !== this.recommendation) {
+      this.recommendOrExpression();
+    }
+  }
+
+  recommendOrExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const orExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a | b, 0) == 1`;
+  
+    this.recommendation = orExpression;
+    this.showRecommendations = true;
+  }
+
+  checkForAndExpression() {
+    if (this.currentUserExpression.includes('&&') && this.currentUserExpression !== this.recommendation) {
+      this.recommendAndExpression();
+    }
+  }
+
+  recommendAndExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const andExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a & b, 1) == 1`;
+  
+    this.recommendation = andExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPrimeNumber() {
+    if (/is\s*prime/i.test(this.currentUserExpression) && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPrimeExpression();
+    }
+  }
+
+  recommendIsPrimeExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPrimeLogic = `(function(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPrimeLogic;
+    this.showRecommendations = true;
+  }
+  
+
+  isEvenNumber() {
+    if (this.currentUserExpression.includes('isEven') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsEvenExpression();
+    }
+  }
+
+  recommendIsEvenExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].map(Number).join(''), 2)`;
+  
+    const isEvenExpression = `(${binaryToDecimal} % 2 == 0)`;
+  
+    this.recommendation = isEvenExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  sumQubits() {
+    if (this.currentUserExpression.includes('sum') && this.currentUserExpression !== this.recommendation) {
+      this.recommendSumQubitsExpression();
+    }
+  }
+  
+  // Comprueba si la suma es 1 (si hay solo un 1 en los qubits)
+  recommendSumQubitsExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const sumExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a + b, 0) == 1`;
+  
+    this.recommendation = sumExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  xorExpression() {
+    if (this.currentUserExpression.includes('xor') && this.currentUserExpression !== this.recommendation) {
+      this.recommendXorExpression();
+    }
+  }
+
+  recommendXorExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const xorExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a ^ b, 0) == 1`;
+  
+    this.recommendation = xorExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPowerOfTwo() {
+    if (this.currentUserExpression.includes('two') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPowerOfTwoExpression();
+    }
+  }
+
+  recommendIsPowerOfTwoExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPowerOfTwoExpression = `(function(n) { return (n > 0 && (n & (n - 1)) === 0); })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPowerOfTwoExpression;
+    this.showRecommendations = true;
+  }
+  
 
 }
