@@ -482,8 +482,8 @@ export class DeterministicComponent extends GroverStyle {
       return;
     }
 
-    if (this.qubits < 2 || this.qubits > 12) {
-      this.error = 'Number of qubits must be between 2 and 12';
+    if (this.qubits < 1 || this.qubits > 12) {
+      this.error = 'Number of qubits must be between 1 and 12';
       this.isInvalid = true;
       return;
     }

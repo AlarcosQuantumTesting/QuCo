@@ -1250,6 +1250,7 @@ ol.list-instructions {
 .cancel-btn {
     background-color: rgb(219, 67, 67);
     border-radius: 12px;
+    padding: 10px 15px;
 }
 
 .cancel-btn:hover {
