@@ -1061,7 +1061,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   onTabPress(event: KeyboardEvent) {
     if (event.key === 'Tab' && this.showRecommendations) {
-      this.currentUserExpression = this.recommendation;
+      this.searchQuery = this.recommendation;
       this.showRecommendations = false;
     }
   }

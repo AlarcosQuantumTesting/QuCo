@@ -1174,7 +1174,7 @@ export class MatrixesComponent implements AfterViewInit  {
   // Maneja el evento 'Tab' y actualiza currentUserExpression
   onTabPress(event: KeyboardEvent) {
     if (event.key === 'Tab' && this.showRecommendations) {
-      this.currentUserExpression = this.recommendation;
+      this.searchQuery = this.recommendation;
       this.showRecommendations = false;
     }
   }

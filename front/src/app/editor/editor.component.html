@@ -25,7 +25,7 @@
             [(ngModel)]="parent.searchQuery"
             (dblclick)="callParentMethod('openTextArea', this, $event, 'Expressions')"
             (input)="callParentMethod('onSearchInput'); callParentMethod('checkForExpressions')"
-            (keydown)="callParentMethod('onTabPress', $event)"
+            (keydown)="onTabPress($event)"
             (focus)="callParentMethod('onFocusInput')"
             placeholder="Double click to add multiple expressions"
             list="expressionsList">

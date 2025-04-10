@@ -30,7 +30,13 @@ export class EditorComponent {
   }
 
   selectRecommendation() {
-    // Lógica para manejar la selección de una recomendación
     console.log("Seleccionada la recomendación:", this.parent?.recommendation);
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      this.callParentMethod("onTabPress", event);
+    }
+    
   }
 }
