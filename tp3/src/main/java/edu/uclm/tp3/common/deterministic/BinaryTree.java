@@ -296,10 +296,11 @@ public class BinaryTree {
 		}
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(leftAngle, leftChild, rightAngle, rightChild);
-	}
+    @Override
+    public int hashCode() {
+        int result = this.name.hashCode();    
+        return result;
+    }
 
 	@Override
 	public boolean equals(Object obj) {

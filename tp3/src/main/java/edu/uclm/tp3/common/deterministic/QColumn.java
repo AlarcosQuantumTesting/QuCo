@@ -7,15 +7,18 @@ import org.json.JSONArray;
 
 public class QColumn {
 
-    private List<String> gateIds = new ArrayList<>();
+    private List<Object> gateIds = new ArrayList<>();
 
     public void addGate(String gateId) {
-        this.gateIds.add(gateId);
+        if (gateId.equals("1"))
+            this.gateIds.add(1);
+        else
+            this.gateIds.add(gateId);
     }
 
     public JSONArray toJsonArray() {
         JSONArray jsonArray = new JSONArray();
-        for (String gateId : this.gateIds) {
+        for (Object gateId : this.gateIds) {
             jsonArray.put(gateId);
         }
         return jsonArray;

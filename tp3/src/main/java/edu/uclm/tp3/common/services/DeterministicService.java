@@ -17,6 +17,7 @@ import edu.uclm.tp3.common.deterministic.Coder;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.deterministic.GRCircuit;
 import edu.uclm.tp3.common.deterministic.Pair;
+import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.common.deterministic.Solver;
 
@@ -62,6 +63,7 @@ public class DeterministicService {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int shots = expectedFrequencies.getShots();
 
@@ -72,6 +74,7 @@ public class DeterministicService {
 		StringBuilder initializers = new StringBuilder();
 		StringBuilder code = new StringBuilder();
 		int startQubit = 0, endQubit;
+		List<Map<String, Object>> generalCircuits = new ArrayList<>();
 
 		for (int i=0; i<pairs; i++) {
 			BinaryTree tree = new BinaryTree();
@@ -102,6 +105,7 @@ public class DeterministicService {
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
 			initializers.append(initializer);
+			generalCircuits.add((Map<String, Object>) partialResult.get("QUIRK"));
 			endQubit = startQubit + qubits;
 			code.append("circuit.append(get" + splitIndex + functionPrefix + "0(), [" + Coder.getTargetQubits(startQubit, endQubit) + "]) # Use this line to use functions\n");
 			startQubit = endQubit;
@@ -114,6 +118,7 @@ public class DeterministicService {
 		result.put("#HADAMARDS#", this.getHadamards());
 		result.put("#INITIALIZE#", initializers);
 		result.put("trees", trees);
+		result.put("QUIRK", generalCircuits);
 		return result;
 	}
 
