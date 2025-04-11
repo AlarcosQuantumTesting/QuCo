@@ -10,7 +10,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 
 const routes: Routes = [
-  { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
+  // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
   { path: "matrix", component: MatrixesComponent },
   { path: "grover", component: GroverComponent },
   { path: "elonging", component: ElongingComponent },
@@ -19,7 +19,7 @@ const routes: Routes = [
   { path: "editor", component: CircuitEditorComponent },
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
-  { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
+  // { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
 ];
 
 

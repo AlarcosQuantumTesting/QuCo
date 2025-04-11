@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { DeterministicService } from '../deterministic.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
@@ -44,6 +44,15 @@ export class DeterministicComponent extends GroverStyle {
 
   responseReceived? : any
   quirkCode? : string;
+  mensajeTemporal: string = '';
+  numberOfQubits : number | null = null;
+  isInvalid: boolean = true;
+  tooltipVisible: boolean = false;
+  tooltipTableVisible: boolean = false;
+  showRecommendations: boolean = false;
+  tooltipPiVisible: boolean = false;
+  mostrarInstrucciones: boolean = false;
+
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
     super(qiskitService)
@@ -56,7 +65,8 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      this.markElementsWithUserExpressions()
+      // this.markElementsWithUserExpressions()
+      this.fillTableWithUserExpressions()
   }
 
   setFrequenciesWithUserExpressions() {
@@ -449,6 +459,134 @@ export class DeterministicComponent extends GroverStyle {
   showQuirk() {
     let url = "https://algassert.com/quirk#circuit=" + this.quirkCode
     window.open(url, "_blank")
+  }
+    
+
+
+
+
+  resetValues() {
+    // Eliminar valores guardados en localStorage
+    localStorage.removeItem('qubits');
+    localStorage.removeItem('processedExpressionsDeterministic');
+    localStorage.removeItem('matrix');
+
+    location.reload();  // Reiniciar
+  }
+
+  validateInputs() {
+    if (this.qubits === null || this.qubits === undefined) {
+      this.error = 'Number of qubits is required';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.qubits < 1 || this.qubits > 12) {
+      this.error = 'Number of qubits must be between 1 and 12';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
+  buildMatrixActions() {
+    this.numberOfQubits = this.qubits;
+
+    localStorage.removeItem('processedExpressionsGrover');
+    localStorage.removeItem('matrix');
+
+    localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
+
+    this.userExpressions = [];
+
+    //this.getEmptyMatrix();
+    // this.goToSpecifications();
+    this.goToTable();
+    // this.clearExpressions();
+  }
+
+  goToTable(): void {
+    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
+    const table = document.getElementById('myTable');
+    if (table) {
+      table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  toggleTooltipTable(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipTableVisible) {
+      this.tooltipTableVisible = false;
+      this.tooltipVisible = false;
+      this.tooltipPiVisible = false;
+    } else {
+      this.tooltipTableVisible = true;
+      this.tooltipVisible = false;
+      this.tooltipPiVisible = false;
+    }
+  }
+
+  toggleTooltip(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipVisible) {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+      this.tooltipPiVisible = false;
+    } else {
+      this.tooltipVisible = true;
+      this.tooltipTableVisible = false;
+      this.tooltipPiVisible = false;
+    }
+  }
+
+  toggleTooltipPi(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipPiVisible) {
+      this.tooltipPiVisible = false;
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+    } else {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+      this.tooltipPiVisible = true;
+    }
+  }
+  
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Verifica si el clic fue fuera del tooltip y el botón
+    const tooltipElement = document.querySelector('.tooltip');
+    const tooltipCustomElement = document.querySelector('.custom-tooltip');
+    const buttonElement = document.querySelector('button');
+    this.showRecommendations = false;
+      
+  
+    if (this.tooltipVisible &&
+        tooltipElement && !tooltipElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipVisible = false;
+    }
+  
+    if (this.tooltipTableVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
+
+    if (this.tooltipPiVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
   }
     
 }

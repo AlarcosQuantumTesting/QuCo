@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, ViewChild, AfterViewInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { GroverService } from '../grover.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
@@ -6,12 +6,41 @@ import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { QiskitCode } from './QiskitCode';
 import { QiskitService } from '../qiskit.service';
+import { EditorComponent } from '../editor/editor.component';
+import { Expression } from '../matrixes/Expression';
+import { ExpressionsService } from '../expressions.service';
+
 @Component({
   selector: 'app-grover',
   templateUrl: './grover.component.html',
   styleUrls: ['./grover.component.css']
 })
-export class GroverComponent extends GroverStyle {
+export class GroverComponent extends GroverStyle  implements AfterViewInit {
+
+  @ViewChild(EditorComponent) editor!: EditorComponent;
+  
+    someMethodInMatrixes() {
+      console.log('Método en grover llamado');
+    }
+  
+    ngAfterViewInit() {
+      setTimeout(() => {
+        if (this.editor) {
+          this.editor.parent = this;
+        }
+      }, 0);
+      
+      if (this.editor) {
+        this.editor.parent = this;
+      }
+    }
+  
+    ngAfterViewChecked() {
+      if (this.editor && !this.editor.parent) {
+        this.editor.parent = this;
+        console.log("Parent asignado en AfterViewChecked:", this.editor.parent);
+      }
+    }
 
   cols: number = 0
   rows: number = 0
@@ -27,16 +56,97 @@ export class GroverComponent extends GroverStyle {
 
   max: number = 50000
 
-  constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, public sanitizer: DomSanitizer, public manager : ManagerService) {
+
+
+
+  mensajeTemporal: string = '';
+  numberOfQubits : number | null = null;
+  isInvalid: boolean = true;
+  dialogo : any = undefined
+  mostrarModalVerExp: boolean = false;
+  filteredExpressions: Expression[] = [];
+  expressions: Expression[] = [];
+  searchQuery: string = "";
+  selectedExpressionIndex: number | null = null;
+  buscarBtn: boolean = false;
+  recommendation: string = '';
+  showRecommendations: boolean = false;
+  tooltipVisible: boolean = false;
+  tooltipTableVisible: boolean = false;
+  mostrarInstrucciones: boolean = false;
+  mostrarEjemplos: boolean = false;
+  mostrarModal: boolean = false;
+  isDisabled: boolean = false;
+  isDisabled2: boolean = false;
+  fromEdit: boolean = false;
+  isNameDisabled: boolean = false;
+  creatingExpression: boolean = false;
+  mostrarModalCrearExp: boolean = false;
+  isType: boolean = true;
+  mostrarModalNombreFuncion: boolean = false;
+  mostrarModalGuargarCode: boolean = false;
+  nombreFuncion = '';
+  matrixTmp: any[] = [];
+  asFunctionTmp = false;
+  showHelp = false;
+  
+  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+
+
+  constructor(protected groverService: GroverService, protected override qiskitService : QiskitService, 
+    public sanitizer: DomSanitizer, public manager : ManagerService, public service : ExpressionsService) {
     super(qiskitService)
+  }
+
+  ngOnInit() {
+    // Valida cuando se inicializan los valores
+    this.validateInputs();
+
+    // this.service.getExpressions().subscribe((data: Expression[]) => {
+    //   this.expressions = data;
+    // });
+
+    this.service.getExpressions().subscribe((data: Expression[]) => {
+      this.expressions = data.filter(exp => exp.type === 'grover');
+    });
+    
+
+    // Recuperar valores desde localStorage con valores por defecto
+    this.qubits = JSON.parse(localStorage.getItem('qubits') || '4');
+
+
+    // Verificar si hay datos guardados
+    const savedQubits = localStorage.getItem('qubits');
+    const savedUserExpressions = localStorage.getItem('processedExpressionsGrover');
+
+
+
+    if (savedQubits) {
+        this.buildMatrixActions();
+        setTimeout(() => {
+
+            if (savedUserExpressions) {
+              // Agregar expresiones guardadas al sistema
+              this.userExpressions = JSON.parse(savedUserExpressions);
+              this.fillTableWithUserExpressions();
+              
+          }
+        }, 50);
+
+    }
+
   }
 
   override tryFill(index: number): void {
     this.reset()
     let exprs = this.javaExamples[index].exprs
+
     this.userExpressions = []
     this.userExpressions = this.userExpressions.concat(exprs)
-    this.markElementsWithUserExpressions()
+    
+    
+    // this.markElementsWithUserExpressions()
+    this.fillTableWithUserExpressions()
   }
 
   fillTable(marking : boolean) {
@@ -44,6 +154,14 @@ export class GroverComponent extends GroverStyle {
       throw Error("There are no expressions to fill-in the table")
     if (!this.matrix)
       throw Error("There is no matrix")
+
+    const maxQubit = this.qubits + 1;
+    
+    const qnValue = `q${this.qubits + 1}`;
+
+    const processedExpressions = this.userExpressions.map(expr =>
+      expr.replace(/\bqn\b/g, qnValue)
+    );
 
     this.selectedElements = 0
     let expr, row, wholeExpression
@@ -64,6 +182,11 @@ export class GroverComponent extends GroverStyle {
       if (row[row.length - 1])
         this.selectedElements++
     }
+
+      localStorage.setItem('qubits', JSON.stringify(this.qubits));
+      localStorage.setItem('processedExpressionsGrover', JSON.stringify(processedExpressions));
+      localStorage.setItem('matrix', JSON.stringify(this.matrix));
+      // localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
   }
 
   private replaceToken(expr: string, token: string, index: number) {
@@ -155,6 +278,8 @@ export class GroverComponent extends GroverStyle {
     }
     this.reset()
     this.matrix = this.emptyMatrix(this.qubits, 0)
+
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
   }
 
   private emptyMatrix(inputQubits: number, outputQubits: number): number[][] {
@@ -225,42 +350,116 @@ export class GroverComponent extends GroverStyle {
     window.getSelection()!.removeAllRanges()
   }
 
-  getQiskitCode(matrix: any[], asFunction : boolean) {
-    let name
+  /*getQiskitCode(matrix: any[], asFunction : boolean) {
+     let name
 
-    this.reset()
+     this.reset()
 
-    if (asFunction) {
-      name = prompt("Enter the name of the function")
-      if (!name || name.trim().length==0) {
-        this.error = "You must enter a name for the function"
-        return
-      }
-      this.qiskitCode.name = name
-      this.qiskitCode.isFunction = true
-    }
+     if (asFunction) {
+       name = prompt("Enter the name of the function")
+       if (!name || name.trim().length==0) {
+         this.error = "You must enter a name for the function"
+         return
+       }
 
-    let info = {
-      matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
-      template : this.manager.selectedTemplate,
-      functionName : name
-    }
-    if (info.matrix.length == 0) {
-      this.error = "Select some output"
-      return
-    }
-    this.groverService.getCode(info, this.useMCX).subscribe(
-      result => {
-        this.qiskitCode.lines = result.code
-        document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
-        this.copyCode()
-        // Sacar un tooltip que diga que se ha copiado el código
-      },
-      error => {
+       this.qiskitCode.name = name
+       this.qiskitCode.isFunction = true
+       this.mostrarModal = true
+     }
+
+     let info = {
+       matrix : matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+       template : this.manager.selectedTemplate,
+       functionName : name
+     }
+     if (info.matrix.length == 0) {
+       this.error = "Select some output"
+       return
+     }
+     this.groverService.getCode(info, this.useMCX).subscribe(
+       result => {
+         this.qiskitCode.lines = result.code
+         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+         this.mostrarModal = true
+       
+         //this.copyCode()
+
+         // Sacar un tooltip que diga que se ha copiado el código
+       },
+       error => {
         this.error = error.error ? error.error.message : error
+       }
+     )
+   }*/
+
+    getQiskitCode(matrix: any[], asFunction: boolean) {
+      
+      let name
+      if (asFunction) {
+        this.matrixTmp = matrix;
+        this.asFunctionTmp = asFunction;
+        this.nombreFuncion = '';
+        this.error = '';
+        this.mostrarModalNombreFuncion = true;
+        return;
+        // Guardas los datos temporalmente
+        /*this.matrixTmp = matrix;
+        this.asFunctionTmp = asFunction;
+        this.mostrarModalNombreFuncion = true; // Mostrar modal para introducir nombre
+      
+        this.qiskitCode.name = this.nombreFuncion;
+        this.qiskitCode.isFunction = true;
+        
+        const info = {
+          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+          template: this.manager.selectedTemplate,
+          functionName: this.qiskitCode.name || ''
+        }
+
+        if (info.matrix.length == 0) {
+          this.error = "Select some output";
+          return;
+        }
+    
+        this.groverService.getCode(info, this.useMCX).subscribe(
+          result => {
+            this.qiskitCode.lines = result.code;
+            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+            this.mostrarModal = true;
+          },
+          error => {
+            this.error = error.error ? error.error.message : error;
+          }
+        )*/
       }
-    )
+      this.reset();
+        let info = {
+          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+          template: this.manager.selectedTemplate,
+          functionName: name
+        }
+
+        if (info.matrix.length == 0) {
+          this.error = "Select some output";
+          return;
+        }
+    
+        this.groverService.getCode(info, this.useMCX).subscribe(
+          result => {
+            this.qiskitCode.lines = result.code;
+            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+            this.mostrarModal = true;
+          },
+          error => {
+            this.error = error.error ? error.error.message : error;
+          }
+        )
+      
+  
+      
   }
+  
+
 
   private loadMatrixes(result: any) {
     this.dataReceived = true
@@ -308,4 +507,724 @@ export class GroverComponent extends GroverStyle {
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
+
+
+
+
+
+
+
+
+
+  goToTable(): void {
+    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
+    const table = document.getElementById('myTable');
+    if (table) {
+      table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  validateInputs() {
+    if (this.qubits === null || this.qubits === undefined) {
+      this.error = 'Number of qubits is required';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.qubits < 2 || this.qubits > 12) {
+      this.error = 'Number of qubits must be between 2 and 12';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
+  buildMatrixActions() {
+    this.numberOfQubits = this.qubits;
+
+    localStorage.removeItem('processedExpressionsGrover');
+    localStorage.removeItem('matrix');
+
+    localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
+
+    this.userExpressions = [];
+
+    this.getEmptyMatrix();
+    // this.goToSpecifications();
+    this.goToTable();
+    // this.clearExpressions();
+  }
+
+  isAddDisabled(): boolean {
+    return !this.currentUserExpression || this.currentUserExpression.trim() === '';
+  }
+
+  openTextArea(c : GroverComponent, e : Event, title : string, elementIndex? : number) {
+    let caja = e.target as any
+    this.createDialog(c, caja, title, elementIndex)
+    this.dialogo.showModal()
+    let textoDialogo = this.dialogo.getElementsByTagName("textarea")[0];
+    textoDialogo.value = caja!.value;
+    this.dialogo.getElementsByTagName("textarea")[0].focus();
+  }
+
+  protected createDialog(cc: GroverComponent, caja: any, title: string, parameterIndex? : number) {
+    let selfCaja = caja
+    let textArea: any
+    if (!this.dialogo) {
+        this.dialogo = document.createElement("dialog")
+        this.dialogo.setAttribute("id", "dialogo");
+
+        // Estilos para el modal
+        this.dialogo.style.backgroundColor = "#eaf7f7";
+        this.dialogo.style.borderRadius = "12px";
+        this.dialogo.style.padding = "20px";
+        this.dialogo.style.maxWidth = "80%";
+        this.dialogo.style.boxShadow = "0px 10px 30px rgba(0, 0, 0, 0.2)";
+        this.dialogo.style.position = "relative";
+        this.dialogo.style.border = "2px solid #007d86";
+
+        // Crear y configurar el título
+        let label = document.createElement("strong")
+        label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+
+        // Crear y configurar la "X" para cerrar el modal
+        let a = document.createElement("u")
+        a.innerHTML = "&times;"
+        a.style.fontSize = "24px";
+        a.style.position = "absolute";
+        a.style.top = "10px";
+        a.style.right = "10px";
+        a.style.cursor = "pointer";
+
+        let self = this
+        a.onclick = function() {
+            selfCaja.parentElement.removeChild(self.dialogo)
+            self.dialogo = null
+            selfCaja.focus()
+        }
+
+        // Agregar el título y la "X" al modal
+        this.dialogo.appendChild(label)
+        this.dialogo.appendChild(a)
+
+        this.dialogo.appendChild(document.createElement("br"))
+
+        // Crear y configurar el textarea
+        textArea = document.createElement("textarea");
+        textArea.style.width = "95%";
+        textArea.style.height = "150px";
+        textArea.style.padding = "10px";
+        textArea.style.fontSize = "16px";
+        textArea.style.borderRadius = "8px";
+        textArea.style.border = "2px solid #ccc";
+        textArea.style.backgroundColor = "#f9f9f9";
+        textArea.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
+        textArea.style.transition = "all 0.3s ease";
+        textArea.style.border = "2px solid #007d86";
+
+        this.dialogo.appendChild(textArea);
+        textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 == 1\n" +
+            "q4 == 0\ninput%2 == 0\n")
+        textArea.setAttribute("rows", "15");
+        textArea.setAttribute("cols", "60");
+        textArea.ondblclick = function() {
+            textArea.value = "q3 == 1\nq4 == 0\ninput%2 == 0\n"
+        }
+
+        // Crear y configurar el botón "Add"
+        let addButton = document.createElement("button");
+        addButton.innerHTML = "Add";
+        addButton.style.marginTop = "10px";
+        addButton.style.padding = "8px 15px";
+        addButton.style.borderRadius = "5px";
+        addButton.style.border = "1px solid #ccc";
+        addButton.style.backgroundColor = "#008b95";
+        addButton.style.color = "#fff";
+        addButton.style.fontSize = "16px";
+        addButton.style.cursor = "pointer";
+
+        addButton.addEventListener("mouseenter", () => {
+          addButton.style.backgroundColor = "#006f78";
+          addButton.style.transform = "scale(1.05)";
+          addButton.style.transition = "all 0.3s ease";
+      });
+
+      addButton.addEventListener("mouseleave", () => {
+          addButton.style.backgroundColor = "#008b95";
+          addButton.style.transform = "scale(1)";
+      });
+
+        addButton.onclick = function() {
+            if (textArea!.value.trim().length > 0) {
+                let expressions = textArea!.value.split("\n")
+                for (let i = 0; i < expressions.length; i++) {
+                    if (expressions[i].trim().length == 0)
+                        continue
+                    self.currentUserExpression = expressions[i]
+                    self.addUserExpression()
+                }
+            }
+            selfCaja.parentElement.removeChild(self.dialogo)
+            self.dialogo = null
+            selfCaja.focus()
+        }
+
+        this.dialogo.appendChild(addButton);
+    }
+
+    caja.parentElement.appendChild(this.dialogo);
+  }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
+  }
+
+
+  onSearchInput() {
+
+    this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
+    
+    this.filteredExpressions = [...this.expressions];
+    
+    if (this.searchQuery.trim() != "") {
+
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'grover' && 
+        (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      );
+
+      
+    const foundExpression = this.manager.expressions.find(exp =>
+      exp.type === 'grover' &&
+      exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
+    );
+
+    // if (foundExpression) {
+    //     console.log("Expression found:", foundExpression);
+    // }
+    
+    if (foundExpression) {
+        this.recommendation = `${foundExpression.jsExpression}`;
+        this.showRecommendations = true;
+    }
+
+    }
+  }
+
+
+  searchExpressions() {
+    this.filteredExpressions = this.expressions;
+
+    if (this.searchQuery.trim() != ""){
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'grover' &&
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+  }
+
+
+  toggleTooltipTable(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipTableVisible) {
+      this.tooltipTableVisible = false;
+      this.tooltipVisible = false;
+    } else {
+      this.tooltipTableVisible = true;
+      this.tooltipVisible = false;
+    }
+  }
+
+  toggleTooltip(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipVisible) {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+    } else {
+      this.tooltipVisible = true;
+      this.tooltipTableVisible = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    // Verifica si el clic fue fuera del tooltip y el botón
+    const tooltipElement = document.querySelector('.tooltip');
+    const tooltipCustomElement = document.querySelector('.custom-tooltip');
+    const buttonElement = document.querySelector('button');
+    this.showRecommendations = false;
+    
+
+    if (this.tooltipVisible &&
+        tooltipElement && !tooltipElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipVisible = false;
+    }
+
+    if (this.tooltipTableVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
+  }
+
+  resetValues() {
+    // Eliminar valores guardados en localStorage
+    localStorage.removeItem('qubits');
+    localStorage.removeItem('processedExpressionsGrover');
+    localStorage.removeItem('matrix');
+
+    location.reload();  // Reiniciar
+  }
+
+  toggleEjemplos() {
+    this.mostrarEjemplos = !this.mostrarEjemplos;
+  }
+
+  onAddExampleClick(i: number): void {
+    this.addExample(i);
+    this.mensajeTemporal = 'Example added';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  addExample(index: number): void {
+    this.error = undefined;
+    this.reset();
+
+    // Eliminar todas las expresiones antes de agregar nuevas
+    this.userExpressions = [];
+
+    let exprs = this.javaExamples[index].exprs;
+
+    for (let i = 0; i < exprs.length; i++) {
+        if (exprs[i].trim().length === 0) continue;
+
+        // Agrega la expresión a la lista
+        this.userExpressions.push(exprs[i]);
+    }
+
+    // Si deseas actualizar la variable `currentUserExpression`
+    if (exprs.length > 0) {
+        this.currentUserExpression = exprs[0];
+    }
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
+
+
+  }
+
+  private _getQiskitCode(matrix: any[], asFunction: boolean,  functionName?: string) {
+    if (this.isDisabled || this.isDisabled2) return;
+    this.isDisabled = true;
+    this.isDisabled2 = true;
+    this.mostrarModal = true;
+    this.reset();
+
+    let info = {
+      matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
+      template: this.manager.selectedTemplate,
+      functionName: functionName
+    }
+
+    if (info.matrix.length == 0) {
+      this.error = "Select some output";
+      return;
+    }
+
+    this.groverService.getCode(info, this.useMCX).subscribe(
+      result => {
+        this.qiskitCode.lines = result.code;
+        document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+        this.mostrarModal = true;
+      },
+      error => {
+        this.error = error.error ? error.error.message : error;
+      }
+    )
+  
+  }
+
+  confirmarNombreFuncion() {
+    if (!this.nombreFuncion.trim()) {
+      this.error = "You must enter a name for the function";
+      return;
+    }
+
+    /*this.mostrarModalNombreFuncion = false;
+
+    this.getQiskitCode(this.matrixTmp, true);
+
+    this.cancelarModalNombreFuncion();
+    this.mostrarModal = true;*/
+
+    this._getQiskitCode(this.matrixTmp, this.asFunctionTmp, this.nombreFuncion);
+    this.cancelarModal();
+  }
+
+  cancelarModalNombreFuncion() {
+      this.mostrarModalNombreFuncion = false;
+      this.nombreFuncion = '';
+      this.error = '';
+  }
+
+
+
+  isConfirmDisabled(): boolean {
+    return !this.nombreFuncion || this.nombreFuncion.trim().length === 0;
+  }
+  
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.isDisabled = false;
+    this.isDisabled2 = false;
+    this.fromEdit = false;
+    this.isNameDisabled = false;
+    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+  }
+
+  cancelarModal() {
+    this.mostrarModalNombreFuncion = false;
+    this.mostrarModalGuargarCode = false;
+    this.error = '';
+  }
+
+  copiarCodigo() {
+    const codigo = this.qiskitCode ? this.qiskitCode.lines.join('\n') : '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      alert('Code copied to clipboard');
+        }).catch(err => {
+          console.error('Error copying code: ', err);
+      });
+  }
+
+  guardarCodigo() {
+    this.mostrarModalGuargarCode = true;
+    this.mostrarModalNombreFuncion = false;
+    this.mostrarModal = false;
+  }
+  // Expressions actions
+
+  create() {
+    this.creatingExpression = true;
+    this.mostrarModalCrearExp = true;
+    this.mostrarModalVerExp = false;
+    // this.manager.selectedTemplate = new CodeTemplate("", "", "")
+  }
+
+  save() {
+    if (this.isValid()) {
+      
+      const existingExpressionIndex = this.expressions.findIndex(exp => exp.expressionName === this.expressionToSave.expressionName);
+
+      if (existingExpressionIndex !== -1) {
+          // Si la expresión existe, actualizamos los datos
+          if (this.fromEdit) {
+            
+            const updatedExpression = { ...this.expressions[existingExpressionIndex], ...this.expressionToSave };
+
+            this.service.updateExpression(updatedExpression).subscribe(
+              data => {
+                // Actualizamos la expresión en el array
+                this.expressions[existingExpressionIndex] = data;
+
+                // Ordenamos las expresiones por nombre
+                this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                // Limpiamos el formulario y cerramos el modal
+                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                this.creatingExpression = false;
+                this.mostrarModalCrearExp = false;
+              },
+              error => {
+                console.error(error);
+              }
+            );
+            this.fromEdit = false;
+            this.isNameDisabled = false;
+          } else {
+            // Si la expresión existe y no estamos editando, mostramos un mensaje de error
+            alert("Expression with this name already exists. Please choose a different name.");
+          }      
+        } else {
+            // Si la expresión no existe, creamos una nueva
+            this.service.createExpression({
+              expressionName: this.expressionToSave.expressionName,
+              jsExpression: this.expressionToSave.jsExpression,
+              description: this.expressionToSave.description,
+              type: 'grover'
+            }).subscribe(
+                data => {
+                    // Aseguramos que `this.expressions` esté inicializado
+                    if (!this.expressions) {
+                        this.expressions = [];
+                    }
+
+                    // Agregar la nueva expresión a la lista
+                    this.expressions.push(data);
+                    this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                    // Limpiamos el formulario y cerramos el modal
+                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                    this.creatingExpression = false;
+                    this.mostrarModalCrearExp = false;
+                },
+                error => {
+                    console.error(error);
+                }
+            );
+        }
+    }
+  }
+
+
+  saveUserExpression(index: number) {
+    this.expressionToSave.jsExpression = this.userExpressions[index];
+    this.expressionToSave.type = 'grover';
+    this.mostrarModalCrearExp = true;
+  }
+
+  editExpression(expression: any, index: number) {
+    this.expressionToSave = { ...expression };
+    this.fromEdit = true;
+    this.isNameDisabled = true;
+    this.mostrarModalCrearExp = true;
+    this.mostrarModalVerExp = false;
+  }
+
+
+  deleteExpression(id: string, index: number) {
+    if (confirm("Are you sure you want to delete this expression?")) {
+        this.service.deleteExpression(id).subscribe(
+            () => {
+                // Asegurar que `this.expressions` esté inicializado
+                if (!this.expressions) {
+                    this.expressions = [];
+                }
+
+                // Eliminar la expresión de la lista
+                this.expressions.splice(index, 1);
+
+                // Ordenar las expresiones por nombre después de eliminar
+                this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+                // Actualizar la tabla
+                this.searchExpressions();
+            },
+            error => {
+                console.error("Error deleting expression:", error);
+                alert("Failed to delete the expression. Please try again.");
+            }
+        );
+    }
+  }
+
+  showExpressions() {
+    this.mostrarModalVerExp = true;
+  }
+
+  isValid() {
+    return this.expressionToSave.expressionName && this.expressionToSave.jsExpression;
+  }
+
+  checkForExpressions() {
+
+    if (!this.currentUserExpression || !this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;
+    }
+
+    if (!this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;
+    }
+
+    this.checkForOrExpression();
+    this.checkForAndExpression();
+    this.isPrimeNumber();
+    this.isEvenNumber();
+    this.sumQubits();
+    this.xorExpression();
+    this.isPowerOfTwo();
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab' && this.showRecommendations) {
+      this.searchQuery = this.recommendation;
+      this.showRecommendations = false;
+    }
+  }
+
+  onFocusInput() {
+    this.checkForExpressions();
+  }
+
+  selectRecommendation() {
+    this.currentUserExpression = this.recommendation;
+    this.showRecommendations = false;
+    this.searchQuery = this.currentUserExpression;
+  }
+
+
+  checkForOrExpression() {
+    if (this.currentUserExpression.includes('||') && this.currentUserExpression !== this.recommendation) {
+      this.recommendOrExpression();
+    }
+  }
+
+  recommendOrExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const orExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a | b, 0) == 1`;
+  
+    this.recommendation = orExpression;
+    this.showRecommendations = true;
+  }
+
+  checkForAndExpression() {
+    if (this.currentUserExpression.includes('&&') && this.currentUserExpression !== this.recommendation) {
+      this.recommendAndExpression();
+    }
+  }
+
+  recommendAndExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const andExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a & b, 1) == 1`;
+  
+    this.recommendation = andExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPrimeNumber() {
+    if (/is\s*prime/i.test(this.currentUserExpression) && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPrimeExpression();
+    }
+  }
+
+  recommendIsPrimeExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPrimeLogic = `(function(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPrimeLogic;
+    this.showRecommendations = true;
+  }
+  
+
+  isEvenNumber() {
+    if (this.currentUserExpression.includes('isEven') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsEvenExpression();
+    }
+  }
+
+  recommendIsEvenExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].map(Number).join(''), 2)`;
+  
+    const isEvenExpression = `(${binaryToDecimal} % 2 == 0)`;
+  
+    this.recommendation = isEvenExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  sumQubits() {
+    if (this.currentUserExpression.includes('sum') && this.currentUserExpression !== this.recommendation) {
+      this.recommendSumQubitsExpression();
+    }
+  }
+  
+  // Comprueba si la suma es 1 (si hay solo un 1 en los qubits)
+  recommendSumQubitsExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const sumExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a + b, 0) == 1`;
+  
+    this.recommendation = sumExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  xorExpression() {
+    if (this.currentUserExpression.includes('xor') && this.currentUserExpression !== this.recommendation) {
+      this.recommendXorExpression();
+    }
+  }
+
+  recommendXorExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const xorExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a ^ b, 0) == 1`;
+  
+    this.recommendation = xorExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPowerOfTwo() {
+    if (this.currentUserExpression.includes('two') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPowerOfTwoExpression();
+    }
+  }
+
+  recommendIsPowerOfTwoExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPowerOfTwoExpression = `(function(n) { return (n > 0 && (n & (n - 1)) === 0); })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPowerOfTwoExpression;
+    this.showRecommendations = true;
+  }
+  
+
 }

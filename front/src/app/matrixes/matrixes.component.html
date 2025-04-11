@@ -1,98 +1,454 @@
-<div>
+<!-- <div>
     Number of:<br>
-    Input qubits: <input type="number" min="2" [(ngModel)]="inputQubits">
+    Input qubits:
+    <input type="number" min="2" max="15" [(ngModel)]="inputQubits" (input)="validateInputs()">
+    <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 15)" style="color: red;">
+        Must be between 2 and 15
+    </span>
     <br>
-    Output qubits: <input type="number" min="0" [(ngModel)]="outputQubits">
-    <button (click)="getEmptyMatrix()">Build input matrix</button>
+
+    Output qubits:
+    <input type="number" min="0" [(ngModel)]="outputQubits" (input)="validateInputs()">
+    <span *ngIf="outputQubits !== null && outputQubits < 0" style="color: red;">
+        Must be 0 or more
+    </span>
     <br>
-    <h3><mark style="color : red">{{ error }}</mark></h3>
+
+    <button (click)="getEmptyMatrix()" [disabled]="isInvalid">Build input matrix</button>
+
+    <h3><mark style="color: red">{{ error }}</mark></h3>
+</div> -->
+
+<head>
+    <!-- Agregar Font Awesome desde CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+<!-- Floating Help Button -->
+<button class="help-button" (click)="toggleHelp()">
+    ❔
+</button>
+
+<!-- Help Modal -->
+<div class="help-modal" *ngIf="showHelp">
+
+    <div class="help-content">
+        <div class="help-modal-header">
+            <h2 class="help-title-modal">Help</h2>
+            <span class="close" (click)="toggleHelp()">&times;</span>
+        </div>
+        <div class="help-text">
+            <h2>💡 How to use 'Matrices' 💡</h2>
+
+            <!-- <h4>🟢 Features:</h4> -->
+            <ol>
+                <li>Select the number of input and output qubits</li>
+                <span class="span-help-modal">When you click on matrices the first thing you need to do to build your matrix is write the
+                    number of input and output qubits you want to work with in the form you see above. Once
+                    you have written the number of qubits, click on the "Build matrix" button.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/matrixInput.jpg" alt="matrixInputImg" class="matrixInput">
+                </div>
+                <li>Show instrucctions</li>
+                <span class="span-help-modal">You can see some instructions to write your own expressions
+                    to fill-in the table. To do so, click on the "Show instructions" button you
+                    can see on the screen.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/instructions.jpg" alt="instructionsImg" class="instructions">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/instructionsShow.jpg" alt="instructionsShowImg" class="instructionsShow">
+                </div>
+                <li>Show examples</li>
+                <span class="span-help-modal">You can see some examples of expressions to fill-in the table
+                    by clicking on the "Show examples" button you can see on the screen.
+
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/expressionsButton.jpg" alt="expressionsButtonImg" class="expressionsButton">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/expressionsShow.jpg" alt="expressionsShowImg" class="expressionsShow">
+                </div>
+                <li>Try expressions</li>
+                <span class="span-help-modal">If you want to try some of the examples you see on the screen,
+                    click on the "Try" button you can see next to the example you want to try. Remember that
+                    you need to have built the matrix before trying the examples, if you can't see the
+                    button, it means you haven't built the matrix yet. One you have tried the example, you will be
+                    redicted to the table with the matrix and the results of the example you tried.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/expressionsShow.jpg" alt="expressionsShowImg" class="expressionsShow">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/tryMatrix.jpg" alt="tryMatrixImg" class="tryMatrix">
+                </div>
+                <li>Add examples' expressions</li>
+                <span class="span-help-modal">If you want to add some of the expressions from the
+                    examples, you can do it by clicking on the "Add" button you can see next to the
+                    example you want to add. Once you have added the example, you will see the expression
+                    in the list of expressions you want to try.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/expressionsShow.jpg" alt="expressionsShowImg" class="expressionsShow">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/exampleExpressions.jpg" alt="exampleExpressionsImg" class="exampleExpressions">
+                </div>
+                <li>Write your own expressions</li>
+                <span class="span-help-modal">If you want to write your own expressions to fill-in the table,
+                    you can do it by writing the expression in the input you see on the screen. Once you have
+                    written the expression, click on the "Add" button to add the expression to the list of
+                    expressions you want to try. Once you have written all the expressions you want to try, click
+                    on the "Apply expressions" button to fill-in the table with the expressions you have written.
+                    You can delete the expressions you have written by clicking on the "Remove" button you can see
+                    next to the expression you want to delete.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/expressions.jpg" alt="expressionsImg" class="expressions">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/exampleExpressions.jpg" alt="exampleExpressionsImg" class="exampleExpressions">
+                </div>
+                <span class="span-help-modal">If you want to write multiple expressions at the same time,
+                    you can do it by double clicking on the input you see on the screen. Once you have written
+                    all the expressions you want to try, click on the "Add" button to add the expressions to the
+                    list of your expressions. Once you have written all the expressions you want to try,
+                    click on the "Apply expressions" button to fill-in the table with the expressions you have
+                    written.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/multipleExp.jpg" alt="multipleExpImg" class="multipleExp">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/someExpressions.jpg" alt="someExpressionsImg" class="someExpressions">
+                </div>
+                <li>Select the domain</li>
+                <span class="span-help-modal">You can select the domain you want to work with by clicking on the
+                    radio button you see on the screen. You can choose between the amplitude domain and the phase
+                    domain.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/domain.jpg" alt="domainImg" class="domain">
+                </div>
+                <li><strong>Change the output qubits value</strong></li>
+                <span class="span-help-modal">If you want to change the value of a determined output qubit,
+                    you can do it by clicking on the you see on the screen in red (0 or 1), or you can
+                    change the value by writing the decimal value you want to assign to the output qubit
+                    in the input.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/changeValue.jpg" alt="changeValueImg" class="changeValue">
+                </div>
+                <li>Draw the circuit</li>
+                <span class="span-help-modal">To draw the circuit of the matrix you have built, click on the
+                    "Quirk" link you see on the screen. You will be redirected to the Quirk page with the
+                    circuit of the matrix you have built. If you want to see the circuit of a determined row
+                    of the matrix, click on the "Draw" link you see on the screen.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/drawQuirk.jpg" alt="drawQuirkImg" class="drawQuirk">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/circuit.jpg" alt="circuitImg" class="circuit">
+                </div>
+                <li>Reduce</li>
+                <span class="span-help-modal">If you want to reduce the circuit of the matrix you have built,
+                    you can do it by clicking on the checkbox you see on the screen. Once you have clicked on
+                    the checkbox, the circuit of the matrix will be reduced. You can also reduce the Qiskit code.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/reduce.jpg" alt="reduceImg" class="reduce">
+                </div>
+                <li>Generate the Qiskit code</li>
+                <span class="span-help-modal">To generate the Qiskit code of the matrix you have built, click
+                    on the "Qiskit code" link you see on the screen. An emergent window will appear with the
+                    Qiskit code of the matrix you have built. You can generate the Qiskit code as a whole program
+                    or as a function. You can also generate the Qiskit code of a determined row of the matrix.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/qiskitCode.jpg" alt="qiskitCodeImg" class="qiskitCode">
+                    <i class="fas fa-long-arrow-right" style="font-size: 30px; margin-left: 20px; margin-right: 20px; font-weight: bold;"></i>
+                    <img src="assets/img/windowCode.jpg" alt="windowCodeImg" class="windowCode">
+                </div>
+                <span class="span-help-modal">Here you can also start with Hadamard gates and count last quibit
+                    by clicking on the links you can see on the screen. The code will be added and you will
+                    see a short message to confirm the action. To make it easier for you, you can copy the
+                    code by clicking on the "Copy" button you see on the screen at the bottom of the window.
+                </span>
+                <div class="image-container">
+                    <img src="assets/img/addCode.jpg" alt="addCodeImg" class="addCode" style="margin-right: 20px;">
+                    <img src="assets/img/copyCode.jpg" alt="copyCodeImg" class="copyCode" style="margin-left: 20px;">
+                </div>
+            </ol>
+            <div class="help-actions">
+                <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+            </div>
+
+        </div>
+    </div>
 </div>
 
-<div *ngIf="matrix">
-    <p>
-        Do click on an <span style="color:red">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span style="color:red">output qubits,</span>
-        <br>
-        or write JavaScript expressions to assign value to the output qubits. Press <a style="color : blue" (click)="hideExamples=!hideExamples">here</a> to show or hide some examples. 
-    </p>
-    <div [hidden]="hideExamples">
-        <strong>Examples of expressions to fill-in the table:</strong>
-        <ol>
-            <li *ngFor="let javaExample of javaExamples; let i = index">
-                <span *ngIf="javaExample.exprs.length==1">
-                    <code>{{ javaExample.exprs[0] }}</code>
-                    →
-                    &nbsp;
-                    <i>{{ javaExample.explanation }}</i>
-                    &nbsp;
-                    <a style="color: blue;" (click)="tryFill(i)">Try</a>
+<div class="mensaje-temporal" *ngIf="mensajeTemporal">
+    {{ mensajeTemporal }}
+</div>
+
+<div class="titulo">
+    <h1>MATRIX</h1>
+</div>
+
+<div class="matrixTitle-container">
+    <h2 class="buildTitle">Build matrix</h2>
+    <button class="btn-reset" (click)="resetValues()">
+        <i class="fa fa-refresh" title="Reset matrix"></i>
+    </button>
+</div>
+
+<div class="container matrix-container">
+    <div class="form-row">
+        <div class="section buildText">
+            <p>
+                In this section you can build a matrix with the desired number of input and output qubits.
+                <br>
+                To do so, fill the number of input and output qubits and press the button to build the matrix.
+            </p>
+        </div>
+        <div class="section inputsContainer">
+            <div class="form-group">
+                <div class="label-container">
+                    <label for="inputQubits">Input qubits:</label>
+                    <small class="input-hint">[2 - 15]</small>
+                </div>
+
+                <input id="inputQubits" type="number" min="2" max="15" [(ngModel)]="inputQubits" (input)="validateInputs()" class="form-control">
+                <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 15)" class="error-text">
+                    Must be between 2 and 15
                 </span>
-                <span *ngIf="javaExample.exprs.length>1">
-                    <i>{{ javaExample.explanation }}</i>
-                    <ol *ngFor="let expr of javaExample.exprs; let j=index">
-                        <code>{{ expr }}</code>
-                        <span *ngIf="j==javaExample.exprs.length-1">
-                            &nbsp;<a style="color: blue;" (click)="tryFill(i)">Try</a>
-                        </span>
-                    </ol>
+            </div>
+
+            <div class="form-group">
+                <div class="label-container">
+                    <label for="outputQubits">Output qubits:</label>
+                    <small class="input-hint">[>= 0]</small>
+                </div>
+                <input id="outputQubits" type="number" min="0" [(ngModel)]="outputQubits" (input)="validateInputs()" class="form-control">
+
+                <span *ngIf="outputQubits !== null && outputQubits < 0" class="error-text">
+                    Must be 0 or more
                 </span>
-            </li>
-        </ol>
-        The expressions' error messages are not too explicit. So, press <a style="color:blue" (click)="hideInstructions=!hideInstructions">here</a> to see or hide instructions and counterexamples (examples of wrong expressions).
-        <div [hidden]="hideInstructions" style="border : 1px solid;">
-            The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment, and is mandatory that:
-            <ol>
-                <li>
-                    The left side of the assignment must reference an output qubit with the notation <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits' indexes. Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code> or <code><strong>q10</strong></code> (if <code><strong>q10</strong></code> is an output qubit).
-                    <br>
-                    So, <strong>qn</strong> or <strong>qi</strong> won't work.
-                </li>
-                <li>
-                    The right side must fulfill the form <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>. 
-                    <br>
-                    Values different than <code>0</code> or <code>1</code>, such as <strong><code>5</code></strong> or 
-                    <strong><code>-1</code></strong> likely won't work.
-                </li>
-                <li>
-                    The <code><strong>condition</strong></code> may reference an input qubit (<code><strong>q0</strong></code> or <code><strong>q1</strong></code>, for example)
-                    or the row index of the table with the word <code><strong>index</strong></code>.
-                </li>
-                <li>
-                    Complex values, such as the <strong>bold text</strong> in <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are not allowed. Likely you'll get an unexplicit error message.
-                </li>
-                <li>
-                    Every expression you write will processed in the server using the <code>ScriptEngineManager</code> Java class, instantiated to the <code>JavaScript</code> engine.
-                </li>
-            </ol>
-            Press <a style="color : blue" (click)="hideInstructions=!hideInstructions">here</a> to hide these instructions.
+            </div>
+
+            <div class="form-actions">
+                <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build matrix</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <h2 *ngIf="matrix">Table</h2> -->
+
+<div *ngIf="matrix" style="display: flex; justify-content: center; align-items: center; position: relative;">
+    <div style="display: flex; align-items: center;">
+        <h2 *ngIf="matrix" style="margin-top: 10px;">Table</h2>
+        <div style="position: relative;">
+            <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
+              <i class="fa fa-edit"></i>
+            </button>
+
+            <!-- Tooltip personalizado -->
+            <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
+
+              <div>
+                <p class="radioTitle">Select domain:</p>
+                <label class="custom-radio">
+                  <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
+                </label>
+                <label class="custom-radio">
+                  <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
+                </label>
+              </div>
+
+                <div>
+                    <p class="radioTitle">Available templates:</p>
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+                        <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">
+                            {{ template.fileName }}
+                        </option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div>
-        <strong>Your expressions:</strong>
-        <br>
-        <input type="text" size="50" 
-            [(ngModel)]="currentUserExpression" (dblclick)="openTextArea(this, $event, 'Expressions')"
-            placeholder="do double click to add several expressions">
-            &nbsp;<a style="color : blue" (click)="addUserExpression()">Add</a>
-        <div *ngFor="let userExpression of userExpressions; let i = index">
-            <code>{{ userExpression }}</code>&nbsp;<a style="color : blue" (click)="removeUserExpression(i)">Remove</a>
-        </div>
-        <br>
-        <button (click)="fillTableWithUserExpressions()">Fill table with these expressions</button>
-        &nbsp;
-        Amplitude domain: <input type="radio" [(ngModel)]="domain" [value]="'amplitude'" name="domain">
-        &nbsp;
-        Phase domain: <input type="radio" [(ngModel)]="domain" [value]="'phase'" name="domain">
-        &nbsp;
-        Available templates:
-        <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-            <option *ngFor="let template of manager.getTemplatesStartingBy('matrixes')" [ngValue]="template">
-              {{ template.fileName }}
-            </option>
-        </select> 
-    </div>
+</div>
 
-    <table border="1">
+
+<div *ngIf="matrix" class="matrix-editor-container">
+    <div class="table-button-container">
+        <div class="table-container" *ngIf="matrix">
+            <table id="myTable" border="1">
+                <tr>
+                    <th></th>
+                    <th [colSpan]="numberOfInputQubits">Input</th>
+                    <th [colSpan]="(numberOfOutputQubits ?? 0) + 1">
+                        
+                        <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                            <span>Output</span>
+                            <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                            
+                            <div class="tooltip" *ngIf="tooltipVisible">
+                                <p>
+                                    Do click on an <span class="highlight">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span class="highlight">output qubits</span>.
+                                </p>
+                                <div class="divider"><span>Or</span></div>
+                                <p>
+                                    Write
+                                    <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+                                        JavaScript expressions
+                                    </span>
+                                    to assign values to the output qubits.
+                                    <br>
+                                </p>
+                            </div>
+                        </div>
+                    </th>
+                    <th *ngIf="!actionsHidden">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <span>Actions</span>
+                            <label title="Reduce Qiskit and Quirk" style="color: white; font-weight: normal; font-size: small;">
+                                <input type="checkbox" class="custom-checkbox" [checked]="reduceQuiskit && reduceQuirk"
+                                    (change)="reduceQuiskit = $any($event.target).checked; reduceQuirk = $any($event.target).checked"/>
+                            </label>
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th *ngFor="let i of [].constructor(cols); let cont = index" align="center">
+                    q<sub>{{cont}}</sub>
+                    </th>
+                    <th style="width: 100px;">
+                        <small class="decimal">Decimal value</small>
+                    </th>
+                    <th class="actions-cell" *ngIf="!actionsHidden">
+                        <button class="action-icon-header" title="Draw in Quirk" (click)="drawAllQuirk(matrix)">
+                            <i class="fas fa-microchip"></i>
+                        </button>
+                        <button class="action-icon-header" title="View Unitary Matrix" (click)="getUnitaryMatrix(matrix)">
+                            <i class="fa fa-border-all"></i>
+                        </button>
+                        <button class="action-icon-header" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false)">
+                            <i class="fa fa-code"></i>
+                        </button>
+                        <button class="action-icon-header" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true)">
+                            f(x)
+                        </button>
+                    </th>
+                </tr>
+
+                <tr *ngFor="let row of matrix; let rowIndex = index" align="center">
+                    <th>{{ rowIndex }}</th>
+
+                    <td *ngFor="let value of row; let colIndex = index" align="right" (click)="negate(rowIndex, colIndex)">
+                    <span *ngIf="colIndex < inputQubits" style="color: green">{{ value }}</span>
+                    <span *ngIf="colIndex >= inputQubits" class="clickable-span">{{ value }}</span>
+                    </td>
+
+                    <td>
+                    <input class="table-input" type="number" min="0"
+                            [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
+                    </td>
+
+                    <td class="actions-cell" *ngIf="!actionsHidden">
+                        <button class="action-icon" title="Draw in Quirk" (click)="drawQuirk(rowIndex, matrix)">
+                            
+                            <i class="fas fa-microchip"></i>
+                        </button>
+                        <button class="action-icon" title="View Unitary Matrix" (click)="getUnitaryMatrix(matrix, rowIndex)">
+                            <i class="fa fa-border-all"></i>
+                        </button>
+                        <button class="action-icon" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false)">
+                            <i class="fa fa-code"></i>
+                        </button>
+                        <button class="action-icon" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true)">
+                            
+                            f(x)
+                        </button>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+        <button class="toggle-actions-btn" [title]="actionsHidden ? 'Show actions' : 'Hide actions'" (click)="toggleActions()">
+            <i class="fa" [ngClass]="actionsHidden ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+        </button>
+    </div>
+    <div class="section half expressions-section">
+
+        <!-- <div class="header-with-button">
+            <button (click)="mostrarEjemplos = true; toggleEjemplos()" class="btn-toggle-examples">
+            <i class="fa" [ngClass]="hideExamples ? 'fa-lightbulb' : 'fa-minus'"></i>
+            </button>
+
+            <div class="editorTitle-container">
+                <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
+                <button class="btn-search" (click)="showExpressions()">
+                    <i class="fa fa-edit editorIcon" title="Edit your expressions"></i>
+                </button>
+            </div>
+            
+            <button (click)="create()" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
+            
+        </div>
+
+        <div class="input-group">
+            <input type="text"
+                [(ngModel)]="searchQuery"
+                (input)="onSearchInput()"
+                (dblclick)="openTextArea(this, $event, 'Expressions')"
+                (keydown)="onTabPress($event)"
+                (focus)="onFocusInput()"
+                placeholder="Double click to add multiple expressions"
+                list="expressionsList">
+
+            <datalist id="expressionsList">
+                <option class="expOpt" *ngFor="let expression of expressions" [value]="expression.jsExpression"></option>
+            </datalist>
+
+            <div class="buttons-container">
+                <button class="btn-add" (click)="addUserExpression()"
+                    [disabled]="isAddDisabled()">
+                <i class="fa fa-plus" aria-hidden="true"></i> Add
+                </button>
+                <button *ngIf="userExpressions.length > 0" class="btn-clear" (click)="clearExpressions()">
+                    <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
+                </button>
+            </div>
+
+            <div class="suggestions" *ngIf="showRecommendations">
+            <div class="suggestion-item" (click)="selectRecommendation()">
+                {{ recommendation }}
+            </div>
+            </div>
+        </div>
+
+        <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
+            <code>{{ userExpression }}</code>
+            <a class="deleteButton" (click)="removeUserExpression(i)"><i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
+            <a class="saveButton" title="Save expression" (click)="saveUserExpression(i)"><i class="fas fa-save" style="font-size: 13px;"></i></a>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-apply" (click)="fillTableWithUserExpressions()"
+                [disabled]="userExpressions.length <= 0">
+                <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
+            </button>
+        </div>
+         -->
+         <app-editor [parent]="this"></app-editor>
+    </div>
+    
+</div>
+<!-- <div class="table-container" *ngIf="matrix">
+    <table id="myTable" border="1">
         <tr>
             <th></th>
             <th [colSpan]="inputQubits">Input</th>
@@ -100,17 +456,17 @@
             <th rowspan="2">
                 <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
                 <br>
-                <small><input type="checkbox" [(ngModel)]="reduceQuirk">Reduce</small>
+                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuirk">Reduce</small>
             </th>
             <th rowspan="2">
                 <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
             </th>
             <th rowspan="2">
-                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">as a whole program</u>
+                Qiskit code: <u href="#" (click)="mostrarModal = true; getQiskitCode(matrix, false)">as a whole program</u>
                 &nbsp;
                 <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
                 <br>
-                <small><input type="checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
+                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
             </th>
         </tr>
         <tr>
@@ -119,27 +475,27 @@
                 q<sub>{{cont}}</sub>
             </th>
             <th>
-                <u><small>Decimal value</small></u>
+                <small class="decimal" style="width: auto;">Decimal value</small>
             </th>
         </tr>
 
-        <tr *ngFor="let row of matrix; let rowIndex = index" 
+        <tr *ngFor="let row of matrix; let rowIndex = index"
                 align="center">
             <th>
                 {{rowIndex}}
             </th>
-            
+
             <td *ngFor="let value of row; let colIndex = index"
                 align="right" (click)="negate(rowIndex, colIndex)">
                 <span *ngIf="colIndex<inputQubits" style="color: green">
                     {{ value }}
-                </span>                               
-                <span *ngIf="colIndex>=inputQubits" style="color: red">
+                </span>
+                <span *ngIf="colIndex>=inputQubits"  class="clickable-span">
                    {{ value }}
-               </span>         
-            </td> 
+               </span>
+            </td>
             <td>
-                <input type="number" min="0" [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
+                <input class="table-input" type="number" min="0" [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
             </td>
             <td>
                 <u href="#" (click)="drawQuirk(rowIndex, matrix)">Draw</u>
@@ -148,11 +504,11 @@
                 <u href="#" (click)="getUnitaryMatrix(matrix, rowIndex)">Unitary matrix</u>
             </td>
             <td>
-                Qiskit code: <u href="#" (click)="getQiskitCode(matrix, false)">as a whole program</u>
+                Qiskit code: <u href="#" (click)="mostrarModal = true; getQiskitCode(matrix, false)">as a whole program</u>
                 &nbsp;
                 <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
                 <br>
-                <small><input type="checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
+                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
             </td>
         </tr>
     </table>
@@ -165,7 +521,7 @@
             </th>
 
             <th rowspan="3" style="background-color: beige;">→</th>
-            
+
             <th [colSpan]="inputQubits + outputQubits + 2">
                 <small>Expected matrix</small>
             </th>
@@ -179,7 +535,7 @@
             <th rowspan="2">
                 <u href="#" (click)="getUnitaryMatrix(startMatrix!)">Matrix</u>
             </th>
-            
+
             <th [colSpan]="inputQubits">Input</th>
             <th [colSpan]="outputQubits">Output</th>
 
@@ -206,12 +562,12 @@
                 align="right">
                 <span *ngIf="colIndex<inputQubits" style="color: green">
                     {{ value }}
-                </span>                               
+                </span>
                 <span *ngIf="colIndex>=inputQubits" style="color: red"
                     (click)="negate(rowIndex, colIndex)">
                     {{ value }}
-                </span>                      
-            </td> 
+                </span>
+            </td>
             <td>
                 <u href="#" (click)="drawQuirk(rowIndex, startMatrix!)">Draw</u>
             </td>
@@ -223,12 +579,12 @@
                 align="right">
                 <span *ngIf="colIndex<inputQubits" style="color: green">
                     {{ finalMatrix![rowIndex][colIndex] }}
-                </span>                               
+                </span>
                 <span *ngIf="colIndex>=inputQubits" style="color: red"
                     (click)="negate(rowIndex, colIndex)">
                     {{ finalMatrix![rowIndex][colIndex] }}
                 </span>
-            </td> 
+            </td>
             <td>
                 <u href="#" (click)="drawQuirk(rowIndex, finalMatrix!)">Draw</u>
             </td>
@@ -237,8 +593,8 @@
             </td>
         </tr>
     </table>
-
-    <p *ngIf="numberOfReceivedMatrixes!=0">
+</div> -->
+    <!-- <p *ngIf="numberOfReceivedMatrixes!=0">
         Received one matrix of {{ qiskitMatrix.length }} x {{ qiskitMatrix.length }}.<br>
         The calculus time on the server has been of {{ calculusTime }} seconds.
     </p>
@@ -250,7 +606,7 @@
     <div *ngIf="qiskitCode && qiskitCode.length>0" style="border: solid 1px;">
         <a style="color : blue" (click)="addHadamardGates()">Start with Hadamard gates</a>
         &nbsp;
-        <a style="color : blue" (click)="countLastQubit()">Count last qubit</a>            
+        <a style="color : blue" (click)="countLastQubit()">Count last qubit</a>
         <div style="font-size: x-small;">
             <pre *ngFor="let line of qiskitCode">{{ line }}</pre>
         </div>
@@ -274,5 +630,381 @@
             <pre>circuit.unitary(component, qreg)</pre>
             <pre>{{ qiskitMatrixEnd }}</pre>
         </small>
+    </div> -->
+
+
+
+
+
+<!-- <div class="container" *ngIf="matrix">
+    <h2>Output qubits value</h2>
+
+    <div class="section">
+        <p>
+            Do click on an <span class="highlight">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span class="highlight">output qubits</span>.
+        </p>
+        <div class="divider"><span>Or</span></div>
+        <p>
+            Write
+            <span (click)="mostrarInstrucciones = true" class="instructions-link">
+                JavaScript expressions
+            </span>
+            to assign values to the output qubits.
+            <br>
+        </p>
+    </div>
+
+    <div class="flex-container" *ngIf="matrix">
+        <div class="section half expressions-section" [hidden]="hideExamples">
+
+                <h3 class="title-examples">Examples</h3>
+                <ol>
+                    <li *ngFor="let javaExample of javaExamples; let i = index">
+                        <div class="example-item">
+
+                            <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
+                                <i>{{ javaExample.explanation }}</i> →
+                                <br>
+                                <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
+                            </div>
+                            <div class="button-container">
+
+                                <button *ngIf="matrix && javaExample.exprs.length==1"
+                                    (click)="onAddExampleClick(i)"
+                                    [ngClass]="{'btn-added': javaExample.attempted}"
+                                    class="btn-addExample">
+                                        <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                        {{ javaExample.attempted ? '' : 'Try' }}
+                                </button>
+                            </div>
+
+                            <div *ngIf="javaExample.exprs.length>1" style="width: 100%;">
+                                <i>{{ javaExample.explanation }}</i> →
+                                <ol>
+                                    <li *ngFor="let expr of javaExample.exprs; let j = index">
+                                        <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ expr }}</code>
+                                        <button *ngIf="matrix && javaExample.exprs.length > 1"
+                                            (click)="onAddExample2Click(expr)"
+                                            [ngClass]="{'btn-added': javaExample.attempted}"
+                                            class="btn-addExample2">
+                                            <i class="fas fa-plus-square"></i>
+                                        </button>
+                                    </li>
+                                </ol>
+                            </div>
+
+                            <div class="button-container">
+
+                                <button *ngIf="matrix && javaExample.exprs.length>1"
+                                        (click)="onAddExampleClick(i)"
+                                        [ngClass]="{'btn-added': javaExample.attempted}"
+                                        class="btn-addExample">
+                                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                            {{ javaExample.attempted ? '' : 'Try' }}
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+        </div>
+    </div>
+</div> -->
+
+<!-- Aqui iba la tabla -->
+
+<!-- Modales -->
+
+<div class="modal instrucciones" *ngIf="mostrarInstrucciones">
+    <div class="modal-content instrucciones"
+    cdkDrag
+    cdkDragRootElement="modal-content">
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal">Instructions</h2>
+            <span class="close" (click)="mostrarInstrucciones = false">&times;</span>
+        </div>
+        <div class="intructions-content">
+            <p class="text-instructions">The expressions you can introduce are processed by an extremely simple syntactic parser. Each expression must be an assignment, and is mandatory that:</p>
+            <ol class="list-instructions">
+                <li>
+                The left side of the assignment must reference an output qubit with the notation <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits' indexes.
+                Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code>, or <code><strong>q10</strong></code>.
+                </li>
+                <li>
+                The right side must fulfill the form <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>.
+                </li>
+                <li>
+                The <code><strong>condition</strong></code> may reference an input qubit or the row index <code><strong>index</strong></code>.
+                </li>
+                <li>
+                Complex values like <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are not allowed.
+                </li>
+                <li>
+                Every expression will be processed using Java's <code>ScriptEngineManager</code> with <code>JavaScript</code>.
+                </li>
+            </ol>
+            <div class="help-actions">
+                <button class="action-btn" (click)="mostrarInstrucciones = false">Got it!</button>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="modal ejemplos" *ngIf="mostrarEjemplos">
+    <div class="modal-content ejemplos"
+    cdkDrag
+    cdkDragRootElement=".modal-content">
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal">Examples</h2>
+            <span class="close" (click)="mostrarEjemplos = false">&times;</span>
+        </div>
+        <div class="intructions-content">
+            <ol>
+                <li *ngFor="let javaExample of javaExamples; let i = index">
+                    <div class="example-item">
+
+                        <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
+                            <i>{{ javaExample.explanation }}</i> →
+                            <br>
+                            <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
+                        </div>
+                        <div class="button-container">
+
+                            <button *ngIf="matrix && javaExample.exprs.length==1"
+                                (click)="onAddExampleClick(i)"
+                                [ngClass]="{'btn-added': javaExample.attempted}"
+                                class="btn-addExample">
+                                    <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                    {{ javaExample.attempted ? '' : 'Try' }}
+                            </button>
+                        </div>
+
+                        <div *ngIf="javaExample.exprs.length>1" style="width: 100%;">
+                            <i>{{ javaExample.explanation }}</i> →
+                            <ol>
+                                <li *ngFor="let expr of javaExample.exprs; let j = index">
+                                    <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ expr }}</code>
+                                    <button *ngIf="matrix && javaExample.exprs.length > 1"
+                                        (click)="onAddExample2Click(expr)"
+                                        [ngClass]="{'btn-added': javaExample.attempted}"
+                                        class="btn-addExample2">
+                                        <i class="fas fa-plus-square"></i>
+                                    </button>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="button-container">
+
+                            <button *ngIf="matrix && javaExample.exprs.length>1"
+                                    (click)="onAddExampleClick(i)"
+                                    [ngClass]="{'btn-added': javaExample.attempted}"
+                                    class="btn-addExample">
+                                        <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                        {{ javaExample.attempted ? '' : 'Try' }}
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+            <div class="help-actions">
+                <button class="action-btn" (click)="mostrarEjemplos = false">Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" *ngIf="mostrarModal">
+    <div class="modal-content">
+        <!-- Botón para cerrar el modal -->
+        <div class="modal-header">
+            <h2 class="title-modal">Qiskit Code</h2>
+            <div class="enlaces-modal">
+                <a (click)="addHadamardGates()" [class.disabled]="isDisabled"><i class="fas fa-plus-circle"></i> Start with Hadamard gates</a>
+                &nbsp;
+                <a (click)="countLastQubit()" [class.disabled]="isDisabled2"><i class="fas fa-plus-circle"></i> Count last qubit</a>
+            </div>
+
+            <span class="close" (click)="mostrarModal = false; cerrarModal()">&times;</span>
+        </div>
+
+        <!-- Contenido del modal -->
+        <div class="code-output">
+            <p *ngIf="numberOfReceivedMatrixes!=0">
+                Received one matrix of {{ qiskitMatrix.length }} x {{ qiskitMatrix.length }}.<br>
+                The calculus time on the server has been of {{ calculusTime }} seconds.
+            </p>
+
+            <p *ngIf="numberOfReceivedMatrixes==-1">
+                Since the data sent contain zero in all the output qubits, no matrices have been produced.
+            </p>
+
+            <div *ngIf="qiskitCode && qiskitCode.length>0">
+                <div style="margin: 20px;">
+                    <pre *ngFor="let line of qiskitCode">{{ line }}</pre>
+                </div>
+                <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+                    {{ mensajeTemporal }}
+                </div>
+            </div>
+
+            <div *ngIf="qiskitMatrix">
+                <small>
+                    <pre>{{ qiskitMatrixStart }}</pre>
+                    <code>component = Operator([<br></code>
+                    <code *ngFor="let row of qiskitMatrix; let i = index">
+                        &nbsp;&nbsp;[
+                        <span *ngFor="let cell of row; let j = index">
+                            <b *ngIf="cell!=0">{{ cell }}</b>
+                            <span *ngIf="cell==0">0</span>
+                            <span *ngIf="j<row.length-1">,</span>
+                        </span>
+                        ]<span *ngIf="i<row.length-1">,</span>
+                        <br>
+                    </code>
+                    <code>])</code>
+                    <pre>circuit.unitary(component, qreg)</pre>
+                    <pre>{{ qiskitMatrixEnd }}</pre>
+                </small>
+            </div>
+        </div>
+
+        <!-- Botón para copiar el código -->
+        <div class="modal-footer">
+            <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal para ingresar el nombre de la función -->
+    <div class="modal" *ngIf="mostrarModalNombreFuncion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Qiskit Code</h2>
+                <span class="close" (click)="mostrarModal = false;cancelarModal()">&times;</span>
+            </div>
+            <div class="info-form">
+                <h3>Enter function name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
+                    <button class="btn-confirm" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
+                        <i class="fa fa-check" aria-hidden="true"></i> Confirm
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="error">{{ error }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalCrearExp">
+        <div class="modal-content">
+            <!-- Botón para cerrar el modal -->
+            <div class="modal-header">
+                <h2 class="title-modal">Create expression</h2>
+                <span class="close" (click)="mostrarModalCrearExp = false; cerrarModal()">&times;</span>
+            </div>
+    
+            <!-- Contenido del modal -->
+            <div class="expression-output">
+
+                <div class="expressionsContainer">
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionName">Expression name:</label>
+                        </div>
+        
+                        <input id="expressionName" type="text" [disabled]="isNameDisabled" 
+                        [(ngModel)]="expressionToSave.expressionName" class="form-control">
+                    </div>
+        
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="jsExpression">Expression in javaScript:</label>
+                        </div>
+                        <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionDescription">Description:</label>
+                        </div>
+                        <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="expressionDescription">Type:</label>
+                        </div>
+                        <input id="expDescription" type="text" [disabled]="isType"
+                        [(ngModel)]="expressionToSave.type" class="form-control">
+                    </div>
+        
+                    <div class="form-actions">
+                        <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+
+                <div class="help-actions">
+                    <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
+                </div>
+            </div>
+    
+            <!-- Botón para copiar el código -->
+            <!-- <div class="modal-footer">
+                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div> -->
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalVerExp">
+        <div class="modal-content">
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+                <div class="header-with-button">
+                    <h2 class="title-modal">Manage Expressions</h2>
+                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                </div>
+                <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
+            </div>
+            
+            <!-- Tabla de expresiones -->
+            <div class="table-container-expressions">
+                <table class="expressions-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>JavaScript Expression</th>
+                            <th>Description</th>
+                            <th style="min-width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let expression of expressions; let i = index">
+                            <td>{{ expression.expressionName }}</td>
+                            <td>{{ expression.jsExpression }}</td>
+                            <td>{{ expression.description }}</td>
+                            <td>
+                                <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
+                                    <i class="fas fa-edit edit-expression-icon"></i>
+                                </button>
+                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                    <i class="fas fa-trash"></i> 
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    
+            <!-- Botón de cerrar -->
+            <div class="help-actions" style="margin-bottom: 15px;">
+                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+            </div>
+        </div>
+    </div>
+    
+</body>
