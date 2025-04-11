@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { FreqTable } from './deterministic/FreqTable';
 
 @Injectable({
   providedIn: 'root'
@@ -15,13 +16,17 @@ export class DeterministicService {
     return this.client.get<any[]>(environment.beUrl + this.controller + "/getTemplates", { responseType : 'json' })
   }
 
-  calculate(qubits: number, expectedFrequencies: number[], physicalAngle: number, functionPrefix? : string) {
+  calculate(qubits: number, expectedFrequencies: FreqTable, physicalAngle: number, originalGR : boolean, splitCircuits : boolean, functionPrefix? : string) {
     let info = {
       qubits : qubits,
       expectedFrequencies : expectedFrequencies,
       physicalAngle : physicalAngle,
-      functionPrefix : functionPrefix
+      functionPrefix : functionPrefix,
+      originalGR : originalGR
     }
-    return this.client.post<any>(environment.beUrl + this.controller + "/calculate", info, { withCredentials: true })
+    let url = environment.beUrl + this.controller + "/calculate"
+    if (splitCircuits)
+      url = url + "Splitting"
+    return this.client.post<any>(url, info, { withCredentials: true })
   }
 }

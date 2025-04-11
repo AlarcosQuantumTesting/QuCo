@@ -3,12 +3,8 @@ package edu.uclm.tp3.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpSession;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.services.DeterministicService;
 
 @RestController
@@ -45,14 +42,34 @@ public class DeterministicController {
 		double physicalAngle = jso.getDouble("physicalAngle");
 
 		String functionPrefix = jso.optString("functionPrefix");
+
+		boolean originalGR = jso.getBoolean("originalGR");
 		
-		JSONArray jsa = jso.getJSONArray("expectedFrequencies");
-		List<Integer> expectedFrequencies = IntStream.range(0, jsa.length())
-                .mapToObj(jsa::getInt)
-                .collect(Collectors.toList());
+		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
 		
 		try {
-			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix);
+			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			return result;
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PostMapping("/calculateSplitting") @ResponseBody
+	public Map<String, Object> calculateSplitting(HttpSession session, @RequestBody Map<String, Object> info) {
+		JSONObject jso = new JSONObject(info);
+		
+		int qubits = jso.getInt("qubits");
+		
+		double physicalAngle = jso.getDouble("physicalAngle");
+
+		String functionPrefix = jso.optString("functionPrefix");
+
+		boolean originalGR = jso.getBoolean("originalGR");
+		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
+		
+		try {
+			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

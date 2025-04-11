@@ -13,13 +13,20 @@ public abstract class OneQubitGate extends Gate {
 	protected double angle;
 
 	protected OneQubitGate() {
-		this.qubit = -1;
 		this.angle = Math.PI/2;
 	}
 	
 	public OneQubitGate setQubit(int qubit) {
 		this.qubit = qubit;
 		return this;
+	}
+
+	public int getQubit() {
+		return qubit;
+	}
+
+	public double getTheta() {
+		return angle;
 	}
 	
 	@Override
