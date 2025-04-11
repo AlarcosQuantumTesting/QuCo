@@ -350,6 +350,43 @@ p {
     border-right: 5px solid #f9f9f9;
   }
 
+  .custom-tooltip-pi {
+    position: absolute;
+    margin-left: 12px;
+    z-index: 100;
+    background: #f9f9f9;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    width: auto;
+    max-width: 400px;
+    font-size: 13px;
+  }
+
+  .custom-tooltip-pi::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #ccc;
+  }
+
+  .custom-tooltip-pi::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #f9f9f9;
+  }
+
+
   .radioTitle {
     font-size: 16px;
     font-weight: bold;

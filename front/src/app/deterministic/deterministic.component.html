@@ -128,34 +128,36 @@
               </tr>
               <tr>
                 <th colspan="6">
-                  <span>p<sub>i</sub></span>
-                  <button title="Output info" (click)="toggleTooltipTable($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
-                    <i class="fa fa-info-circle"></i>
-                  </button>
-                  <!-- <div class="custom-tooltip" *ngIf="tooltipPiVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
-                    <div>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="random(1)">Random</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="reset()">Reset</small></small>
+                  <div style="position: relative;">
+                    <span>p<sub>i</sub></span>
+                    <button title="Output info" (click)="toggleTooltipPi($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                      <i class="fa fa-info-circle"></i>
+                    </button>
+                    <div class="tooltip" *ngIf="tooltipPiVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
+                      <div>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="random(1)">Random</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="reset()">Reset</small></small>
+                      </div>
                     </div>
-                  </div> -->
-                  &nbsp;
-                      <small><small style="color: blue" (click)="random(1)">Random</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
-                      &nbsp;
-                      <small><small style="color: blue" (click)="reset()">Reset</small></small>
+                    <!-- &nbsp;
+                        <small><small style="color: blue" (click)="random(1)">Random</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
+                        &nbsp;
+                        <small><small style="color: blue" (click)="reset()">Reset</small></small> -->
+                  </div>
                 </th>
               </tr>
               <tr *ngFor="let i of [].constructor(expectedFrequencies.length); let rowIndex = index" align="center">

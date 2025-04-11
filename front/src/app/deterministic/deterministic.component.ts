@@ -529,9 +529,11 @@ export class DeterministicComponent extends GroverStyle {
     if (this.tooltipTableVisible) {
       this.tooltipTableVisible = false;
       this.tooltipVisible = false;
+      this.tooltipPiVisible = false;
     } else {
       this.tooltipTableVisible = true;
       this.tooltipVisible = false;
+      this.tooltipPiVisible = false;
     }
   }
 
@@ -542,9 +544,26 @@ export class DeterministicComponent extends GroverStyle {
     if (this.tooltipVisible) {
       this.tooltipVisible = false;
       this.tooltipTableVisible = false;
+      this.tooltipPiVisible = false;
     } else {
       this.tooltipVisible = true;
       this.tooltipTableVisible = false;
+      this.tooltipPiVisible = false;
+    }
+  }
+
+  toggleTooltipPi(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipPiVisible) {
+      this.tooltipPiVisible = false;
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+    } else {
+      this.tooltipVisible = false;
+      this.tooltipTableVisible = false;
+      this.tooltipPiVisible = true;
     }
   }
   
@@ -564,6 +583,12 @@ export class DeterministicComponent extends GroverStyle {
     }
   
     if (this.tooltipTableVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+        buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipTableVisible = false;
+    }
+
+    if (this.tooltipPiVisible &&
       tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
         buttonElement && !buttonElement.contains(event.target as Node)) {
       this.tooltipTableVisible = false;
