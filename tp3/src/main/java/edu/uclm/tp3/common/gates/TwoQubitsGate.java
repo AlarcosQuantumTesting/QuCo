@@ -18,9 +18,23 @@ public abstract class TwoQubitsGate extends Gate {
 		return this;
 	}
 
+	public int getQubit0() {
+		return qubit0;
+	}
+
+	public int getQubit1() {
+		return qubit1;
+	}
+
 	public TwoQubitsGate setQubits(String qubits) {
 		this.qubit0 = qubits.charAt(0);
 		this.qubit1 = qubits.charAt(1);
+		return this;
+	}
+
+	public TwoQubitsGate setQubits(int qubit0, int qubit1) {
+		this.qubit0 = qubit0;
+		this.qubit1 = qubit1;
 		return this;
 	}
 	

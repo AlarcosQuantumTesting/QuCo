@@ -1,20 +1,13 @@
 package edu.uclm.tp3.common.services;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.dao.TemplateDao;
 
