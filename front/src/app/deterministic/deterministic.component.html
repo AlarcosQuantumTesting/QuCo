@@ -160,16 +160,16 @@
                   </div>
                 </th>
               </tr>
-              <tr *ngFor="let i of [].constructor(expectedFrequencies.length); let rowIndex = index" align="center">
+              <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">
                 <td>
                   {{ rowIndex }}
                   <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
                 </td>
                 <td>
-                  <input type="number" min="0" step="1" [(ngModel)]="expectedFrequencies[rowIndex]" (change)="updateOutputs()">
+                  <input type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
                 </td>
                 <td>
-                  <span>{{ relativeFrequencies[rowIndex].toFixed(2) }}%</span>
+                  <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
                 </td>
               </tr>
             </table>
