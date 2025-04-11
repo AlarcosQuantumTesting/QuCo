@@ -21,6 +21,10 @@ public class CRY extends TwoQubitsGate implements IRotableGate {
 		return this;
 	}
 
+	public double getTheta() {
+		return theta;
+	}
+
 	@Override
 	public QMatrix getMatrix() {
 		QMatrix m = new QMatrix();
