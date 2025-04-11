@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.deterministic.GRCircuit;
 import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
+import edu.uclm.tp3.common.deterministic.QColumn;
 import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.common.deterministic.Solver;
 
@@ -52,6 +55,10 @@ public class DeterministicService {
 
 		solver = new UnifierSolver(tree, functionPrefix, originalGR);
 		Map<String, Object> result = solver.solve(shots);
+
+		QCircuit qCircuit = (QCircuit) result.get("QUIRK");
+		Map<String, Object> cleanCircuit = this.clean(qCircuit, qubits, null);
+
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", shots);
@@ -59,8 +66,32 @@ public class DeterministicService {
 		result.put("#MEASURES#", this.getMeasures(qubits));
 		result.put("#CALCULUS#", "circuit.append(get" + functionPrefix + "0(), qreg)");
 		result.put("tree", tree.toMap());
+		result.put("QUIRK", cleanCircuit);
 
 		return result;
+	}
+
+	private Map<String, Object> clean(QCircuit circuit, int qubits, String splitIndex) {
+		circuit.sortGates();
+		QColumn column0 = new QColumn();
+		if (splitIndex==null)
+			column0.addGate("~0");
+		else
+			column0.addGate("~" + splitIndex + "0");
+
+		circuit.insertColumn(column0, 0);
+
+		QColumn column1 = new QColumn();
+		for (int i=0; i<qubits; i++)
+			column1.addGate("H");
+		circuit.insertColumn(column1, 0);
+
+		JSONObject jso = circuit.toJson();
+		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
+		jso.remove("circuit");
+		jso.put("cols", jsaCols);
+
+		return jso.toMap();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,7 +105,7 @@ public class DeterministicService {
 		StringBuilder initializers = new StringBuilder();
 		StringBuilder code = new StringBuilder();
 		int startQubit = 0, endQubit;
-		List<Map<String, Object>> generalCircuits = new ArrayList<>();
+		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 
 		for (int i=0; i<pairs; i++) {
 			BinaryTree tree = new BinaryTree();
@@ -102,15 +133,20 @@ public class DeterministicService {
 
 			solver = new UnifierSolver(tree, functionPrefix, originalGR);
 			Map<String, Object> partialResult = solver.solve(shots);
+
+			QCircuit qCircuit = (QCircuit) partialResult.get("QUIRK");
+			Map<String, Object> cleanCircuit = this.clean(qCircuit, qubits, splitIndex);
+
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
 			initializers.append(initializer);
-			generalCircuits.add((Map<String, Object>) partialResult.get("QUIRK"));
+			partialCircuits.add(cleanCircuit);
 			endQubit = startQubit + qubits;
 			code.append("circuit.append(get" + splitIndex + functionPrefix + "0(), [" + Coder.getTargetQubits(startQubit, endQubit) + "]) # Use this line to use functions\n");
 			startQubit = endQubit;
 		}
 
+		Map<String, Object> generalCircuit = this.groupCircuits(partialCircuits, qubits);
 		result.put("#CALCULUS#", code.toString());
 		result.put("#QUBITS#", qubits*pairs);
 		result.put("#OUTPUT_QUBITS#", qubits*pairs);
@@ -118,8 +154,41 @@ public class DeterministicService {
 		result.put("#HADAMARDS#", this.getHadamards());
 		result.put("#INITIALIZE#", initializers);
 		result.put("trees", trees);
-		result.put("QUIRK", generalCircuits);
+		result.put("QUIRK", generalCircuit);
 		return result;
+	}
+
+	private Map<String, Object> groupCircuits(List<Map<String, Object>> generalCircuits, int qubits) {
+		JSONObject jso = new JSONObject();
+
+		JSONArray jsaGates = new JSONArray();
+		for (Map<String, Object> partialCircuit : generalCircuits) {
+			JSONObject jsoPartialCircuit = new JSONObject(partialCircuit);
+			JSONArray jsaPartialGates = jsoPartialCircuit.getJSONArray("gates");
+			jsaGates.putAll(jsaPartialGates);
+		}
+
+		JSONArray jsaCols = new JSONArray();
+		JSONArray jsaCol0 = new JSONArray();
+		for (int i=0; i<qubits*generalCircuits.size(); i++) {
+			jsaCol0.put("H");
+		}
+		jsaCols.put(jsaCol0);
+
+		int ones = 0;
+		for (int i=0; i<generalCircuits.size(); i++) {
+			JSONArray jsaCol1 = new JSONArray();
+			for (int j=0; j<ones; j++)
+				jsaCol1.put(1);
+			jsaCol1.put("~v" + i + "_0");
+			jsaCols.put(jsaCol1);
+			ones += qubits;
+		}
+
+		jso.put("gates", jsaGates);
+		jso.put("cols", jsaCols);
+		
+		return jso.toMap();
 	}
 
 	public List<Map<String, String>> getTemplates() throws IOException {

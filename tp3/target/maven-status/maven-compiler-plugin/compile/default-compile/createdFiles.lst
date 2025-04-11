@@ -39,7 +39,6 @@ edu/uclm/tp3/common/gates/CSwap.class
 edu/uclm/tp3/qiskit/QiskitRunner.class
 edu/uclm/tp3/classic/QSolver.class
 edu/uclm/tp3/symbolic/Coord.class
-edu/uclm/tp3/common/deterministic/OpCry.class
 edu/uclm/tp3/common/gates/CX.class
 edu/uclm/tp3/common/services/GateDescription.class
 edu/uclm/tp3/symbolic/CoordSum.class
@@ -84,7 +83,6 @@ edu/uclm/tp3/symbolic/QSMSolver.class
 edu/uclm/tp3/genetic/fitnessers/Fitnesser.class
 edu/uclm/tp3/common/gates/SDG.class
 edu/uclm/tp3/common/deterministic/UnifierSolver.class
-edu/uclm/tp3/common/deterministic/OpRy.class
 edu/uclm/tp3/common/gates/CU.class
 edu/uclm/tp3/common/gates/IRotableGate.class
 edu/uclm/tp3/common/gates/NQubitsGate.class
@@ -92,7 +90,6 @@ edu/uclm/tp3/Complex.class
 edu/uclm/tp3/common/gates/U.class
 edu/uclm/tp3/common/model/ProblemConfiguration.class
 edu/uclm/tp3/blocks/model/BlockCircuit.class
-edu/uclm/tp3/common/deterministic/OpGate.class
 edu/uclm/tp3/common/model/GateEncoding.class
 edu/uclm/tp3/common/gates/Barrier.class
 edu/uclm/tp3/common/gates/X.class

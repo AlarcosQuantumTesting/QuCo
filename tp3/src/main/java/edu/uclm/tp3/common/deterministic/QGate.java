@@ -13,6 +13,8 @@ public abstract class QGate {
     }
     
     public String getId() {
+        if (name == null)
+            return null;
         return "~" + name;
     }
 

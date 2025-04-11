@@ -42,8 +42,6 @@ public class UnifierSolver extends Solver {
 			String nodeName = nodeNames.get(i);
 			BinaryTree node = nodes.get(nodeName);
 			Coder coder;
-			System.out.print(nodeName + ": ");
-			System.out.println(node.hashCode());
 			if (originalGR)
 				coder = new GRCoder(node, functionPrefix);
 			else 
@@ -76,29 +74,8 @@ public class UnifierSolver extends Solver {
 		
 		result.put("#INITIALIZE#", initialize[0]);
 
-		result.put("QUIRK", buildQuirk(generalCircuit));
+		result.put("QUIRK", generalCircuit);
 		return result;
-	}
-
-	private Map<String, Object> buildQuirk(QCircuit generalCircuit) throws JSONException {
-		generalCircuit.sortGates();
-		JSONObject jsonGeneralCircuit = generalCircuit.toJson();
-		jsonGeneralCircuit.remove("circuit");
-		jsonGeneralCircuit.remove("id");
-		
-		JSONArray jsaCols = new JSONArray();
-		JSONArray jsaColH = new JSONArray();
-		for (int i=0; i<this.tree.getDepth(); i++) {
-			jsaColH.put("H");
-		}
-		jsaCols.put(jsaColH);
-
-		JSONArray jsaCol0 = new JSONArray()
-			.put("~0");
-		jsaCols.put(jsaCol0);
-
-		jsonGeneralCircuit.put("cols", jsaCols);
-		return jsonGeneralCircuit.toMap();
 	}
 
 	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit) {

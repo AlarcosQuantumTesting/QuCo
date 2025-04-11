@@ -24,5 +24,7 @@ public class QColumn {
         return jsonArray;
     }
 
-
+    public List<Object> getGates() {
+        return gateIds;
+    }
 }

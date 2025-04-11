@@ -35,9 +35,11 @@ public class QCircuit extends QGate {
 
     public JSONObject toJson() {
         JSONObject jsoCircuit = new JSONObject();
-        jsoCircuit.put("id", this.getId());
-        jsoCircuit.put("name", this.name);
-
+        if (this.getName()!=null) {
+            jsoCircuit.put("id", this.getId());
+            jsoCircuit.put("name", this.name);
+        }
+        
         JSONArray jsaColumns = new JSONArray();
         for (QColumn column : this.columns) {
             jsaColumns.put(column.toJsonArray());
@@ -85,4 +87,10 @@ public class QCircuit extends QGate {
         this.columns.add(column);
         return this;
     }
+
+    public void insertColumn(QColumn column, int index) {
+        this.columns.add(index, column);
+    }
+
+
 }

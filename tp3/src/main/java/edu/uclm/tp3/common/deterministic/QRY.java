@@ -21,11 +21,11 @@ public class QRY extends QGate {
         jso.put("id", this.getId());
         jso.put("name", this.name);
         jso.put("theta", this.theta);
-        jso.put("matrix", this.buildMatrix());
+        jso.put("matrix", this.getMatrix());
         return jso;
     }
 
-    private String buildMatrix() {
+    public String getMatrix() {
         return "{{" + this.matrix[0][0] + "," + this.matrix[0][1] + "},{" + this.matrix[1][0] + "," + this.matrix[1][1] + "}}";
     }
 }
