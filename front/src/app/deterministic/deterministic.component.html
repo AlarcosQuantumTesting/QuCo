@@ -5,12 +5,8 @@
 
 
 <body>
-  <!-- <button class="help-button" (click)="toggleHelp()">
-      ❔
-  </button> -->
-
   
-  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+<!--  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
       {{ mensajeTemporal }}
   </div>
 
@@ -46,9 +42,9 @@
                   </span>
               </div>
 
-              <!-- <div class="form-actions">
+              <div class="form-actions">
                   <button (click)="buildMatrixActions()" class="btn btn-primary">Build matrix</button>
-              </div> -->
+              </div> 
           </div>
       </div>
   </div>
@@ -62,7 +58,6 @@
               <i class="fa fa-edit"></i>
             </button>
 
-            <!-- Tooltip personalizado -->
             <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
     
                 <div>
@@ -147,16 +142,6 @@
                         <small><small style="color: blue" (click)="reset()">Reset</small></small>
                       </div>
                     </div>
-                    <!-- &nbsp;
-                        <small><small style="color: blue" (click)="random(1)">Random</small></small>
-                        &nbsp;
-                        <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
-                        &nbsp;
-                        <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-                        &nbsp;
-                        <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
-                        &nbsp;
-                        <small><small style="color: blue" (click)="reset()">Reset</small></small> -->
                   </div>
                 </th>
               </tr>
@@ -175,14 +160,10 @@
             </table>
         </div>
     </div>
-    <div class="section half expressions-section">
-        <app-editor [parent]="this"></app-editor>
-    </div>
+    
   </div>
 
-</body>
-
-
+-->
 
 
 
@@ -344,6 +325,8 @@
   </strong>
   &nbsp;
   <u style="color:blue" *ngIf="quirkCode" (click)="showQuirk()">Show in quirk</u>
+  &nbsp;
+  <span style="color : red">{{ error }}</span>
   <br>
   <u (click)="switchOutput()">
     Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
@@ -360,3 +343,5 @@
       <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
   </div>
 </div>
+
+</body>

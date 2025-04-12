@@ -94,7 +94,6 @@ public class DeterministicService {
 		return jso.toMap();
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int shots = expectedFrequencies.getShots();
 

@@ -46,7 +46,7 @@ public class DeterministicController {
 		boolean originalGR = jso.getBoolean("originalGR");
 		
 		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
-		
+		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 			return result;
@@ -67,6 +67,7 @@ public class DeterministicController {
 
 		boolean originalGR = jso.getBoolean("originalGR");
 		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
+		expectedFrequencies.sort();
 		
 		try {
 			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);

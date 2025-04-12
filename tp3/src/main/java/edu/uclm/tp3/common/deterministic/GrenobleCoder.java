@@ -43,8 +43,12 @@ public class GrenobleCoder extends Coder {
 		}
 
 		if (this.node.leftProbability==this.node.rightProbability) {
-			GRCU cu = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.leftChild.name);
-			circuit.addGate(cu);
+			GRCU cuLeft = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.leftChild.name);
+			circuit.addGate(new GRX());
+			circuit.addGate(cuLeft);
+			circuit.addGate(new GRX());
+			GRCU cuRight = new GRCU(this.functionPrefix, this.node.rightChild.name, 0, nodeDepth, 1, this.node.rightChild.name);
+			circuit.addGate(cuRight);
 			this.node.setCircuit(circuit);
 
 			return this.node;
@@ -80,11 +84,11 @@ public class GrenobleCoder extends Coder {
 			circuit.addGate(ry0);
 
 			GRY ry1 = null;
-
-			if (this.node.rightChild.rightAngle!=0) {
-				ry1 = new GRY(1, this.node.rightChild.rightAngle, this.node.name + "-R");
+			if (this.node.rightChild.leftAngle!=0)  {
+				ry1 = new GRY(1, this.node.rightChild.leftAngle, this.node.name + "-R");
 				circuit.addGate(ry1);
 			}
+
 			this.node.setCircuit(circuit);
 
 			return this.node;
