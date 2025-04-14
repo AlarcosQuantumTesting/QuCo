@@ -1,0 +1,119 @@
+package edu.uclm.tp3.common.deterministic;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class QGroverer {
+
+    public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean splitting) {
+        int qubits = sRows.get(0).size();
+
+        List<QGroverOracle> groverOracles = new ArrayList<>();
+        for (int i = 0; i < sRows.size(); i++) {
+            QGroverOracle oracle = new QGroverOracle(sRows.get(i));
+            groverOracles.add(oracle);
+        }
+
+        QGroverDifussor difussor = new QGroverDifussor(qubits);
+
+        if (!splitting) {
+            int nOptimal = getOptimal(sRows, qubits);
+            return buildGroverCircuit(qubits, groverOracles, difussor, nOptimal);
+        } else { 
+            int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(Math.pow(2, qubits)));
+            return buildGroverCircuitSplitting(qubits, sRows.size(), groverOracles, difussor, nOptimal);
+        }
+    }
+
+    private static QCircuit buildGroverCircuitSplitting(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
+        List<QCircuit> circuits = new ArrayList<>();
+
+        int ones = 0;
+        QCircuit resultCircuit = new QCircuit();
+        QColumn column0 = new QColumn();
+        QColumn barrier = new QColumn();
+        for (int i = 0; i < qubits*values; i++) { 
+            column0.addGate("H");
+            barrier.addGate("…");
+        }                
+        resultCircuit.addColumn(column0);
+        resultCircuit.addColumn(barrier);
+
+        for (int i = 0; i < values; i++) {
+            QCircuit circuit = new QCircuit();
+            List<QColumn> oracleColumns = groverOracles.get(i).getColumns();
+            for (int j=0; j<oracleColumns.size(); j++) {
+                QColumn oracleColumn = oracleColumns.get(j);
+                QColumn column = new QColumn();
+                for (int k = 0; k < ones; k++)
+                    column.addGate("1");
+                for (int k=0; k<qubits; k++)
+                    column.addGate("" + oracleColumn.getGates().get(k));
+                circuit.addColumn(column);
+            }
+
+            circuit.addColumn(barrier);
+
+            List<QColumn> difussorColumns = difussor.getColumns();
+            for (int j=0; j<difussorColumns.size(); j++) {
+                QColumn difussorColumn = difussorColumns.get(j);
+                QColumn column = new QColumn();
+                for (int k = 0; k < ones; k++)
+                    column.addGate("1");
+                for (int k=0; k<qubits; k++)
+                    column.addGate("" + difussorColumn.getGates().get(k));
+                circuit.addColumn(column);
+            }
+            circuit.addColumn(barrier);
+
+            circuits.add(circuit);
+            ones = ones + qubits;
+        }
+
+        for (int i=0; i<circuits.size(); i++) {
+            QCircuit c = circuits.get(i);
+            for (int j=0; j<nOptimal; j++)
+                resultCircuit.addColumns(c.getColumns());
+        }
+
+        return resultCircuit;
+    }
+
+    private static QCircuit buildGroverCircuit(int qubits, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
+        QCircuit circuit = new QCircuit();
+        QColumn column0 = new QColumn();
+        QColumn barrier = new QColumn();
+        for (int i = 0; i < qubits; i++) {
+            column0.addGate("H");
+            barrier.addGate("…");
+        }
+
+        circuit.addColumn(column0);
+        circuit.addColumn(barrier);
+
+        List<QColumn> oracleColumns = new ArrayList<>();
+        for (int i = 0; i < groverOracles.size(); i++)
+            oracleColumns.addAll(groverOracles.get(i).getColumns());
+
+        List<QColumn> difussorColumns = new ArrayList<>();
+        difussorColumns.addAll(difussor.getColumns());
+
+        for (int i = 0; i < nOptimal; i++) {
+            circuit.addColumns(oracleColumns);
+            circuit.addColumns(difussorColumns);
+        }
+        return circuit;
+    }
+
+    private static int getOptimal(List<List<Integer>> sRows, int qubits) {
+        double N = Math.pow(2, qubits);
+        double M = sRows.size();
+        if (M >= N / 2) {
+            for (int i = 0; i < M; i++)
+                sRows.get(i).add(0);
+            qubits++;
+        }
+        int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(N / M));
+        return nOptimal;
+    }
+}

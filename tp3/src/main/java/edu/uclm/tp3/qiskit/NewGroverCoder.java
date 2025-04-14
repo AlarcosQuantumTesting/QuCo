@@ -75,8 +75,8 @@ public class NewGroverCoder {
 				sb.append("circuit.h(" + i + ")\n");
 			else if (gateName.equals("X"))
 				sb.append("circuit.x(" + i + ")\n");
-			else if (gateName.equals("%E2%80%A2")) {
-				sb.append(getControlledGate(quirkColumn));
+			else if (gateName.equals("%E2%80%A2") || gateName.equals("•")) {
+				sb.append(getControlledGate(i, quirkColumn));
 				break;
 			} else if (gateName.equals("…")) {
 				sb.append("circuit.barrier()\n");
@@ -86,14 +86,14 @@ public class NewGroverCoder {
 		return sb;
 	}
 
-	private StringBuilder getControlledGate(List<Object> quirkColumn) {
+	private StringBuilder getControlledGate(int start, List<Object> quirkColumn) {
 		StringBuilder sb = new StringBuilder();
 		char last = quirkColumn.get(quirkColumn.size()-1).toString().charAt(0);
 		if (last=='z' || last=='Z')
 			sb.append("circuit.mcp(pi, [");
 		else
 			sb.append("circuit.mcx([");
-		for (int i=0; i<quirkColumn.size()-2; i++)
+		for (int i=start; i<quirkColumn.size()-2; i++)
 			sb.append(i + ", ");
 		sb.append((quirkColumn.size()-2) + "], " + (quirkColumn.size()-1) + ")\n");
 		return sb;

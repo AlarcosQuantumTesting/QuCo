@@ -30,7 +30,6 @@ export class DeterministicComponent extends GroverStyle {
   prefix? : string
 
   originalGR : boolean = false
-  splitCircuits : boolean = false
 
   running : boolean = false
   state? : string 
