@@ -112,7 +112,7 @@
                     <div>
                         <p class="radioTitle">Available templates:</p>
                         <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-                            <option *ngFor="let template of manager.getTemplatesStartingBy('grover')" [ngValue]="template">
+                            <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
                                 {{ template.fileName }}
                             </option>
                         </select> 

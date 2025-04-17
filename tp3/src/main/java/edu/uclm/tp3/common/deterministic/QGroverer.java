@@ -5,11 +5,16 @@ import java.util.List;
 
 public class QGroverer {
 
-    public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean splitting) {
+    public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean splitting, List<Double> expected) {
         int qubits = sRows.get(0).size();
+
+        double expectedElementProbability = 1.0/sRows.size();
 
         List<QGroverOracle> groverOracles = new ArrayList<>();
         for (int i = 0; i < sRows.size(); i++) {
+            int index = toDecimal(sRows.get(i));
+            expected.add(1.0*index);
+            expected.add(expectedElementProbability);
             QGroverOracle oracle = new QGroverOracle(sRows.get(i));
             groverOracles.add(oracle);
         }
@@ -23,6 +28,14 @@ public class QGroverer {
             int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(Math.pow(2, qubits)));
             return buildGroverCircuitSplitting(qubits, sRows.size(), groverOracles, difussor, nOptimal);
         }
+    }
+
+    private static int toDecimal(List<Integer> row) {
+        int decimal = 0;
+        for (int i = 0; i < row.size(); i++) {
+            decimal += row.get(i) * Math.pow(2, row.size() - 1 - i);
+        }
+        return decimal;
     }
 
     private static QCircuit buildGroverCircuitSplitting(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {

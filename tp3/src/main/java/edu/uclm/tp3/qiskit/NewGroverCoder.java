@@ -1,6 +1,7 @@
 package edu.uclm.tp3.qiskit;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,21 +12,33 @@ import edu.uclm.tp3.common.model.CodeTemplate;
 @Service
 public class NewGroverCoder {
 
-@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public String[] getCode(Map<String, Object> quirk, CodeTemplate template, String functionName) throws IOException {
 		StringBuilder sbCalculus = new StringBuilder();
 		List<List<Object>> matrixes = (List<List<Object>>) quirk.get("cols");
+
+		int qubits = matrixes.get(0).size();
 		for (int i=0; i<matrixes.size(); i++) {
 			List<Object> quirkColumn = matrixes.get(i);
 			sbCalculus.append(this.getCode(quirkColumn));
 		}
 		
-		int qubits = matrixes.get(0).size();
         String code;
         if (functionName==null)
             code = this.prepareCodeAsAProgram(qubits, sbCalculus, template);
         else
             code = this.prepareCodeAsAFunction(qubits, sbCalculus, functionName);
+
+		List<Double> expected = (List<Double>) quirk.get("expected");
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<expected.size(); i=i+2) {
+			sbExpected.append("(" + expected.get(i).intValue() + ", " + expected.get(i+1) + ")");
+			if (i<expected.size()-2)
+				sbExpected.append(", ");
+		}
+		sbExpected.append("]");
+
+		code = code.replace("#EXPECTED#", sbExpected.toString());
 
 		return code.split("\n");
 	}

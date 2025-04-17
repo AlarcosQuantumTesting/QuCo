@@ -70,11 +70,13 @@ public class GroverController {
 
 	@PutMapping("/getAllQuirk")
 	public Map<String, Object> getAllQuirk(@RequestBody List<List<Integer>> receivedMatrixes, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean splitting) {
-		QCircuit circuit = QGroverer.buildGrover(receivedMatrixes, useMCX, splitting);
+		List<Double> expected = new ArrayList<>();
+		QCircuit circuit = QGroverer.buildGrover(receivedMatrixes, useMCX, splitting, expected);
 		Map<String, Object> result = new HashMap<>();
 		JSONObject jsoCircuit = circuit.toJson().getJSONObject("circuit");
 
 		result.put("cols", jsoCircuit.getJSONArray("cols").toList());
+		result.put("expected", expected);
 		return result;
 	}
 

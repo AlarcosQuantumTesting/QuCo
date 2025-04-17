@@ -68,6 +68,16 @@ public class DeterministicService {
 		result.put("tree", tree.toMap());
 		result.put("QUIRK", cleanCircuit);
 
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			int freq = pair.getFreq();
+			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
+
 		return result;
 	}
 
@@ -154,6 +164,16 @@ public class DeterministicService {
 		result.put("#INITIALIZE#", initializers);
 		result.put("trees", trees);
 		result.put("QUIRK", generalCircuit);
+
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			int freq = pair.getFreq();
+			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
 		return result;
 	}
 

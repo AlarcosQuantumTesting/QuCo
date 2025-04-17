@@ -7,10 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class UnifierSolver extends Solver {
 	private String functionPrefix;
 	private boolean originalGR;
@@ -93,8 +89,10 @@ public class UnifierSolver extends Solver {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		
+		int cont = 0;
 		for (BinaryTree bt : usedNodesMap.values()) {
 			sbSubcircuits.append(bt.getCode());
+			System.out.println(cont++);
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 		
@@ -119,9 +117,11 @@ public class UnifierSolver extends Solver {
 				circuit.addColumn("X");
 
 				BinaryTree rightChild = node.rightChild;
-				QRY ryRight = this.getQRY(rightChild);
-				circuit.addColumn("•", ryRight);
-				generalCircuit.addGate(ryRight);
+				if (rightChild!=null) {  // ¿Seguro? XXX
+					QRY ryRight = this.getQRY(rightChild);
+					circuit.addColumn("•", ryRight);
+					generalCircuit.addGate(ryRight);
+				}
 			} else if (node.rightProbability==0) {
 				QRY ry0 = this.getQRY(node);
 				ry0.name = node.name + "-0";
@@ -129,9 +129,11 @@ public class UnifierSolver extends Solver {
 				generalCircuit.addGate(ry0);
 
 				BinaryTree leftChild = node.leftChild;
-				QRY ryLeft = this.getQRY(leftChild);
-				circuit.addColumn("1", ryLeft);
-				generalCircuit.addGate(ryLeft);
+				if (leftChild!=null) { // ¿Seguro? XXX
+					QRY ryLeft = this.getQRY(leftChild);
+					circuit.addColumn("1", ryLeft);
+					generalCircuit.addGate(ryLeft);
+				}
 			} else if (node.leftProbability==0) {
 				QRY ry0 = this.getQRY(node);
 				ry0.name = node.name + "-0";
