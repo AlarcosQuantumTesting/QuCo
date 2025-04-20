@@ -3,9 +3,13 @@ package edu.uclm.tp3.common.services;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.criteria.CriteriaBuilder.In;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -107,7 +111,7 @@ public class DeterministicService {
 	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int shots = expectedFrequencies.getShots();
 
-		int pairs = expectedFrequencies.getPairs().size();
+		int numberOfPairs = expectedFrequencies.getPairs().size();
 		Map<String, Object> result = new HashMap<>();
 
 		List<Map<String, Object>> trees = new ArrayList<>();
@@ -116,7 +120,7 @@ public class DeterministicService {
 		int startQubit = 0, endQubit;
 		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 
-		for (int i=0; i<pairs; i++) {
+		for (int i=0; i<numberOfPairs; i++) {
 			BinaryTree tree = new BinaryTree();
 			for (int j=0; j<qubits-1; j++)
 				tree.addChildren();
@@ -157,24 +161,74 @@ public class DeterministicService {
 
 		Map<String, Object> generalCircuit = this.groupCircuits(partialCircuits, qubits);
 		result.put("#CALCULUS#", code.toString());
-		result.put("#QUBITS#", qubits*pairs);
-		result.put("#OUTPUT_QUBITS#", qubits*pairs);
+		result.put("#QUBITS#", qubits*numberOfPairs);
+		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
 		result.put("#SHOTS#", shots);
 		result.put("#HADAMARDS#", this.getHadamards());
 		result.put("#INITIALIZE#", initializers);
 		result.put("trees", trees);
 		result.put("QUIRK", generalCircuit);
 
-		StringBuilder sbExpected = new StringBuilder("expected = [");
-		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+		List<Pair> expectedPairs = new ArrayList<>();
+		int[] totalFrequencies = { 0 };
+		int totalQubits = qubits * numberOfPairs;
+		for (int i=0; i<numberOfPairs; i++) {
+			int leftQubits = qubits*i;
+			int rightQubits = totalQubits - qubits*(i+1);
+
 			Pair pair = expectedFrequencies.getPairs().get(i);
+
+			this.generateAll(qubits, leftQubits, pair, rightQubits, expectedPairs, totalFrequencies);
+		}
+		
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<expectedPairs.size(); i++) {
+			Pair pair = expectedPairs.get(i);
 			int index = pair.getIndex();
 			int freq = pair.getFreq();
-			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
+			sbExpected.append("(" + index + ", " + (1.0*freq/totalFrequencies[0]) + "),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
 		}
 		sbExpected.append("]");
 		result.put("#EXPECTED#", sbExpected.toString());
 		return result;
+	}
+
+	private void generateAll(int qubits, int leftQubits, Pair pair, int rightQubits, List<Pair> expectedPairs, int[] totalFrequencies) {
+		String sIndex = print(pair.getIndex(), qubits);
+		for (int i = 0; i < (1 << leftQubits); i++) {
+			String sLeft = print(i, leftQubits);
+			for (int j = 0; j < (1 << rightQubits); j++) {
+				String sRight = print(j, rightQubits);
+				String sValue = sLeft + sIndex + sRight;
+				int value = Integer.parseInt(sValue, 2);
+
+				Pair existingPair = new Pair().setIndex(value);
+				int pos = Collections.binarySearch(expectedPairs, existingPair);
+				if (pos < 0) {
+					pos = -pos - 1;
+					existingPair.setFreq(pair.getFreq());
+					totalFrequencies[0] += pair.getFreq();
+					expectedPairs.add(pos, existingPair);
+				} else {
+					int freq = expectedPairs.get(pos).getFreq();
+					totalFrequencies[0] += pair.getFreq();
+					existingPair = expectedPairs.get(pos);
+					existingPair.setFreq(freq + pair.getFreq());
+				}
+			}
+		}
+	}
+
+	private static String print(int index, int length) {
+		if (length==0)
+			return "";
+		String s = Integer.toBinaryString(index);
+		int sl = s.length();
+		for (int i=0; i<length-sl; i++)
+			s = "0" + s;
+		return s;
 	}
 
 	private Map<String, Object> groupCircuits(List<Map<String, Object>> generalCircuits, int qubits) {

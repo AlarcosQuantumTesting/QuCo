@@ -89,10 +89,8 @@ public class UnifierSolver extends Solver {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		
-		int cont = 0;
 		for (BinaryTree bt : usedNodesMap.values()) {
 			sbSubcircuits.append(bt.getCode());
-			System.out.println(cont++);
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 		
