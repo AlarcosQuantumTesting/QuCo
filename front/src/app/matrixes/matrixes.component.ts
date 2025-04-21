@@ -48,6 +48,7 @@ export class MatrixesComponent implements AfterViewInit  {
   showHelp = false;
   isDisabled = false;
   isDisabled2 = false;
+  isLoadingQiskitCode = false;
 
   cols : number = 0
   rows : number = 0
@@ -440,16 +441,6 @@ export class MatrixesComponent implements AfterViewInit  {
   getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
     let functionName
     if (asFunction) {
-      // functionName = prompt("Enter the name of the function")
-      // if (!functionName || functionName.trim().length==0) {
-      //   this.error = "You must enter a name for the function"
-      //   return
-      // }
-      // if (this.isDisabled) return;
-      // this.isDisabled = true;
-      // if (this.isDisabled2) return;
-      // this.isDisabled2 = true;
-
       this.matrixTmp = matrix;
       this.asFunctionTmp = asFunction;
       this.rowIndexTmp = rowIndex;
@@ -459,6 +450,8 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
     this.reset()
+    this.isLoadingQiskitCode = true;
+
     let info = {
       matrix : matrix,
       inputQubits : this.inputQubits,
@@ -470,8 +463,9 @@ export class MatrixesComponent implements AfterViewInit  {
     }
     if (rowIndex!=undefined)
       info.matrix = matrix[rowIndex]
-    this.qiskitService.getCode(info).subscribe(
-      result => {
+    this.qiskitService.getCode(info).subscribe({
+      next: result => {
+        this.isLoadingQiskitCode = true;
         this.qiskitCode = result.code
         this.replaceShotsToken(1000)
 
@@ -480,8 +474,15 @@ export class MatrixesComponent implements AfterViewInit  {
         if (asFunction) {
           this.mostrarModal = true;
         }
+      },
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        // opcional: podrías mostrar un mensaje de error al usuario
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
       }
-    )
+    });
   }
 
 
@@ -508,6 +509,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.isDisabled2 = true;
 
     this.reset();
+    this.isLoadingQiskitCode = true;
 
     let info = {
       matrix: matrix,
@@ -520,10 +522,11 @@ export class MatrixesComponent implements AfterViewInit  {
     };
 
     if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
-
+    this.mostrarModal = true;
     this.qiskitService.getCode(info).subscribe(result => {
       this.qiskitCode = result.code;
       this.replaceShotsToken(1000);
+      this.isLoadingQiskitCode = false;
       this.mostrarModal = true;
     });
   }
@@ -726,8 +729,8 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
 
-    if (this.inputQubits < 2 || this.inputQubits > 15) {
-      this.error = 'Input qubits must be between 2 and 15';
+    if (this.inputQubits < 2 || this.inputQubits > 12) {
+      this.error = 'Input qubits must be between 2 and 12';
       this.isInvalid = true;
       return;
     }
