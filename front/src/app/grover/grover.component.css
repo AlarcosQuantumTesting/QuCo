@@ -1302,3 +1302,30 @@ input[disabled], textarea[disabled], select[disabled] {
     opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
     cursor: not-allowed; /* Cambia el cursor */
 }
+
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  

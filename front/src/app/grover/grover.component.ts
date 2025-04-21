@@ -85,6 +85,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   isType: boolean = true;
   mostrarModalNombreFuncion: boolean = false;
   mostrarModalGuargarCode: boolean = false;
+  isLoadingQiskitCode = false;
   nombreFuncion = '';
   matrixTmp: any[] = [];
   asFunctionTmp = false;
@@ -400,39 +401,13 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
         this.asFunctionTmp = asFunction;
         this.nombreFuncion = '';
         this.error = '';
+        this.isLoadingQiskitCode = true;
         this.mostrarModalNombreFuncion = true;
         return;
-        // Guardas los datos temporalmente
-        /*this.matrixTmp = matrix;
-        this.asFunctionTmp = asFunction;
-        this.mostrarModalNombreFuncion = true; // Mostrar modal para introducir nombre
-      
-        this.qiskitCode.name = this.nombreFuncion;
-        this.qiskitCode.isFunction = true;
-        
-        const info = {
-          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
-          template: this.manager.selectedTemplate,
-          functionName: this.qiskitCode.name || ''
-        }
-
-        if (info.matrix.length == 0) {
-          this.error = "Select some output";
-          return;
-        }
-    
-        this.groverService.getCode(info, this.useMCX).subscribe(
-          result => {
-            this.qiskitCode.lines = result.code;
-            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
-            this.mostrarModal = true;
-          },
-          error => {
-            this.error = error.error ? error.error.message : error;
-          }
-        )*/
       }
       this.reset();
+      this.isLoadingQiskitCode = true;
+
         let info = {
           matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
           template: this.manager.selectedTemplate,
@@ -444,16 +419,23 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           return;
         }
     
-        this.groverService.getCode(info, this.useMCX).subscribe(
-          result => {
+        this.groverService.getCode(info, this.useMCX).subscribe({
+          next: result => {
             this.qiskitCode.lines = result.code;
             document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
             this.mostrarModal = true;
           },
-          error => {
-            this.error = error.error ? error.error.message : error;
+          // error => {
+          //   this.error = error.error ? error.error.message : error;
+          // },
+          error: err => {
+            console.error('Error generando código Qiskit', err);
+            // opcional: podrías mostrar un mensaje de error al usuario
+          },
+          complete: () => {
+            this.isLoadingQiskitCode = false; // ← finaliza carga
           }
-        )
+        });
       
   
       
@@ -831,6 +813,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     this.isDisabled2 = true;
     this.mostrarModal = true;
     this.reset();
+    this.isLoadingQiskitCode = true;
 
     let info = {
       matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
@@ -842,18 +825,26 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       this.error = "Select some output";
       return;
     }
-
-    this.groverService.getCode(info, this.useMCX).subscribe(
-      result => {
+    this.mostrarModal = true;
+    this.groverService.getCode(info, this.useMCX).subscribe({
+      next: result => {
         this.qiskitCode.lines = result.code;
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
         this.mostrarModal = true;
+        console.log("Qiskit code generated successfully");
+        this.isLoadingQiskitCode = false;
       },
-      error => {
-        this.error = error.error ? error.error.message : error;
+      // error => {
+      //   this.error = error.error ? error.error.message : error;
+      // }
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        // opcional: podrías mostrar un mensaje de error al usuario
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
       }
-    )
-  
+    });
   }
 
   confirmarNombreFuncion() {
