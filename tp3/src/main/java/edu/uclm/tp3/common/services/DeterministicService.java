@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.criteria.CriteriaBuilder.In;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -108,7 +105,7 @@ public class DeterministicService {
 		return jso.toMap();
 	}
 
-	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
+	public Map<String, Object> calculateSeparating(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int shots = expectedFrequencies.getShots();
 
 		int numberOfPairs = expectedFrequencies.getPairs().size();
@@ -197,11 +194,20 @@ public class DeterministicService {
 
 	private void generateAll(int qubits, int leftQubits, Pair pair, int rightQubits, List<Pair> expectedPairs, int[] totalFrequencies) {
 		String sIndex = print(pair.getIndex(), qubits);
+		int totalLength = leftQubits + qubits + rightQubits;
+
 		for (int i = 0; i < (1 << leftQubits); i++) {
 			String sLeft = print(i, leftQubits);
 			for (int j = 0; j < (1 << rightQubits); j++) {
 				String sRight = print(j, rightQubits);
-				String sValue = sLeft + sIndex + sRight;
+
+				// Construimos sValue con StringBuilder
+				StringBuilder sbValue = new StringBuilder(totalLength);
+				sbValue.append(sLeft)
+					.append(sIndex)
+					.append(sRight);
+				String sValue = sbValue.toString();
+
 				int value = Integer.parseInt(sValue, 2);
 
 				Pair existingPair = new Pair().setIndex(value);
@@ -212,24 +218,31 @@ public class DeterministicService {
 					totalFrequencies[0] += pair.getFreq();
 					expectedPairs.add(pos, existingPair);
 				} else {
-					int freq = expectedPairs.get(pos).getFreq();
+					Pair found = expectedPairs.get(pos);
 					totalFrequencies[0] += pair.getFreq();
-					existingPair = expectedPairs.get(pos);
-					existingPair.setFreq(freq + pair.getFreq());
+					found.setFreq(found.getFreq() + pair.getFreq());
 				}
 			}
 		}
 	}
 
 	private static String print(int index, int length) {
-		if (length==0)
+		if (length == 0) {
 			return "";
-		String s = Integer.toBinaryString(index);
-		int sl = s.length();
-		for (int i=0; i<length-sl; i++)
-			s = "0" + s;
-		return s;
+		}
+		String bin = Integer.toBinaryString(index);
+		int zeros = length - bin.length();
+
+		StringBuilder sb = new StringBuilder(length);
+		// Añadimos los ceros a la izquierda
+		for (int k = 0; k < zeros; k++) {
+			sb.append('0');
+		}
+		// Añadimos el resto de la representación binaria
+		sb.append(bin);
+		return sb.toString();
 	}
+
 
 	private Map<String, Object> groupCircuits(List<Map<String, Object>> generalCircuits, int qubits) {
 		JSONObject jso = new JSONObject();

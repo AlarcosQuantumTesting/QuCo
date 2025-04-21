@@ -34,7 +34,8 @@ public class UnifierSolver extends Solver {
 		Map<Integer, BinaryTree> usedNodesMap = new HashMap<>();
 		List<BinaryTree> usedNodesList = new ArrayList<>();
 
-		for (int i=nodeNames.size()-1; i>=0; i--) {
+		int nodeNamesSize = nodeNames.size();
+		for (int i=nodeNamesSize-1; i>=0; i--) {
 			String nodeName = nodeNames.get(i);
 			BinaryTree node = nodes.get(nodeName);
 			Coder coder;

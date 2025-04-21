@@ -261,7 +261,7 @@
           <br>
           Functions' prefix: <input type="text" [(ngModel)]="prefix">
           &nbsp;
-          <input type="checkbox" [(ngModel)]="splitCircuits">Split per values
+          <input type="checkbox" [(ngModel)]="separateCircuits">Separate per values
           &nbsp;
           <button (click)="getCircuit()">Get whole Qiskit code</button>
           &nbsp;
@@ -282,15 +282,17 @@
         <th colspan="6">
           <i>p<sub>i</sub></i>
           &nbsp;
-          <small><small style="color: blue" (click)="random(1)">Random</small></small>
+          <small><small style="color: white" (click)="random(1)">Random</small></small>
           &nbsp;
-          <small><small style="color: blue" (click)="random(10)">Random*10</small></small>
+          <small><small style="color: white" (click)="random(10)">Random*10</small></small>
           &nbsp;
-          <small><small style="color: blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
+          <small><small style="color: white" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
           &nbsp;
-          <small><small style="color: blue" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
+          <small><small style="color: white" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
           &nbsp;
-          <small><small style="color: blue" (click)="reset()">Reset</small></small>
+          <small><small style="color: white" (click)="reset()">Reset</small></small>
+          &nbsp;
+          <small><small style="color: white" (click)="fixedAmount()">This amount of values: <input type="number" step="1" min="1" max="expectedFrequencies.rows" [(ngModel)]="amountOfValues"></small></small>
         </th>
       </tr>
       <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">

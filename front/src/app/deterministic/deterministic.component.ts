@@ -23,6 +23,7 @@ export class DeterministicComponent extends GroverStyle {
   desiredError : number = 0.05
 
   probOf0 : number = 0.5
+  amountOfValues : number = 1
 
   expectedFrequencies : FreqTable = new FreqTable()
 
@@ -240,7 +241,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.splitCircuits, this.prefix).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.separateCircuits, this.prefix).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
@@ -414,13 +415,30 @@ export class DeterministicComponent extends GroverStyle {
     this.updateOutputs()
   }
 
+  fixedAmount() {
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
+    let selectedIndexes : number[] = []
+    for (let i=0; i<this.amountOfValues; i++) {
+      let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      while (selectedIndexes.includes(index)) {
+        index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      }
+      selectedIndexes.push(index)
+      this.expectedFrequencies.setFreq(index, 100)
+    }
+  }
+
   withProb() {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    
-    for (let i=0; i<this.expectedFrequencies.rows; i++)
-      if (Math.random() >= this.probOf0)
-        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100))
+
+    let numberOfIndexes = (1-this.probOf0) * this.expectedFrequencies.rows
+    for (let i=0; i<numberOfIndexes; i++) {
+      let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      this.expectedFrequencies.setFreq(index, Math.round(Math.random()*100))
+    }
+  
     this.calculateShots()
     this.updateOutputs()
   }
@@ -458,11 +476,7 @@ export class DeterministicComponent extends GroverStyle {
   showQuirk() {
     let url = "https://algassert.com/quirk#circuit=" + this.quirkCode
     window.open(url, "_blank")
-  }
-    
-
-
-
+  }    
 
   resetValues() {
     // Eliminar valores guardados en localStorage

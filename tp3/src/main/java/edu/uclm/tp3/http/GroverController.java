@@ -19,9 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QGroverer;
 import edu.uclm.tp3.common.model.CodeTemplate;
-import edu.uclm.tp3.qiskit.GroverSolver;
 import edu.uclm.tp3.qiskit.NewGroverCoder;
-import edu.uclm.tp3.quirk.QuirkSolver;
 
 @RestController
 @RequestMapping("grover")
@@ -38,7 +36,7 @@ public class GroverController {
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
-	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean splitting) {
+	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean separating) {
 		try {
 			List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
 			Map<String, Object> receivedTemplate = (Map<String, Object>) info.get("template");
@@ -50,7 +48,7 @@ public class GroverController {
 			if (info.containsKey("functionName"))
 				functionName = info.get("functionName").toString();
 			
-			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes, useMCX, splitting);
+			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes, useMCX, separating);
 			String[] code = this.coder.getCode(quirk, template, functionName);		
 			
 			Map<String, String[]> result = new HashMap<>();
@@ -62,16 +60,16 @@ public class GroverController {
 	}
 	
 	@PutMapping("/getQuirk")
-	public Map<String, Object> getQuirk(@RequestBody List<Integer> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean splitting) {
+	public Map<String, Object> getQuirk(@RequestBody List<Integer> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean separating) {
 		List<List<Integer>> receivedMatrixes = new ArrayList<>();
 		receivedMatrixes.add(info);
-		return this.getAllQuirk(receivedMatrixes, useMCX, splitting);
+		return this.getAllQuirk(receivedMatrixes, useMCX, separating);
 	}
 
 	@PutMapping("/getAllQuirk")
-	public Map<String, Object> getAllQuirk(@RequestBody List<List<Integer>> receivedMatrixes, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean splitting) {
+	public Map<String, Object> getAllQuirk(@RequestBody List<List<Integer>> receivedMatrixes, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean separating) {
 		List<Double> expected = new ArrayList<>();
-		QCircuit circuit = QGroverer.buildGrover(receivedMatrixes, useMCX, splitting, expected);
+		QCircuit circuit = QGroverer.buildGrover(receivedMatrixes, useMCX, separating, expected);
 		Map<String, Object> result = new HashMap<>();
 		JSONObject jsoCircuit = circuit.toJson().getJSONObject("circuit");
 

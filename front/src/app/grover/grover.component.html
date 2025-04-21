@@ -94,8 +94,7 @@
                 </button>
     
                 <!-- Tooltip personalizado -->
-                <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
-                           
+                <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">    
                     <div>
                         <p class="radioTitle">Use:</p>
                         <label class="custom-radio">
@@ -105,7 +104,7 @@
                         <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">H-MCZ-H
                         </label>
                         <label class="custom-radio">
-                        Split circuits: <input type="checkbox" [(ngModel)]="splitCircuits" [value]="false" style="margin-left: 5px;">
+                        Separate circuits: <input type="checkbox" [(ngModel)]="separateCircuits" [value]="false" style="margin-left: 5px;">
                         </label>
                     </div>
         

@@ -55,8 +55,8 @@ public class DeterministicController {
 		}
 	}
 
-	@PostMapping("/calculateSplitting") @ResponseBody
-	public Map<String, Object> calculateSplitting(HttpSession session, @RequestBody Map<String, Object> info) {
+	@PostMapping("/calculateSeparating") @ResponseBody
+	public Map<String, Object> calculateSeparating(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -70,7 +70,7 @@ public class DeterministicController {
 		expectedFrequencies.sort();
 		
 		try {
-			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			Map<String, Object> result = this.service.calculateSeparating(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
