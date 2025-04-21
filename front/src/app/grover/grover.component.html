@@ -171,10 +171,10 @@
                                     <button class="action-icon-header" title="View Unitary Matrix" (click)="getUnitaryMatrix(matrix)">
                                         <i class="fa fa-border-all"></i>
                                     </button>
-                                    <button class="action-icon-header" title="Get Qiskit code (program)" (click)="getQiskitCode(matrix, false); mostrarModal = true">
+                                    <button *ngIf="totalSelectedElements>0" class="action-icon-header" title="Get Qiskit code (program)" (click)="getQiskitCode(matrix, false); mostrarModal = true">
                                         <i class="fa fa-code"></i>
                                     </button>
-                                    <button class="action-icon-header" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true); mostrarModal = false">
+                                    <button *ngIf="totalSelectedElements>0" class="action-icon-header" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true); mostrarModal = false">
                                         f(x)
                                     </button>
                                 </div>
