@@ -90,6 +90,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   matrixTmp: any[] = [];
   asFunctionTmp = false;
   showHelp = false;
+  totalSelectedElements: number = 0;
   
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
 
@@ -114,7 +115,9 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     // Recuperar valores desde localStorage con valores por defecto
     this.qubits = JSON.parse(localStorage.getItem('qubits') || '4');
+    this.matrix = JSON.parse(localStorage.getItem('matrix') || '[]');
 
+    this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
 
     // Verificar si hay datos guardados
     const savedQubits = localStorage.getItem('qubits');
@@ -187,6 +190,9 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       localStorage.setItem('qubits', JSON.stringify(this.qubits));
       localStorage.setItem('processedExpressionsGrover', JSON.stringify(processedExpressions));
       localStorage.setItem('matrix', JSON.stringify(this.matrix));
+      this.totalSelectedElements = this.matrix.filter(row => row[row.length - 1] === true).length;
+
+
       // localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
   }
 
@@ -484,6 +490,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   mark(rowIndex: number) {
     this.matrix![rowIndex][this.qubits] = !this.matrix![rowIndex][this.qubits]
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
+    this.totalSelectedElements = this.matrix!.filter(row => row[row.length - 1] === true).length;
   }
 
   onTemplateChange(selected: CodeTemplate) {
