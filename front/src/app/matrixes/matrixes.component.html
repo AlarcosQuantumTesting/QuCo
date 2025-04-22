@@ -928,12 +928,11 @@
                         [(ngModel)]="expressionToSave.type" class="form-control">
                     </div>
         
-                    <div class="form-actions">
-                        <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
-                    </div>
+                    
                 </div>
 
                 <div class="help-actions">
+                    <button (click)="save()" [disabled]="isInvalid" class="save-new-btn">Save</button>
                     <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
@@ -950,8 +949,8 @@
             <!-- Encabezado del modal -->
             <div class="modal-header">
                 <div class="header-with-button">
-                    <h2 class="title-modal">Manage Expressions</h2>
-                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                    <h2 class="title-modal">Manage expressions</h2>
+                    <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
                 </div>
                 <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
             </div>
@@ -976,7 +975,8 @@
                                 <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
                                     <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
-                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                <!-- <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)"> -->
+                                    <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -986,10 +986,33 @@
             </div>
     
             <!-- Botón de cerrar -->
-            <div class="help-actions" style="margin-bottom: 15px;">
-                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+           
+            <div class="modal-footer">
+                <!-- <div class="help-actions" style="margin-bottom: 15px;">
+                    <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+                </div> -->
+                <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
             </div>
+            
         </div>
     </div>
     
+    <!-- Delete Confirmation Modal -->
+    <!-- <div *ngIf="showDeleteModal" class="modal-delete">
+        <div class="modal-content-delete">
+            <div class="modal-header">
+                <h2 class="title-modal">Delete expression</h2>
+                <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-message-delete">
+                <p>Are you sure you want to delete the expression?</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-danger" (click)="confirmDelete()">Yes, delete</button>
+                    <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+            
+        </div>
+    </div> -->
+  
 </body>

@@ -364,12 +364,17 @@ td {
     cursor: pointer;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #77ac962a;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+
 tr:hover {
-    background-color: #e8f3ed;
+    /* background-color: #e8f3ed; */
+    background-color: #357a5d2a;
     transition: 0.3s;
 }
 
@@ -738,6 +743,18 @@ code {
     min-width: 100px;
     margin-top: 5px;
   }
+
+.save-new-btn {
+    background-color: #0b555a;
+    border-radius: 12px;
+    padding: 10px 15px;
+    width: 80px;
+}
+
+.save-new-btn:hover {
+    background-color: #1c747a;
+    transform: scale(1.05);
+}
   
   .btn-confirm {
     padding: 10px 20px;
@@ -1251,6 +1268,7 @@ ol.list-instructions {
     background-color: rgb(219, 67, 67);
     border-radius: 12px;
     padding: 10px 15px;
+    width: 80px;
 }
 
 .cancel-btn:hover {

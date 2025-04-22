@@ -1078,6 +1078,48 @@ export class MatrixesComponent implements AfterViewInit  {
     }
   }
 
+  /*showDeleteModal: boolean = false;
+  expressionToDelete: any = null;
+  deleteIndex: number = -1;
+
+  // Llamada inicial desde la tabla o botón
+  openDeleteModal(expression: any, index: number) {
+    this.expressionToDelete = expression;
+    this.deleteIndex = index;
+    this.showDeleteModal = true;
+  }
+
+  // Confirmar eliminación
+  confirmDelete() {
+    if (!this.expressionToDelete) return;
+
+    this.service.deleteExpression(this.expressionToDelete.id).subscribe(
+      () => {
+        if (!this.expressions) {
+          this.expressions = [];
+        }
+
+        this.expressions.splice(this.deleteIndex, 1);
+        this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+        this.searchExpressions();
+
+        this.cancelDelete(); // cerrar el modal
+      },
+      error => {
+        console.error("Error deleting expression:", error);
+        alert("Failed to delete the expression. Please try again.");
+        this.cancelDelete();
+      }
+    );
+  }
+
+  // Cancelar
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.expressionToDelete = null;
+    this.deleteIndex = -1;
+  }
+*/
 
 
   isValid() {
