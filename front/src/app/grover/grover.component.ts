@@ -115,7 +115,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     // Recuperar valores desde localStorage con valores por defecto
     this.qubits = JSON.parse(localStorage.getItem('qubits') || '4');
-    this.matrix = JSON.parse(localStorage.getItem('matrix') || '[]');
+    if(localStorage.getItem('matrix') != null) {
+      this.matrix = JSON.parse(localStorage.getItem('matrix') || '[]');
+    }
+    
 
     this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
 
@@ -534,6 +537,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
+    this.totalSelectedElements = 0;
 
     localStorage.removeItem('processedExpressionsGrover');
     localStorage.removeItem('matrix');
@@ -772,7 +776,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsGrover');
     localStorage.removeItem('matrix');
-
+    
+    this.totalSelectedElements = 0;
     location.reload();  // Reiniciar
   }
 
