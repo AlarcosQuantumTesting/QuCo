@@ -1,9 +1,72 @@
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <!-- <button class="help-button" (click)="toggleHelp()">
+        ❔
+    </button> -->
+
+    <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+    <div class="titulo">
+        <h1>TEMPLATES</h1>
+    </div>
+    <div class="container search-container">
+        <div class="form-row">
+            <div class="section buildText">
+                <p>
+                    In this section you can see all the templates available in the system.
+                    
+                    You can also create your own templates and save them for later use.
+                    <br>
+                    You can select a template from the list and its specifications will be shown below.
+                </p>
+            </div>
+            <div class="section inputsContainer">
+                <div class="input-group">
+                    <strong>Available templates: </strong>
+                    <input type="text"
+                        [(ngModel)]="searchQuery"
+                        (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)"
+                        (focus)="onFocusInput()"
+                        placeholder="template name..."
+                        list="templatesList">
+            
+                    <datalist id="templatesList">
+                        <option class="temOpt" *ngFor="let template of manager.templates" [value]="template.fileName"></option>
+                    </datalist>
+            
+                </div>
+
+                <div class="buttons-container">
+                <button class="btn-clear" (click)="searchTemplate()">
+                    <i class="fa fa-search" aria-hidden="true"></i> Search
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+
+
+
+
+
+
+
+
 <div>
-    <strong>Available templates:</strong>
+    <!-- <strong>Available templates:</strong>
     <span *ngFor="let template of manager.templates; let i=index">
       <input type="radio" name="template" [(ngModel)]="manager.selectedTemplate" (change)="show(template)"
         [value]="template">{{ template.fileName }}
-    </span>
+    </span> -->
 
     <div>
         <button (click)="create()">Create new template</button>
