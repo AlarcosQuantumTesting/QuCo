@@ -309,38 +309,38 @@
 
     <div class="modal" *ngIf="mostrarModalGuargarCode">
         <div class="modal-content">
-
             <div class="modal-header">
-              <h2 class="title-modal">Qiskit Code</h2>
+              <h2 class="title-modal">Save Qiskit code</h2>
               <span class="close" (click)="mostrarModalGuargarCode = false">&times;</span>
             </div>
-        
-            <div class="info-form">
-              <h3>Enter function data</h3>
-        
-              <div class="input-button-row">
-                <strong>Name:</strong>
-                <input class="input-function" type="text" [(ngModel)]="qiskitCode.name">
-              </div>
-        
-              <div class="input-button-row">
-                <strong>Description:</strong>
-                <input class="input-function" type="text" [(ngModel)]="qiskitCode.description">
-              </div>
-        
-              <div class="modal-buttons-function">
-                <button class="btn-confirm" (click)="saveCode()" [disabled]="!qiskitCode.name.trim()">
-                  <i class="fa fa-check" aria-hidden="true"></i> Save
-                </button>
-        
-                <button class="btn-cancel" (click)="mostrarModalGuargarCode = false">
-                  <i class="fa fa-times" aria-hidden="true"></i> Cancel
-                </button>
-              </div>
-        
-              <div class="error" *ngIf="error">{{ error }}</div>
+            <div class="expressionsContainer">
+                <div class="form-group">
+                    <div class="label-container">
+                        <label>Name:</label>
+                    </div>
+                    <input class="input-function" type="text" [(ngModel)]="qiskitCode.name" class="form-control">
+                </div>
+
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label>Description:</label>
+                        </div>
+                        <input class="input-function" type="text" [(ngModel)]="qiskitCode.description" class="form-control">
+                    </div>
+
+                <div class="modal-buttons-function">
+                    <button class="btn-confirm" (click)="saveCode()" [disabled]="!qiskitCode.name.trim()">
+                      <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+            
+                    <button class="btn-cancel" (click)="mostrarModalGuargarCode = false">
+                      <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+            
+                <div class="error" *ngIf="error">{{ error }}</div>
             </div>
-          </div>
+        </div>
     </div>
 
     <div class="modal instrucciones" *ngIf="mostrarInstrucciones">

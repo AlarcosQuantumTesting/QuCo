@@ -59,7 +59,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
 
 
-  mensajeTemporal: string = '';
+  // mensajeTemporal: string = '';
   numberOfQubits : number | null = null;
   isInvalid: boolean = true;
   dialogo : any = undefined

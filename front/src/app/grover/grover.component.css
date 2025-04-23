@@ -742,6 +742,8 @@ code {
     transition: background-color 0.3s ease, transform 0.2s ease;
     min-width: 100px;
     margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 
 .save-new-btn {
