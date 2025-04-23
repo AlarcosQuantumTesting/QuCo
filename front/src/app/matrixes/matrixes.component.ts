@@ -994,6 +994,10 @@ export class MatrixesComponent implements AfterViewInit  {
                 this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
+                this.mensajeTemporal = 'Expression updated successfully';
+                setTimeout(() => {
+                  this.mensajeTemporal = '';
+                }, 2000);
               },
               error => {
                 console.error(error);
@@ -1027,6 +1031,10 @@ export class MatrixesComponent implements AfterViewInit  {
                     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
+                    this.mensajeTemporal = 'Expression created successfully';
+                    setTimeout(() => {
+                      this.mensajeTemporal = '';
+                    }, 2000);
                 },
                 error => {
                     console.error(error);
@@ -1051,7 +1059,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.mostrarModalVerExp = false;
   }
 
-
+/*
   deleteExpression(id: string, index: number) {
     if (confirm("Are you sure you want to delete this expression?")) {
         this.service.deleteExpression(id).subscribe(
@@ -1076,9 +1084,9 @@ export class MatrixesComponent implements AfterViewInit  {
             }
         );
     }
-  }
+  }*/
 
-  /*showDeleteModal: boolean = false;
+  showDeleteModal: boolean = false;
   expressionToDelete: any = null;
   deleteIndex: number = -1;
 
@@ -1093,7 +1101,7 @@ export class MatrixesComponent implements AfterViewInit  {
   confirmDelete() {
     if (!this.expressionToDelete) return;
 
-    this.service.deleteExpression(this.expressionToDelete.id).subscribe(
+    this.service.deleteExpression(this.expressionToDelete).subscribe(
       () => {
         if (!this.expressions) {
           this.expressions = [];
@@ -1104,6 +1112,11 @@ export class MatrixesComponent implements AfterViewInit  {
         this.searchExpressions();
 
         this.cancelDelete(); // cerrar el modal
+
+        this.mensajeTemporal = 'Expression deleted successfully';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
       },
       error => {
         console.error("Error deleting expression:", error);
@@ -1119,7 +1132,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.expressionToDelete = null;
     this.deleteIndex = -1;
   }
-*/
+
 
 
   isValid() {

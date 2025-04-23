@@ -2145,14 +2145,24 @@ input[disabled], textarea[disabled], select[disabled] {
     justify-content: space-around;
   }
 
-  .btn-danger {
+  .btn-delete-modal {
     background-color: #dc3545;
     color: white;
   }
+
+  .btn-delete-modal:hover {
+    background-color: #881520;
+    transform: scale(1.05);
+  }
   
-  .btn-secondary {
+  .btn-cancel-delete-modal {
     background-color: #6c757d;
     color: white;
+  }
+
+  .btn-cancel-delete-modal:hover {
+    background-color: #414549;
+    transform: scale(1.05);
   }
 
   .modal-delete {
@@ -2166,6 +2176,7 @@ input[disabled], textarea[disabled], select[disabled] {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
+    border-radius: 15px;
 }
 
 /* Caja del contenido del modal */
