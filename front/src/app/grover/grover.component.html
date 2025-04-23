@@ -165,7 +165,12 @@
                                 </div>
                             </div> -->
                         </th>
-                        <th>Marked</th>
+                        <th>
+                            Marked
+                            <button class="btn-reset" *ngIf="matrix" (click)="buildMatrixActions()">
+                                <i class="fa fa-refresh" style="color: white; font-size: 14px;" title="Reset table"></i>
+                            </button>
+                        </th>
                     </tr>
                     <tr>
                         <th *ngFor="let i of [].constructor(numberOfQubits); let cont = index" align="center">
