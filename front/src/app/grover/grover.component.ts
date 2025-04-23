@@ -945,6 +945,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
                 this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
+                this.mensajeTemporal = 'Expression updated successfully';
+                setTimeout(() => {
+                  this.mensajeTemporal = '';
+                }, 2000);
               },
               error => {
                 console.error(error);
@@ -978,6 +982,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
                     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
+                    this.mensajeTemporal = 'Expression created successfully';
+                    setTimeout(() => {
+                      this.mensajeTemporal = '';
+                    }, 2000);
                 },
                 error => {
                     console.error(error);
@@ -1003,7 +1011,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
 
 
-  deleteExpression(id: string, index: number) {
+  /*deleteExpression(id: string, index: number) {
     if (confirm("Are you sure you want to delete this expression?")) {
         this.service.deleteExpression(id).subscribe(
             () => {
@@ -1027,6 +1035,53 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
             }
         );
     }
+  }*/
+
+  showDeleteModal: boolean = false;
+  expressionToDelete: any = null;
+  deleteIndex: number = -1;
+
+  // Llamada inicial desde la tabla o botón
+  openDeleteModal(expression: any, index: number) {
+    this.expressionToDelete = expression;
+    this.deleteIndex = index;
+    this.showDeleteModal = true;
+  }
+
+  // Confirmar eliminación
+  confirmDelete() {
+    if (!this.expressionToDelete) return;
+
+    this.service.deleteExpression(this.expressionToDelete).subscribe(
+      () => {
+        if (!this.expressions) {
+          this.expressions = [];
+        }
+
+        this.expressions.splice(this.deleteIndex, 1);
+        this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+        this.searchExpressions();
+
+        this.cancelDelete(); // cerrar el modal
+
+        this.mensajeTemporal = 'Expression deleted successfully';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+      },
+      error => {
+        console.error("Error deleting expression:", error);
+        alert("Failed to delete the expression. Please try again.");
+        this.cancelDelete();
+      }
+    );
+  }
+
+  // Cancelar
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.expressionToDelete = null;
+    this.deleteIndex = -1;
   }
 
   showExpressions() {

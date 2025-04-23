@@ -479,8 +479,8 @@
             <!-- Encabezado del modal -->
             <div class="modal-header">
                 <div class="header-with-button">
-                    <h2 class="title-modal">Manage Expressions</h2>
-                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                    <h2 class="title-modal">Manage expressions</h2>
+                    <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
                 </div>
                 <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
             </div>
@@ -505,7 +505,10 @@
                                 <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
                                     <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
-                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                    <i class="fas fa-trash"></i> 
+                                </button> -->
+                                <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -515,9 +518,29 @@
             </div>
     
             <!-- Botón de cerrar -->
-            <div class="help-actions" style="margin-bottom: 15px;">
-                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+            <div class="modal-footer">
+                <!-- <div class="help-actions" style="margin-bottom: 15px;">
+                    <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+                </div> -->
+                <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
             </div>
+        </div>
+    </div>
+
+    <div *ngIf="showDeleteModal" class="modal-delete">
+        <div class="modal-content-delete">
+            <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+                <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
+                <span class="close" (click)="showDeleteModal = false">&times;</span>
+            </div>
+            <div class="modal-message-delete">
+                <p>Are you sure you want to delete the expression <strong>{{expressionToDelete}}</strong>?</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-delete-modal" (click)="confirmDelete()">Yes, delete</button>
+                    <button class="btn btn-cancel-delete-modal" (click)="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+            
         </div>
     </div>
 
