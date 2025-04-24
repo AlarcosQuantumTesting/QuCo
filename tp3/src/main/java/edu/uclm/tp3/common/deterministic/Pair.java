@@ -7,8 +7,9 @@ public class Pair implements Comparable<Pair> {
     public int getIndex() {
         return index;
     }
-    public void setIndex(int index) {
+    public Pair setIndex(int index) {
         this.index = index;
+        return this;
     }
     public int getFreq() {
         return freq;

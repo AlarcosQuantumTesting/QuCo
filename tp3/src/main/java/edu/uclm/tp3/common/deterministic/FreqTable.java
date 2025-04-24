@@ -30,6 +30,17 @@ public class FreqTable {
         }
     }
 
+    public void sort() {
+        this.pairs.sort((p1, p2) -> {
+            if (p1.getIndex() < p2.getIndex())
+                return -1;
+            else if (p1.getIndex() > p2.getIndex())
+                return 1;
+            else
+                return 0;
+        });
+    }
+
     public int getQubits() {
         return qubits;
     }

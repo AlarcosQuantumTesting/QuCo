@@ -88,9 +88,20 @@ public class QCircuit extends QGate {
         return this;
     }
 
+    public QCircuit addColumn(QColumn column) {
+        this.columns.add(column);
+        return this;
+    }
+
     public void insertColumn(QColumn column, int index) {
         this.columns.add(index, column);
     }
 
+    public void addColumns(List<QColumn> columns) {
+       this.columns.addAll(columns);
+    }
 
+    public List<QColumn> getColumns() {
+        return columns;
+    }
 }

@@ -324,7 +324,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       return
     }
 
-    this.groverService.getAllQuirk(info, this.useMCX).subscribe(
+    this.groverService.getAllQuirk(info, this.useMCX, this.inParallel).subscribe(
       result => {
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
@@ -428,7 +428,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           return;
         }
     
-        this.groverService.getCode(info, this.useMCX).subscribe({
+        this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
           next: result => {
             this.qiskitCode.lines = result.code;
             document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
@@ -449,8 +449,6 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   
       
   }
-  
-
 
   private loadMatrixes(result: any) {
     this.dataReceived = true
@@ -839,7 +837,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       return;
     }
     this.mostrarModal = true;
-    this.groverService.getCode(info, this.useMCX).subscribe({
+    this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
       next: result => {
         this.qiskitCode.lines = result.code;
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });

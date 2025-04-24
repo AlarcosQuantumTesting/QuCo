@@ -23,8 +23,10 @@ public class GrenobleCoder extends Coder {
 			GRY ry = new GRY(0, this.node.leftAngle, this.node.name + "-L");
 			circuit.addGate(ry);
 			child = usedNodesMap.get(this.node.rightChild.hashCode());
-			GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
-			circuit.addGate(cu);
+			if (child!=null)  {
+				GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
+				circuit.addGate(cu);
+			}
 			this.node.setCircuit(circuit);
 
 			return this.node;
@@ -35,16 +37,22 @@ public class GrenobleCoder extends Coder {
 			circuit.addGate(ry);
 
 			child = usedNodesMap.get(this.node.leftChild.hashCode());
-			GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
-			circuit.addGate(cu);
+			if (child!=null)  {
+				GRCU cu = new GRCU(this.functionPrefix, child.name, 1, nodeDepth, child.name);
+				circuit.addGate(cu);
+			}
 			this.node.setCircuit(circuit);
 
 			return this.node;
 		}
 
 		if (this.node.leftProbability==this.node.rightProbability) {
-			GRCU cu = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.leftChild.name);
-			circuit.addGate(cu);
+			GRCU cuLeft = new GRCU(this.functionPrefix, this.node.leftChild.name, 0, nodeDepth, 1, this.node.leftChild.name);
+			circuit.addGate(new GRX());
+			circuit.addGate(cuLeft);
+			circuit.addGate(new GRX());
+			GRCU cuRight = new GRCU(this.functionPrefix, this.node.rightChild.name, 0, nodeDepth, 1, this.node.rightChild.name);
+			circuit.addGate(cuRight);
 			this.node.setCircuit(circuit);
 
 			return this.node;
@@ -53,14 +61,18 @@ public class GrenobleCoder extends Coder {
 		GRY ry = new GRY(0, this.node.leftAngle, this.node.name + "-0");
 		circuit.addGate(ry);
 		child = usedNodesMap.get(this.node.leftChild.hashCode());
-		GRX x = new GRX();
-		circuit.addGate(x);
-		GRCU cu0 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
-		circuit.addGate(cu0);
-		circuit.addGate(x);
+		if (child!=null) {
+			GRX x = new GRX();
+			circuit.addGate(x);
+			GRCU cu0 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
+			circuit.addGate(cu0);
+			circuit.addGate(x);
+		}
 		child = usedNodesMap.get(this.node.rightChild.hashCode());
-		GRCU cu1 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
-		circuit.addGate(cu1);
+		if (child!=null) {
+			GRCU cu1 = new GRCU(functionPrefix, child.name, 0, nodeDepth, 1, child.name);
+			circuit.addGate(cu1);
+		}
 		this.node.setCircuit(circuit);
 
 		return this.node;
@@ -80,11 +92,11 @@ public class GrenobleCoder extends Coder {
 			circuit.addGate(ry0);
 
 			GRY ry1 = null;
-
-			if (this.node.rightChild.rightAngle!=0) {
-				ry1 = new GRY(1, this.node.rightChild.rightAngle, this.node.name + "-R");
+			if (this.node.rightChild.leftAngle!=0)  {
+				ry1 = new GRY(1, this.node.rightChild.leftAngle, this.node.name + "-R");
 				circuit.addGate(ry1);
 			}
+
 			this.node.setCircuit(circuit);
 
 			return this.node;
@@ -106,18 +118,7 @@ public class GrenobleCoder extends Coder {
 		}
 
 		if (this.node.leftProbability==this.node.rightProbability) {
-			if (this.node.leftChild.leftAngle!=0) {
-				GRX x = new GRX();
-				circuit.addGate(x);
-				GRCRY cry = new GRCRY(0, 1, this.node.leftChild.leftAngle, this.node.name);
-				circuit.addGate(cry);
-			}
-			if (this.node.rightChild.leftAngle!=0) {
-				GRCRY cry = new GRCRY(0, 1, this.node.rightChild.leftAngle, this.node.name);
-				circuit.addGate(cry);
-			}
-			this.node.setCircuit(circuit);
-			return this.node;
+			return null;
 		}
 
 		GRY ry0 = new GRY(0, this.node.leftAngle, this.node.name + "0");

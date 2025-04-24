@@ -23,6 +23,7 @@ export class DeterministicComponent extends GroverStyle {
   desiredError : number = 0.05
 
   probOf0 : number = 0.5
+  amountOfValues : number = 1
 
   expectedFrequencies : FreqTable = new FreqTable()
 
@@ -30,7 +31,6 @@ export class DeterministicComponent extends GroverStyle {
   prefix? : string
 
   originalGR : boolean = false
-  splitCircuits : boolean = false
 
   running : boolean = false
   state? : string 
@@ -43,7 +43,7 @@ export class DeterministicComponent extends GroverStyle {
   maxRows = 1024
 
   responseReceived? : any
-  quirkCode? : string;
+  quirkCodes : string[] = [];
   // mensajeTemporal: string = '';
   numberOfQubits : number | null = null;
   isInvalid: boolean = true;
@@ -188,7 +188,19 @@ export class DeterministicComponent extends GroverStyle {
 
     if (this.codeAsFunctions) {
         for (let key in this.responseReceived) {
-          if (key!='tree' && key!='unitaryMatrix' && key!='QUIRK') {
+          if (key=="#INITIALIZE#") {
+            let tag = "TEMPLATE = '" + this.manager.selectedTemplate.fileName + "'\n"
+            tag = tag + "ORIGINAL_QUBITS = " + this.qubits + "\n"
+            if (this.inParallel) 
+              tag = tag + "PARALLEL = True\n"
+            else
+              tag = tag + "PARALLEL = False\n"
+            if (this.splitCircuits)
+              tag = tag + "SPLIT = True\n"
+            else
+              tag = tag + "SPLIT = False\n"
+            code = code?.replace("#INITIALIZE#", tag + this.responseReceived["#INITIALIZE#"])
+          } else if (key!='tree' && key!='unitaryMatrix' && key!='QUIRK') {
             let value = this.responseReceived[key]
             code = code?.replace(key, value)
           }
@@ -205,7 +217,12 @@ export class DeterministicComponent extends GroverStyle {
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
-    this.quirkCode = JSON.stringify(this.responseReceived["QUIRK"])
+    let quirks = this.responseReceived["QUIRK"]
+    this.quirkCodes = []
+    for (let i=0; i<quirks.length; i++) {
+      let quirk = quirks[i]
+      this.quirkCodes.push(JSON.stringify(quirk))
+    }
   }
 
   private drawMatrix(matrixReceived : any) : string {
@@ -241,7 +258,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating"
     this.error = undefined
 
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.splitCircuits, this.prefix).subscribe(
+    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.inParallel, this.splitCircuits, this.prefix).subscribe(
       response=> {
         this.responseReceived = response
         this.buildCode()
@@ -275,111 +292,125 @@ export class DeterministicComponent extends GroverStyle {
     levelHeight = 100,
     leafSpacing = 110 // Espaciado mínimo entre hojas
   ): { svg: string; width: number; height: number } {
-    const positions: Map<any, { x: number; y: number }> = new Map();
-    let maxWidth = 0;
+    type Pos = { x: number; y: number; level: number };
+    const positions = new Map<any, Pos>();
+    let maxX = 0;
+    let maxLevel = 0;
   
-    // Paso 1: Calcular posiciones desde las hojas hacia arriba
-    const calculatePositions = (node: any, level: number): number => {
-      if (!node || !this.shouldDisplay(node)) return 0; // Ignorar nodos que no deben mostrarse
-  
+    // -------------------------
+    // 1) CÁLCULO DE POSICIONES
+    // -------------------------
+    const calculate = (node: any, level: number): Pos | null => {
+      if (!node || !this.shouldDisplay(node)) {
+        return null;
+      }
+      maxLevel = Math.max(maxLevel, level);
       const y = level * levelHeight;
-      let x: number;
   
-      if (!node.leftChild && !node.rightChild) {
-        // Nodo hoja: Asegurar espaciado mínimo entre hojas
-        x = startX + maxWidth;
-        positions.set(node, { x, y });
-        maxWidth += leafSpacing; // Incrementar con el espaciado fijo para hojas
-        return x;
+      // Si es hoja visible, le damos la siguiente posición libre
+      const left = calculate(node.leftChild, level + 1);
+      const right = calculate(node.rightChild, level + 1);
+  
+      let x: number;
+      if (!left && !right) {
+        // Hoja
+        x = startX + maxX;
+        maxX += leafSpacing;
+      } else {
+        // Nodo interno: promediamos sólo hijos existentes
+        if (left && right) {
+          x = (left.x + right.x) / 2;
+        } else {
+          x = (left ?? right)!.x;
+        }
       }
   
-      // Calcular posiciones de los hijos visibles
-      const leftX = this.shouldDisplay(node.leftChild)
-        ? calculatePositions(node.leftChild, level + 1)
-        : 0;
-      const rightX = this.shouldDisplay(node.rightChild)
-        ? calculatePositions(node.rightChild, level + 1)
-        : 0;
-  
-      // Si ambos hijos están ocultos, no mostrar el nodo actual
-      if (leftX === 0 && rightX === 0) return 0;
-  
-      // La posición del nodo padre es el promedio de las posiciones de los hijos visibles
-      x = (leftX + rightX) / (leftX && rightX ? 2 : 1);
-      positions.set(node, { x, y });
-      return x;
+      const pos = { x, y, level };
+      positions.set(node, pos);
+      return pos;
     };
   
-    calculatePositions(tree, 0);
+    calculate(tree, 0);
   
-    // Paso 2: Generar SVG
-    let svg = '';
+    // -------------------
+    // 2) GENERACIÓN DE SVG
+    // -------------------
+    const nodeW = 100, nodeH = 60;
+    let svgContent = '';
+  
+    // Primero las líneas de conexión
     positions.forEach((pos, node) => {
       const { x, y } = pos;
-      const nodeWidth = 100;
-      const nodeHeight = 60;
+      const children = ['leftChild', 'rightChild'] as const;
+      const midY = y + nodeH + 20;
   
-      // Dibujar el nodo actual
-      svg += `
-    <!-- Nodo principal con un solo rectángulo -->
-    <rect x="${x - nodeWidth / 2}" y="${y}" width="${nodeWidth}" height="${nodeHeight + 20}" fill="#f0f0f0" stroke="#000"/>
-    
-    <!-- Recuadro para el nombre con fondo verde claro -->
-    <rect x="${x - nodeWidth / 2}" y="${y}" width="${nodeWidth}" height="20" fill="#dff0d8" stroke="#000"/>
-    
-    <!-- Texto del nombre -->
-    <text x="${x}" y="${y + 15}" font-size="12" font-weight="bold" text-anchor="middle">${node.name || 'Node'}</text>
-    
-    <!-- Líneas de división -->
-    <line x1="${x - nodeWidth / 2}" y1="${y + 20}" x2="${x + nodeWidth / 2}" y2="${y + 20}" stroke="#000"/>
-    <line x1="${x - nodeWidth / 2}" y1="${y + 40}" x2="${x + nodeWidth / 2}" y2="${y + 40}" stroke="#000"/>
-    <line x1="${x}" y1="${y + 20}" x2="${x}" y2="${y + nodeHeight + 20}" stroke="#000"/>
-    
-    <!-- Textos dentro del nodo -->
-    <text x="${x - nodeWidth / 4}" y="${y + 35}" font-size="12" font-weight="bold" text-anchor="middle">0</text>
-    <text x="${x + nodeWidth / 4}" y="${y + 35}" font-size="12" font-weight="bold" text-anchor="middle">1</text>
-    <text x="${x - 40}" y="${y + 55}" font-size="12">${node.leftProbability?.toFixed(2) || '-'}</text>
-    <text x="${x + 10}" y="${y + 55}" font-size="12">${node.rightProbability?.toFixed(2) || '-'}</text>
-    <text x="${x - 40}" y="${y + 75}" font-size="12">${node.leftAngle?.toFixed(2) || '-'}</text>
-    <text x="${x + 10}" y="${y + 75}" font-size="12">${node.rightAngle?.toFixed(2) || '-'}</text>
-  `;
+      children.forEach(dir => {
+        const child = node[dir];
+        const childPos = positions.get(child);
+        if (childPos) {
+          // Línea vertical del padre al midY
+          svgContent += `<line x1="${x}" y1="${y + nodeH + 20}" x2="${x}" y2="${midY}" stroke="#000"/>`;
+          // Línea horizontal al child.x a nivel midY
+          svgContent += `<line x1="${x}" y1="${midY}" x2="${childPos.x}" y2="${midY}" stroke="#000"/>`;
+          // Línea vertical al child.y
+          svgContent += `<line x1="${childPos.x}" y1="${midY}" x2="${childPos.x}" y2="${childPos.y}" stroke="#000"/>`;
+        }
+      });
+    });
   
+    // Después los nodos (rectángulos y texto)
+    positions.forEach((pos, node) => {
+      const { x, y } = pos;
+      const name = node.name ?? 'Node';
+      const lp = node.leftProbability?.toFixed(2) ?? '-';
+      const rp = node.rightProbability?.toFixed(2) ?? '-';
+      const la = node.leftAngle?.toFixed(2) ?? '-';
+      const ra = node.rightAngle?.toFixed(2) ?? '-';
   
-    // Dibujar líneas hacia los hijos visibles
-    if (this.shouldDisplay(node.leftChild) || this.shouldDisplay(node.rightChild)) {
-      // Punto intermedio vertical entre el padre y los hijos
-      const midY = y + nodeHeight + 30;
-    
-      // Línea vertical desde el centro inferior del nodo padre al punto intermedio
-      svg += `<line x1="${x}" y1="${y + nodeHeight + 20}" x2="${x}" y2="${midY}" stroke="#000"/>`;
-    
-      // Conexiones horizontales hacia los hijos
-      if (this.shouldDisplay(node.leftChild)) {
-        const leftPos = positions.get(node.leftChild);
-        svg += `
-          <line x1="${x}" y1="${midY}" x2="${leftPos?.x}" y2="${midY}" stroke="#000"/>
-          <!-- Línea vertical desde el punto horizontal al nodo hijo -->
-          <line x1="${leftPos?.x}" y1="${midY}" x2="${leftPos?.x}" y2="${leftPos?.y}" stroke="#000"/>
-        `;
-      }
-    
-      if (this.shouldDisplay(node.rightChild)) {
-        const rightPos = positions.get(node.rightChild);
-        svg += `
-          <line x1="${x}" y1="${midY}" x2="${rightPos?.x}" y2="${midY}" stroke="#000"/>
-          <!-- Línea vertical desde el punto horizontal al nodo hijo -->
-          <line x1="${rightPos?.x}" y1="${midY}" x2="${rightPos?.x}" y2="${rightPos?.y}" stroke="#000"/>
-        `;
-      }
-    }
-  });
+      svgContent += `
+        <!-- Nodo ${name} -->
+        <rect x="${x - nodeW/2}" y="${y}" width="${nodeW}" height="${nodeH + 20}"
+              fill="#f0f0f0" stroke="#000"/>
+        <rect x="${x - nodeW/2}" y="${y}" width="${nodeW}" height="20"
+              fill="#dff0d8" stroke="#000"/>
+        <text x="${x}" y="${y + 15}" font-size="12" font-weight="bold" text-anchor="middle">
+          ${name}
+        </text>
+        <line x1="${x - nodeW/2}" y1="${y + 20}"
+              x2="${x + nodeW/2}" y2="${y + 20}" stroke="#000"/>
+        <line x1="${x - nodeW/2}" y1="${y + 40}"
+              x2="${x + nodeW/2}" y2="${y + 40}" stroke="#000"/>
+        <line x1="${x}" y1="${y + 20}"
+              x2="${x}" y2="${y + nodeH + 20}" stroke="#000"/>
   
-    return {
-      svg,
-      width: maxWidth + startX,
-      height: positions.size * levelHeight,
-    };
+        <!-- Bits y propiedades -->
+        <text x="${x - nodeW/4}" y="${y + 35}" font-size="12"
+              text-anchor="middle">0</text>
+        <text x="${x + nodeW/4}" y="${y + 35}" font-size="12"
+              text-anchor="middle">1</text>
+        <text x="${x - 40}" y="${y + 55}" font-size="12">${lp}</text>
+        <text x="${x + 10}" y="${y + 55}" font-size="12">${rp}</text>
+        <text x="${x - 40}" y="${y + 75}" font-size="12">${la}</text>
+        <text x="${x + 10}" y="${y + 75}" font-size="12">${ra}</text>
+      `;
+    });
+  
+    // -----------------------
+    // 3) ENVOLTORIO Y MEDIDAS
+    // -----------------------
+    const svgWidth  = startX + maxX;
+    const svgHeight = (maxLevel + 1) * levelHeight + nodeH + 20;
+  
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="${svgWidth}" height="${svgHeight}"
+           viewBox="0 0 ${svgWidth} ${svgHeight}">
+        ${svgContent}
+      </svg>`.trim();
+  
+    return { svg, width: svgWidth, height: svgHeight };
   }
+  
 
   updateOutputs() {
     this.expectedFrequencies.setQubits(this.qubits)
@@ -415,13 +446,30 @@ export class DeterministicComponent extends GroverStyle {
     this.updateOutputs()
   }
 
+  fixedAmount() {
+    this.expectedFrequencies = new FreqTable()
+    this.expectedFrequencies.setQubits(this.qubits)
+    let selectedIndexes : number[] = []
+    for (let i=0; i<this.amountOfValues; i++) {
+      let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      while (selectedIndexes.includes(index)) {
+        index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      }
+      selectedIndexes.push(index)
+      this.expectedFrequencies.setFreq(index, 100)
+    }
+  }
+
   withProb() {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    
-    for (let i=0; i<this.expectedFrequencies.rows; i++)
-      if (Math.random() >= this.probOf0)
-        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100))
+
+    let numberOfIndexes = (1-this.probOf0) * this.expectedFrequencies.rows
+    for (let i=0; i<numberOfIndexes; i++) {
+      let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
+      this.expectedFrequencies.setFreq(index, Math.round(Math.random()*100))
+    }
+  
     this.calculateShots()
     this.updateOutputs()
   }
@@ -456,14 +504,12 @@ export class DeterministicComponent extends GroverStyle {
     this.expectedFrequencies.setFreq(rowIndex, freq)
   }
 
-  showQuirk() {
-    let url = "https://algassert.com/quirk#circuit=" + this.quirkCode
+  showQuirk(index? : number) {
+    if (index == undefined) 
+      index = 0
+    let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
     window.open(url, "_blank")
-  }
-    
-
-
-
+  }    
 
   resetValues() {
     // Eliminar valores guardados en localStorage
@@ -589,4 +635,16 @@ export class DeterministicComponent extends GroverStyle {
     }
   }
     
+  onParallelCircuitsChange(): void {
+    if (this.inParallel) {
+      this.splitCircuits = false;
+    }
+  }
+
+  // Se llama al cambiar el checkbox de “Split in several circuits”
+  onSplitCircuitsChange(): void {
+    if (this.splitCircuits) {
+      this.inParallel = false;
+    }
+  }
 }

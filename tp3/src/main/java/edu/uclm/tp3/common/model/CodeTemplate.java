@@ -11,7 +11,7 @@ public class CodeTemplate {
 	private String fileName;
 	@Column(columnDefinition = "TEXT")
 	private String code;
-	@Column(length = 2000)
+	@Column(length = 5000)
 	private String description;
 
 	public void setFileName(String fileName) {
