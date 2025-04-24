@@ -44,7 +44,7 @@ export class DeterministicComponent extends GroverStyle {
 
   responseReceived? : any
   quirkCodes : string[] = [];
-  mensajeTemporal: string = '';
+  // mensajeTemporal: string = '';
   numberOfQubits : number | null = null;
   isInvalid: boolean = true;
   tooltipVisible: boolean = false;

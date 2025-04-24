@@ -21,8 +21,8 @@ const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
   { path : 'elonging', component : ElongingComponent },
   { path : 'blocks', component : BlocksComponent },
-  { path : 'grover', component : GroverComponent },
-  { path : '', redirectTo : '/', pathMatch : 'full'}
+  { path : 'grover', component : GroverComponent }
+  // { path : '', redirectTo : '/', pathMatch : 'full'}
 ]
 
 @NgModule({

@@ -1,24 +1,3 @@
-<!-- <div>
-    Number of:<br>
-    Input qubits:
-    <input type="number" min="2" max="15" [(ngModel)]="inputQubits" (input)="validateInputs()">
-    <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 15)" style="color: red;">
-        Must be between 2 and 15
-    </span>
-    <br>
-
-    Output qubits:
-    <input type="number" min="0" [(ngModel)]="outputQubits" (input)="validateInputs()">
-    <span *ngIf="outputQubits !== null && outputQubits < 0" style="color: red;">
-        Must be 0 or more
-    </span>
-    <br>
-
-    <button (click)="getEmptyMatrix()" [disabled]="isInvalid">Build input matrix</button>
-
-    <h3><mark style="color: red">{{ error }}</mark></h3>
-</div> -->
-
 <head>
     <!-- Agregar Font Awesome desde CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -193,12 +172,12 @@
     <h1>MATRIX</h1>
 </div>
 
-<div class="matrixTitle-container">
+<!-- <div class="matrixTitle-container">
     <h2 class="buildTitle">Build matrix</h2>
     <button class="btn-reset" (click)="resetValues()">
         <i class="fa fa-refresh" title="Reset matrix"></i>
     </button>
-</div>
+</div> -->
 
 <div class="container matrix-container">
     <div class="form-row">
@@ -213,12 +192,12 @@
             <div class="form-group">
                 <div class="label-container">
                     <label for="inputQubits">Input qubits:</label>
-                    <small class="input-hint">[2 - 15]</small>
+                    <small class="input-hint">[2 - 12]</small>
                 </div>
 
-                <input id="inputQubits" type="number" min="2" max="15" [(ngModel)]="inputQubits" (input)="validateInputs()" class="form-control">
-                <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 15)" class="error-text">
-                    Must be between 2 and 15
+                <input id="inputQubits" type="number" min="2" max="12" [(ngModel)]="inputQubits" (input)="validateInputs()" class="form-control">
+                <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 12)" class="error-text">
+                    Must be between 2 and 12
                 </span>
             </div>
 
@@ -234,14 +213,19 @@
                 </span>
             </div>
 
-            <div class="form-actions">
+            <!-- <div class="form-actions" style="margin-top: 25px;">
                 <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build matrix</button>
+            </div> -->
+
+            <div class="matrixTitle-container" style="margin-top: 25px;">
+                <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
+                <button class="btn-reset" style="margin-top: 10px;" *ngIf="matrix" (click)="resetValues()">
+                    <i class="fa fa-refresh" title="Reset matrix"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
-
-<!-- <h2 *ngIf="matrix">Table</h2> -->
 
 <div *ngIf="matrix" style="display: flex; justify-content: center; align-items: center; position: relative;">
     <div style="display: flex; align-items: center;">
@@ -382,67 +366,6 @@
         </button>
     </div>
     <div class="section half expressions-section">
-
-        <!-- <div class="header-with-button">
-            <button (click)="mostrarEjemplos = true; toggleEjemplos()" class="btn-toggle-examples">
-            <i class="fa" [ngClass]="hideExamples ? 'fa-lightbulb' : 'fa-minus'"></i>
-            </button>
-
-            <div class="editorTitle-container">
-                <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
-                <button class="btn-search" (click)="showExpressions()">
-                    <i class="fa fa-edit editorIcon" title="Edit your expressions"></i>
-                </button>
-            </div>
-            
-            <button (click)="create()" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
-            
-        </div>
-
-        <div class="input-group">
-            <input type="text"
-                [(ngModel)]="searchQuery"
-                (input)="onSearchInput()"
-                (dblclick)="openTextArea(this, $event, 'Expressions')"
-                (keydown)="onTabPress($event)"
-                (focus)="onFocusInput()"
-                placeholder="Double click to add multiple expressions"
-                list="expressionsList">
-
-            <datalist id="expressionsList">
-                <option class="expOpt" *ngFor="let expression of expressions" [value]="expression.jsExpression"></option>
-            </datalist>
-
-            <div class="buttons-container">
-                <button class="btn-add" (click)="addUserExpression()"
-                    [disabled]="isAddDisabled()">
-                <i class="fa fa-plus" aria-hidden="true"></i> Add
-                </button>
-                <button *ngIf="userExpressions.length > 0" class="btn-clear" (click)="clearExpressions()">
-                    <i class="fa fa-trash-alt" aria-hidden="true"></i> Clear
-                </button>
-            </div>
-
-            <div class="suggestions" *ngIf="showRecommendations">
-            <div class="suggestion-item" (click)="selectRecommendation()">
-                {{ recommendation }}
-            </div>
-            </div>
-        </div>
-
-        <div class="expression-list" *ngFor="let userExpression of userExpressions; let i = index">
-            <code>{{ userExpression }}</code>
-            <a class="deleteButton" (click)="removeUserExpression(i)"><i class="fas fa-delete-left" style="padding-right: 5px; font-size: 13px;"></i> Remove</a>
-            <a class="saveButton" title="Save expression" (click)="saveUserExpression(i)"><i class="fas fa-save" style="font-size: 13px;"></i></a>
-        </div>
-
-        <div class="btn-container">
-            <button class="btn-apply" (click)="fillTableWithUserExpressions()"
-                [disabled]="userExpressions.length <= 0">
-                <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
-            </button>
-        </div>
-         -->
          <app-editor [parent]="this"></app-editor>
     </div>
     
@@ -594,6 +517,7 @@
         </tr>
     </table>
 </div> -->
+
     <!-- <p *ngIf="numberOfReceivedMatrixes!=0">
         Received one matrix of {{ qiskitMatrix.length }} x {{ qiskitMatrix.length }}.<br>
         The calculus time on the server has been of {{ calculusTime }} seconds.
@@ -602,15 +526,6 @@
     <p *ngIf="numberOfReceivedMatrixes==-1">
         Since the data sent contain zero in all the output qubits, no matrices have been produced.
     </p>
-
-    <div *ngIf="qiskitCode && qiskitCode.length>0" style="border: solid 1px;">
-        <a style="color : blue" (click)="addHadamardGates()">Start with Hadamard gates</a>
-        &nbsp;
-        <a style="color : blue" (click)="countLastQubit()">Count last qubit</a>
-        <div style="font-size: x-small;">
-            <pre *ngFor="let line of qiskitCode">{{ line }}</pre>
-        </div>
-    </div>
 
     <div *ngIf="qiskitMatrix">
         <small style="font-family: 'Courier New', Courier, monospace;">
@@ -631,86 +546,6 @@
             <pre>{{ qiskitMatrixEnd }}</pre>
         </small>
     </div> -->
-
-
-
-
-
-<!-- <div class="container" *ngIf="matrix">
-    <h2>Output qubits value</h2>
-
-    <div class="section">
-        <p>
-            Do click on an <span class="highlight">output qubit</span> to negate its value, or change its corresponding decimal value to update the <span class="highlight">output qubits</span>.
-        </p>
-        <div class="divider"><span>Or</span></div>
-        <p>
-            Write
-            <span (click)="mostrarInstrucciones = true" class="instructions-link">
-                JavaScript expressions
-            </span>
-            to assign values to the output qubits.
-            <br>
-        </p>
-    </div>
-
-    <div class="flex-container" *ngIf="matrix">
-        <div class="section half expressions-section" [hidden]="hideExamples">
-
-                <h3 class="title-examples">Examples</h3>
-                <ol>
-                    <li *ngFor="let javaExample of javaExamples; let i = index">
-                        <div class="example-item">
-
-                            <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
-                                <i>{{ javaExample.explanation }}</i> →
-                                <br>
-                                <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
-                            </div>
-                            <div class="button-container">
-
-                                <button *ngIf="matrix && javaExample.exprs.length==1"
-                                    (click)="onAddExampleClick(i)"
-                                    [ngClass]="{'btn-added': javaExample.attempted}"
-                                    class="btn-addExample">
-                                        <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                        {{ javaExample.attempted ? '' : 'Try' }}
-                                </button>
-                            </div>
-
-                            <div *ngIf="javaExample.exprs.length>1" style="width: 100%;">
-                                <i>{{ javaExample.explanation }}</i> →
-                                <ol>
-                                    <li *ngFor="let expr of javaExample.exprs; let j = index">
-                                        <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ expr }}</code>
-                                        <button *ngIf="matrix && javaExample.exprs.length > 1"
-                                            (click)="onAddExample2Click(expr)"
-                                            [ngClass]="{'btn-added': javaExample.attempted}"
-                                            class="btn-addExample2">
-                                            <i class="fas fa-plus-square"></i>
-                                        </button>
-                                    </li>
-                                </ol>
-                            </div>
-
-                            <div class="button-container">
-
-                                <button *ngIf="matrix && javaExample.exprs.length>1"
-                                        (click)="onAddExampleClick(i)"
-                                        [ngClass]="{'btn-added': javaExample.attempted}"
-                                        class="btn-addExample">
-                                            <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
-                                            {{ javaExample.attempted ? '' : 'Try' }}
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                </ol>
-        </div>
-    </div>
-</div> -->
-
-<!-- Aqui iba la tabla -->
 
 <!-- Modales -->
 
@@ -814,7 +649,13 @@
 </div>
 
 <div class="modal" *ngIf="mostrarModal">
-    <div class="modal-content">
+    <div class="modal-content" *ngIf="isLoadingQiskitCode">
+        <div *ngIf="isLoadingQiskitCode" class="spinner-container">
+            <div class="spinner"></div>
+            <p>Generating Qiskit code...</p>
+        </div>              
+    </div>
+    <div class="modal-content" *ngIf="!isLoadingQiskitCode">
         <!-- Botón para cerrar el modal -->
         <div class="modal-header">
             <h2 class="title-modal">Qiskit Code</h2>
@@ -943,12 +784,11 @@
                         [(ngModel)]="expressionToSave.type" class="form-control">
                     </div>
         
-                    <div class="form-actions">
-                        <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
-                    </div>
+                    
                 </div>
 
                 <div class="help-actions">
+                    <button (click)="save()" [disabled]="isInvalid" class="save-new-btn">Save</button>
                     <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
@@ -965,8 +805,8 @@
             <!-- Encabezado del modal -->
             <div class="modal-header">
                 <div class="header-with-button">
-                    <h2 class="title-modal">Manage Expressions</h2>
-                    <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+                    <h2 class="title-modal">Manage expressions</h2>
+                    <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
                 </div>
                 <span class="close" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</span>
             </div>
@@ -991,7 +831,8 @@
                                 <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
                                     <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
-                                <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                                <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
+                                    <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)"> -->
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -1001,10 +842,33 @@
             </div>
     
             <!-- Botón de cerrar -->
-            <div class="help-actions" style="margin-bottom: 15px;">
-                <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+           
+            <div class="modal-footer">
+                <!-- <div class="help-actions" style="margin-bottom: 15px;">
+                    <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+                </div> -->
+                <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
             </div>
+            
         </div>
     </div>
     
+    <!-- Delete Confirmation Modal -->
+    <div *ngIf="showDeleteModal" class="modal-delete">
+        <div class="modal-content-delete">
+            <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+                <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
+                <span class="close" (click)="showDeleteModal = false">&times;</span>
+            </div>
+            <div class="modal-message-delete">
+                <p>Are you sure you want to delete the expression <strong>{{expressionToDelete}}</strong>?</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-delete-modal" (click)="confirmDelete()">Yes, delete</button>
+                    <button class="btn btn-cancel-delete-modal" (click)="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+  
 </body>

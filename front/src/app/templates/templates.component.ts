@@ -6,7 +6,8 @@ import { ManagerService } from '../manager.service';
 @Component({
   selector: 'app-templates',
   templateUrl: './templates.component.html',
-  styleUrls: ['../circuit-editor/circuit-editor.component.css']
+  // styleUrls: ['../circuit-editor/circuit-editor.component.css']
+  styleUrls: ['./templates.component.css']
 })
 export class TemplatesComponent implements OnInit {
 
@@ -73,4 +74,48 @@ export class TemplatesComponent implements OnInit {
       )
     }
   }
+
+  mensajeTemporal: string = '';
+  searchQuery: string = "";
+
+  onSearchInput() {
+    // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      this.selectTemplateIfMatch();
+    }
+  }
+
+  onFocusInput() {
+    
+  }
+
+  selectTemplateIfMatch() {
+    const match = this.manager.templates.find(t => t.fileName.toLowerCase() === this.searchQuery.toLowerCase());
+    if (match) {
+      this.manager.selectedTemplate = match;
+      console.log('Template seleccionado:', match);
+    } 
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+  }
+
+  searchTemplate() {
+    const match = this.manager.templates.find(
+      template => template.fileName.toLowerCase() === this.searchQuery.trim().toLowerCase()
+    );
+  
+    if (match) {
+      this.manager.selectedTemplate = match;
+      console.log('Template seleccionado:', match);
+      // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
+    } else {
+      console.warn('No se encontró ningún template con ese nombre.');
+    }
+  }
+  
 }

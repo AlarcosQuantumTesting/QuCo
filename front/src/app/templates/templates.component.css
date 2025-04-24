@@ -1,0 +1,221 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.mensaje-temporal {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s;
+    opacity: 0.9;
+    z-index: 9999;
+}
+
+div.titulo {
+    display: flex;
+    /* justify-content: center;
+    align-items: center; */
+    margin: 0;
+    margin-top: -20px;
+}
+
+h1 {
+    display: inline-block;
+    background-color: #008f99;
+    color: white;
+    font-family: 'Georgia', serif;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    position: relative;
+    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #0b555a;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 23px;
+}
+
+h3 {
+    /* color: #2980b9; */
+    color: #14645b;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 2px 15px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.buttons-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.section {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* texto */
+p {
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: center;
+    background-color: none;
+}
+
+.inputsContainer {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.form-row {
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos */
+    gap: 10px; /* Espacio entre elementos */
+}
+
+label {
+    font-size: 15px;
+}
+
+.form-row label {
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.form-row input {
+    /* width: 80px; */
+    width: 100%;
+}
+
+.form-row button {
+    margin-left: auto; /* Empuja el botón hacia la derecha */
+}
+
+.container {
+    max-width: 100%;
+    margin: auto;
+    padding: 20px;
+}
+
+.container.search-container {
+    background-color: #e7eeed;
+    border-radius: 12px;
+    margin-top: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.buildText {
+    width: 30%;
+    text-align: left;
+    border-right: 3px dashed #197a81;
+}
+
+.input-group {
+    position: relative;
+  }
+
+  
+
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 230px;
+}
+
+
+
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+.btn-search {
+    background-color: #4c9696;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para el botón al pasar el ratón */
+  .btn-search:hover {
+    /* background-color: #0056b3; */
+    background-color: #386161;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .template-details {
+    margin-top: 25px;
+  }

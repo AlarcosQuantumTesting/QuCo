@@ -59,7 +59,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
 
 
-  mensajeTemporal: string = '';
+  // mensajeTemporal: string = '';
   numberOfQubits : number | null = null;
   isInvalid: boolean = true;
   dialogo : any = undefined
@@ -85,10 +85,12 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   isType: boolean = true;
   mostrarModalNombreFuncion: boolean = false;
   mostrarModalGuargarCode: boolean = false;
+  isLoadingQiskitCode = false;
   nombreFuncion = '';
   matrixTmp: any[] = [];
   asFunctionTmp = false;
   showHelp = false;
+  totalSelectedElements: number = 0;
   
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
 
@@ -113,7 +115,12 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
     // Recuperar valores desde localStorage con valores por defecto
     this.qubits = JSON.parse(localStorage.getItem('qubits') || '4');
+    if(localStorage.getItem('matrix') != null) {
+      this.matrix = JSON.parse(localStorage.getItem('matrix') || '[]');
+    }
+    
 
+    this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
 
     // Verificar si hay datos guardados
     const savedQubits = localStorage.getItem('qubits');
@@ -186,6 +193,9 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       localStorage.setItem('qubits', JSON.stringify(this.qubits));
       localStorage.setItem('processedExpressionsGrover', JSON.stringify(processedExpressions));
       localStorage.setItem('matrix', JSON.stringify(this.matrix));
+      this.totalSelectedElements = this.matrix.filter(row => row[row.length - 1] === true).length;
+
+
       // localStorage.setItem('processedExpressions', JSON.stringify(processedExpressions));
   }
 
@@ -400,39 +410,13 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
         this.asFunctionTmp = asFunction;
         this.nombreFuncion = '';
         this.error = '';
+        this.isLoadingQiskitCode = true;
         this.mostrarModalNombreFuncion = true;
         return;
-        // Guardas los datos temporalmente
-        /*this.matrixTmp = matrix;
-        this.asFunctionTmp = asFunction;
-        this.mostrarModalNombreFuncion = true; // Mostrar modal para introducir nombre
-      
-        this.qiskitCode.name = this.nombreFuncion;
-        this.qiskitCode.isFunction = true;
-        
-        const info = {
-          matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
-          template: this.manager.selectedTemplate,
-          functionName: this.qiskitCode.name || ''
-        }
-
-        if (info.matrix.length == 0) {
-          this.error = "Select some output";
-          return;
-        }
-    
-        this.groverService.getCode(info, this.useMCX).subscribe(
-          result => {
-            this.qiskitCode.lines = result.code;
-            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
-            this.mostrarModal = true;
-          },
-          error => {
-            this.error = error.error ? error.error.message : error;
-          }
-        )*/
       }
       this.reset();
+      this.isLoadingQiskitCode = true;
+
         let info = {
           matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
           template: this.manager.selectedTemplate,
@@ -444,16 +428,26 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           return;
         }
     
-        this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe(
-          result => {
+        this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
+          next: result => {
             this.qiskitCode.lines = result.code;
             document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
             this.mostrarModal = true;
           },
-          error => {
-            this.error = error.error ? error.error.message : error;
+          // error => {
+          //   this.error = error.error ? error.error.message : error;
+          // },
+          error: err => {
+            console.error('Error generando código Qiskit', err);
+            // opcional: podrías mostrar un mensaje de error al usuario
+          },
+          complete: () => {
+            this.isLoadingQiskitCode = false; // ← finaliza carga
           }
-        )
+        });
+      
+  
+      
   }
 
   private loadMatrixes(result: any) {
@@ -497,6 +491,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   mark(rowIndex: number) {
     this.matrix![rowIndex][this.qubits] = !this.matrix![rowIndex][this.qubits]
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
+    this.totalSelectedElements = this.matrix!.filter(row => row[row.length - 1] === true).length;
   }
 
   onTemplateChange(selected: CodeTemplate) {
@@ -539,6 +535,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
+    this.totalSelectedElements = 0;
 
     localStorage.removeItem('processedExpressionsGrover');
     localStorage.removeItem('matrix');
@@ -777,7 +774,8 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsGrover');
     localStorage.removeItem('matrix');
-
+    
+    this.totalSelectedElements = 0;
     location.reload();  // Reiniciar
   }
 
@@ -826,6 +824,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
     this.isDisabled2 = true;
     this.mostrarModal = true;
     this.reset();
+    this.isLoadingQiskitCode = true;
 
     let info = {
       matrix: matrix.filter(row => row[row.length - 1]).map(row => row.slice(0, row.length - 1)),
@@ -837,18 +836,26 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
       this.error = "Select some output";
       return;
     }
-
-    this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe(
-      result => {
+    this.mostrarModal = true;
+    this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
+      next: result => {
         this.qiskitCode.lines = result.code;
         document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
         this.mostrarModal = true;
+        console.log("Qiskit code generated successfully");
+        this.isLoadingQiskitCode = false;
       },
-      error => {
-        this.error = error.error ? error.error.message : error;
+      // error => {
+      //   this.error = error.error ? error.error.message : error;
+      // }
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        // opcional: podrías mostrar un mensaje de error al usuario
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
       }
-    )
-  
+    });
   }
 
   confirmarNombreFuncion() {
@@ -941,6 +948,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
                 this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
+                this.mensajeTemporal = 'Expression updated successfully';
+                setTimeout(() => {
+                  this.mensajeTemporal = '';
+                }, 2000);
               },
               error => {
                 console.error(error);
@@ -974,6 +985,10 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
                     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
+                    this.mensajeTemporal = 'Expression created successfully';
+                    setTimeout(() => {
+                      this.mensajeTemporal = '';
+                    }, 2000);
                 },
                 error => {
                     console.error(error);
@@ -999,7 +1014,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
 
 
-  deleteExpression(id: string, index: number) {
+  /*deleteExpression(id: string, index: number) {
     if (confirm("Are you sure you want to delete this expression?")) {
         this.service.deleteExpression(id).subscribe(
             () => {
@@ -1023,6 +1038,53 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
             }
         );
     }
+  }*/
+
+  showDeleteModal: boolean = false;
+  expressionToDelete: any = null;
+  deleteIndex: number = -1;
+
+  // Llamada inicial desde la tabla o botón
+  openDeleteModal(expression: any, index: number) {
+    this.expressionToDelete = expression;
+    this.deleteIndex = index;
+    this.showDeleteModal = true;
+  }
+
+  // Confirmar eliminación
+  confirmDelete() {
+    if (!this.expressionToDelete) return;
+
+    this.service.deleteExpression(this.expressionToDelete).subscribe(
+      () => {
+        if (!this.expressions) {
+          this.expressions = [];
+        }
+
+        this.expressions.splice(this.deleteIndex, 1);
+        this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+        this.searchExpressions();
+
+        this.cancelDelete(); // cerrar el modal
+
+        this.mensajeTemporal = 'Expression deleted successfully';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+      },
+      error => {
+        console.error("Error deleting expression:", error);
+        alert("Failed to delete the expression. Please try again.");
+        this.cancelDelete();
+      }
+    );
+  }
+
+  // Cancelar
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.expressionToDelete = null;
+    this.deleteIndex = -1;
   }
 
   showExpressions() {
