@@ -58,10 +58,19 @@
     </div>
 
     <div *ngIf="manager.selectedTemplate && !creatingTemplate" class="template-details">
-        <div>
-            <label>Template description: </label>
-            <label>{{ manager.selectedTemplate.description }}</label>
+        <div style="display: flex; align-items: center;">
+            <h2 style="margin-top: 10px;">Template</h2>
+            <div style="position: relative;">
+                <button class="editTable-button" title="Table specifications" (click)="editTemplate(manager.selectedTemplate)">
+                  <i class="fa fa-edit"></i>
+                </button>
+            </div>
         </div>
+        <label>Template name: </label>
+        <label>{{ manager.selectedTemplate.fileName }}</label>
+        <br>
+        <label>Template description: </label>
+        <label>{{ manager.selectedTemplate.description }}</label>
         <pre>{{ manager.selectedTemplate.code }}</pre>
     </div>
 

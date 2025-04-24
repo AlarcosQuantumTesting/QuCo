@@ -118,4 +118,7 @@ export class TemplatesComponent implements OnInit {
     }
   }
   
+  editTemplate(template: CodeTemplate) {
+
+  }
 }
