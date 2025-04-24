@@ -108,6 +108,10 @@ p {
     gap: 10px; /* Espacio entre elementos */
 }
 
+label {
+    font-size: 15px;
+}
+
 .form-row label {
     white-space: nowrap; /* Evita que el texto se divida en varias líneas */
 }
@@ -140,3 +144,78 @@ p {
     text-align: left;
     border-right: 3px dashed #197a81;
 }
+
+.input-group {
+    position: relative;
+  }
+
+  
+
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 230px;
+}
+
+
+
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+.btn-search {
+    background-color: #4c9696;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para el botón al pasar el ratón */
+  .btn-search:hover {
+    /* background-color: #0056b3; */
+    background-color: #386161;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .template-details {
+    margin-top: 25px;
+  }

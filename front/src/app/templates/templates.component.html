@@ -27,28 +27,42 @@
             </div>
             <div class="section inputsContainer">
                 <div class="input-group">
-                    <strong>Available templates: </strong>
+                    <label>Available templates:</label>
                     <input type="text"
                         [(ngModel)]="searchQuery"
                         (input)="onSearchInput()"
                         (keydown)="onTabPress($event)"
                         (focus)="onFocusInput()"
-                        placeholder="template name..."
+                        placeholder="Search for a template..."
                         list="templatesList">
             
                     <datalist id="templatesList">
                         <option class="temOpt" *ngFor="let template of manager.templates" [value]="template.fileName"></option>
                     </datalist>
+
+                    <div>
+                        <button class="btn-search" style="margin-top: 20px;" (click)="searchTemplate()">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
             
                 </div>
 
                 <div class="buttons-container">
-                <button class="btn-clear" (click)="searchTemplate()">
-                    <i class="fa fa-search" aria-hidden="true"></i> Search
-                </button>
-            </div>
+                    <button class="btn btn-primary" (click)="create()">New template</button>
+                    &nbsp;
+                    <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div *ngIf="manager.selectedTemplate && !creatingTemplate" class="template-details">
+        <div>
+            <label>Template description: </label>
+            <label>{{ manager.selectedTemplate.description }}</label>
+        </div>
+        <pre>{{ manager.selectedTemplate.code }}</pre>
     </div>
 
     
@@ -68,11 +82,11 @@
         [value]="template">{{ template.fileName }}
     </span> -->
 
-    <div>
+    <!-- <div>
         <button (click)="create()">Create new template</button>
         &nbsp;
         <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
-    </div>
+    </div> -->
 
     <br>
 
@@ -114,11 +128,11 @@
         </div>
     </div>
 
-    <div *ngIf="manager.selectedTemplate && !creatingTemplate">
+    <!-- <div *ngIf="manager.selectedTemplate && !creatingTemplate">
         <div>
             <strong>Template description:</strong>
             <mark>{{ manager.selectedTemplate.description }}</mark>
         </div>
         <pre>{{ manager.selectedTemplate.code }}</pre>
-    </div>
+    </div> -->
 </div>
