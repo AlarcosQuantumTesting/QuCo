@@ -427,7 +427,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           this.error = "Select some output";
           return;
         }
-    
+        console.log("inParallel", this.inParallel);
         this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
           next: result => {
             this.qiskitCode.lines = result.code;
