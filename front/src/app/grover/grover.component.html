@@ -94,8 +94,7 @@
                 </button>
     
                 <!-- Tooltip personalizado -->
-                <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">
-                           
+                <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">    
                     <div>
                         <p class="radioTitle">Use:</p>
                         <label class="custom-radio">
@@ -104,12 +103,15 @@
                         <label class="custom-radio">
                         <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">H-MCZ-H
                         </label>
+                        <label class="custom-radio">
+                        Separate circuits: <input type="checkbox" [(ngModel)]="inParallel" [value]="false" style="margin-left: 5px;">
+                        </label>
                     </div>
         
                     <div>
                         <p class="radioTitle">Available templates:</p>
                         <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-                            <option *ngFor="let template of manager.getTemplatesStartingBy('grover')" [ngValue]="template">
+                            <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
                                 {{ template.fileName }}
                             </option>
                         </select> 

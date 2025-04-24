@@ -27,4 +27,12 @@ public class QColumn {
     public List<Object> getGates() {
         return gateIds;
     }
+
+    public boolean isEmpty() {
+        return this.gateIds.isEmpty();
+    }
+
+    public void setGate(int i, String gateId) {
+       this.gateIds.set(i, gateId);
+    }
 }

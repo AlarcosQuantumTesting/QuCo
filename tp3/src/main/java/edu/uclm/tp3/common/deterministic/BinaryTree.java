@@ -1,22 +1,25 @@
 package edu.uclm.tp3.common.deterministic;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class BinaryTree {
+public class BinaryTree implements Serializable{
 	
 	static final boolean DEBUG = false; 
 	static final boolean PRINT = true; 
 
-	private Coder coder;
+	private transient Coder coder;
+
+    private int qubits;
 	
 	String name;
-    int value;
     int leftFreq;
     int rightFreq;
-    double leftProbability, rightProbability;
-    double leftAngle, rightAngle;
+    float leftProbability, rightProbability;
+    float leftAngle;
+    //float rightAngle;
     
     BinaryTree parent;
     BinaryTree leftChild;
@@ -24,13 +27,20 @@ public class BinaryTree {
 
     int depth;
 
-    private GRCircuit circuit;
+    private transient GRCircuit circuit;
     
     public BinaryTree() {
-		this.value = -1;
 		this.name = "";
         this.circuit = new GRCircuit();
 	}
+
+    public int getQubits() {
+        return qubits;
+    }
+
+    public void setQubits(int qubits) {
+        this.qubits = qubits;
+    }
 
     public String getCode() {
         return this.circuit.toString();
@@ -71,7 +81,7 @@ public class BinaryTree {
 		if (node==null)
 			return;
 		
-		if (Math.abs(node.leftAngle)<physicalAngle && Math.abs(node.rightAngle)<physicalAngle)
+		/*if (Math.abs(node.leftAngle)<physicalAngle && Math.abs(node.rightAngle)<physicalAngle)
 			node.leftAngle = node.rightAngle = 0;
 		else if (Math.abs(node.leftAngle)<physicalAngle) {
 			node.rightAngle = node.rightAngle + node.leftAngle;
@@ -79,6 +89,12 @@ public class BinaryTree {
 		} else if (Math.abs(node.rightAngle)<physicalAngle) {
 			node.leftAngle = node.leftAngle + node.rightAngle;
 			node.rightAngle = 0;
+		}*/
+
+        if (Math.abs(node.leftAngle)<physicalAngle) {
+			node.leftAngle = 0;
+		} else if (Math.abs(Math.PI - node.leftAngle)<physicalAngle) {
+			node.leftAngle = (float) Math.PI;
 		}
 		            
 		this.removeLowAnglesRecursive(node.leftChild, physicalAngle);
@@ -93,22 +109,22 @@ public class BinaryTree {
         if (node == null)
             return;
         
-        double sum = node.leftFreq + node.rightFreq;
+        float sum = node.leftFreq + node.rightFreq;
 
         if (sum > 0) {
             node.leftProbability = node.leftFreq / sum;
             node.rightProbability = node.rightFreq / sum;
         }
         
-        node.leftAngle = 2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2;
-        node.rightAngle = Math.PI - node.leftAngle;
-        if (node.rightAngle>=Math.PI)
-            node.rightAngle = node.rightAngle-Math.PI;
+        node.leftAngle = (float) (2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2);
+        //node.rightAngle = (float) (Math.PI - node.leftAngle);
+        //if (node.rightAngle>=Math.PI)
+        //    node.rightAngle = (float) (node.rightAngle-Math.PI);
 
         normalizeProbabilitiesRecursive(node.leftChild);
         normalizeProbabilitiesRecursive(node.rightChild);
     }
-    
+
     public void setFrequencies(String binario, double probability) {
         BinaryTree node = this; 
 
@@ -126,48 +142,59 @@ public class BinaryTree {
     }
     
     public void addChildren() {
-        addChildrenToLeaves(this);
+        addChildrenToLeaves(this, 0, "");
     }
 
-    private void addChildrenToLeaves(BinaryTree node) {
-        if (node == null)
-            return;
-
+    private void addChildrenToLeaves(BinaryTree node, int depth, String position) {
+        if (node == null) return;
+    
+        // 1) Sincronizamos la profundidad y el nombre
+        node.depth = depth;
+        node.name  = depth + position;
+    
+        // 2) Si es hoja, creamos los hijos
         if (node.leftChild == null && node.rightChild == null) {
-            node.leftChild = new BinaryTree();
-            node.leftChild.value = 0;
-            node.leftProbability = 0;
-            node.leftChild.depth = node.depth + 1;
-            node.leftChild.parent = node;
-
-            node.rightChild = new BinaryTree();
-            node.rightChild.value = 1;
-            node.rightProbability = 0;
-            node.rightChild.depth = node.depth + 1;
-            node.rightChild.parent = node;
-            
+            // hijo izquierdo
+            BinaryTree left = new BinaryTree();
+            left.parent          = node;
+            left.depth           = depth + 1;
+            left.name            = (depth + 1) + position + "L";
+            left.leftProbability = 0;
+            left.rightProbability= 0;
+            node.leftChild       = left;
+    
+            // hijo derecho
+            BinaryTree right = new BinaryTree();
+            right.parent           = node;
+            right.depth            = depth + 1;
+            right.name             = (depth + 1) + position + "R";
+            right.leftProbability  = 0;
+            right.rightProbability = 0;
+            node.rightChild        = right;
+    
             return;
         }
-
-        addChildrenToLeaves(node.leftChild);
-        addChildrenToLeaves(node.rightChild);
+    
+        // 3) Si no es hoja, seguimos recursión
+        addChildrenToLeaves(node.leftChild,  depth + 1, position + "L");
+        addChildrenToLeaves(node.rightChild, depth + 1, position + "R");
     }
     
-    public void assignNames(String splitIndex, String functionPrefix) {
-        assignNamesRecursive(this, 0, splitIndex, functionPrefix);
+    public void setPrefixes(String splitIndex, String functionPrefix) {
+        setPrefixesRecursive(this, splitIndex, functionPrefix);
     }
 
-    private void assignNamesRecursive(BinaryTree node, int depth, String splitIndex, String position) {
+    private void setPrefixesRecursive(BinaryTree node, String splitIndex, String position) {
         if (node == null)
             return;
 
-        node.name = splitIndex + depth + (position.isEmpty() ? "" : "" + position);
+        node.name = splitIndex + position + node.name;
 
         if (node.leftChild != null) {
-            assignNamesRecursive(node.leftChild, depth + 1, splitIndex, position + "L");
+            setPrefixesRecursive(node.leftChild, splitIndex, position);
         }
         if (node.rightChild != null) {
-            assignNamesRecursive(node.rightChild, depth + 1, splitIndex, position + "R");
+            setPrefixesRecursive(node.rightChild, splitIndex, position);
         }
     }
 
@@ -182,15 +209,14 @@ public class BinaryTree {
 
         Map<String, Object> map = new HashMap<>();
         map.put("name", node.name);
-        map.put("value", node.value);
         map.put("leftFreq", node.leftFreq);
         map.put("rightFreq", node.rightFreq);
         map.put("leftProbability", node.leftProbability);
         map.put("rightProbability", node.rightProbability);
         map.put("leftAngle", node.leftAngle);
-        map.put("rightAngle", node.rightAngle);
+        //map.put("rightAngle", node.rightAngle);
+        map.put("rightAngle", (float) (Math.PI - node.leftAngle));
 
-        // Convierte los hijos en mapas recursivamente
         map.put("leftChild", convertToMap(node.leftChild));
         map.put("rightChild", convertToMap(node.rightChild));
 
@@ -211,7 +237,8 @@ public class BinaryTree {
                 "probs: (" + node.leftProbability +
                 ", " + node.rightProbability + "); " +                 
                 "angles: (" + node.leftAngle +
-                ", " + node.rightAngle +
+                //", " + node.rightAngle +
+                ", " + (float) (Math.PI - node.leftAngle) +
                 ")\n";
 
         r = r + printTreeRecursive(node.leftChild, level + 1);
@@ -235,17 +262,14 @@ public class BinaryTree {
 		if (node == null)
 	        return;
 
-	    // Eliminar el hijo izquierdo si leftProbability es 0
 	    if (node.leftChild != null && node.leftProbability == 0) {
 	        node.leftChild = null;
 	    }
 
-	    // Eliminar el hijo derecho si rightProbability es 0
 	    if (node.rightChild != null && node.rightProbability == 0) {
 	        node.rightChild = null;
 	    }
 
-	    // Continuar recursivamente para los hijos no nulos
 	    if (node.leftChild != null) {
 	    	pruneRecursive(node.leftChild);
 	    }
@@ -298,7 +322,12 @@ public class BinaryTree {
 
     @Override
     public int hashCode() {
-        int result = this.name.hashCode();    
+        // Comenzamos con los bits de la propiedad leftAngle
+        int result = Float.floatToIntBits(this.leftAngle);
+        // Incorporamos el hash del hijo izquierdo (recursivo)
+        result = 31 * result + (leftChild  != null ? leftChild.hashCode()  : 0);
+        // Incorporamos el hash del hijo derecho (recursivo)
+        result = 31 * result + (rightChild != null ? rightChild.hashCode() : 0);
         return result;
     }
 
@@ -311,9 +340,12 @@ public class BinaryTree {
 		if (getClass() != obj.getClass())
 			return false;
 		BinaryTree other = (BinaryTree) obj;
-		return Double.doubleToLongBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
+		/*return Double.doubleToLongBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
 				&& Objects.equals(leftChild, other.leftChild)
 				&& Double.doubleToLongBits(rightAngle) == Double.doubleToLongBits(other.rightAngle)
+				&& Objects.equals(rightChild, other.rightChild);*/
+        return Float.floatToIntBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
+				&& Objects.equals(leftChild, other.leftChild)
 				&& Objects.equals(rightChild, other.rightChild);
 	}
 
@@ -338,6 +370,4 @@ public class BinaryTree {
 	public BinaryTree getCode(BinaryTree rootNode, int nodeDepth, Map<Integer, BinaryTree> usedNodesMap) {
 		return this.coder.getCode(rootNode, nodeDepth, usedNodesMap);
 	}
-
-
 }

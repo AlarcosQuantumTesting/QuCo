@@ -16,6 +16,9 @@ export abstract class GroverStyle {
     selectedElements: number = 0
     matrix?: any[]
 
+    inParallel : boolean = false
+    splitCircuits : boolean = false
+
     userExpressions: string[] = []
     currentUserExpression: string = ""
 

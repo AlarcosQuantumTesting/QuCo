@@ -23,8 +23,11 @@ export class ManagerService {
     })
   }
 
-  getTemplatesStartingBy(prefix: string): CodeTemplate[] {
-    return this.templates.filter(t => t.fileName.startsWith(prefix))
+  getTemplatesStartingBy(prefixes: string[]): CodeTemplate[] {
+    prefixes.push("common")
+    return this.templates.filter(t =>
+      prefixes.some(prefix => t.fileName.startsWith(prefix))
+    );
   }
 
   getExpressionsStartingBy(name: string): Expression[] {
