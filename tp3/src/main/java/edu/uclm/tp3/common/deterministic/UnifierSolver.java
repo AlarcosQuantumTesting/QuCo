@@ -23,11 +23,11 @@ public class UnifierSolver extends Solver {
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
 				.collect(Collectors.toList());
 
-		int treeDepth = this.tree.getDepth();
+		int treeDepthMinus1 = this.tree.getDepth() - 1;
 		for (int i=nodeNames.size()-1; i>=0; i--) {
 			String nodeName = nodeNames.get(i);
 			BinaryTree node = nodes.get(nodeName);
-			if (node.depth == treeDepth-1)
+			if (node.depth == treeDepthMinus1)
 				nodeNames.remove(i);
 		}
 		

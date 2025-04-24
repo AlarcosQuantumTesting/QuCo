@@ -1,15 +1,26 @@
 package edu.uclm.tp3.common.services;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.transaction.Transactional;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -22,19 +33,100 @@ import edu.uclm.tp3.common.deterministic.GRCircuit;
 import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QColumn;
-import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.common.deterministic.Solver;
+import edu.uclm.tp3.common.deterministic.UnifierSolver;
+import edu.uclm.tp3.dao.BinaryTreeDao;
+import edu.uclm.tp3.dao.BinaryTreeEntity;
 
 @Service
 public class DeterministicService {
+
+	@Autowired
+	private BinaryTreeDao btDao;
+
+	@Transactional
+    public BinaryTree findTree(int qubits) {
+        // 1) Intentamos cargar
+        Optional<BinaryTreeEntity> optEntity = btDao.findById(qubits);
+        if (optEntity.isPresent()) {
+            try {
+                // Descompress & deserialize
+                BinaryTree tree = decompress(optEntity.get().getTreeData());
+				tree.setCircuit(new GRCircuit());
+                return tree;
+            } catch (IOException | ClassNotFoundException e) {
+                //throw new IllegalStateException("Error al descomprimir BinaryTree para " + qubits, e);
+            }
+        }
+
+        // 2) No existe → creamos
+        BinaryTree tree = new BinaryTree();
+        tree.setQubits(qubits);
+        for (int j = 0; j < qubits-1; j++)
+            tree.addChildren();
+
+        try {
+            byte[] compressed = compress(tree);
+            BinaryTreeEntity entity = new BinaryTreeEntity();
+            entity.setQubits(qubits);
+            entity.setTreeData(compressed);
+            btDao.save(entity);
+        } catch (IOException e) {
+            throw new IllegalStateException("Error al comprimir BinaryTree para " + qubits, e);
+        }
+
+        return tree;
+    }
+
+	public static byte[] compress(Serializable obj) throws IOException {
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			GZIPOutputStream gos        = new GZIPOutputStream(bos);
+			ObjectOutputStream oos      = new ObjectOutputStream(gos)) {
+			oos.writeObject(obj);
+			oos.flush();
+			gos.finish();  // cierra el flujo GZIP correctamente
+			return bos.toByteArray();
+		}
+	}
+
+	private BinaryTree decompress(byte[] data) throws IOException, ClassNotFoundException {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+             GZIPInputStream gis        = new GZIPInputStream(bis);
+             ObjectInputStream ois      = new ObjectInputStream(gis)) {
+            return (BinaryTree) ois.readObject();
+        }
+    }
+
+	private void createTrees(int from, int to) throws IOException {
+		for (int i = from; i <= to; i++) {
+			System.out.println("Creating tree for " + i + " qubits");
+			
+			// --- construyes tu árbol ---
+			BinaryTree tree = new BinaryTree();
+			tree.setQubits(i);
+			for (int j = 0; j < i - 1; j++) {
+				tree.addChildren();
+			}
+			
+			// --- serializas y comprimes el árbol ---
+			byte[] compressedTree = compress(tree);
+			
+			// --- preparas la entidad con los bytes comprimidos ---
+			BinaryTreeEntity entity = new BinaryTreeEntity();
+			entity.setQubits(tree.getQubits());
+			entity.setTreeData(compressedTree);  // asume que has cambiado el campo en la entidad a byte[]
+			
+			// --- guardas en BD ---
+			this.btDao.save(entity);
+		}
+	}
 	
 	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int nOfOutputs = (int) Math.pow(2, qubits);
 		int shots = expectedFrequencies.getShots();
 
-		BinaryTree tree = new BinaryTree();
-		for (int i=0; i<qubits-1; i++)
-			tree.addChildren();
+		//this.createTrees(2, 50);
+		BinaryTree tree = this.findTree(qubits);
 		
 		for (int i=0; i<nOfOutputs; i++) {
 			String binary = String.format("%" + qubits + "s", Integer.toBinaryString(i)).replace(' ', '0');
@@ -42,7 +134,9 @@ public class DeterministicService {
 			tree.setFrequencies(binary, freq);
 		}
 		
-		tree.assignNames("", functionPrefix);
+		if (functionPrefix.length()>0)
+			tree.setPrefixes("", functionPrefix);
+
 		tree.normalizeProbabilities();
 		
 		tree.getCircuit().setQubits(qubits);
@@ -67,7 +161,10 @@ public class DeterministicService {
 		result.put("#MEASURES#", this.getMeasures(qubits));
 		result.put("#CALCULUS#", "circuit.append(get" + functionPrefix + "0(), qreg)");
 		result.put("tree", tree.toMap());
-		result.put("QUIRK", cleanCircuit);
+
+		List<Map<String, Object>> partialCircuits = new ArrayList<>();
+		partialCircuits.add(cleanCircuit);
+		result.put("QUIRK", partialCircuits);
 
 		StringBuilder sbExpected = new StringBuilder("expected = [");
 		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
@@ -75,6 +172,8 @@ public class DeterministicService {
 			int index = pair.getIndex();
 			int freq = pair.getFreq();
 			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
 		}
 		sbExpected.append("]");
 		result.put("#EXPECTED#", sbExpected.toString());
@@ -82,30 +181,7 @@ public class DeterministicService {
 		return result;
 	}
 
-	private Map<String, Object> clean(QCircuit circuit, int qubits, String splitIndex) {
-		circuit.sortGates();
-		QColumn column0 = new QColumn();
-		if (splitIndex==null)
-			column0.addGate("~0");
-		else
-			column0.addGate("~" + splitIndex + "0");
-
-		circuit.insertColumn(column0, 0);
-
-		QColumn column1 = new QColumn();
-		for (int i=0; i<qubits; i++)
-			column1.addGate("H");
-		circuit.insertColumn(column1, 0);
-
-		JSONObject jso = circuit.toJson();
-		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
-		jso.remove("circuit");
-		jso.put("cols", jsaCols);
-
-		return jso.toMap();
-	}
-
-	public Map<String, Object> calculateSeparating(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
+	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		int shots = expectedFrequencies.getShots();
 
 		int numberOfPairs = expectedFrequencies.getPairs().size();
@@ -118,9 +194,7 @@ public class DeterministicService {
 		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 
 		for (int i=0; i<numberOfPairs; i++) {
-			BinaryTree tree = new BinaryTree();
-			for (int j=0; j<qubits-1; j++)
-				tree.addChildren();
+			BinaryTree tree = this.findTree(qubits);
 			
 			Pair pair = expectedFrequencies.getPairs().get(i);
 			String binary = String.format("%" + qubits + "s", Integer.toBinaryString(pair.getIndex())).replace(' ', '0');
@@ -128,7 +202,7 @@ public class DeterministicService {
 			tree.setFrequencies(binary, freq);
 
 			String splitIndex = "v" + i + "_";
-			tree.assignNames(splitIndex, functionPrefix);
+			tree.setPrefixes(splitIndex, functionPrefix);
 			tree.normalizeProbabilities();
 		
 			GRCircuit circuit = new GRCircuit();
@@ -145,7 +219,84 @@ public class DeterministicService {
 			Map<String, Object> partialResult = solver.solve(shots);
 
 			QCircuit qCircuit = (QCircuit) partialResult.get("QUIRK");
-			Map<String, Object> cleanCircuit = this.clean(qCircuit, qubits, splitIndex);
+			Map<String, Object> cleanCircuit = this.clean(qCircuit, qubits, splitIndex.toString());
+
+			trees.add(tree.toMap());
+			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
+			initializers.append(initializer);
+			partialCircuits.add(cleanCircuit);
+			endQubit = startQubit + qubits;
+			code.append("circuits[" + i + "].append(get" + splitIndex + functionPrefix + "0(), [" + Coder.getTargetQubits(startQubit, endQubit) + "]) # Use this line to use functions\n");
+			//startQubit = endQubit;
+		}
+
+		StringBuilder circuitsDeclaration = new StringBuilder();
+		for (int i=0; i<numberOfPairs; i++) 
+			circuitsDeclaration.append("QuantumCircuit(qreg, creg),");
+		
+		result.put("#CIRCUITS_DECLARATION#", circuitsDeclaration.toString());
+		result.put("#CALCULUS#", code.toString());
+		result.put("#QUBITS#", qubits);
+		result.put("#OUTPUT_QUBITS#", qubits);
+		result.put("#SHOTS#", shots);
+		result.put("#HADAMARDS#", this.getHadamards());
+		result.put("#INITIALIZE#", initializers);
+		result.put("trees", trees);
+		result.put("QUIRK", partialCircuits);
+		
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<numberOfPairs; i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			//int freq = pair.getFreq();
+			sbExpected.append("(" + index + ", 1),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
+		return result;
+	}
+
+	public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
+		int shots = expectedFrequencies.getShots();
+
+		int numberOfPairs = expectedFrequencies.getPairs().size();
+		Map<String, Object> result = new HashMap<>();
+
+		List<Map<String, Object>> trees = new ArrayList<>();
+		StringBuilder initializers = new StringBuilder();
+		StringBuilder code = new StringBuilder();
+		int startQubit = 0, endQubit;
+		List<Map<String, Object>> partialCircuits = new ArrayList<>();
+
+		for (int i=0; i<numberOfPairs; i++) {
+			BinaryTree tree = this.findTree(qubits);
+			
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			String binary = String.format("%" + qubits + "s", Integer.toBinaryString(pair.getIndex())).replace(' ', '0');
+			int freq = expectedFrequencies.getFreq(pair.getIndex());
+			tree.setFrequencies(binary, freq);
+
+			String splitIndex = "v" + i + "_";
+			tree.setPrefixes(splitIndex, functionPrefix);
+			tree.normalizeProbabilities();
+		
+			GRCircuit circuit = new GRCircuit();
+			circuit.setQubits(qubits);
+			
+			Solver solver = null;
+			if (!originalGR && physicalAngle>0) {
+				double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
+				minProb = minProb * minProb;
+				tree.removeLowAngles(physicalAngle);
+			}
+
+			solver = new UnifierSolver(tree, functionPrefix, originalGR);
+			Map<String, Object> partialResult = solver.solve(shots);
+
+			QCircuit qCircuit = (QCircuit) partialResult.get("QUIRK");
+			Map<String, Object> cleanCircuit = this.clean(qCircuit, qubits, splitIndex.toString());
 
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
@@ -175,7 +326,7 @@ public class DeterministicService {
 
 			Pair pair = expectedFrequencies.getPairs().get(i);
 
-			this.generateAll(qubits, leftQubits, pair, rightQubits, expectedPairs, totalFrequencies);
+			//this.generateAll(qubits, leftQubits, pair, rightQubits, expectedPairs, totalFrequencies);
 		}
 		
 		StringBuilder sbExpected = new StringBuilder("expected = [");
@@ -192,7 +343,30 @@ public class DeterministicService {
 		return result;
 	}
 
-	private void generateAll(int qubits, int leftQubits, Pair pair, int rightQubits, List<Pair> expectedPairs, int[] totalFrequencies) {
+	private Map<String, Object> clean(QCircuit circuit, int qubits, String splitIndex) {
+		circuit.sortGates();
+		QColumn column0 = new QColumn();
+		if (splitIndex==null)
+			column0.addGate("~0");
+		else
+			column0.addGate("~" + splitIndex + "0");
+
+		circuit.insertColumn(column0, 0);
+
+		QColumn column1 = new QColumn();
+		for (int i=0; i<qubits; i++)
+			column1.addGate("H");
+		circuit.insertColumn(column1, 0);
+
+		JSONObject jso = circuit.toJson();
+		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
+		jso.remove("circuit");
+		jso.put("cols", jsaCols);
+
+		return jso.toMap();
+	}
+
+	/*private void generateAll(int qubits, int leftQubits, Pair pair, int rightQubits, List<Pair> expectedPairs, int[] totalFrequencies) {
 		String sIndex = print(pair.getIndex(), qubits);
 		int totalLength = leftQubits + qubits + rightQubits;
 
@@ -224,7 +398,7 @@ public class DeterministicService {
 				}
 			}
 		}
-	}
+	}*/
 
 	private static String print(int index, int length) {
 		if (length == 0) {

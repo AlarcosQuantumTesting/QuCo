@@ -36,7 +36,7 @@ public class GroverController {
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
-	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean separating) {
+	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean inParallel) {
 		try {
 			List<List<Integer>> receivedMatrixes = (List<List<Integer>>) info.get("matrix");
 			Map<String, Object> receivedTemplate = (Map<String, Object>) info.get("template");
@@ -48,7 +48,7 @@ public class GroverController {
 			if (info.containsKey("functionName"))
 				functionName = info.get("functionName").toString();
 			
-			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes, useMCX, separating);
+			Map<String, Object> quirk = this.getAllQuirk(receivedMatrixes, useMCX, inParallel);
 			String[] code = this.coder.getCode(quirk, template, functionName);		
 			
 			Map<String, String[]> result = new HashMap<>();
@@ -78,40 +78,4 @@ public class GroverController {
 		return result;
 	}
 
-	/*@PutMapping("/getAllQuirk2")
-	public Map<String, Object> getAllQuirk2(@RequestBody List<List<Integer>> receivedMatrixes, @RequestParam Boolean useMCX, @RequestParam(required = false) Boolean splitting) {
-		int qubits = receivedMatrixes.get(0).size();
-		double N = Math.pow(2, qubits);
-		double M = receivedMatrixes.size();
-		if (M>=N/2) {
-			for (int i=0; i<M; i++)
-				receivedMatrixes.get(i).add(0);
-			qubits++;
-		}
-		int nOptimal = (int) Math.floor(Math.PI/4*Math.sqrt(N/M));
-
-
-		List<Object> init = QuirkSolver.getInit(qubits);
-		List<Object> hh = GroverSolver.getGate(qubits, "H");
-		
-		List<List<Object>> oracle = GroverSolver.guessGroverOracle(receivedMatrixes, qubits, useMCX);
-		List<Object> barriers = GroverSolver.getGate(qubits, "…");
-		List<List<Object>> difussor = GroverSolver.guessDifussor(qubits, useMCX);
-		
-		List<List<Object>> matrixes = new ArrayList<>();
-		matrixes.add(hh);
-		matrixes.add(barriers);
-		for (int i=0; i<nOptimal; i++) {
-			matrixes.addAll(oracle);
-			matrixes.add(barriers);
-			matrixes.addAll(difussor);
-			if (i!=nOptimal-1)
-				matrixes.add(barriers);
-		}
-		
-		Map<String, Object> result = new HashMap<>();
-		result.put("init", init);
-		result.put("cols", matrixes);
-		return result;
-	}*/
 }

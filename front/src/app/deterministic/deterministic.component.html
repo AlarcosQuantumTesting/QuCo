@@ -169,7 +169,7 @@
 
 
 <div>
-    Number of qubits: <input type="number" min="1" [(ngModel)]="qubits" (change)="updateOutputs()">
+    Number of qubits: <input type="number" min="1" max = "24" [(ngModel)]="qubits" (change)="updateOutputs()">
     &nbsp;
     <i>(The table shows only the first {{ maxRows}} rows)</i>
 </div>
@@ -261,11 +261,13 @@
           <br>
           Functions' prefix: <input type="text" [(ngModel)]="prefix">
           &nbsp;
-          <input type="checkbox" [(ngModel)]="separateCircuits">Separate per values
+          <input type="checkbox" [(ngModel)]="inParallel" (change)="onParallelCircuitsChange()">Parallel circuit
+          &nbsp;
+          <input type="checkbox" [(ngModel)]="splitCircuits" (change)="onSplitCircuitsChange()">Split in several circuits
           &nbsp;
           <button (click)="getCircuit()">Get whole Qiskit code</button>
           &nbsp;
-          <u style="color:blue" (click)="goToCode()">Go to code</u>
+          <u style="color:white" (click)="goToCode()">Go to code</u>
         </th>
       </tr>
       <tr>
@@ -326,7 +328,16 @@
     >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
   </strong>
   &nbsp;
-  <u style="color:blue" *ngIf="quirkCode" (click)="showQuirk()">Show in quirk</u>
+  <span *ngIf="quirkCodes.length>0">
+    <u style="color:blue" *ngIf="quirkCodes.length==1" (click)="showQuirk()">Show in quirk</u>
+    <span *ngIf="quirkCodes.length>1">
+      Show in quirk:
+      <span style="color : blue" *ngFor="let quirkCode of quirkCodes; let i = index">
+        <u style="color : blue"  (click)="showQuirk(i)">{{ i+1 }}</u>&nbsp;
+      </span>
+    </span>
+  </span>
+
   &nbsp;
   <span style="color : red">{{ error }}</span>
   <br>

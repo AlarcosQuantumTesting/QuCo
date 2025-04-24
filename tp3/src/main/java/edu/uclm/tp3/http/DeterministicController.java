@@ -55,8 +55,8 @@ public class DeterministicController {
 		}
 	}
 
-	@PostMapping("/calculateSeparating") @ResponseBody
-	public Map<String, Object> calculateSeparating(HttpSession session, @RequestBody Map<String, Object> info) {
+	@PostMapping("/calculateInParallel") @ResponseBody
+	public Map<String, Object> calculateInParallel(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -70,7 +70,29 @@ public class DeterministicController {
 		expectedFrequencies.sort();
 		
 		try {
-			Map<String, Object> result = this.service.calculateSeparating(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			Map<String, Object> result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			return result;
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@PostMapping("/calculateSplitting") @ResponseBody
+	public Map<String, Object> calculateParallelizing(HttpSession session, @RequestBody Map<String, Object> info) {
+		JSONObject jso = new JSONObject(info);
+		
+		int qubits = jso.getInt("qubits");
+		
+		double physicalAngle = jso.getDouble("physicalAngle");
+
+		String functionPrefix = jso.optString("functionPrefix");
+
+		boolean originalGR = jso.getBoolean("originalGR");
+		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
+		expectedFrequencies.sort();
+		
+		try {
+			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 			return result;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

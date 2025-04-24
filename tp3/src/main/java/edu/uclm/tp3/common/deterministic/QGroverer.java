@@ -5,7 +5,7 @@ import java.util.List;
 
 public class QGroverer {
 
-    public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean separating, List<Double> expected) {
+    public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean inParallel, List<Double> expected) {
         int qubits = sRows.get(0).size();
 
         double expectedElementProbability = 1.0/sRows.size();
@@ -21,12 +21,12 @@ public class QGroverer {
 
         QGroverDifussor difussor = new QGroverDifussor(qubits);
 
-        if (!separating) {
+        if (!inParallel) {
             int nOptimal = getOptimal(sRows, qubits);
             return buildGroverCircuit(qubits, groverOracles, difussor, nOptimal);
         } else { 
             int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(Math.pow(2, qubits)));
-            return buildGroverCircuitSeparating(qubits, sRows.size(), groverOracles, difussor, nOptimal);
+            return buildGroverCircuitIParallel(qubits, sRows.size(), groverOracles, difussor, nOptimal);
         }
     }
 
@@ -38,7 +38,7 @@ public class QGroverer {
         return decimal;
     }
 
-    private static QCircuit buildGroverCircuitSeparating(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
+    private static QCircuit buildGroverCircuitIParallel(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
         List<QCircuit> circuits = new ArrayList<>();
 
         int ones = 0;
