@@ -12,6 +12,16 @@ import { ManagerService } from '../manager.service';
 export class TemplatesComponent implements OnInit {
 
   creatingTemplate: boolean = false;
+  editingTemplate: boolean = false;
+  nameTemplate: string = "";
+  searchQuery: string = "";
+  mensajeTemporal: string = '';
+  currentName: string = '';
+  descriptionTemplate: string = '';
+  currentDescription: string = '';
+  codeTemplate: string = '';
+  currentCode: string = '';
+  mostrarModalCrear : boolean = false;
 
   constructor(private service : TemplatesService, public manager : ManagerService) { }
 
@@ -21,6 +31,8 @@ export class TemplatesComponent implements OnInit {
         data.sort((a, b) => a.fileName.localeCompare(b.fileName))
         this.manager.templates = Object.assign(data)
         this.manager.selectedTemplate = this.manager.templates[0]
+        this.searchQuery = this.manager.selectedTemplate?.fileName?.trim() || "";
+        this.searchTemplate();
       },
       error => {
         console.error(error)
@@ -75,9 +87,6 @@ export class TemplatesComponent implements OnInit {
     }
   }
 
-  mensajeTemporal: string = '';
-  searchQuery: string = "";
-
   onSearchInput() {
     // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
   }
@@ -112,13 +121,76 @@ export class TemplatesComponent implements OnInit {
     if (match) {
       this.manager.selectedTemplate = match;
       console.log('Template seleccionado:', match);
+      console.log('Nombre del template:', this.nameTemplate);
+      this.editingTemplate = false;
       // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
     } else {
       console.warn('No se encontró ningún template con ese nombre.');
     }
   }
   
-  editTemplate(template: CodeTemplate) {
-
+  editTemplate() {
+    this.editingTemplate = true;
+    this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
+    this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim() || '';
+    this.codeTemplate = this.manager.selectedTemplate?.code?.trim() || '';
   }
+
+  cancelEdit() {
+    this.editingTemplate = false;
+    this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
+    this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim();
+    this.codeTemplate = this.manager.selectedTemplate?.code?.trim();
+  }
+
+  templateExists(): boolean {
+    this.currentName = this.nameTemplate?.trim();
+    if (!this.currentName) return false;
+  
+    const requiredSuffix = '.template.txt';
+
+    if (this.currentName && this.currentName.toLowerCase().endsWith('.')) {
+      this.currentName += 'template.txt';
+    } else if (!this.currentName.toLowerCase().endsWith(requiredSuffix)) {
+      this.currentName += requiredSuffix;
+    }
+    
+
+    const index = this.manager.templates.findIndex(
+      t => t.fileName.trim().toLowerCase() === this.currentName.toLowerCase()
+    );
+  
+    return index !== -1;
+  }
+
+  descriptionInput () {
+    this.currentDescription = this.descriptionTemplate?.trim();	
+  }
+
+  codeInput () {
+    this.currentCode = this.codeTemplate?.trim();	
+  }
+  
+
+  updateTemplate() {
+    this.manager.selectedTemplate.fileName = this.nameTemplate.trim();
+    console.log("Descripción del template:", this.manager.selectedTemplate.description);
+    console.log("Código del template:", this.manager.selectedTemplate.code);
+  }
+
+  createTemplate() {
+    //this.manager.selectedTemplate.fileName = this.nameTemplate.trim();
+    console.log("Nombre del template:", this.currentName);
+    console.log("Descripción del template:", this.currentDescription); 
+    console.log("Código del template:", this.currentCode);
+  }
+
+  cancelarModal() {
+    this.mostrarModalCrear = false;
+  }
+
+  createModal() {
+    this.mostrarModalCrear = true;
+  }
+  
 }

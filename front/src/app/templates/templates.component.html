@@ -49,7 +49,8 @@
                 </div>
 
                 <div class="buttons-container">
-                    <button class="btn btn-primary" (click)="create()">New template</button>
+                    <!-- <button class="btn btn-primary" (click)="create()">New template</button> -->
+                    <button class="btn btn-primary" (click)="createModal()">New template</button>
                     &nbsp;
                     <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
                 </div>
@@ -57,24 +58,126 @@
         </div>
     </div>
 
-    <div *ngIf="manager.selectedTemplate && !creatingTemplate" class="template-details">
-        <div style="display: flex; align-items: center;">
+    <div *ngIf="manager.selectedTemplate && !creatingTemplate && !editingTemplate" class="template-details">
+        <div style="display: flex; align-items: center; justify-content: center;">
             <h2 style="margin-top: 10px;">Template</h2>
             <div style="position: relative;">
-                <button class="editTable-button" title="Table specifications" (click)="editTemplate(manager.selectedTemplate)">
+                <button class="editTemp-button" title="Edit template" (click)="editTemplate()">
                   <i class="fa fa-edit"></i>
                 </button>
             </div>
         </div>
-        <label>Template name: </label>
-        <label>{{ manager.selectedTemplate.fileName }}</label>
-        <br>
-        <label>Template description: </label>
-        <label>{{ manager.selectedTemplate.description }}</label>
-        <pre>{{ manager.selectedTemplate.code }}</pre>
+        <div class="template-info">
+            <div class="name-description">
+              <div class="info-block">
+                <label><strong>Name:</strong></label>
+                <span>{{ manager.selectedTemplate.fileName }}</span>
+              </div>
+              <div class="info-block">
+                <label><strong>Description:</strong></label>
+                <span>{{ manager.selectedTemplate.description }}</span>
+              </div>
+            </div>
+          
+            <pre class="template-code">{{ manager.selectedTemplate.code }}</pre>
+          </div>          
     </div>
 
-    
+    <div *ngIf="manager.selectedTemplate && !creatingTemplate && editingTemplate" class="template-details">
+        <!-- <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin-top: 10px;">Template</h2>
+          
+            <div style="display: flex; gap: 10px;">
+                <button class="editTable-button" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
+                <button 
+                    class="editTable-button" 
+                    title="Save or Create template"
+                    *ngIf="manager.selectedTemplate"
+                    (click)="templateExists() ? updateTemplate() : createTemplate()">
+                    {{ templateExists() ? 'Update' : 'Create' }}
+                </button>
+            
+            </div>
+        </div> -->
+        <div class="template-header">
+            <h2>Template</h2>
+          
+            <div class="template-buttons">
+              <button class="btn-cancel" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
+              <button 
+                class="btn-confirm" 
+                title="Save or Create template"
+                *ngIf="manager.selectedTemplate"
+                (click)="templateExists() ? updateTemplate() : createTemplate()">
+                {{ templateExists() ? 'Update' : 'Create' }}
+              </button>
+            </div>
+        </div>
+          
+        <div class="template-info">
+            <div class="name-description">
+              <div class="info-block">
+                <label for="templateName">Name:</label>
+                <input id="templateName" 
+                    type="text" 
+                    [(ngModel)]="nameTemplate"
+                    (input)="templateExists()"
+                    (focus)="templateExists()"/>
+              </div>
+              <div class="info-block">
+                <label for="templateDesc">Description:</label>
+                <input id="templateDesc" type="text" 
+                    [(ngModel)]="descriptionTemplate"
+                    (input)="descriptionInput()"
+                    (focus)="descriptionInput()"/>
+              </div>
+            </div>
+          
+            <textarea class="template-code-edit" 
+                [(ngModel)]="codeTemplate"
+                (input)="codeInput()"
+                (focus)="codeInput()">
+            </textarea>
+        </div>
+    </div>
+
+    <!-- Modales -->
+    <div class="modal" *ngIf="mostrarModalCrear">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h2 class="title-modal">New template</h2>
+                <span class="close" (click)="cancelarModal()">&times;</span>
+            </div>
+        
+            <div class="template-info">
+                <div class="info-block">
+                    <label for="templateName">Name:</label>
+                    <input id="templateName" 
+                        type="text" 
+                        [(ngModel)]="nameTemplate"
+                        (input)="templateExists()"
+                        (focus)="templateExists()"/>
+                </div>
+                <div class="info-block">
+                    <label for="templateDesc">Description:</label>
+                    <input id="templateDesc" type="text" 
+                        [(ngModel)]="descriptionTemplate"
+                        (input)="descriptionInput()"
+                        (focus)="descriptionInput()"/>
+                </div>
+                <label for="templateDesc">Code:</label>
+                <textarea class="template-code-create" 
+                    [(ngModel)]="codeTemplate"
+                    (input)="codeInput()"
+                    (focus)="codeInput()">
+                </textarea>
+            </div>
+            <div class="create-actions">
+                <button class="save-btn" (click)="save()">Save</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 
