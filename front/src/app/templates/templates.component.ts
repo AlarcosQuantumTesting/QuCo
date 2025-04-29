@@ -22,6 +22,7 @@ export class TemplatesComponent implements OnInit {
   codeTemplate: string = '';
   currentCode: string = '';
   mostrarModalCrear : boolean = false;
+  mostrarInstrucciones : boolean = false;
 
   constructor(private service : TemplatesService, public manager : ManagerService) { }
 
@@ -191,6 +192,13 @@ export class TemplatesComponent implements OnInit {
 
   createModal() {
     this.mostrarModalCrear = true;
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+  }
+
+  abrirInstucciones() {
+    this.mostrarInstrucciones = true;
   }
   
 }

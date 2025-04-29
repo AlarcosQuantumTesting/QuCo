@@ -1023,6 +1023,7 @@ u:hover {
     padding-left: 20px;
 }
 
+
 .close {
     color: white;
     font-size: 28px;
@@ -1031,9 +1032,18 @@ u:hover {
     transition: color 0.2s;
     padding-left: 80px;
     padding-right: 10px;
+    background: none;
 }
+
 .close:hover {
+  background: none;
+  cursor: default;
+  color: white;
+}
+
+.close-i:hover {
     color: #ccc;
+    cursor: pointer;
 }
 
 .code-output p {

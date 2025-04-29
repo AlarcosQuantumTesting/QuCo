@@ -998,7 +998,7 @@ ol.list-instructions {
     transition: all 0.2s ease-in-out;
   }
 
-.close {
+  .close {
     color: white;
     font-size: 28px;
     font-weight: bold;
@@ -1006,10 +1006,20 @@ ol.list-instructions {
     transition: color 0.2s;
     padding-left: 80px;
     padding-right: 10px;
+    background: none;
 }
+
 .close:hover {
-    color: #ccc;
+  background: none;
+  cursor: default;
+  color: white;
 }
+
+.close-i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
 
 
 /* Close Button */
@@ -1244,19 +1254,6 @@ ol.list-instructions {
     /* background: none; */
     background-color: #1a7c83;
     transform: scale(1.05);
-}
-
-.close {
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding-left: 80px;
-    padding-right: 10px;
-}
-.close:hover {
-    color: #ccc;
 }
 
 .update-btn {

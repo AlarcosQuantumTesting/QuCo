@@ -50,7 +50,7 @@
 
                 <div class="buttons-container">
                     <!-- <button class="btn btn-primary" (click)="create()">New template</button> -->
-                    <button class="btn btn-primary" (click)="createModal()">New template</button>
+                    <button class="btn btn-primary" [disabled]="editingTemplate"  (click)="createModal()">New template</button>
                     &nbsp;
                     <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
                 </div>
@@ -146,35 +146,88 @@
         <div class="modal-content">
 
             <div class="modal-header">
-                <h2 class="title-modal">New template</h2>
-                <span class="close" (click)="cancelarModal()">&times;</span>
+                <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                    <h2 class="title-modal">New template</h2>
+                    <button title="Template instructions" (click)="abrirInstucciones()" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                        <i class="fa fa-info-circle"></i>
+                    </button>
+                </div>
+                <button class="close"><i class="close-i" (click)="cancelarModal()">&times;</i></button>
             </div>
         
-            <div class="template-info">
-                <div class="info-block">
-                    <label for="templateName">Name:</label>
-                    <input id="templateName" 
-                        type="text" 
-                        [(ngModel)]="nameTemplate"
-                        (input)="templateExists()"
-                        (focus)="templateExists()"/>
+            <div class="template-info-modal">
+                <div class="name-description-modal">
+                    <div class="info-block">
+                        <label for="templateName">Name:</label>
+                        <input id="templateName"  placeholder="template.name..."
+                            type="text" 
+                            [(ngModel)]="nameTemplate"
+                            (input)="templateExists()"
+                            (focus)="templateExists()"/>
+                    </div>
+                    <div class="info-block">
+                        <label for="templateDesc" >Description:</label>
+                        <input id="templateDesc" type="text" placeholder="This template is for..."
+                            [(ngModel)]="descriptionTemplate"
+                            (input)="descriptionInput()"
+                            (focus)="descriptionInput()"/>
+                    </div>
                 </div>
-                <div class="info-block">
-                    <label for="templateDesc">Description:</label>
-                    <input id="templateDesc" type="text" 
-                        [(ngModel)]="descriptionTemplate"
-                        (input)="descriptionInput()"
-                        (focus)="descriptionInput()"/>
-                </div>
-                <label for="templateDesc">Code:</label>
-                <textarea class="template-code-create" 
+                <label for="templateDesc" style="justify-content: left; width: 93%; margin-bottom: 10px"><strong>Code:</strong></label>
+                <textarea class="template-code-create" placeholder="from qiskit..."
                     [(ngModel)]="codeTemplate"
                     (input)="codeInput()"
                     (focus)="codeInput()">
                 </textarea>
+                <div class="create-actions">
+                    <button class="save-btn" (click)="save()">Save</button>
+                    <button class="cancel-btn" (click)="cancelarModal()">Cancel</button>
+                </div>
             </div>
-            <div class="create-actions">
-                <button class="save-btn" (click)="save()">Save</button>
+        </div>
+    </div>
+
+    <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
+        <div class="modal-content instrucciones"
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Instructions</h2>
+                <button class="close"><i class="close-i" (click)="mostrarInstrucciones = false">&times;</i></button>
+            </div>
+            <div class="intructions-content">
+                <p class="text-instructions">
+                    Remind to use the following tokens. They will be replaced by the actual values when the circuit code is generated.
+                </p>
+                <p class="text-instructions">
+                    See the existing templates to have examples.
+                </p>
+                <ol class="list-instructions">
+                    <li>
+                        <code><strong>#QUBITS#:</strong></code> number of qubits in the circuit.
+                    </li>
+                    <li>
+                        <code><strong>#OUTPUT_QUBITS#:</strong></code> number of output qubits in the circuit.
+                    </li>
+                    <li>
+                        <code><strong>#INITIALIZE#:</strong></code> statements for initializating the circuit.
+                    </li>
+                    <li>
+                        <code><strong>#CALCULUS#:</strong></code> statements for doing the circuit calculus.
+                    </li>
+                    <li>
+                        <code><strong>#MEASURES#:</strong></code> statements for measuring the circuit.
+                    </li>
+                    <li>
+                        <code><strong>#SHOTS#:</strong></code> it will be replaced by the number of shots.
+                    </li>
+                    <li>
+                        <code><strong>#HADAMARDS#:</strong></code> it will be replaced by Hadamard gates.
+                    </li>
+                </ol>
+                <div class="modal-actions">
+                    <button class="action-btn" (click)="mostrarInstrucciones = false">Got it!</button>
+                </div>
             </div>
         </div>
     </div>
@@ -206,35 +259,7 @@
         <input type="text" [(ngModel)]="manager.selectedTemplate.fileName" placeholder="Template name"><code>.template.txt</code>
         <br>
         <input type="text" [(ngModel)]="manager.selectedTemplate.description" size="100" placeholder="Description">
-        <div>
-            Remind to use the following tokens. They will be replaced by the actual values when the circuit code is generated.
-            <br>
-            <b>See the existing templates to have examples.</b>
-            <br>
-            <ol>
-                <li>
-                    <code>#QUBITS#</code>: number of qubits in the circuit.
-                </li>
-                <li>
-                    <code>#OUTPUT_QUBITS#</code>: number of output qubits in the circuit.
-                </li>
-                <li>
-                    <code>#INITIALIZE#</code>: statements for initializating the circuit.
-                </li>
-                <li>
-                    <code>#CALCULUS#</code>: statements for doing the circuit calculus.
-                </li>
-                <li>
-                    <code>#MEASURES#</code>: statements for measuring the circuit.
-                </li>
-                <li>
-                    <code>#SHOTS#</code>: it will be replaced by the number of shots.
-                </li>
-                <li>
-                    <code>#HADAMARDS#</code>: it will be replaced by Hadamard gates.
-                </li>
-            </ol>
-        </div>
+        
         <div>
             <textarea [(ngModel)]="manager.selectedTemplate.code" placeholder="Template code"></textarea>
         </div>
