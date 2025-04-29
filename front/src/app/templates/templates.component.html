@@ -167,13 +167,16 @@
                     </div>
                     <div class="info-block">
                         <label for="templateDesc" >Description:</label>
-                        <input id="templateDesc" type="text" placeholder="This template is for..."
+                        <input id="templateDesc" placeholder="This template is for..."
+                            type="text"
                             [(ngModel)]="descriptionTemplate"
                             (input)="descriptionInput()"
                             (focus)="descriptionInput()"/>
                     </div>
                 </div>
-                <label for="templateDesc" style="justify-content: left; width: 93%; margin-bottom: 10px"><strong>Code:</strong></label>
+                <label style="justify-content: left; width: 93%; margin-bottom: 10px">
+                    <strong>Code:</strong>
+                </label>
                 <textarea class="template-code-create" placeholder="from qiskit..."
                     [(ngModel)]="codeTemplate"
                     (input)="codeInput()"
