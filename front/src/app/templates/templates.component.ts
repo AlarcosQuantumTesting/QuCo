@@ -23,6 +23,8 @@ export class TemplatesComponent implements OnInit {
   currentCode: string = '';
   mostrarModalCrear : boolean = false;
   mostrarInstrucciones : boolean = false;
+  error : string = '';
+  isInvalid : boolean = false;
 
   constructor(private service : TemplatesService, public manager : ManagerService) { }
 
@@ -39,6 +41,8 @@ export class TemplatesComponent implements OnInit {
         console.error(error)
       }
     )
+
+    this.validateInputs();
   }
 
   show(template : any) {
@@ -199,6 +203,18 @@ export class TemplatesComponent implements OnInit {
 
   abrirInstucciones() {
     this.mostrarInstrucciones = true;
+  }
+
+  validateInputs() {
+    if (this.descriptionTemplate == '' || this.nameTemplate == '' || this.codeTemplate == '') {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
   }
   
 }

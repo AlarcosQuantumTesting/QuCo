@@ -379,6 +379,12 @@ label {
       transform: none;
   }
 
+  .disabled {
+    pointer-events: none; /* Bloquea los clics */
+    opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
+    cursor: not-allowed; /* Cambia el cursor */
+}
+
 /* Modales */
 
 .close {
@@ -495,6 +501,12 @@ label {
 .save-btn:hover {
     background-color: #218838;
     transform: scale(1.05);
+}
+
+.save-btn:disabled {
+  background-color: #8f929073;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .cancel-btn {
