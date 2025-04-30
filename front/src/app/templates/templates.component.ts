@@ -110,7 +110,7 @@ export class TemplatesComponent implements OnInit {
     const match = this.manager.templates.find(t => t.fileName.toLowerCase() === this.searchQuery.toLowerCase());
     if (match) {
       this.manager.selectedTemplate = match;
-      console.log('Template seleccionado:', match);
+      //console.log('Template seleccionado:', match);
     } 
   }
 
@@ -125,8 +125,8 @@ export class TemplatesComponent implements OnInit {
   
     if (match) {
       this.manager.selectedTemplate = match;
-      console.log('Template seleccionado:', match);
-      console.log('Nombre del template:', this.nameTemplate);
+      /*console.log('Template seleccionado:', match);
+      console.log('Nombre del template:', this.nameTemplate);*/
       this.editingTemplate = false;
       // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
     } else {
