@@ -107,6 +107,7 @@
               <button 
                 class="btn-confirm" 
                 title="Save or Create template"
+                [disabled]="isInvalid || nameTemplate.trim() === ''"
                 *ngIf="manager.selectedTemplate"
                 (click)="templateExists() ? updateTemplate() : createTemplate()">
                 {{ templateExists() ? 'Update' : 'Create' }}
@@ -183,7 +184,10 @@
                     (focus)="codeInput()">
                 </textarea>
                 <div class="create-actions">
-                    <button class="save-btn" [disabled]="isInvalid" (click)="save()">Save</button>
+                    <button class="save-btn"
+                        [disabled]="isInvalid || nameTemplate.trim() === '' || descriptionTemplate.trim() === '' || codeTemplate.trim() === ''"
+                        (click)="save()">Save
+                    </button>
                     <button class="cancel-btn" (click)="cancelarModal()">Cancel</button>
                 </div>
             </div>

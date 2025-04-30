@@ -164,16 +164,19 @@ export class TemplatesComponent implements OnInit {
     const index = this.manager.templates.findIndex(
       t => t.fileName.trim().toLowerCase() === this.currentName.toLowerCase()
     );
+    this.validateInputs();
   
     return index !== -1;
   }
 
   descriptionInput () {
-    this.currentDescription = this.descriptionTemplate?.trim();	
+    this.currentDescription = this.descriptionTemplate?.trim();
+    this.validateInputs();
   }
 
   codeInput () {
-    this.currentCode = this.codeTemplate?.trim();	
+    this.currentCode = this.codeTemplate?.trim();
+    this.validateInputs();
   }
   
 
@@ -206,11 +209,18 @@ export class TemplatesComponent implements OnInit {
   }
 
   validateInputs() {
-    if (this.descriptionTemplate == '' || this.nameTemplate == '' || this.codeTemplate == '') {
+    if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
       this.error = 'All fields are required';
       this.isInvalid = true;
       return;
     }
+
+    /*if ((this.currentDescription == '' || this.currentName == '' || this.currentCode == '') && this.editingTemplate) {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      console.log("Invalido: ", this.isInvalid);
+      return;
+    }*/
 
     // Si todo está correcto
     this.error = '';
