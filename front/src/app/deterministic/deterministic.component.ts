@@ -214,6 +214,7 @@ export class DeterministicComponent extends GroverStyle {
       }
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
+    this.goToCode()
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
@@ -254,6 +255,51 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   getCircuit() {
+    this.running = true;
+    this.state   = "Calculating";
+    this.error   = undefined;
+  
+    this.service.calculate(
+      this.qubits,
+      this.expectedFrequencies,
+      this.physicalAngle,
+      this.originalGR,
+      this.inParallel,
+      this.splitCircuits,
+      this.prefix
+    ).subscribe(
+      blob => {
+        blob.text().then(text => {
+          let response : any;
+          try {
+            response = JSON.parse(text);
+          } catch (e) {
+            this.error   = 'Error parseando JSON: ' + e;
+            this.running = false;
+            return;
+          }
+  
+          this.responseReceived = response;
+          this.buildCode();
+    
+          const { svg, width, height } =
+            this.generateSvgFromBottom(response.tree);
+          this.svgTree   = this.sanitizer.bypassSecurityTrustHtml(svg);
+          this.svgWidth  = width;
+          this.svgHeight = height;
+          this.state     = undefined;
+          this.running   = false;
+        })
+      },
+      err => {
+        this.error   = err.error?.message || err.message;
+        this.running = false;
+      }
+    );
+  }
+  
+
+  /*getCircuit() {
     this.running = true
     this.state = "Calculating"
     this.error = undefined
@@ -276,7 +322,7 @@ export class DeterministicComponent extends GroverStyle {
           this.error = error.message + " (is the server running?)"
       }
     )
-  }
+  }*/
 
   goToCode() {
     this.codeArea.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });

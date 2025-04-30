@@ -8,6 +8,8 @@ import javax.servlet.http.HttpSession;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.services.DeterministicService;
@@ -33,8 +38,8 @@ public class DeterministicController {
 		return this.service.getTemplates();
 	}
 		
-	@PostMapping("/calculate") @ResponseBody
-	public Map<String, Object> calculate(HttpSession session, @RequestBody Map<String, Object> info) {
+	@PostMapping(path = "/calculate", produces = MediaType.APPLICATION_JSON_VALUE) @ResponseBody
+	public ResponseEntity<StreamingResponseBody> calculate(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -49,14 +54,28 @@ public class DeterministicController {
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			return result;
+			return this.buildResponse(result);
+
+		} catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 	}
 
+	private ResponseEntity<StreamingResponseBody> buildResponse(Map<String, Object> result) {
+		StreamingResponseBody body = out -> {
+			new ObjectMapper().writeValue(out, result);
+		};
+		return ResponseEntity
+			.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(body);
+	}
+
 	@PostMapping("/calculateInParallel") @ResponseBody
-	public Map<String, Object> calculateInParallel(HttpSession session, @RequestBody Map<String, Object> info) {
+	public ResponseEntity<StreamingResponseBody> calculateInParallel(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -71,14 +90,14 @@ public class DeterministicController {
 		
 		try {
 			Map<String, Object> result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			return result;
+			return this.buildResponse(result);
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@PostMapping("/calculateSplitting") @ResponseBody
-	public Map<String, Object> calculateParallelizing(HttpSession session, @RequestBody Map<String, Object> info) {
+	public ResponseEntity<StreamingResponseBody> calculateParallelizing(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -93,7 +112,7 @@ public class DeterministicController {
 		
 		try {
 			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			return result;
+			return this.buildResponse(result);
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}

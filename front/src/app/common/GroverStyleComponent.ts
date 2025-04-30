@@ -110,6 +110,9 @@ export abstract class GroverStyle {
         this.reset()
         try {
           this.fillTable(true)
+
+        if (this.qubits>10)
+            alert("Table filled")
         } catch (error) {
           this.error = error
         }

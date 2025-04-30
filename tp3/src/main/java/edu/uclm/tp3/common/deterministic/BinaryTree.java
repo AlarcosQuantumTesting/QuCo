@@ -322,32 +322,34 @@ public class BinaryTree implements Serializable{
 
     @Override
     public int hashCode() {
-        // Comenzamos con los bits de la propiedad leftAngle
+        // 1. Iniciamos con los bits de leftAngle
         int result = Float.floatToIntBits(this.leftAngle);
-        // Incorporamos el hash del hijo izquierdo (recursivo)
-        result = 31 * result + (leftChild  != null ? leftChild.hashCode()  : 0);
-        // Incorporamos el hash del hijo derecho (recursivo)
-        result = 31 * result + (rightChild != null ? rightChild.hashCode() : 0);
+        // 2. Mezclamos el número de qubits
+        result = 31 * result + this.qubits;
+        // 3. Añadimos la profundidad (depth)
+        result = 31 * result + this.depth;
+        // 4. Incorporamos el hash recursivo del hijo izquierdo
+        result = 31 * result + (this.leftChild  != null ? this.leftChild.hashCode()  : 0);
+        // 5. Incorporamos el hash recursivo del hijo derecho
+        result = 31 * result + (this.rightChild != null ? this.rightChild.hashCode() : 0);
         return result;
     }
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BinaryTree other = (BinaryTree) obj;
-		/*return Double.doubleToLongBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
-				&& Objects.equals(leftChild, other.leftChild)
-				&& Double.doubleToLongBits(rightAngle) == Double.doubleToLongBits(other.rightAngle)
-				&& Objects.equals(rightChild, other.rightChild);*/
-        return Float.floatToIntBits(leftAngle) == Double.doubleToLongBits(other.leftAngle)
-				&& Objects.equals(leftChild, other.leftChild)
-				&& Objects.equals(rightChild, other.rightChild);
-	}
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        BinaryTree other = (BinaryTree) obj;
+        // Comparamos qubits, ángulo, depth y estructura de hijos
+        return this.qubits == other.qubits
+            && Float.floatToIntBits(this.leftAngle) == Float.floatToIntBits(other.leftAngle)
+            && this.depth == other.depth
+            && Objects.equals(this.leftChild,  other.leftChild)
+            && Objects.equals(this.rightChild, other.rightChild);
+    }
+    
 
 	public Map<String, BinaryTree> getSeparatedNodes() {
 		Map<String, BinaryTree> nodesByName = new HashMap<>();
