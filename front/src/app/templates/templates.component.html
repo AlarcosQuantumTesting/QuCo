@@ -51,8 +51,8 @@
                 <div class="buttons-container">
                     <!-- <button class="btn btn-primary" (click)="create()">New template</button> -->
                     <button class="btn btn-primary" [disabled]="editingTemplate"  (click)="createModal()">New template</button>
-                    &nbsp;
-                    <button (click)="save()" [disabled]="isInvalid" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
+                    <!-- &nbsp;
+                    <button (click)="save()" [disabled]="isInvalid" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button> -->
                 </div>
             </div>
         </div>
@@ -84,21 +84,7 @@
     </div>
 
     <div *ngIf="manager.selectedTemplate && !creatingTemplate && editingTemplate" class="template-details">
-        <!-- <div style="display: flex; align-items: center; justify-content: space-between;">
-            <h2 style="margin-top: 10px;">Template</h2>
-          
-            <div style="display: flex; gap: 10px;">
-                <button class="editTable-button" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
-                <button 
-                    class="editTable-button" 
-                    title="Save or Create template"
-                    *ngIf="manager.selectedTemplate"
-                    (click)="templateExists() ? updateTemplate() : createTemplate()">
-                    {{ templateExists() ? 'Update' : 'Create' }}
-                </button>
-            
-            </div>
-        </div> -->
+
         <div class="template-header">
             <h2>Template</h2>
           
@@ -241,24 +227,18 @@
 </body>
 
 
-
-
-
-
-
-
-<div>
-    <!-- <strong>Available templates:</strong>
+<!-- <div>
+    <strong>Available templates:</strong>
     <span *ngFor="let template of manager.templates; let i=index">
       <input type="radio" name="template" [(ngModel)]="manager.selectedTemplate" (change)="show(template)"
         [value]="template">{{ template.fileName }}
-    </span> -->
+    </span>
 
-    <!-- <div>
+    <div>
         <button (click)="create()">Create new template</button>
         &nbsp;
         <button (click)="save()" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button>
-    </div> -->
+    </div>
 
     <br>
 
@@ -272,11 +252,11 @@
         </div>
     </div>
 
-    <!-- <div *ngIf="manager.selectedTemplate && !creatingTemplate">
+    <div *ngIf="manager.selectedTemplate && !creatingTemplate">
         <div>
             <strong>Template description:</strong>
             <mark>{{ manager.selectedTemplate.description }}</mark>
         </div>
         <pre>{{ manager.selectedTemplate.code }}</pre>
-    </div> -->
-</div>
+    </div>
+</div> -->
