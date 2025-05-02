@@ -265,6 +265,13 @@ export class TemplatesComponent implements OnInit {
     this.templateToSave.fileName = this.currentName;
     this.templateToSave.description = this.currentDescription;
     this.templateToSave.code = this.currentCode;
+
+    let forgottenTokens = this.templateToSave.getForgottenTokens()
+    if (forgottenTokens.length > 0) {
+      let option = window.confirm("The following tokens are not used in the code: " + forgottenTokens.join(", ") + ". Do you want to continue?")
+      if (!option)
+        return
+    }
     
     this.service.createTemplate(this.templateToSave).subscribe(
       data => {
@@ -299,6 +306,13 @@ export class TemplatesComponent implements OnInit {
     this.templateToSave.fileName = this.currentName;
     this.templateToSave.description = this.currentDescription;
     this.templateToSave.code = this.currentCode;
+
+    let forgottenTokens = this.templateToSave.getForgottenTokens()
+    if (forgottenTokens.length > 0) {
+      let option = window.confirm("The following tokens are not used in the code: " + forgottenTokens.join(", ") + ". Do you want to continue?")
+      if (!option)
+        return
+    }
     
     this.service.updateTemplate(this.templateToSave).subscribe(
       data => {
@@ -307,6 +321,12 @@ export class TemplatesComponent implements OnInit {
         this.mostrarModalCrear = false;
         this.mostrarInstrucciones = false;
         this.manager.selectedTemplate = this.templateToSave;
+
+
+        this.manager.templates.push(data)
+        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName))
+        this.manager.selectedTemplate = data
+        this.creatingTemplate = false
       },
       error => {
         console.error(error)
