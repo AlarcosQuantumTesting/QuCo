@@ -16,7 +16,7 @@ export class DeterministicService {
     return this.client.get<any[]>(environment.beUrl + this.controller + "/getTemplates", { responseType : 'json' })
   }
 
-  calculate(qubits: number, expectedFrequencies: FreqTable, physicalAngle: number, originalGR : boolean, inParallel : boolean, splitCircuits : boolean, functionPrefix? : string) {
+  /*calculate(qubits: number, expectedFrequencies: FreqTable, physicalAngle: number, originalGR : boolean, inParallel : boolean, splitCircuits : boolean, functionPrefix? : string) {
     let info = {
       qubits : qubits,
       expectedFrequencies : expectedFrequencies,
@@ -30,5 +30,34 @@ export class DeterministicService {
     if (splitCircuits)
       url = url + "Splitting"
     return this.client.post<any>(url, info, { withCredentials: true })
-  }
+  }*/
+
+    calculate(
+      qubits: number,
+      expectedFrequencies: FreqTable,
+      physicalAngle: number,
+      originalGR: boolean,
+      inParallel: boolean,
+      splitCircuits: boolean,
+      functionPrefix?: string
+    ): Observable<Blob> {
+      const info = {
+        qubits,
+        expectedFrequencies,
+        physicalAngle,
+        functionPrefix,
+        originalGR
+      };
+      let url = environment.beUrl + this.controller + '/calculate';
+      if (inParallel)   url += 'InParallel';
+      if (splitCircuits) url += 'Splitting';
+    
+      return this.client.post(
+        url,
+        info,
+        {
+          responseType: 'blob',
+        }
+      );
+    }    
 }

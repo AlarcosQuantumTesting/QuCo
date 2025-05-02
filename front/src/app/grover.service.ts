@@ -15,7 +15,6 @@ export class GroverService {
   }
 
   getCode(info : any, useMCX : boolean, separating : boolean) {
-    // return this.client.put<any>(environment.beUrl + "grover/getCode?useMCX=" + useMCX + "&separating=" + separating, info)
     return this.client.put<any>(environment.beUrl + "grover/getCode?useMCX=" + useMCX + "&inParallel=" + separating, info)
   }
 
