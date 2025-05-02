@@ -317,24 +317,12 @@ public class DeterministicService {
 		result.put("trees", trees);
 		result.put("QUIRK", generalCircuit);
 
-		List<Pair> expectedPairs = new ArrayList<>();
-		int[] totalFrequencies = { 0 };
-		int totalQubits = qubits * numberOfPairs;
-		for (int i=0; i<numberOfPairs; i++) {
-			int leftQubits = qubits*i;
-			int rightQubits = totalQubits - qubits*(i+1);
-
-			Pair pair = expectedFrequencies.getPairs().get(i);
-
-			//this.generateAll(qubits, leftQubits, pair, rightQubits, expectedPairs, totalFrequencies);
-		}
-		
 		StringBuilder sbExpected = new StringBuilder("expected = [");
-		for (int i=0; i<expectedPairs.size(); i++) {
-			Pair pair = expectedPairs.get(i);
+		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
 			int index = pair.getIndex();
 			int freq = pair.getFreq();
-			sbExpected.append("(" + index + ", " + (1.0*freq/totalFrequencies[0]) + "),");
+			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
 			if (i>0 && i%10==0)
 				sbExpected.append("\n");
 		}

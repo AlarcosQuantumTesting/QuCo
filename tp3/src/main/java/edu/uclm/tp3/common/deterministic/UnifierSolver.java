@@ -52,12 +52,21 @@ public class UnifierSolver extends Solver {
 				usedNodesList.add(node);
 			} else {
 				BinaryTree preexistingNode = usedNodesMap.get(node.hashCode());
-				if (preexistingNode==null) {
-					int nodeDepth = node.getDepth();
-					node = node.getCode(this.tree, nodeDepth, usedNodesMap);
-					if (node!=null)
-						usedNodesMap.put(node.hashCode(), node);
+				if (preexistingNode!=null && preexistingNode.getDepth() == node.getDepth()) {
+					System.out.println("Node " + node.name + " = " + preexistingNode.name);
+					BinaryTree parent = node.parent;
+					if (parent!=null) {
+						if (parent.leftChild==node)
+							parent.leftChild = preexistingNode;
+						else
+							parent.rightChild = preexistingNode;
+					}
+					continue;
 				}
+				int nodeDepth = node.getDepth();
+				node = node.getCode(this.tree, nodeDepth, usedNodesMap);
+				if (node!=null)
+					usedNodesMap.put(node.hashCode(), node);
 			}
 		}
 
