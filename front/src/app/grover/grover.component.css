@@ -364,12 +364,17 @@ td {
     cursor: pointer;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #77ac962a;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+
 tr:hover {
-    background-color: #e8f3ed;
+    /* background-color: #e8f3ed; */
+    background-color: #357a5d2a;
     transition: 0.3s;
 }
 
@@ -737,7 +742,21 @@ code {
     transition: background-color 0.3s ease, transform 0.2s ease;
     min-width: 100px;
     margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
+
+.save-new-btn {
+    background-color: #0b555a;
+    border-radius: 12px;
+    padding: 10px 15px;
+    width: 80px;
+}
+
+.save-new-btn:hover {
+    background-color: #1c747a;
+    transform: scale(1.05);
+}
   
   .btn-confirm {
     padding: 10px 20px;
@@ -979,7 +998,7 @@ ol.list-instructions {
     transition: all 0.2s ease-in-out;
   }
 
-.close {
+  .close {
     color: white;
     font-size: 28px;
     font-weight: bold;
@@ -987,10 +1006,20 @@ ol.list-instructions {
     transition: color 0.2s;
     padding-left: 80px;
     padding-right: 10px;
+    background: none;
 }
+
 .close:hover {
-    color: #ccc;
+  background: none;
+  cursor: default;
+  color: white;
 }
+
+.close-i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
 
 
 /* Close Button */
@@ -1069,6 +1098,7 @@ ol.list-instructions {
     bottom: 20px;
     right: 20px;
     background: #007b7f;
+    /* background: #128c7e; */
     color: white;
     border: none;
     border-radius: 50%;
@@ -1199,30 +1229,31 @@ ol.list-instructions {
 }
 
 .btn-createExp-edit {
-    background: none;
-    padding: 7px;
+    /* background: none;
+    padding: 7px; */
+
+    background-color: #0b555a;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0;
+    margin-bottom: 15px;
+    margin-right: 15px;
+    padding: 8px 10px;
 }
 
-.edit-create-icon:hover {
+/* .edit-create-icon:hover {
     transform: scale(1.2);
     color: rgb(180, 180, 180);
-}
+} */
 
 .btn-createExp-edit:hover {
-    background: none;
-}
-
-.close {
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding-left: 80px;
-    padding-right: 10px;
-}
-.close:hover {
-    color: #ccc;
+    /* background: none; */
+    background-color: #1a7c83;
+    transform: scale(1.05);
 }
 
 .update-btn {
@@ -1251,6 +1282,7 @@ ol.list-instructions {
     background-color: rgb(219, 67, 67);
     border-radius: 12px;
     padding: 10px 15px;
+    width: 80px;
 }
 
 .cancel-btn:hover {
@@ -1301,4 +1333,130 @@ input[disabled], textarea[disabled], select[disabled] {
     pointer-events: none; /* Bloquea los clics */
     opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
     cursor: not-allowed; /* Cambia el cursor */
+}
+
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .modal-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .btn-delete-modal {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .btn-delete-modal:hover {
+    background-color: #881520;
+    transform: scale(1.05);
+  }
+  
+  .btn-cancel-delete-modal {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-cancel-delete-modal:hover {
+    background-color: #414549;
+    transform: scale(1.05);
+  }
+
+  .modal-delete {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    border-radius: 15px;
+}
+
+/* Caja del contenido del modal */
+.modal-content-delete {
+    background-color: white;
+    border-radius: 10px;
+    width: fit-content;
+    max-width: 90vw; /* Para evitar que se desborde en pantallas pequeñas */
+    max-height: 90vh;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+}
+
+/* Encabezado del modal */
+.modal-header-delete {
+    width: 100%;
+    background-color: #a1241b;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-message-delete {
+    padding: 20px;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+}
+
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2ea3ac;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: all 0.2s;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.custom-checkbox:checked {
+    background-color: #2ea3ac;
+    border-color: #2ea3ac;
+}
+
+.custom-checkbox:checked::after {
+    content: '✔';
+    color: white;
+    font-size: 14px;
+    position: absolute;
+    left: 2px;
+    top: -2px;
 }

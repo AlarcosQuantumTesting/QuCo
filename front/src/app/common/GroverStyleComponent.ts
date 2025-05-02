@@ -70,12 +70,17 @@ export abstract class GroverStyle {
 
     constructor(protected qiskitService: QiskitService) {}
 
+    mensajeTemporal: string = '';
     saveCode() {
         this.error = undefined
         this.qiskitCode.qubits = this.qubits
         this.qiskitService.saveCode(this.qiskitCode).subscribe(
         result => {
             alert("Code saved")
+            this.mensajeTemporal = 'Code suscessfully saved';
+            setTimeout(() => {
+                this.mensajeTemporal = '';
+            }, 2000);
         },
         error => {
             this.error = error.error ? error.error.message : error

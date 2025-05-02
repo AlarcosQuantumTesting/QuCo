@@ -48,6 +48,7 @@ export class MatrixesComponent implements AfterViewInit  {
   showHelp = false;
   isDisabled = false;
   isDisabled2 = false;
+  isLoadingQiskitCode = false;
 
   cols : number = 0
   rows : number = 0
@@ -440,16 +441,6 @@ export class MatrixesComponent implements AfterViewInit  {
   getQiskitCode(matrix : any[], asFunction : boolean, rowIndex? : number) {
     let functionName
     if (asFunction) {
-      // functionName = prompt("Enter the name of the function")
-      // if (!functionName || functionName.trim().length==0) {
-      //   this.error = "You must enter a name for the function"
-      //   return
-      // }
-      // if (this.isDisabled) return;
-      // this.isDisabled = true;
-      // if (this.isDisabled2) return;
-      // this.isDisabled2 = true;
-
       this.matrixTmp = matrix;
       this.asFunctionTmp = asFunction;
       this.rowIndexTmp = rowIndex;
@@ -459,6 +450,8 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
     this.reset()
+    this.isLoadingQiskitCode = true;
+
     let info = {
       matrix : matrix,
       inputQubits : this.inputQubits,
@@ -470,8 +463,9 @@ export class MatrixesComponent implements AfterViewInit  {
     }
     if (rowIndex!=undefined)
       info.matrix = matrix[rowIndex]
-    this.qiskitService.getCode(info).subscribe(
-      result => {
+    this.qiskitService.getCode(info).subscribe({
+      next: result => {
+        this.isLoadingQiskitCode = true;
         this.qiskitCode = result.code
         this.replaceShotsToken(1000)
 
@@ -480,8 +474,15 @@ export class MatrixesComponent implements AfterViewInit  {
         if (asFunction) {
           this.mostrarModal = true;
         }
+      },
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        this.isLoadingQiskitCode = false;
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
       }
-    )
+    });
   }
 
 
@@ -508,6 +509,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.isDisabled2 = true;
 
     this.reset();
+    this.isLoadingQiskitCode = true;
 
     let info = {
       matrix: matrix,
@@ -520,11 +522,21 @@ export class MatrixesComponent implements AfterViewInit  {
     };
 
     if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
-
-    this.qiskitService.getCode(info).subscribe(result => {
+    this.mostrarModal = true;
+    this.qiskitService.getCode(info).subscribe({
+      next: result => {
       this.qiskitCode = result.code;
       this.replaceShotsToken(1000);
+      this.isLoadingQiskitCode = false;
       this.mostrarModal = true;
+      },
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        this.isLoadingQiskitCode = false;
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
+      }
     });
   }
 
@@ -726,8 +738,8 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
 
-    if (this.inputQubits < 2 || this.inputQubits > 15) {
-      this.error = 'Input qubits must be between 2 and 15';
+    if (this.inputQubits < 2 || this.inputQubits > 12) {
+      this.error = 'Input qubits must be between 2 and 12';
       this.isInvalid = true;
       return;
     }
@@ -991,6 +1003,10 @@ export class MatrixesComponent implements AfterViewInit  {
                 this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
+                this.mensajeTemporal = 'Expression updated successfully';
+                setTimeout(() => {
+                  this.mensajeTemporal = '';
+                }, 2000);
               },
               error => {
                 console.error(error);
@@ -1024,6 +1040,10 @@ export class MatrixesComponent implements AfterViewInit  {
                     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
+                    this.mensajeTemporal = 'Expression created successfully';
+                    setTimeout(() => {
+                      this.mensajeTemporal = '';
+                    }, 2000);
                 },
                 error => {
                     console.error(error);
@@ -1048,7 +1068,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.mostrarModalVerExp = false;
   }
 
-
+/*
   deleteExpression(id: string, index: number) {
     if (confirm("Are you sure you want to delete this expression?")) {
         this.service.deleteExpression(id).subscribe(
@@ -1073,6 +1093,53 @@ export class MatrixesComponent implements AfterViewInit  {
             }
         );
     }
+  }*/
+
+  showDeleteModal: boolean = false;
+  expressionToDelete: any = null;
+  deleteIndex: number = -1;
+
+  // Llamada inicial desde la tabla o botón
+  openDeleteModal(expression: any, index: number) {
+    this.expressionToDelete = expression;
+    this.deleteIndex = index;
+    this.showDeleteModal = true;
+  }
+
+  // Confirmar eliminación
+  confirmDelete() {
+    if (!this.expressionToDelete) return;
+
+    this.service.deleteExpression(this.expressionToDelete).subscribe(
+      () => {
+        if (!this.expressions) {
+          this.expressions = [];
+        }
+
+        this.expressions.splice(this.deleteIndex, 1);
+        this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+        this.searchExpressions();
+
+        this.cancelDelete(); // cerrar el modal
+
+        this.mensajeTemporal = 'Expression deleted successfully';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+      },
+      error => {
+        console.error("Error deleting expression:", error);
+        alert("Failed to delete the expression. Please try again.");
+        this.cancelDelete();
+      }
+    );
+  }
+
+  // Cancelar
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.expressionToDelete = null;
+    this.deleteIndex = -1;
   }
 
 
