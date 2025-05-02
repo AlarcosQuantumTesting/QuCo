@@ -26,6 +26,8 @@ export class TemplatesComponent implements OnInit {
   error : string = '';
   isInvalid : boolean = false;
 
+  templateToSave: CodeTemplate = new CodeTemplate("", "", "");
+
   constructor(private service : TemplatesService, public manager : ManagerService) { }
 
   ngOnInit(): void {
@@ -41,6 +43,8 @@ export class TemplatesComponent implements OnInit {
         console.error(error)
       }
     )
+
+    this.isInvalid = false;
 
     this.validateInputs();
   }
@@ -147,25 +151,39 @@ export class TemplatesComponent implements OnInit {
     this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim();
     this.codeTemplate = this.manager.selectedTemplate?.code?.trim();
   }
+  isExistingTemplate: boolean = false;
+
+  onNameChange(value: string) {
+    this.nameTemplate = value;
+    this.isExistingTemplate = this.templateExists();
+    this.isInvalid = this.nameTemplate.trim() === '';
+  }
 
   templateExists(): boolean {
     this.currentName = this.nameTemplate?.trim();
+    this.currentDescription = this.descriptionTemplate?.trim();
+    this.currentCode = this.codeTemplate?.trim();
+
     if (!this.currentName) return false;
   
     const requiredSuffix = '.template.txt';
 
-    if (this.currentName && this.currentName.toLowerCase().endsWith('.')) {
+    if (this.currentName.toLowerCase().endsWith('.template.')) {
+      this.currentName += 'txt';
+    } else if (this.currentName.toLowerCase().endsWith('.template')) {
+      this.currentName += '.txt';
+    } else if (this.currentName && this.currentName.toLowerCase().endsWith('.')) {
       this.currentName += 'template.txt';
     } else if (!this.currentName.toLowerCase().endsWith(requiredSuffix)) {
       this.currentName += requiredSuffix;
-    }
+    } 
     
 
     const index = this.manager.templates.findIndex(
       t => t.fileName.trim().toLowerCase() === this.currentName.toLowerCase()
     );
     this.validateInputs();
-  
+    
     return index !== -1;
   }
 
@@ -177,13 +195,6 @@ export class TemplatesComponent implements OnInit {
   codeInput () {
     this.currentCode = this.codeTemplate?.trim();
     this.validateInputs();
-  }
-  
-
-  updateTemplate() {
-    this.manager.selectedTemplate.fileName = this.nameTemplate.trim();
-    console.log("Descripción del template:", this.manager.selectedTemplate.description);
-    console.log("Código del template:", this.manager.selectedTemplate.code);
   }
 
   createTemplate() {
@@ -209,6 +220,7 @@ export class TemplatesComponent implements OnInit {
   }
 
   validateInputs() {
+    this.isInvalid = false;
     if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
       this.error = 'All fields are required';
       this.isInvalid = true;
@@ -226,5 +238,94 @@ export class TemplatesComponent implements OnInit {
     this.error = '';
     this.isInvalid = false;
   }
+
+  validInputs() : boolean {
+    this.isInvalid = false;
+    if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      return true;
+    }
+
+    /*if ((this.currentDescription == '' || this.currentName == '' || this.currentCode == '') && this.editingTemplate) {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      console.log("Invalido: ", this.isInvalid);
+      return;
+    }*/
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+    return false;
+  }
   
+  saveTemplate() {
+
+    this.templateToSave.fileName = this.currentName;
+    this.templateToSave.description = this.currentDescription;
+    this.templateToSave.code = this.currentCode;
+    
+    this.service.createTemplate(this.templateToSave).subscribe(
+      data => {
+        this.mensajeTemporal = 'Template created successfully!';
+        this.mostrarModalCrear = false;
+        this.mostrarInstrucciones = false;
+        this.manager.templates.push(data);
+        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
+        this.manager.selectedTemplate = data;
+      },
+      error => {
+        console.error(error);
+      }
+    );
+
+    console.log("Nombre del template:", this.templateToSave.fileName);
+    console.log("Descripción del template:", this.templateToSave.description);
+    console.log("Código del template:", this.templateToSave.code);
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+    this.currentName = '';
+    this.currentDescription = '';
+    this.currentCode = '';
+    this.creatingTemplate = false;
+    this.mensajeTemporal = '';
+    this.templateToSave = new CodeTemplate("", "", "");
+    this.cancelEdit();
+  }
+
+  updateTemplate() {
+    this.templateToSave.fileName = this.currentName;
+    this.templateToSave.description = this.currentDescription;
+    this.templateToSave.code = this.currentCode;
+    
+    this.service.updateTemplate(this.templateToSave).subscribe(
+      data => {
+        this.templateToSave = data;
+        this.mensajeTemporal = 'Template updated successfully!';
+        this.mostrarModalCrear = false;
+        this.mostrarInstrucciones = false;
+        this.manager.selectedTemplate = this.templateToSave;
+      },
+      error => {
+        console.error(error)
+      }
+    )
+
+    console.log("Nombre del template:", this.templateToSave.fileName);
+    console.log("Descripción del template:", this.templateToSave.description);
+    console.log("Código del template:", this.templateToSave.code);
+
+    this.templateToSave = new CodeTemplate("", "", "");
+    this.mensajeTemporal = '';
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+    this.currentName = '';
+    this.currentDescription = '';
+    this.currentCode = '';
+    this.cancelEdit();
+
+  }
 }

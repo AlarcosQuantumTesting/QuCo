@@ -385,6 +385,17 @@ label {
     cursor: not-allowed; /* Cambia el cursor */
 }
 
+.error-text {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.input-wrapper-modal {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Modales */
 
 .close {

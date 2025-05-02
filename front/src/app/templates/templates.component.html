@@ -93,9 +93,10 @@
               <button 
                 class="btn-confirm" 
                 title="Save or Create template"
-                [disabled]="isInvalid || nameTemplate.trim() === ''"
+                [disabled]="nameTemplate.trim() === '' || validInputs()"
+                (ngModelChange)="onNameChange(nameTemplate)"
                 *ngIf="manager.selectedTemplate"
-                (click)="templateExists() ? updateTemplate() : createTemplate()">
+                (click)="templateExists() ? updateTemplate() : saveTemplate()">
                 {{ templateExists() ? 'Update' : 'Create' }}
               </button>
             </div>
@@ -143,14 +144,20 @@
             </div>
         
             <div class="template-info-modal">
+                
                 <div class="name-description-modal">
                     <div class="info-block">
                         <label for="templateName">Name:</label>
+                        <div class="input-wrapper-modal">
                         <input id="templateName"  placeholder="template.name..."
                             type="text" 
                             [(ngModel)]="nameTemplate"
                             (input)="templateExists()"
                             (focus)="templateExists()"/>
+                        <span *ngIf="templateExists()" class="error-text">
+                            The template already exists
+                        </span>
+                        </div>
                     </div>
                     <div class="info-block">
                         <label for="templateDesc" >Description:</label>
@@ -171,8 +178,8 @@
                 </textarea>
                 <div class="create-actions">
                     <button class="save-btn"
-                        [disabled]="isInvalid || nameTemplate.trim() === '' || descriptionTemplate.trim() === '' || codeTemplate.trim() === ''"
-                        (click)="save()">Save
+                        [disabled]="isInvalid || nameTemplate.trim() === '' || descriptionTemplate.trim() === '' || codeTemplate.trim() === '' || templateExists()"
+                        (click)="saveTemplate()">Save
                     </button>
                     <button class="cancel-btn" (click)="cancelarModal()">Cancel</button>
                 </div>
