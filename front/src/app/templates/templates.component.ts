@@ -12,6 +12,21 @@ import { ManagerService } from '../manager.service';
 export class TemplatesComponent implements OnInit {
 
   creatingTemplate: boolean = false;
+  editingTemplate: boolean = false;
+  nameTemplate: string = "";
+  searchQuery: string = "";
+  mensajeTemporal: string = '';
+  currentName: string = '';
+  descriptionTemplate: string = '';
+  currentDescription: string = '';
+  codeTemplate: string = '';
+  currentCode: string = '';
+  mostrarModalCrear : boolean = false;
+  mostrarInstrucciones : boolean = false;
+  error : string = '';
+  isInvalid : boolean = false;
+
+  templateToSave: CodeTemplate = new CodeTemplate("", "", "");
 
   constructor(private service : TemplatesService, public manager : ManagerService) { }
 
@@ -21,11 +36,17 @@ export class TemplatesComponent implements OnInit {
         data.sort((a, b) => a.fileName.localeCompare(b.fileName))
         this.manager.templates = Object.assign(data)
         this.manager.selectedTemplate = this.manager.templates[0]
+        this.searchQuery = this.manager.selectedTemplate?.fileName?.trim() || "";
+        this.searchTemplate();
       },
       error => {
         console.error(error)
       }
     )
+
+    this.isInvalid = false;
+
+    this.validateInputs();
   }
 
   show(template : any) {
@@ -75,9 +96,6 @@ export class TemplatesComponent implements OnInit {
     }
   }
 
-  mensajeTemporal: string = '';
-  searchQuery: string = "";
-
   onSearchInput() {
     // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
   }
@@ -96,7 +114,7 @@ export class TemplatesComponent implements OnInit {
     const match = this.manager.templates.find(t => t.fileName.toLowerCase() === this.searchQuery.toLowerCase());
     if (match) {
       this.manager.selectedTemplate = match;
-      console.log('Template seleccionado:', match);
+      //console.log('Template seleccionado:', match);
     } 
   }
 
@@ -111,11 +129,223 @@ export class TemplatesComponent implements OnInit {
   
     if (match) {
       this.manager.selectedTemplate = match;
-      console.log('Template seleccionado:', match);
+      /*console.log('Template seleccionado:', match);
+      console.log('Nombre del template:', this.nameTemplate);*/
+      this.editingTemplate = false;
       // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
     } else {
       console.warn('No se encontró ningún template con ese nombre.');
     }
   }
   
+  editTemplate() {
+    this.editingTemplate = true;
+    this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
+    this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim() || '';
+    this.codeTemplate = this.manager.selectedTemplate?.code?.trim() || '';
+  }
+
+  cancelEdit() {
+    this.editingTemplate = false;
+    this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
+    this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim();
+    this.codeTemplate = this.manager.selectedTemplate?.code?.trim();
+  }
+  isExistingTemplate: boolean = false;
+
+  onNameChange(value: string) {
+    this.nameTemplate = value;
+    this.isExistingTemplate = this.templateExists();
+    this.isInvalid = this.nameTemplate.trim() === '';
+  }
+
+  templateExists(): boolean {
+    this.currentName = this.nameTemplate?.trim();
+    this.currentDescription = this.descriptionTemplate?.trim();
+    this.currentCode = this.codeTemplate?.trim();
+
+    if (!this.currentName) return false;
+  
+    const requiredSuffix = '.template.txt';
+
+    if (this.currentName.toLowerCase().endsWith('.template.')) {
+      this.currentName += 'txt';
+    } else if (this.currentName.toLowerCase().endsWith('.template')) {
+      this.currentName += '.txt';
+    } else if (this.currentName && this.currentName.toLowerCase().endsWith('.')) {
+      this.currentName += 'template.txt';
+    } else if (!this.currentName.toLowerCase().endsWith(requiredSuffix)) {
+      this.currentName += requiredSuffix;
+    } 
+    
+
+    const index = this.manager.templates.findIndex(
+      t => t.fileName.trim().toLowerCase() === this.currentName.toLowerCase()
+    );
+    this.validateInputs();
+    
+    return index !== -1;
+  }
+
+  descriptionInput () {
+    this.currentDescription = this.descriptionTemplate?.trim();
+    this.validateInputs();
+  }
+
+  codeInput () {
+    this.currentCode = this.codeTemplate?.trim();
+    this.validateInputs();
+  }
+
+  createTemplate() {
+    //this.manager.selectedTemplate.fileName = this.nameTemplate.trim();
+    console.log("Nombre del template:", this.currentName);
+    console.log("Descripción del template:", this.currentDescription); 
+    console.log("Código del template:", this.currentCode);
+  }
+
+  cancelarModal() {
+    this.mostrarModalCrear = false;
+  }
+
+  createModal() {
+    this.mostrarModalCrear = true;
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+  }
+
+  abrirInstucciones() {
+    this.mostrarInstrucciones = true;
+  }
+
+  validateInputs() {
+    this.isInvalid = false;
+    if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      return;
+    }
+
+    /*if ((this.currentDescription == '' || this.currentName == '' || this.currentCode == '') && this.editingTemplate) {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      console.log("Invalido: ", this.isInvalid);
+      return;
+    }*/
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+  }
+
+  validInputs() : boolean {
+    this.isInvalid = false;
+    if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      return true;
+    }
+
+    /*if ((this.currentDescription == '' || this.currentName == '' || this.currentCode == '') && this.editingTemplate) {
+      this.error = 'All fields are required';
+      this.isInvalid = true;
+      console.log("Invalido: ", this.isInvalid);
+      return;
+    }*/
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalid = false;
+    return false;
+  }
+  
+  saveTemplate() {
+
+    this.templateToSave.fileName = this.currentName;
+    this.templateToSave.description = this.currentDescription;
+    this.templateToSave.code = this.currentCode;
+
+    let forgottenTokens = this.templateToSave.getForgottenTokens()
+    if (forgottenTokens.length > 0) {
+      let option = window.confirm("The following tokens are not used in the code: " + forgottenTokens.join(", ") + ". Do you want to continue?")
+      if (!option)
+        return
+    }
+    
+    this.service.createTemplate(this.templateToSave).subscribe(
+      data => {
+        this.mensajeTemporal = 'Template created successfully!';
+        this.mostrarModalCrear = false;
+        this.mostrarInstrucciones = false;
+        this.manager.templates.push(data);
+        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
+        this.manager.selectedTemplate = data;
+      },
+      error => {
+        console.error(error);
+      }
+    );
+
+    console.log("Nombre del template:", this.templateToSave.fileName);
+    console.log("Descripción del template:", this.templateToSave.description);
+    console.log("Código del template:", this.templateToSave.code);
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+    this.currentName = '';
+    this.currentDescription = '';
+    this.currentCode = '';
+    this.creatingTemplate = false;
+    this.mensajeTemporal = '';
+    this.templateToSave = new CodeTemplate("", "", "");
+    this.cancelEdit();
+  }
+
+  updateTemplate() {
+    this.templateToSave.fileName = this.currentName;
+    this.templateToSave.description = this.currentDescription;
+    this.templateToSave.code = this.currentCode;
+
+    let forgottenTokens = this.templateToSave.getForgottenTokens()
+    if (forgottenTokens.length > 0) {
+      let option = window.confirm("The following tokens are not used in the code: " + forgottenTokens.join(", ") + ". Do you want to continue?")
+      if (!option)
+        return
+    }
+    
+    this.service.updateTemplate(this.templateToSave).subscribe(
+      data => {
+        this.templateToSave = data;
+        this.mensajeTemporal = 'Template updated successfully!';
+        this.mostrarModalCrear = false;
+        this.mostrarInstrucciones = false;
+        this.manager.selectedTemplate = this.templateToSave;
+
+
+        this.manager.templates.push(data)
+        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName))
+        this.manager.selectedTemplate = data
+        this.creatingTemplate = false
+      },
+      error => {
+        console.error(error)
+      }
+    )
+
+    console.log("Nombre del template:", this.templateToSave.fileName);
+    console.log("Descripción del template:", this.templateToSave.description);
+    console.log("Código del template:", this.templateToSave.code);
+
+    this.templateToSave = new CodeTemplate("", "", "");
+    this.mensajeTemporal = '';
+    this.nameTemplate = '';
+    this.descriptionTemplate = '';
+    this.codeTemplate = '';
+    this.currentName = '';
+    this.currentDescription = '';
+    this.currentCode = '';
+    this.cancelEdit();
+
+  }
 }

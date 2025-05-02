@@ -477,7 +477,7 @@ export class MatrixesComponent implements AfterViewInit  {
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
-        // opcional: podrías mostrar un mensaje de error al usuario
+        this.isLoadingQiskitCode = false;
       },
       complete: () => {
         this.isLoadingQiskitCode = false; // ← finaliza carga
@@ -523,11 +523,20 @@ export class MatrixesComponent implements AfterViewInit  {
 
     if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
     this.mostrarModal = true;
-    this.qiskitService.getCode(info).subscribe(result => {
+    this.qiskitService.getCode(info).subscribe({
+      next: result => {
       this.qiskitCode = result.code;
       this.replaceShotsToken(1000);
       this.isLoadingQiskitCode = false;
       this.mostrarModal = true;
+      },
+      error: err => {
+        console.error('Error generando código Qiskit', err);
+        this.isLoadingQiskitCode = false;
+      },
+      complete: () => {
+        this.isLoadingQiskitCode = false; // ← finaliza carga
+      }
     });
   }
 

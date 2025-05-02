@@ -998,7 +998,7 @@ ol.list-instructions {
     transition: all 0.2s ease-in-out;
   }
 
-.close {
+  .close {
     color: white;
     font-size: 28px;
     font-weight: bold;
@@ -1006,10 +1006,20 @@ ol.list-instructions {
     transition: color 0.2s;
     padding-left: 80px;
     padding-right: 10px;
+    background: none;
 }
+
 .close:hover {
-    color: #ccc;
+  background: none;
+  cursor: default;
+  color: white;
 }
+
+.close-i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
 
 
 /* Close Button */
@@ -1246,19 +1256,6 @@ ol.list-instructions {
     transform: scale(1.05);
 }
 
-.close {
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding-left: 80px;
-    padding-right: 10px;
-}
-.close:hover {
-    color: #ccc;
-}
-
 .update-btn {
     background-color: #149099;
     border-radius: 20%;
@@ -1432,4 +1429,34 @@ input[disabled], textarea[disabled], select[disabled] {
     font-size: 16px;
     color: #333;
     text-align: center;
+}
+
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2ea3ac;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: all 0.2s;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.custom-checkbox:checked {
+    background-color: #2ea3ac;
+    border-color: #2ea3ac;
+}
+
+.custom-checkbox:checked::after {
+    content: '✔';
+    color: white;
+    font-size: 14px;
+    position: absolute;
+    left: 2px;
+    top: -2px;
 }

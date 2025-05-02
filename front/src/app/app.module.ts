@@ -16,13 +16,16 @@ import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { EditorComponent } from './editor/editor.component';
+import { HomeComponent } from './home/home.component';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
   { path : 'elonging', component : ElongingComponent },
   { path : 'blocks', component : BlocksComponent },
-  { path : 'grover', component : GroverComponent }
-  // { path : '', redirectTo : '/', pathMatch : 'full'}
+  { path : 'grover', component : GroverComponent },
+  { path : 'home', component : HomeComponent },
+  // { path : 'quco', component : AppComponent }
+  { path : '', redirectTo : '/', pathMatch : 'full'}
 ]
 
 @NgModule({
@@ -36,7 +39,8 @@ const appRoutes : Routes = [
     CircuitEditorComponent,
     TemplatesComponent,
     QubitsConfigurationComponent,
-    EditorComponent
+    EditorComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

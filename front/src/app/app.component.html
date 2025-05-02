@@ -20,31 +20,31 @@
         </li> -->
         <li>
           <a routerLink="matrixes" routerLinkActive="active">
-            <i class="fas fa-table"></i>
+            <i class="fas fa-table" title="Matrices"></i>
             <span *ngIf="menuAbierto">Matrices</span>
           </a>
         </li>
         <li>
           <a routerLink="grover" routerLinkActive="active">
-            <i class="fas fa-search"></i>
+            <i class="fas fa-search" title="Grover"></i>
             <span *ngIf="menuAbierto">Grover</span>
           </a>
         </li>
         <li>
           <a routerLink="elonging" routerLinkActive="active">
-            <i class="fas fa-dna"></i>
+            <i class="fas fa-dna" title="Genetic algorithm"></i>
             <span *ngIf="menuAbierto">Genetic algorithm</span>
           </a>
         </li>
         <li>
           <a routerLink="blocks" routerLinkActive="active">
-            <i class="fas fa-th-large"></i>
+            <i class="fas fa-th-large" title="Blocks genetic algorithm"></i>
             <span *ngIf="menuAbierto">Blocks genetic algorithm</span>
           </a>
         </li>
         <li>
           <a routerLink="grenoble" routerLinkActive="active">
-            <i class="fas fa-project-diagram"></i>
+            <i class="fas fa-project-diagram" title="Grover and Rudolph + Grenoble"></i>
             <span *ngIf="menuAbierto">Grover and Rudolph + Grenoble</span>
           </a>
         </li>
@@ -56,19 +56,19 @@
         </li>
         <li>
           <a routerLink="editor" routerLinkActive="active">
-            <i class="fas fa-microchip"></i>
+            <i class="fas fa-microchip" title="Circuits editor"></i>
             <span *ngIf="menuAbierto">Circuits editor</span>
           </a>
         </li>
         <li>
           <a routerLink="qubits-configuration" routerLinkActive="active">
-            <i class="fas fa-cubes"></i>
+            <i class="fas fa-cubes" title="Qubits configuration"></i>
             <span *ngIf="menuAbierto">Qubits configurations</span>
           </a>
         </li>
         <li>
           <a routerLink="templates" routerLinkActive="active">
-            <i class="fas fa-file-code"></i>
+            <i class="fas fa-file-code" title="Code templates"></i>
             <span *ngIf="menuAbierto">Code templates</span>
           </a>
         </li>
@@ -83,51 +83,9 @@
         </h1>
       </div>
     
-      <div *ngIf="mostrarInicio" class="container">
-        <div class="titulo">
-          <h1 class="main-title" class="fade-in">Welcome to Quantum Code Generation</h1>
-          <p class="fade-in">
-            This web allows you to design, simulate, and execute quantum circuits efficiently. 
-            <!-- Use powerful algorithms such as Grover's search and genetic optimization to solve complex problems. -->
-          </p>
-        </div>
-        
-        <div class="info-container">
-          <!-- Quantum Code Introduction -->
-          <div class="intro-section container fade-in">
-            <h2 class="intro-title">About quantum code</h2>
-            <div class="content-container">
-              <p class="intro-text">
-                Quantum code leverages the power of quantum computing to solve complex problems faster than traditional computers. 
-                By harnessing qubits and quantum gates, it enables advanced algorithms like Grover's search and quantum optimization. 
-                This makes it incredibly useful for tasks such as cryptography, data analysis, and simulation of quantum systems. 
-                As quantum technology continues to evolve, learning and experimenting with quantum code opens the door to groundbreaking possibilities in computing and problem-solving.
-              </p>
-              <div class="image-container">
-                <img src="assets/img/posicionesQubit.png" alt="qubitsImg" class="posicionesQubit">
-              </div>
-            </div>
-          </div>
-          <div class="features-section fade-in">
-            <h2 class="intro-title">Available features:</h2>
-            <p class="features-text">
-              In this web, you can access the following features to explore quantum computing and quantum code generation:
-            </p>
-            <ul class="features-list">
-              <li routerLink="matrixes" routerLinkActive="active" class="option fade-in"><strong>Matrices:</strong> work with single matrices to perform quantum operations.</li>
-              <li routerLink="grover" routerLinkActive="active" class="option fade-in"><strong>Grover:</strong> implement Grover’s algorithm to work with multiple qubits.</li>
-              <li routerLink="elonging" routerLinkActive="active" class="option fade-in"><strong>Genetic algorithm:</strong> use evolutionary techniques to optimize solutions.</li>
-              <li routerLink="blocks" routerLinkActive="active" class="option fade-in"><strong>Blocks genetic algorithm:</strong> enhance solutions using a block-based genetic algorithm approach.</li>
-              <li routerLink="grenoble" routerLinkActive="active" class="option fade-in"><strong>Grover and Rudolph + Grenoble:</strong> combine Grover's and Grenoble's algorithms for improved problem-solving.</li>
-              <li routerLink="editor" routerLinkActive="active" class="option fade-in"><strong>Circuits editor:</strong> create and customize quantum circuits interactively.</li>
-              <li routerLink="qubits-configuration" routerLinkActive="active" class="option fade-in"><strong>Qubits configurations:</strong> define, customize, and visualize different qubit state configurations.</li>
-              <li routerLink="templates" routerLinkActive="active" class="option fade-in"><strong>Code templates:</strong> use templates to generate your quantum code and create new ones.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <app-home *ngIf="mostrarInicio"></app-home>
     
-      <router-outlet (activate)="onActivate()"></router-outlet>
+      <router-outlet (activate)="onActivate()" *ngIf="!mostrarInicio"></router-outlet>
     </div>
     
   </div>

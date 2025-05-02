@@ -8,6 +8,7 @@ import { DeterministicComponent } from './deterministic/deterministic.component'
 import { CircuitEditorComponent } from './circuit-editor/circuit-editor.component';
 import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
+import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
   // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
@@ -19,6 +20,9 @@ const routes: Routes = [
   { path: "editor", component: CircuitEditorComponent },
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
+  { path: "home", component: HomeComponent },
+  // { path: "", redirectTo: "/quco", pathMatch: "full" }
+  { path: "", redirectTo: "/home", pathMatch: "full" }
   // { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
 ];
 

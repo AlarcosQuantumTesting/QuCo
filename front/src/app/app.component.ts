@@ -15,7 +15,8 @@ export class AppComponent implements AfterViewInit {
   constructor(private router: Router, private el: ElementRef) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.mostrarInicio = this.router.url === '/';
+        // this.mostrarInicio = this.router.url === '/quco';
+        this.mostrarInicio = this.router.url === '/home';
       }
     });
   }
@@ -44,6 +45,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   goToHome() {
+    // window.location.href = '/quco';
     window.location.href = '/';
   }
 }

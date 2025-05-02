@@ -427,7 +427,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           this.error = "Select some output";
           return;
         }
-    
+        console.log("inParallel", this.inParallel);
         this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe({
           next: result => {
             this.qiskitCode.lines = result.code;
@@ -439,12 +439,24 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
           // },
           error: err => {
             console.error('Error generando código Qiskit', err);
-            // opcional: podrías mostrar un mensaje de error al usuario
+            this.isLoadingQiskitCode = false;
           },
           complete: () => {
             this.isLoadingQiskitCode = false; // ← finaliza carga
           }
         });
+
+        /*this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe(
+          result => {
+            this.qiskitCode.lines = result.code;
+            document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+            this.mostrarModal = true;
+          },
+          error => {
+            this.isLoadingQiskitCode = false
+            this.error = error.error ? error.error.message : error;
+          }
+        )*/
       
   
       
@@ -845,17 +857,28 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
         console.log("Qiskit code generated successfully");
         this.isLoadingQiskitCode = false;
       },
-      // error => {
-      //   this.error = error.error ? error.error.message : error;
-      // }
+     // error => {
+     //   this.error = error.error ? error.error.message : error;
+     // }
       error: err => {
+        this.isLoadingQiskitCode = false;
         console.error('Error generando código Qiskit', err);
-        // opcional: podrías mostrar un mensaje de error al usuario
       },
       complete: () => {
         this.isLoadingQiskitCode = false; // ← finaliza carga
       }
-    });
+   });
+
+    /*this.groverService.getCode(info, this.useMCX, this.inParallel).subscribe(
+      result => {
+        this.qiskitCode.lines = result.code;
+        document.getElementById("wholeCode")!.scrollIntoView({ behavior: 'smooth' });
+        this.mostrarModal = true;
+      },
+      error => {
+        this.error = error.error ? error.error.message : error;
+      }
+    )*/
   }
 
   confirmarNombreFuncion() {
