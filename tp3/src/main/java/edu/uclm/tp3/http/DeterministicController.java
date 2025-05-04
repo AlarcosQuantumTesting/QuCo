@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.services.DeterministicService;
+import edu.uclm.tp3.common.services.GroverService;
 
 @RestController
 @RequestMapping("deterministic")
@@ -32,30 +33,44 @@ public class DeterministicController {
 	
 	@Autowired
 	private DeterministicService service;
+	@Autowired
+	private GroverService groverService;
 	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
 		return this.service.getTemplates();
 	}
-		
-	@PostMapping(path = "/calculate", produces = MediaType.APPLICATION_JSON_VALUE) @ResponseBody
-	public ResponseEntity<StreamingResponseBody> calculate(HttpSession session, @RequestBody Map<String, Object> info) {
+
+	@PostMapping(path = "/newCalculate", produces = MediaType.APPLICATION_JSON_VALUE) @ResponseBody
+	public ResponseEntity<StreamingResponseBody> newCalculate(HttpSession session, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
-		
-		double physicalAngle = jso.getDouble("physicalAngle");
-
-		String functionPrefix = jso.optString("functionPrefix");
-
-		boolean originalGR = jso.getBoolean("originalGR");
-		
 		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
+		double physicalAngle = jso.getDouble("physicalAngle");
+		boolean originalGR = jso.getBoolean("originalGR");
+		boolean inParallel = jso.getBoolean("inParallel");
+		boolean splitCircuits = jso.getBoolean("splitCircuits");
+		String functionPrefix = jso.optString("functionPrefix");
+		boolean asGrover = jso.optBoolean("asGrover", false);
+		
 		expectedFrequencies.sort();
 		try {
-			Map<String, Object> result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			Map<String, Object> result = null;
+			if (asGrover) {
+				if (inParallel)
+					result = this.groverService.calculateInParallel(qubits, expectedFrequencies);
+				else
+					result = this.groverService.calculate(qubits, expectedFrequencies);			
+			} else {
+				if (inParallel)
+					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+				else if (splitCircuits)
+					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+				else
+					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+			}
 			return this.buildResponse(result);
-
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
@@ -72,50 +87,6 @@ public class DeterministicController {
 			.ok()
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(body);
-	}
-
-	@PostMapping("/calculateInParallel") @ResponseBody
-	public ResponseEntity<StreamingResponseBody> calculateInParallel(HttpSession session, @RequestBody Map<String, Object> info) {
-		JSONObject jso = new JSONObject(info);
-		
-		int qubits = jso.getInt("qubits");
-		
-		double physicalAngle = jso.getDouble("physicalAngle");
-
-		String functionPrefix = jso.optString("functionPrefix");
-
-		boolean originalGR = jso.getBoolean("originalGR");
-		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
-		expectedFrequencies.sort();
-		
-		try {
-			Map<String, Object> result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			return this.buildResponse(result);
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@PostMapping("/calculateSplitting") @ResponseBody
-	public ResponseEntity<StreamingResponseBody> calculateParallelizing(HttpSession session, @RequestBody Map<String, Object> info) {
-		JSONObject jso = new JSONObject(info);
-		
-		int qubits = jso.getInt("qubits");
-		
-		double physicalAngle = jso.getDouble("physicalAngle");
-
-		String functionPrefix = jso.optString("functionPrefix");
-
-		boolean originalGR = jso.getBoolean("originalGR");
-		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
-		expectedFrequencies.sort();
-		
-		try {
-			Map<String, Object> result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			return this.buildResponse(result);
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		}
 	}
 }
 

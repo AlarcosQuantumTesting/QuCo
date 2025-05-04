@@ -8,6 +8,7 @@ import { CodeTemplate } from '../templates/CodeTemplate';
 import { QiskitCode } from '../grover/QiskitCode';
 import { QiskitService } from '../qiskit.service';
 import { FreqTable } from './FreqTable';
+import { GroverService } from '../grover.service';
 
 Chart.register(...registerables)
 
@@ -191,10 +192,10 @@ export class DeterministicComponent extends GroverStyle {
           if (key=="#INITIALIZE#") {
             let tag = "TEMPLATE = '" + this.manager.selectedTemplate.fileName + "'\n"
             tag = tag + "ORIGINAL_QUBITS = " + this.qubits + "\n"
-            if (this.inParallel) 
-              tag = tag + "PARALLEL = True\n"
-            else
-              tag = tag + "PARALLEL = False\n"
+            //if (this.inParallel) 
+            //  tag = tag + "PARALLEL = True\n"
+            //else
+            //  tag = tag + "PARALLEL = False\n"
             if (this.splitCircuits)
               tag = tag + "SPLIT = True\n"
             else
@@ -254,10 +255,13 @@ export class DeterministicComponent extends GroverStyle {
     this.buildCode()
   }
 
-  getCircuit() {
+  getCircuit(asGrover? : boolean) {
     this.running = true;
     this.state   = "Calculating";
     this.error   = undefined;
+
+    if (!asGrover) 
+      asGrover = false
   
     this.service.calculate(
       this.qubits,
@@ -266,6 +270,7 @@ export class DeterministicComponent extends GroverStyle {
       this.originalGR,
       this.inParallel,
       this.splitCircuits,
+      asGrover,
       this.prefix
     ).subscribe(
       blob => {
@@ -329,7 +334,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   private shouldDisplay(node : any) : boolean {
-    return node && (node.leftProbability>0 || node.rightProbability>0)
+    return true // node && (node.leftProbability>0 || node.rightProbability>0)
   }
 
   generateSvgFromBottom(
