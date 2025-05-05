@@ -60,8 +60,10 @@ public class DeterministicController {
 			if (asGrover) {
 				if (inParallel)
 					result = this.groverService.calculateInParallel(qubits, expectedFrequencies);
+				else if (splitCircuits)
+					result = this.groverService.calculateSplitting(qubits, expectedFrequencies);
 				else
-					result = this.groverService.calculate(qubits, expectedFrequencies);			
+					result = this.groverService.calculate(qubits, expectedFrequencies);
 			} else {
 				if (inParallel)
 					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
