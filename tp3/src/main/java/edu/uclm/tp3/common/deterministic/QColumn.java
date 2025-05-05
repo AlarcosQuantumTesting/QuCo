@@ -35,4 +35,12 @@ public class QColumn {
     public void setGate(int i, String gateId) {
        this.gateIds.set(i, gateId);
     }
+
+    public int size() {
+        return this.gateIds.size();
+    }
+    
+    public String get(int index) {
+        return this.gateIds.get(index).toString();
+    }
 }

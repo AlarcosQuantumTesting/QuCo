@@ -1,19 +1,88 @@
 package edu.uclm.tp3.qiskit;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import edu.uclm.tp3.common.deterministic.QCircuit;
+import edu.uclm.tp3.common.deterministic.QColumn;
+import edu.uclm.tp3.common.deterministic.QGroverDifussor;
+import edu.uclm.tp3.common.deterministic.QGroverOracle;
 import edu.uclm.tp3.common.model.CodeTemplate;
 
 @Service
 public class NewGroverCoder {
 
+    public String getCode(QGroverDifussor difussor) {
+        StringBuilder code = new StringBuilder();
+		List<QColumn> columns = difussor.getColumns();
+		for (QColumn column : columns)
+			code.append(this.getCode(column));
+		return code.toString();
+    }
+
+	public String getCode(QGroverOracle oracle) {
+		QColumn encoding0 = oracle.getEncoding0();
+		QColumn h0 = oracle.getH0();
+		QColumn mcx = oracle.getMcx();
+		QColumn h1 = oracle.getH1();
+		QColumn encoding1 = oracle.getEncoding1();
+
+		StringBuilder code = this.getCode(encoding0);
+		code.append(this.getCode(h0));
+		code.append(this.getCode(mcx));
+		code.append(this.getCode(h1));
+		code.append(this.getCode(encoding1));
+		return code.toString();
+	}
+
+    public String getCode(QCircuit circuit, int qubits) {
+        StringBuilder sbCalculus = new StringBuilder();
+		List<QColumn> columns = circuit.getColumns();
+
+		for (int i=0; i<columns.size(); i++) {
+			QColumn column = columns.get(i);
+			sbCalculus.append(this.getCode(column));
+		}
+		return sbCalculus.toString();
+    }
+
+	private StringBuilder getCode(QColumn column) {
+		StringBuilder sb = new StringBuilder();
+		List<Object> gateIds = column.getGates();
+		for (int i=0; i<gateIds.size(); i++) {
+			Object gateName = gateIds.get(i);
+			if (gateName.equals("H"))
+				sb.append("\tU.h(" + i + ")\n");
+			else if (gateName.equals("X"))
+				sb.append("\tU.x(" + i + ")\n");
+			else if (gateName.equals("%E2%80%A2") || gateName.equals("•")) {
+				sb.append(getControlledGate(i, column));
+				break;
+			} else if (gateName.equals("…")) {
+				sb.append("\tU.barrier()\n");
+				break;
+			}
+		}
+		return sb;
+	}
+
+	private Object getControlledGate(int start, QColumn column) {
+		StringBuilder sb = new StringBuilder();
+		char last = column.get(column.size()-1).toString().charAt(0);
+		if (last=='z' || last=='Z')
+			sb.append("\tU.mcp(pi, [");
+		else
+			sb.append("\tU.mcx([");
+		for (int i=start; i<column.size()-2; i++)
+			sb.append(i + ", ");
+		sb.append((column.size()-2) + "], " + (column.size()-1) + ")\n");
+		return sb;
+	}
+
 	@SuppressWarnings("unchecked")
-	public String[] getCode(Map<String, Object> quirk, CodeTemplate template, String functionName) throws IOException {
+	public String[] getCode(Map<String, Object> quirk, CodeTemplate template, String functionName) {
 		StringBuilder sbCalculus = new StringBuilder();
 		List<List<Object>> matrixes = (List<List<Object>>) quirk.get("cols");
 
@@ -61,7 +130,7 @@ public class NewGroverCoder {
 		return function.toString();
 	}
 
-	private final String prepareCodeAsAProgram(int qubits, StringBuilder sbCalculus, CodeTemplate template) throws IOException {
+	private final String prepareCodeAsAProgram(int qubits, StringBuilder sbCalculus, CodeTemplate template) {
 		String initialize = "#Input qubits initialization:\n";
 		for (int i=0; i<qubits; i++) 
 			initialize = initialize + "circuit.initialize(ZERO, " + i + ")\n";

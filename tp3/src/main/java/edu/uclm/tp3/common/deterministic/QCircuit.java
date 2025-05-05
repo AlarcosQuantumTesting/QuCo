@@ -104,4 +104,16 @@ public class QCircuit extends QGate {
     public List<QColumn> getColumns() {
         return columns;
     }
+
+    public void add(QCircuit circuit, int start) {
+        for (int i=0; i<circuit.getColumns().size(); i++) {
+            QColumn originalColumn = circuit.getColumns().get(i);
+            QColumn newColumn = new QColumn();
+            for (int j=0; j<start; j++)
+                newColumn.addGate("1");
+            for (int j=0; j<originalColumn.size(); j++)
+                newColumn.addGate(originalColumn.get(j));
+            this.addColumn(newColumn);
+        }
+    }
 }
