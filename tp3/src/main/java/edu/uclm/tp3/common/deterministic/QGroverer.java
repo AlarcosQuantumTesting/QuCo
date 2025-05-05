@@ -5,6 +5,28 @@ import java.util.List;
 
 public class QGroverer {
 
+    public static QCircuit buildGrover(FreqTable expectedFrequencies, int qubits, List<Double> expected) {
+        List<Pair> pairs = expectedFrequencies.getPairs();
+        List<List<Integer>> sRows = new ArrayList<>();
+        for (Pair pair : pairs) {
+            List<Integer> row = new ArrayList<>();
+            int index = pair.getIndex();
+            String binary = Integer.toBinaryString(index);
+            while (binary.length() < qubits) {
+                binary = "0" + binary;
+            }
+            for (int i = 0; i < binary.length(); i++) {
+                if (binary.charAt(i) == '1') {
+                    row.add(1);
+                } else {
+                    row.add(0);
+                }
+            }
+            sRows.add(row);
+        }
+        return buildGrover(sRows, false, false, expected);
+    }
+
     public static QCircuit buildGrover(List<List<Integer>> sRows, Boolean useMCX, boolean inParallel, List<Double> expected) {
         int qubits = sRows.get(0).size();
 
@@ -129,4 +151,5 @@ public class QGroverer {
         int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(N / M));
         return nOptimal;
     }
+
 }

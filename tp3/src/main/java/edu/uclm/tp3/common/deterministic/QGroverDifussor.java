@@ -35,6 +35,18 @@ public class QGroverDifussor {
         oneH1.setGate(qubits-1, "H");
     }
 
+    public QCircuit toCircuit() {
+        QCircuit result = new QCircuit();
+        result.addColumn(h0);
+        result.addColumn(x0);
+        result.addColumn(oneH0);
+        result.addColumn(mcx);
+        result.addColumn(oneH1);
+        result.addColumn(x1);
+        result.addColumn(h1);
+        return result;
+    }
+
     public List<QColumn> getColumns() {
         List<QColumn> columns = new ArrayList<>();
         columns.add(this.h0);
