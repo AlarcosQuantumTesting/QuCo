@@ -24,31 +24,38 @@ public class GroverService {
     @Autowired
     private NewGroverCoder coder;
 
-    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies) {
         int shots = 1000;
 
         int numberOfPairs = expectedFrequencies.getPairs().size();
-        List<QCircuit> partialCircuits = new ArrayList<>();
-        for (int i=0; i<numberOfPairs; i++) {
-            //QCircuit circuit = this.buildGrover(expectedFrequencies, qubits);
-            //partialCircuits.add(circuit);
-        }
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
 
-        QCircuit generalCircuit = this.groupCircuits(partialCircuits, qubits);
-        String code = this.coder.getCode(generalCircuit, qubits);
-
-        Map<String, Object> result = new HashMap<>();
-		result.put("QUIRK", generalCircuit.toJson().toMap());
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
+        Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
+        List<Map<String, Object>> partialCircuits = GroverSplitter.split(partialCircuit, qubits, numberOfPairs, optimal);
+		result.put("QUIRK", partialCircuits);
         result.put("#QUBITS#", qubits*numberOfPairs);
 		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
 		result.put("#SHOTS#", shots);
-        result.put("#INITIALIZE#", code);
-		result.put("#HADAMARDS#", "");
-		result.put("#CALCULUS#", "");
+
+        StringBuilder sbCalculus = new StringBuilder();
+        int startQubit = 0;
+        StringBuilder circuitsDeclaration = new StringBuilder();
+        for (int i=0; i<numberOfPairs; i++) {
+            for (int j=0; j<optimal; j++) {
+                sbCalculus.append("circuits[" + i + "].append(oracle_" + i + "(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+                sbCalculus.append("circuits[" + i + "].append(difussor(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+            }
+            circuitsDeclaration.append("QuantumCircuit(qubits, qubits), ");
+            startQubit = startQubit + qubits;
+        }
+		result.put("#CALCULUS#", sbCalculus.toString());
+        result.put("#CIRCUITS_DECLARATION#", circuitsDeclaration);	
 
         StringBuilder sbExpected = new StringBuilder("expected = [");
         double expectedFreq = 1.0/expectedFrequencies.getPairs().size();
-		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+		for (int i=0; i<numberOfPairs; i++) {
 			Pair pair = expectedFrequencies.getPairs().get(i);
 			int index = pair.getIndex();
 			sbExpected.append("(" + index + ", " + expectedFreq + "),");
@@ -58,6 +65,88 @@ public class GroverService {
 		sbExpected.append("]");
 		result.put("#EXPECTED#", sbExpected.toString());
         return result;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies) {
+        int shots = 1000;
+
+        int numberOfPairs = expectedFrequencies.getPairs().size();
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
+
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
+        Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
+        partialCircuit = this.parallelize(partialCircuit, qubits, numberOfPairs, optimal);
+        List<Map<String, Object>> partialCircuits = new ArrayList<>();
+        partialCircuits.add(partialCircuit);
+		result.put("QUIRK", partialCircuits);
+        result.put("#QUBITS#", qubits*numberOfPairs);
+		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
+		result.put("#SHOTS#", shots);
+
+        StringBuilder sbCalculus = new StringBuilder();
+        int startQubit = 0;
+        for (int i=0; i<numberOfPairs; i++) {
+            for (int j=0; j<optimal; j++) {
+                sbCalculus.append("circuits[0].append(oracle_" + i + "(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+                sbCalculus.append("circuits[0].append(difussor(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+            }
+            startQubit = startQubit + qubits;
+        }
+		result.put("#CALCULUS#", sbCalculus.toString());
+
+        StringBuilder sbExpected = new StringBuilder("expected = [");
+        double expectedFreq = 1.0/expectedFrequencies.getPairs().size();
+		for (int i=0; i<numberOfPairs; i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			sbExpected.append("(" + index + ", " + expectedFreq + "),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
+        return result;
+    }
+
+    private Map<String, Object> parallelize(Map<String, Object> partialCircuit, int qubits, int numberOfPairs, int optimal) {
+        JSONObject jsoCircuit = new JSONObject(partialCircuit);
+        JSONArray jsaCols = new JSONArray();        
+        JSONArray jsaColH = new JSONArray();
+
+        int targetQubits = qubits * numberOfPairs;
+        for (int i=0; i<targetQubits; i++)
+            jsaColH.put("H");
+        jsaCols.put(jsaColH);
+
+        JSONArray jsaGates = jsoCircuit.getJSONArray("gates");
+        JSONArray jsaOracles = new JSONArray();
+        for (int i=0; i<jsaGates.length(); i++) {
+            String gateId = jsaGates.getJSONObject(i).getString("id");
+            if (gateId.startsWith("~oracle"))
+                jsaOracles.put(gateId);
+        }
+
+        for (int i=0; i<optimal; i++) {
+            JSONArray jsaCol = new JSONArray();
+            JSONArray jsaDifussor = new JSONArray();
+            for (int j=0; j<jsaOracles.length(); j++) {
+                String oracleId = jsaOracles.getString(j);
+                this.put(jsaCol, oracleId, qubits*j);
+                this.put(jsaDifussor, "~difussor", qubits*j);
+            }
+            jsaCols.put(jsaCol);
+            jsaCols.put(jsaDifussor);
+        }
+        jsoCircuit.put("cols", jsaCols);
+        return jsoCircuit.toMap();
+    }
+
+    private void put(JSONArray jsaCol, String oracleId, int startQubit) {
+        for (int i=1; i<startQubit; i++)
+            jsaCol.put(1);
+        jsaCol.put(oracleId);
     }
 
     @SuppressWarnings("unchecked")
@@ -71,13 +160,15 @@ public class GroverService {
         QCircuit quirkCircuit = new QCircuit();
         StringBuilder code = new StringBuilder();
         for (int i=0; i<groverOracles.size(); i++) {
-            code.append("def oracle_" + i + "() :\t # Looks for " + expectedFrequencies.getPairs().get(i).getIndex() +"\n");
+            String oracleName = "oracle_" + i;
+
+            code.append("def " + oracleName + "() :\t # Looks for " + expectedFrequencies.getPairs().get(i).getIndex() +"\n");
             code.append("\tU = QuantumCircuit(" + qubits + ")\n");
             QGroverOracle oracle = groverOracles.get(i);
             code.append(this.coder.getCode(oracle));
             code.append("\treturn U\n");
             QCircuit oracleCircuit = oracle.toCircuit();
-            oracleCircuit.setName("oracle_" + i);
+            oracleCircuit.setName(oracleName);
             quirkCircuit.addGate(oracleCircuit);
         }
 
@@ -85,7 +176,7 @@ public class GroverService {
         difussorGate.setName("difussor");
         quirkCircuit.addGate(difussorGate);
 
-        int optimal = (int) Math.round(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
 
         JSONObject jsoCircuit = this.prepareCircuit(quirkCircuit, qubits, groverOracles.size(), optimal);
 
@@ -96,9 +187,8 @@ public class GroverService {
 
         StringBuilder sbCalculus = new StringBuilder();
         for (int i=0; i<optimal; i++) {
-            for (int j=0; j<groverOracles.size(); j++) {
+            for (int j=0; j<groverOracles.size(); j++)
                 sbCalculus.append("circuits[0].append(oracle_" + j + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
-            }
             sbCalculus.append("circuits[0].append(difussor(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
         }
 
@@ -128,7 +218,7 @@ public class GroverService {
         return result;
     }
 
-	private JSONObject prepareCircuit(QCircuit quirkCircuit, int qubits, int oracles, int optimal) {
+    private JSONObject prepareCircuit(QCircuit quirkCircuit, int qubits, int oracles, int optimal) {
         JSONObject jsoCircuit = quirkCircuit.toJson();
         jsoCircuit.remove("circuit");
         JSONArray jsaCols = new JSONArray();
@@ -172,8 +262,6 @@ public class GroverService {
             }
             sRows.add(row);
         }
-        int optimal = this.getOptimal(sRows, qubits);
-        System.out.println(optimal);
         return buildGrover(sRows, false);
     }
 
@@ -190,18 +278,6 @@ public class GroverService {
 
         Object[] result = { groverOracles, difussor };
         return result;
-    }
-
-    private int getOptimal(List<List<Integer>> sRows, int qubits) {
-        double N = Math.pow(2, qubits);
-        double M = sRows.size();
-        if (M >= N / 2) {
-            for (int i = 0; i < M; i++)
-                sRows.get(i).add(0);
-            qubits++;
-        }
-        int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(N / M));
-        return nOptimal;
     }
 
     private QCircuit groupCircuits(List<QCircuit> generalCircuits, int qubits) {
