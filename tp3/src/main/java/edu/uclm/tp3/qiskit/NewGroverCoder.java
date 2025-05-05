@@ -7,10 +7,35 @@ import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QColumn;
+import edu.uclm.tp3.common.deterministic.QGroverDifussor;
+import edu.uclm.tp3.common.deterministic.QGroverOracle;
 import edu.uclm.tp3.common.model.CodeTemplate;
 
 @Service
 public class NewGroverCoder {
+
+    public String getCode(QGroverDifussor difussor) {
+        StringBuilder code = new StringBuilder();
+		List<QColumn> columns = difussor.getColumns();
+		for (QColumn column : columns)
+			code.append(this.getCode(column));
+		return code.toString();
+    }
+
+	public String getCode(QGroverOracle oracle) {
+		QColumn encoding0 = oracle.getEncoding0();
+		QColumn h0 = oracle.getH0();
+		QColumn mcx = oracle.getMcx();
+		QColumn h1 = oracle.getH1();
+		QColumn encoding1 = oracle.getEncoding1();
+
+		StringBuilder code = this.getCode(encoding0);
+		code.append(this.getCode(h0));
+		code.append(this.getCode(mcx));
+		code.append(this.getCode(h1));
+		code.append(this.getCode(encoding1));
+		return code.toString();
+	}
 
     public String getCode(QCircuit circuit, int qubits) {
         StringBuilder sbCalculus = new StringBuilder();
@@ -29,14 +54,14 @@ public class NewGroverCoder {
 		for (int i=0; i<gateIds.size(); i++) {
 			Object gateName = gateIds.get(i);
 			if (gateName.equals("H"))
-				sb.append("circuit.h(" + i + ")\n");
+				sb.append("\tU.h(" + i + ")\n");
 			else if (gateName.equals("X"))
-				sb.append("circuit.x(" + i + ")\n");
+				sb.append("\tU.x(" + i + ")\n");
 			else if (gateName.equals("%E2%80%A2") || gateName.equals("•")) {
 				sb.append(getControlledGate(i, column));
 				break;
 			} else if (gateName.equals("…")) {
-				sb.append("circuit.barrier()\n");
+				sb.append("\tU.barrier()\n");
 				break;
 			}
 		}
@@ -47,9 +72,9 @@ public class NewGroverCoder {
 		StringBuilder sb = new StringBuilder();
 		char last = column.get(column.size()-1).toString().charAt(0);
 		if (last=='z' || last=='Z')
-			sb.append("circuit.mcp(pi, [");
+			sb.append("\tU.mcp(pi, [");
 		else
-			sb.append("circuit.mcx([");
+			sb.append("\tU.mcx([");
 		for (int i=start; i<column.size()-2; i++)
 			sb.append(i + ", ");
 		sb.append((column.size()-2) + "], " + (column.size()-1) + ")\n");
