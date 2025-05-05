@@ -34,8 +34,16 @@ public class TemplatesController {
 		return this.service.createTemplate(template);
 	}
 	
-	@PostMapping("/updateTemplate") 
+	/*@PostMapping("/updateTemplate") 
 	public CodeTemplate updateTemplate(@RequestBody CodeTemplate template) {
 		return null;
+	}*/
+
+	@PostMapping("/updateTemplate")
+	public CodeTemplate updateTemplate(@RequestBody CodeTemplate template) {
+		return this.service.updateTemplate(template);
 	}
+
+
+	
 }
