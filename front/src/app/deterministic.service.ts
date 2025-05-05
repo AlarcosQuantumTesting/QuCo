@@ -39,18 +39,20 @@ export class DeterministicService {
       originalGR: boolean,
       inParallel: boolean,
       splitCircuits: boolean,
-      functionPrefix?: string
+      asGrover : boolean,
+      functionPrefix?: string,
     ): Observable<Blob> {
       const info = {
         qubits,
         expectedFrequencies,
-        physicalAngle,
+        physicalAngle,        
+        originalGR,
+        inParallel,
+        splitCircuits,
         functionPrefix,
-        originalGR
+        asGrover,
       };
-      let url = environment.beUrl + this.controller + '/calculate';
-      if (inParallel)   url += 'InParallel';
-      if (splitCircuits) url += 'Splitting';
+      let url = environment.beUrl + this.controller + '/newCalculate';
     
       return this.client.post(
         url,

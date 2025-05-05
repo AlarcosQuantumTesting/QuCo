@@ -1,6 +1,5 @@
 package edu.uclm.tp3.common.deterministic;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,7 @@ public class UnifierSolver extends Solver {
 		this.originalGR = originalGR;
 	}
 
-	public Map<String, Object> solve(int shots) throws IOException {
+	public Map<String, Object> solve(int shots) {
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
 		List<String> nodeNames = nodes.keySet().stream()
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
@@ -53,7 +52,6 @@ public class UnifierSolver extends Solver {
 			} else {
 				BinaryTree preexistingNode = usedNodesMap.get(node.hashCode());
 				if (preexistingNode!=null && preexistingNode.getDepth() == node.getDepth()) {
-					System.out.println("Node " + node.name + " = " + preexistingNode.name);
 					BinaryTree parent = node.parent;
 					if (parent!=null) {
 						if (parent.leftChild==node)

@@ -261,11 +261,13 @@
           <br>
           Functions' prefix: <input type="text" [(ngModel)]="prefix">
           &nbsp;
-          <input type="checkbox" [(ngModel)]="inParallel" (change)="onParallelCircuitsChange()">Parallel circuit
+          <input type="checkbox" [(ngModel)]="inParallel">Parallel circuit
           &nbsp;
-          <input type="checkbox" [(ngModel)]="splitCircuits" (change)="onSplitCircuitsChange()">Split in several circuits
+          <input type="checkbox" [(ngModel)]="splitCircuits">Split in several circuits
           &nbsp;
           <button (click)="getCircuit()">Get whole Qiskit code</button>
+          &nbsp;
+          <button (click)="getCircuit(true)">Get Grover code</button>
           &nbsp;
           <u style="color:white" (click)="goToCode()">Go to code</u>
         </th>

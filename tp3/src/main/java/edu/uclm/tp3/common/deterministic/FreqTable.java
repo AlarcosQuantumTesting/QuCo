@@ -65,6 +65,10 @@ public class FreqTable {
         this.pairs = pairs;
     }
 
+    public void addPair(Pair pair) {
+        this.pairs.add(pair);
+    }
+
     @JsonIgnore
     public int getShots() {
         int r = 0;
@@ -81,5 +85,8 @@ public class FreqTable {
         return pos>=0 ? this.pairs.get(pos).getFreq() : 0;
     }
 
-    
+    public void setFreqs(int freq) {
+        for (Pair p : this.pairs)
+            p.setFreq(freq);
+    }
 }
