@@ -9,6 +9,7 @@ import { QiskitCode } from '../grover/QiskitCode';
 import { QiskitService } from '../qiskit.service';
 import { FreqTable } from './FreqTable';
 import { GroverService } from '../grover.service';
+import { EditorComponent } from '../editor/editor.component';
 
 Chart.register(...registerables)
 
@@ -19,7 +20,27 @@ Chart.register(...registerables)
 })
 export class DeterministicComponent extends GroverStyle {
   @ViewChild('codeArea', { static: false }) codeArea!: ElementRef;
+  @ViewChild(EditorComponent) editor!: EditorComponent;
   
+  ngAfterViewInit() {
+    setTimeout(() => {
+      if (this.editor) {
+        this.editor.parent = this;
+      }
+    }, 0);
+    
+    if (this.editor) {
+      this.editor.parent = this;
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.editor && !this.editor.parent) {
+      this.editor.parent = this;
+      console.log("Parent asignado en AfterViewChecked:", this.editor.parent);
+    }
+  }
+
   shots : number = 0
   desiredError : number = 0.05
 
@@ -53,6 +74,12 @@ export class DeterministicComponent extends GroverStyle {
   showRecommendations: boolean = false;
   tooltipPiVisible: boolean = false;
   mostrarInstrucciones: boolean = false;
+  mostrarTabla: boolean = false;
+  isGrover: boolean = false;
+  isGrenoble: boolean = false;
+  isOriginalGR: boolean = false;
+  cambioInput: boolean = false;
+  selectedAlgorithm: string = 'grover'; 
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
@@ -61,8 +88,13 @@ export class DeterministicComponent extends GroverStyle {
     this.updateOutputs()
   }
 
+  ngOnInit() {
+    this.validateInputs();
+  }
+
   override tryFill(index: number): void {
       this.reset()
+      this.mostrarTabla = true;
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
@@ -464,6 +496,11 @@ export class DeterministicComponent extends GroverStyle {
   
 
   updateOutputs() {
+    if(this.cambioInput) {
+      this.mostrarTabla = false;
+      this.cambioInput = false;
+    }
+    
     this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
     
@@ -578,8 +615,14 @@ export class DeterministicComponent extends GroverStyle {
       return;
     }
 
-    if (this.qubits < 1 || this.qubits > 12) {
-      this.error = 'Number of qubits must be between 1 and 12';
+    if (this.qubits < 1 || this.qubits > 24) {
+      this.error = 'Number of qubits must be between 1 and 24';
+      this.isInvalid = true;
+      return;
+    }
+
+    if (this.selectedAlgorithm === '') {
+      this.error = 'Algorithm is required';
       this.isInvalid = true;
       return;
     }
@@ -592,13 +635,13 @@ export class DeterministicComponent extends GroverStyle {
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
 
-    localStorage.removeItem('processedExpressionsGrover');
-    localStorage.removeItem('matrix');
+    localStorage.removeItem('processedExpressionsDeterministic');
+    localStorage.removeItem('matrixDeterministic');
 
     localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
 
     this.userExpressions = [];
-
+    this.mostrarTabla = true;
     //this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
@@ -698,4 +741,15 @@ export class DeterministicComponent extends GroverStyle {
       this.inParallel = false;
     }
   }
+
+  onAlgorithmChange(value: string): void {
+    this.isGrover = value === 'grover';
+    this.isGrenoble = value === 'grenoble';
+    this.isOriginalGR = value === 'originalGR';
+  }
+
+  isAddDisabled(): boolean {
+    return !this.currentUserExpression || this.currentUserExpression.trim() === '';
+  }
+
 }

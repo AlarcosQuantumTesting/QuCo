@@ -613,3 +613,56 @@ th, td {
 .tooltip p {
     margin: 5px;
 }
+
+.matrixTitle-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+/* Puedes poner esto en tu archivo .css del componente, por ejemplo `selector.component.css` */
+.selector-container {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .selector-container button {
+    padding: 0.5rem 1rem;
+    border: 2px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .selector-container button.active {
+    background-color: #4caf50;
+    color: white;
+    border-color: #4caf50;
+  }
+  
+  .form-group select {
+    width: 100%;
+    min-height: 35px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .form-group select:hover {
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+    border-color: #2980b9;
+    cursor: pointer;
+  }
+
+  .form-group select:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+  }
+
+  .form-group option:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+  }

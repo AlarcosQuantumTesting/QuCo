@@ -19,10 +19,6 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   @ViewChild(EditorComponent) editor!: EditorComponent;
   
-    someMethodInMatrixes() {
-      console.log('Método en grover llamado');
-    }
-  
     ngAfterViewInit() {
       setTimeout(() => {
         if (this.editor) {
