@@ -11,7 +11,7 @@
   </div>
 
   <div class="titulo">
-      <h1>Algorithims</h1>
+      <h1>Algorithms</h1>
   </div>
 
   <!-- <div class="matrixTitle-container">
@@ -76,16 +76,44 @@
         <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
           <i class="fa fa-edit"></i>
         </button>
+
+        <!-- <div class="custom-tooltip" *ngIf="tooltipTableVisible && isGrover" style="position: absolute;margin-left: 10px; z-index: 100;">    
+          <div>
+              <p class="radioTitle">Use:</p>
+              <label class="custom-radio">
+              <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">MCX
+              </label>
+              <label class="custom-radio">
+              <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">H-MCZ-H
+              </label>
+          </div>
+
+          <div>
+              <p class="radioTitle">Configuration:</p>
+              <label class="custom-radio">
+                  <input type="checkbox"  class="custom-checkbox" [(ngModel)]="inParallel" [value]="false" style="margin-left: 5px;"> Separate circuits
+              </label>
+          </div>
+
+          <div>
+              <p class="radioTitle">Available templates:</p>
+              <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+                  <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
+                      {{ template.fileName }}
+                  </option>
+              </select> 
+          </div>
+        </div> -->
       </div>
     </div>
-</div>
+  </div>
 
   <div *ngIf="mostrarTabla" class="matrix-editor-container">
     <div class="table-button-container">
         <div class="table-container" *ngIf="mostrarTabla">
           <table border="1">
             <tr>
-              <th colspan="5" align="left">
+              <!-- <th colspan="5" align="left">
                 <input type="checkbox" [(ngModel)]="originalGR"> Original Grover & Rudolph
                 <br>
                 Physical angle:
@@ -98,12 +126,40 @@
                 &nbsp;
                 <input type="checkbox" [(ngModel)]="splitCircuits">Split in several circuits
                 &nbsp;
-                <button (click)="getCircuit()">Get whole Qiskit code</button>
+                <button *ngIf="!isGrover" (click)="getCircuit()">Get whole Qiskit code</button>
                 &nbsp;
-                <button (click)="getCircuit(true)">Get Grover code</button>
+                <button *ngIf="isGrover" (click)="getCircuit(true)">Get Grover code</button>
                 &nbsp;
                 <u style="color:white" (click)="goToCode()">Go to code</u>
+              </th> -->
+
+              <th colspan="5" class="config-cell">
+                <div class="config-container">
+                  
+                  <div class="config-item" *ngIf="!isGrover">
+                    <label for="angle">Physical angle:</label>
+                    <input id="angle" type="number" min="0" max="3.1416" step="0.0625"
+                           [(ngModel)]="physicalAngle"> radians
+                  </div>
+              
+                  <div class="config-item" *ngIf="!isGrover">
+                    <label for="prefix">Functions' prefix:</label>
+                    <input id="prefix" type="text" [(ngModel)]="prefix">
+                  </div>
+              
+                  <div class="config-item checkbox">
+                    <label><input type="checkbox" [(ngModel)]="inParallel"> Parallel circuit</label>
+                    <label><input type="checkbox" [(ngModel)]="splitCircuits"> Split in several circuits</label>
+                  </div>
+              
+                  <div class="config-item buttons">
+                    <button *ngIf="!isGrover" (click)="getCircuit()">Get whole Qiskit code</button>
+                    <button *ngIf="isGrover" (click)="getCircuit(true)">Get Grover code</button>
+                  </div>
+              
+                </div>
               </th>
+              
             </tr>
             <tr>
               <th rowspan="2">
@@ -116,7 +172,7 @@
               <th colspan="3">Expected frequency</th>
             </tr>
             <tr>
-              <th colspan="6">
+              <!-- <th colspan="6">
                 <i>p<sub>i</sub></i>
                 &nbsp;
                 <small><small style="color: white" (click)="random(1)">Random</small></small>
@@ -130,7 +186,29 @@
                 <small><small style="color: white" (click)="reset()">Reset</small></small>
                 &nbsp;
                 <small><small style="color: white" (click)="fixedAmount()">This amount of values: <input type="number" step="1" min="1" max="expectedFrequencies.rows" [(ngModel)]="amountOfValues"></small></small>
+              </th> -->
+              <th colspan="6" class="probability-cell">
+                <div class="pi-label"><i>p<sub>i</sub></i></div>
+                
+                <div class="prob-controls">
+                  <span class="clickable" (click)="random(1)">Random</span>
+                  <span class="clickable" (click)="random(10)">Random ×10</span>
+                  <span class="clickable" (click)="zeroTo2N()">0 to 2⁽ⁿ⁻¹⁾</span>
+              
+                  <span>
+                    Probability of 0:
+                    <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0">
+                  </span>
+              
+                  <span class="clickable" (click)="reset()">Reset</span>
+              
+                  <span>
+                    This amount of values:
+                    <input type="number" step="1" min="1" [max]="expectedFrequencies.rows" [(ngModel)]="amountOfValues">
+                  </span>
+                </div>
               </th>
+              
             </tr>
             <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">
               <td>
@@ -151,7 +229,6 @@
         <app-editor [parent]="this"></app-editor>
     </div>
 </div>
-
 
 
 

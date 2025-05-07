@@ -46,6 +46,6 @@ export class AppComponent implements AfterViewInit {
 
   goToHome() {
     // window.location.href = '/quco';
-    window.location.href = '/';
+    window.location.href = '/home';
   }
 }

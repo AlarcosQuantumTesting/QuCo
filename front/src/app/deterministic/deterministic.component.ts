@@ -75,11 +75,14 @@ export class DeterministicComponent extends GroverStyle {
   tooltipPiVisible: boolean = false;
   mostrarInstrucciones: boolean = false;
   mostrarTabla: boolean = false;
-  isGrover: boolean = false;
+  isGrover: boolean = true;
   isGrenoble: boolean = false;
   isOriginalGR: boolean = false;
   cambioInput: boolean = false;
-  selectedAlgorithm: string = 'grover'; 
+  selectedAlgorithm: string = 'grover';
+
+  //De grover
+  totalSelectedElements: number = 0;
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
@@ -90,6 +93,10 @@ export class DeterministicComponent extends GroverStyle {
 
   ngOnInit() {
     this.validateInputs();
+
+    this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
+
+    this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true'; 
   }
 
   override tryFill(index: number): void {
@@ -299,7 +306,7 @@ export class DeterministicComponent extends GroverStyle {
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
-      this.originalGR,
+      this.isOriginalGR,
       this.inParallel,
       this.splitCircuits,
       asGrover,
@@ -634,14 +641,17 @@ export class DeterministicComponent extends GroverStyle {
 
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
+    this.userExpressions = [];
+    this.mostrarTabla = true;
 
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrixDeterministic');
 
     localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
+    localStorage.setItem('mostrarTabla', JSON.stringify(this.mostrarTabla));
 
-    this.userExpressions = [];
-    this.mostrarTabla = true;
+
+    
     //this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
@@ -743,6 +753,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   onAlgorithmChange(value: string): void {
+    this.mostrarTabla = false;
     this.isGrover = value === 'grover';
     this.isGrenoble = value === 'grenoble';
     this.isOriginalGR = value === 'originalGR';
@@ -750,6 +761,14 @@ export class DeterministicComponent extends GroverStyle {
 
   isAddDisabled(): boolean {
     return !this.currentUserExpression || this.currentUserExpression.trim() === '';
+  }
+
+
+
+  mark(rowIndex: number) {
+    this.matrix![rowIndex][this.qubits] = !this.matrix![rowIndex][this.qubits]
+    localStorage.setItem('matrix', JSON.stringify(this.matrix));
+    this.totalSelectedElements = this.matrix!.filter(row => row[row.length - 1] === true).length;
   }
 
 }

@@ -666,3 +666,93 @@ th, td {
     background-color: #f0f0f0;
     cursor: pointer;
   }
+
+
+  .config-cell {
+    padding: 10px;
+    color: white;
+    font-size: 14px;
+  }
+
+  .config-cell label {
+    color: white;
+  }
+  
+  .config-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .config-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .config-item input[type="number"],
+  .config-item input[type="text"] {
+    padding: 4px;
+    border-radius: 4px;
+    width: 100px;
+  }
+  
+  .config-item.checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .config-item.buttons button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    background-color: #007acc;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .config-item.buttons button:hover {
+    background-color: #005f99;
+  }
+  
+
+  .probability-cell {
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .pi-label {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .prob-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .prob-controls input[type="number"] {
+    padding: 3px 5px;
+    width: 60px;
+    border-radius: 4px;
+  }
+  
+  .clickable {
+    cursor: pointer;
+    color: white;
+    transition: color 0.2s;
+  }
+  
+  .clickable:hover {
+    color: #ffffffa8;
+    transform: scale(1.05);
+  }
+  
