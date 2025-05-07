@@ -80,6 +80,15 @@ export class DeterministicComponent extends GroverStyle {
   isOriginalGR: boolean = false;
   cambioInput: boolean = false;
   selectedAlgorithm: string = 'grover';
+  selectedOptionFreq: string = 'none';
+
+
+  isNone: boolean = true;
+  isRandom: boolean = false;
+  isRandom10: boolean = false;
+  isZeroTo2N: boolean = false;
+  isProbabilityOf0: boolean = false;
+  isAmountOfValues: boolean = false;
 
   //De grover
   totalSelectedElements: number = 0;
@@ -517,6 +526,9 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   reset() {
+    this.selectedOptionFreq = 'none'
+    this.isNone = true
+    this.onOptionFreqChange(this.selectedOptionFreq)
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
@@ -643,7 +655,7 @@ export class DeterministicComponent extends GroverStyle {
     this.numberOfQubits = this.qubits;
     this.userExpressions = [];
     this.mostrarTabla = true;
-
+    this.reset();
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrixDeterministic');
 
@@ -761,6 +773,32 @@ export class DeterministicComponent extends GroverStyle {
 
   isAddDisabled(): boolean {
     return !this.currentUserExpression || this.currentUserExpression.trim() === '';
+  }
+
+  onOptionFreqChange(value: string): void {
+    
+    this.isNone = value === 'none';
+    this.isRandom = value === 'random';
+    this.isRandom10 = value === 'random10';
+    this.isZeroTo2N = value === 'zeroTo2N';
+    this.isProbabilityOf0 = value === 'probabilityOf0';
+    this.isAmountOfValues = value === 'amountOfValues';
+  }
+
+  applyOption() {
+    if (this.isNone) {
+      this.reset();
+    } else if (this.isRandom) {
+      this.random(1);
+    } else if (this.isRandom10) {
+      this.random(10);
+    } else if (this.isZeroTo2N) {
+      this.zeroTo2N();
+    } else if (this.isProbabilityOf0) {
+      this.withProb();
+    } else if (this.isAmountOfValues) {
+      this.fixedAmount();
+    }
   }
 
 
