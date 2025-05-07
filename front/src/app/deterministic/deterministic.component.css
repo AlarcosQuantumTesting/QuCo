@@ -721,7 +721,7 @@ th, td {
 
   .probability-cell {
     color: white;
-    padding: 10px;
+    padding: 5px;
     text-align: center;
     font-size: 14px;
   }
@@ -756,3 +756,20 @@ th, td {
     transform: scale(1.05);
   }
   
+  .reset-btn {
+    background: none;
+    padding: 5px;
+  }
+
+  .reset-btn:hover {
+    background: none;
+  }
+
+  .reset-btn i {
+    font-size: 12px;
+  }
+
+  .reset-btn i:hover {
+    transform: scale(1.05);
+    color: #ffffffa8;
+  }
