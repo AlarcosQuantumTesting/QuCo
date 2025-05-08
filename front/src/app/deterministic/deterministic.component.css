@@ -676,7 +676,6 @@ th, td {
 
 
   .config-cell {
-    padding: 10px;
     color: white;
     font-size: 14px;
   }
@@ -688,19 +687,20 @@ th, td {
   .config-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
     align-items: center;
+    padding-top: 5px
   }
   
   .config-item {
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    width: 100%;
   }
   
   .config-item input[type="number"],
   .config-item input[type="text"] {
-    padding: 4px;
+    padding: 2px;
     border-radius: 4px;
     width: 100px;
   }
@@ -709,6 +709,25 @@ th, td {
     display: flex;
     align-items: center;
     gap: 5px;
+  }
+
+  .config-item.checkbox {
+    gap: 10px;
+  }
+
+  .config-inputs-container {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
+  .config-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   
   .config-item.buttons button {
@@ -735,7 +754,6 @@ th, td {
   
   .pi-label {
     font-size: 18px;
-    margin-bottom: 8px;
   }
   
   .prob-controls {
@@ -786,7 +804,51 @@ th, td {
     color: white;
   }
 
+  .true-row .label-number {
+    color: white;
+  }
+
+  .label-number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(0, 0, 0);
+    height: 100%;
+    width: 100%;
+    margin-bottom: 0px;
+  }  
+
   .grover-row:hover {
     cursor: pointer;
   }
+
+  .grover-row label:hover {
+    cursor: pointer;
+  }
   
+  .header-with-button {
+    grid-template-columns: auto 1fr auto;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.actions-container {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+}
+  
+.apply-button {
+    background-color: #10989c;
+}
+
+.apply-button:hover {
+    background-color: #267375;
+    transform: scale(1.05);
+}

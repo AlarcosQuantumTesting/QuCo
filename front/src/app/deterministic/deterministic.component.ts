@@ -80,10 +80,10 @@ export class DeterministicComponent extends GroverStyle {
   isOriginalGR: boolean = false;
   cambioInput: boolean = false;
   selectedAlgorithm: string = 'grover';
-  selectedOptionFreq: string = 'none';
+  selectedOptionFreq: string = '';
 
 
-  isNone: boolean = true;
+  isNone: boolean = false;
   isRandom: boolean = false;
   isRandom10: boolean = false;
   isZeroTo2N: boolean = false;
@@ -101,11 +101,26 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   ngOnInit() {
-    this.validateInputs();
-
+    
+    console.log('selectedAlgorithm en localStorage:', localStorage.getItem('selectedAlgorithm'));
     this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
 
-    this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true'; 
+    this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
+
+    this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
+
+
+    console.log('selectedAlgorithm:', this.selectedAlgorithm);
+    
+    this.isGrover = this.selectedAlgorithm === 'grover';
+    this.isGrenoble = this.selectedAlgorithm === 'grenoble';
+    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';
+    
+    this.selectedOptionFreq = localStorage.getItem('selectedOptionFreq') || 'none';
+    this.onOptionFreqChange(this.selectedOptionFreq);
+    this.applyOption();
+
+    this.validateInputs();
   }
 
   override tryFill(index: number): void {
@@ -531,6 +546,7 @@ export class DeterministicComponent extends GroverStyle {
 
   reset() {
     this.selectedOptionFreq = 'none'
+    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq)
     this.isNone = true
     this.onOptionFreqChange(this.selectedOptionFreq)
     this.expectedFrequencies = new FreqTable()
@@ -637,7 +653,9 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrix');
-
+    localStorage.removeItem('selectedOptionFreq');
+    localStorage.removeItem('mostrarTabla');
+    localStorage.removeItem('selectedAlgorithm');
     location.reload();  // Reiniciar
   }
 
@@ -675,6 +693,7 @@ export class DeterministicComponent extends GroverStyle {
 
     localStorage.setItem('qubits', JSON.stringify(this.numberOfQubits));
     localStorage.setItem('mostrarTabla', JSON.stringify(this.mostrarTabla));
+    localStorage.setItem('selectedAlgorithm', this.selectedAlgorithm);
 
 
     
@@ -779,6 +798,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   onAlgorithmChange(value: string): void {
+    this.selectedAlgorithm = value;
     this.mostrarTabla = false;
     this.isGrover = value === 'grover';
     this.isGrenoble = value === 'grenoble';
@@ -813,6 +833,8 @@ export class DeterministicComponent extends GroverStyle {
     } else if (this.isAmountOfValues) {
       this.fixedAmount();
     }
+
+    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq);
   }
 
 
