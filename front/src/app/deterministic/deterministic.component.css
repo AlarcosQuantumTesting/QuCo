@@ -499,21 +499,28 @@ th {
     background-color: #0b555a;
     color: white;
     font-weight: bold;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
+    border: 1.5px solid #bbb7b7;
 }
 
 td {
-    padding: 3px;
-    border: 1px solid #ddd;
+    padding: 1px;
+    /* border: 1px solid #ddd; */
+    border: 1.5px solid #bbb7b7;
     text-align: center;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #4377611c;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+
 tr:hover {
-    background-color: #e8f3ed;
+    /* background-color: #e8f3ed; */
+    background-color: #0b555a4b;
     transition: 0.3s;
 }
 
@@ -773,3 +780,13 @@ th, td {
     transform: scale(1.05);
     color: #ffffffa8;
   }
+
+  .true-row {
+    background-color: rgba(15, 92, 15, 0.541);
+    color: white;
+  }
+
+  .grover-row:hover {
+    cursor: pointer;
+  }
+  

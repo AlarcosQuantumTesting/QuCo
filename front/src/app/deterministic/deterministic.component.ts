@@ -153,9 +153,13 @@ export class DeterministicComponent extends GroverStyle {
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
       let result = eval(wholeExpression )
-      if (marking && result)
-        this.expectedFrequencies.setFreq(i, 100)
-      else if (result)
+      if (marking && result) {
+        if (this.isGrover) {
+          this.expectedFrequencies.setFreq(i, 1)
+        } else {
+          this.expectedFrequencies.setFreq(i, 100)
+        }
+      } else if (result)
         this.expectedFrequencies.setFreq(i, result)
     }
     this.updateOutputs()
@@ -538,8 +542,13 @@ export class DeterministicComponent extends GroverStyle {
   random(factor : number) {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    for (let i=0; i<this.expectedFrequencies.rows; i++)
+    for (let i=0; i<this.expectedFrequencies.rows; i++) {
+      if (this.isGrover) {
+        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*1*factor))
+      } else {
         this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100*factor))
+      }
+    }
     this.calculateShots()
     this.updateOutputs()
   }
@@ -563,7 +572,12 @@ export class DeterministicComponent extends GroverStyle {
         index = Math.floor(Math.random() * this.expectedFrequencies.rows)
       }
       selectedIndexes.push(index)
-      this.expectedFrequencies.setFreq(index, 100)
+      if (this.isGrover) {
+        this.expectedFrequencies.setFreq(index, 1)
+      } else {
+        this.expectedFrequencies.setFreq(index, 100)
+      }
+      
     }
   }
 
@@ -802,11 +816,24 @@ export class DeterministicComponent extends GroverStyle {
   }
 
 
+  validateGroverValue(event: any, rowIndex: number): void {
+    const value = parseInt(event.target.value, 10);
+    if (value !== 0 && value !== 1) {
+      event.target.value = 0;
+      this.setFreq({ target: { value: 0 } }, rowIndex);
+    }
+  }
 
-  mark(rowIndex: number) {
-    this.matrix![rowIndex][this.qubits] = !this.matrix![rowIndex][this.qubits]
-    localStorage.setItem('matrix', JSON.stringify(this.matrix));
-    this.totalSelectedElements = this.matrix!.filter(row => row[row.length - 1] === true).length;
+  changeRowValue(rowIndex: number, event: any): void {
+    if(this.isGrover) {
+      if (this.expectedFrequencies.getFreq(rowIndex) === 0) {
+        event.target.value = 1;
+        this.setFreq({ target: { value: 1 } }, rowIndex);
+      } else if (this.expectedFrequencies.getFreq(rowIndex) === 1) {
+        event.target.value = 0;
+        this.setFreq({ target: { value: 0 } }, rowIndex);
+      }
+    }
   }
 
 }

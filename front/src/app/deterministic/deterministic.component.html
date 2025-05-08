@@ -199,7 +199,7 @@
                     <option [ngValue]="'random'">Random</option>
                     <option [ngValue]="'random10'" *ngIf="!isGrover">Random ×10</option>
                     <option [ngValue]="'zeroTo2N'" *ngIf="!isGrover">0 to 2⁽ⁿ⁻¹⁾</option>
-                    <option [ngValue]="'probabilityOf0'">Probability of 0</option>
+                    <option [ngValue]="'probabilityOf0'" *ngIf="!isGrover">Probability of 0</option>
                     <option [ngValue]="'amountOfValues'">This amount of values</option>
                   </select>  
 
@@ -224,23 +224,26 @@
 
                   <button (click)="applyOption()">Apply</button> 
                 </div>
-
-                
-                
-                
               </th>
               
             </tr>
-            <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">
+            <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center"
+            [class.true-row]="isGrover && expectedFrequencies.getFreq(rowIndex) === 1"
+            [class.grover-row]="isGrover" (click)="changeRowValue(rowIndex, $event)">
               <td>
                 {{ rowIndex }}
                 <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
               </td>
               <td>
-                <input type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
+                <input *ngIf="!isGrover" type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
+                <input *ngIf="isGrover" type="number" min="0" max="1" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)" (blur)="validateGroverValue($event, rowIndex)">
               </td>
-              <td>
+              <td *ngIf="!isGrover">
                 <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
+              </td>
+              <td *ngIf="isGrover">
+                <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 1">true</span>
+                <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 0">false</span>
               </td>
             </tr>
           </table>
@@ -315,17 +318,23 @@
         <code>{{ userExpression }}</code>&nbsp;<a style="color : blue" (click)="removeUserExpression(i)">Remove</a>
     </div>
     <br>
-    <button (click)="setFrequenciesWithUserExpressions()">Fill frequencies with these expressions</button>
+    <button *ngIf="!isGrover" (click)="setFrequenciesWithUserExpressions()">Fill frequencies with these expressions</button>
     &nbsp;
     <!-- <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button> -->
     <button (click)="fillTableWithUserExpressions()">Mark elements with these expressions</button>
     &nbsp;
 
     Available templates:
-    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
         <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
             {{ template.fileName }}
         </option>
+    </select> 
+
+    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
+      <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
+          {{ template.fileName }}
+      </option>
     </select> 
 
     <div *ngIf="selectedElements>0">
@@ -399,7 +408,7 @@
     </table> -->
   
 <!-- SVG -->
-<div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree">
+<div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
       <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
         <g [innerHTML]="svgTree"></g>
       </svg>
@@ -428,10 +437,10 @@
   &nbsp;
   <span style="color : red">{{ error }}</span>
   <br>
-  <u (click)="switchOutput()">
+  <!-- <u (click)="switchOutput()">
     Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
     <span *ngIf="!codeAsFunctions">functions</span>
-  </u>
+  </u> -->
   <div>
     <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
   </div>
