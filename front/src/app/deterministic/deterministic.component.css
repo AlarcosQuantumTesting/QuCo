@@ -852,3 +852,324 @@ th, td {
     background-color: #267375;
     transform: scale(1.05);
 }
+
+/* Modales */
+
+  
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.modal-content {
+  background-color: #fff;
+  width: 80%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.modal-header {
+  position: sticky; /* Se mantiene fija en la parte superior dentro del modal */
+  top: 0; /* Pegada arriba */
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background-color: #008b95;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100; /* Asegura que esté por encima del contenido */
+}
+
+.title-modal {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+  padding-left: 20px;
+}
+
+
+.modal-footer {
+  position: sticky; /* Se mantiene fija en la parte superior dentro del modal */
+  bottom: 0; /* Pegada abajo */
+  left: 0;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 100; /* Asegura que esté por encima del contenido */
+}
+
+
+.enlaces-modal {
+  display: block;
+  text-align: center;
+  
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.enlaces-modal a {
+  display: inline-block; 
+  background-color: #008b95; 
+  color: white; 
+  text-decoration: none; 
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  padding: 10px 20px;
+  border-radius: 6px; 
+  border: none; 
+  text-align: center; 
+}
+
+.enlaces-modal a:hover {
+  background-color: #0f5d63;
+  color: white;
+  text-decoration: none;
+  transform: scale(1.05);
+}
+
+
+.modal.instrucciones {
+  position: fixed;
+  z-index: 1000;
+  background-color: transparent;
+  pointer-events: none; /* Permite hacer clic fuera del modal */
+}
+
+.modal-content.instrucciones {
+  pointer-events: auto; /* Solo el contenido del modal es interactivo */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 600px;
+  max-width: none;
+  max-height: none;
+  overflow-y: auto;
+  position: relative;
+
+  /* 🪟 Estilo de ventana emergente */
+  resize: both;
+  overflow: auto;
+
+  min-width: 300px;
+  min-height: 200px;
+
+  /* Opcional: borde para dar sensación de "ventana" */
+  border: 1px solid #ccc;
+}
+
+.intructions-content {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+
+  width: 100%;
+  box-sizing: border-box;
+}
+
+p.text-instructions {
+  text-align: left;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+ol.list-instructions {
+  padding-left: 30px;
+  justify-content: center;
+}
+
+.list-instructions li {
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+.modal.ejemplos {
+  position: fixed;
+  z-index: 1000;
+  background-color: transparent;
+  pointer-events: none; /* Permite hacer clic fuera del modal */
+}
+
+.modal-content.ejemplos {
+  pointer-events: auto; /* Solo el contenido del modal es interactivo */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 60%;
+  height: 80%;
+  /* max-height: 90vh; */
+  max-width: none;
+  max-height: 100vh;
+  overflow-y: auto;
+  position: relative;
+
+  /* 🪟 Estilo de ventana emergente */
+  resize: both;
+  overflow: auto;
+
+  min-width: 300px;
+  min-height: 200px;
+
+  /* Opcional: borde para dar sensación de "ventana" */
+  border: 1px solid #ccc;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row; /* Alinea en fila */
+  align-items: center; /* Centra los botones verticalmente */
+  justify-content: center;
+  gap: 10px; /* Espacio entre los botones */
+  margin-right: 0;
+  width: auto;
+}
+
+.btn-addExample {
+  background-color: #4c9696;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  display: inline-block;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-addExample:hover {
+  background-color: #386161;
+  transform: scale(1.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.close {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding-left: 80px;
+  padding-right: 10px;
+  background: none;
+}
+
+.close:hover {
+background: none;
+cursor: default;
+color: white;
+}
+
+.close-i:hover {
+  color: #ccc;
+  cursor: pointer;
+}
+
+/* Close Button */
+.close-btn {
+  background: #007b7f;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  border-radius: 5px;
+  justify-self: center;
+}
+
+.example-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: first baseline;
+  margin-bottom: 10px;
+  width: 100%;
+  font-style: normal !important;
+}
+
+i {
+  font-style: normal !important;
+}
+
+.examples-code {
+  background-color: #dce0de;
+  font-style: normal !important;
+}
+
+.copy-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.copy-btn:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.save-code-btn {
+  background-color: #285ba7;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.save-code-btn:hover {
+  background-color: #1b3763;
+  transform: scale(1.05);
+}
+
+.help-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+
+  width: 100%;
+}
+
+.action-btn {
+  background-color: #3aa751;
+  border-radius: 12px;
+  padding: 10px 15px;
+}
+
+.action-btn:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}

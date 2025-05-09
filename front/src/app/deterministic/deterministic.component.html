@@ -77,8 +77,8 @@
           <i class="fa fa-edit"></i>
         </button>
 
-        <!-- <div class="custom-tooltip" *ngIf="tooltipTableVisible && isGrover" style="position: absolute;margin-left: 10px; z-index: 100;">    
-          <div>
+        <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">    
+          <div *ngIf="isGrover">
               <p class="radioTitle">Use:</p>
               <label class="custom-radio">
               <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">MCX
@@ -88,7 +88,7 @@
               </label>
           </div>
 
-          <div>
+          <div *ngIf="isGrover">
               <p class="radioTitle">Configuration:</p>
               <label class="custom-radio">
                   <input type="checkbox"  class="custom-checkbox" [(ngModel)]="inParallel" [value]="false" style="margin-left: 5px;"> Separate circuits
@@ -97,13 +97,19 @@
 
           <div>
               <p class="radioTitle">Available templates:</p>
-              <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-                  <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
-                      {{ template.fileName }}
-                  </option>
-              </select> 
+              <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
+                <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
+                    {{ template.fileName }}
+                </option>
+            </select> 
+        
+            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
+              <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
+                  {{ template.fileName }}
+              </option>
+            </select> 
           </div>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
@@ -231,8 +237,6 @@
                       </span>
                       <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
                   </div>
-
-                  
                 </div>
 
                 <div class="prob-controls">
@@ -268,6 +272,56 @@
     </div>
 </div>
 
+<!-- Modales -->
+
+<div class="modal ejemplos" *ngIf="mostrarEjemplos">
+  <div class="modal-content ejemplos"
+  cdkDrag
+  cdkDragRootElement=".modal-content">
+      <div class="modal-header" cdkDragHandle>
+          <h2 class="title-modal">Examples</h2>
+          <button class="close"><i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
+      </div>
+      <div class="intructions-content">
+          <ol>
+              <li *ngFor="let javaExample of javaExamples; let i = index">
+                  <div class="example-item">
+
+                      <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
+                          <i>{{ javaExample.explanation }}</i> →
+                          <br>
+                          <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
+                      </div>
+                      <div class="button-container">
+
+                          <button *ngIf="javaExample.exprs.length==1"
+                              (click)="onAddExampleClick(i)"
+                              [ngClass]="{'btn-added': javaExample.attempted}"
+                              class="btn-addExample">
+                                  <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                  {{ javaExample.attempted ? '' : 'Try' }}
+                          </button>
+                      </div>
+
+                      <div class="button-container">
+
+                          <button *ngIf="javaExample.exprs.length>1"
+                                  (click)="onAddExampleClick(i)"
+                                  [ngClass]="{'btn-added': javaExample.attempted}"
+                                  class="btn-addExample">
+                                      <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                                      {{ javaExample.attempted ? '' : 'Try' }}
+                          </button>
+                      </div>
+                  </div>
+              </li>
+          </ol>
+          <div class="help-actions">
+              <button class="action-btn" (click)="mostrarEjemplos = false">Got it!</button>
+          </div>
+      </div>
+  </div>
+</div>
 
 
 <!-- <div>
@@ -336,7 +390,7 @@
     &nbsp;
     <!-- <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button> -->
     <button (click)="fillTableWithUserExpressions()">Mark elements with these expressions</button>
-    &nbsp;
+    <!-- &nbsp;
 
     Available templates:
     <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
@@ -349,7 +403,7 @@
       <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
           {{ template.fileName }}
       </option>
-    </select> 
+    </select>  -->
 
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>
@@ -421,50 +475,50 @@
       </tr>
     </table> -->
   
-<!-- SVG -->
-<div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
-      <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
-        <g [innerHTML]="svgTree"></g>
-      </svg>
-    </div>
-</div>
+  <!-- SVG -->
+  <div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
+        <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
+          <g [innerHTML]="svgTree"></g>
+        </svg>
+      </div>
+  </div>
 
-<div id="divCode">
-  <strong 
-      (click)="copyCode(copyTooltip)" 
-      #copyTooltip 
-      title="Copy code"
-      style="cursor: pointer;"
-    >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
-  </strong>
-  &nbsp;
-  <span *ngIf="quirkCodes.length>0">
-    <u style="color:blue" *ngIf="quirkCodes.length==1" (click)="showQuirk()">Show in quirk</u>
-    <span *ngIf="quirkCodes.length>1">
-      Show in quirk:
-      <span style="color : blue" *ngFor="let quirkCode of quirkCodes; let i = index">
-        <u style="color : blue"  (click)="showQuirk(i)">{{ i+1 }}</u>&nbsp;
+  <div id="divCode">
+    <strong 
+        (click)="copyCode(copyTooltip)" 
+        #copyTooltip 
+        title="Copy code"
+        style="cursor: pointer;"
+      >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
+    </strong>
+    &nbsp;
+    <span *ngIf="quirkCodes.length>0">
+      <u style="color:blue" *ngIf="quirkCodes.length==1" (click)="showQuirk()">Show in quirk</u>
+      <span *ngIf="quirkCodes.length>1">
+        Show in quirk:
+        <span style="color : blue" *ngFor="let quirkCode of quirkCodes; let i = index">
+          <u style="color : blue"  (click)="showQuirk(i)">{{ i+1 }}</u>&nbsp;
+        </span>
       </span>
     </span>
-  </span>
 
-  &nbsp;
-  <span style="color : red">{{ error }}</span>
-  <br>
-  <!-- <u (click)="switchOutput()">
-    Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
-    <span *ngIf="!codeAsFunctions">functions</span>
-  </u> -->
-  <div>
-    <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
+    &nbsp;
+    <span style="color : red">{{ error }}</span>
+    <br>
+    <!-- <u (click)="switchOutput()">
+      Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
+      <span *ngIf="!codeAsFunctions">functions</span>
+    </u> -->
+    <div>
+      <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
+    </div>
+    <div>
+        <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
+        <button (click)="saveCode()">Save</button>
+    </div>
+    <div style="font-size: x-small;" #codeArea>
+        <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
+    </div>
   </div>
-  <div>
-      <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
-      <button (click)="saveCode()">Save</button>
-  </div>
-  <div style="font-size: x-small;" #codeArea>
-      <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
-  </div>
-</div>
 
 </body>

@@ -10,6 +10,8 @@ import { QiskitService } from '../qiskit.service';
 import { FreqTable } from './FreqTable';
 import { GroverService } from '../grover.service';
 import { EditorComponent } from '../editor/editor.component';
+import { Expression } from '../matrixes/Expression';
+import { ExpressionsService } from '../expressions.service';
 
 Chart.register(...registerables)
 
@@ -90,27 +92,38 @@ export class DeterministicComponent extends GroverStyle {
   isProbabilityOf0: boolean = false;
   isAmountOfValues: boolean = false;
 
+  mostrarEjemplos: boolean = false;
+  mostrarModal: boolean = false;
+
+  dialogo : any = undefined
+  filteredExpressions: Expression[] = [];
+  expressions: Expression[] = [];
+  searchQuery: string = "";
+  recommendation: string = '';
+
   //De grover
   totalSelectedElements: number = 0;
+  useMCX: boolean = false;
 
 
-  constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer, public manager : ManagerService) {
+  constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
+     public manager : ManagerService, public expService : ExpressionsService) {
     super(qiskitService)
 
     this.updateOutputs()
   }
 
   ngOnInit() {
+
+    this.expService.getExpressions().subscribe((data: Expression[]) => {
+      this.expressions = data.filter(exp => exp.type === 'grover');
+    });
     
-    console.log('selectedAlgorithm en localStorage:', localStorage.getItem('selectedAlgorithm'));
     this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
 
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
-
-
-    console.log('selectedAlgorithm:', this.selectedAlgorithm);
     
     this.isGrover = this.selectedAlgorithm === 'grover';
     this.isGrenoble = this.selectedAlgorithm === 'grenoble';
@@ -857,5 +870,403 @@ export class DeterministicComponent extends GroverStyle {
       }
     }
   }
+
+  clearExpressions() {
+    this.userExpressions = [];
+  }
+
+
+
+  // Modales
+
+  toggleEjemplos() {
+    this.mostrarEjemplos = !this.mostrarEjemplos;
+  }
+
+  onAddExampleClick(i: number): void {
+    this.addExample(i);
+    this.mensajeTemporal = 'Example added';
+    setTimeout(() => {
+        this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  addExample(index: number): void {
+    this.error = undefined;
+    this.reset();
+
+    // Eliminar todas las expresiones antes de agregar nuevas
+    this.userExpressions = [];
+
+    let exprs = this.javaExamples[index].exprs;
+
+    for (let i = 0; i < exprs.length; i++) {
+        if (exprs[i].trim().length === 0) continue;
+
+        // Agrega la expresión a la lista
+        this.userExpressions.push(exprs[i]);
+    }
+
+    if (exprs.length > 0) {
+        this.currentUserExpression = exprs[0];
+    }
+
+    // Limpiar el campo de texto
+    this.currentUserExpression = "";
+  }
+
+  openTextArea(c : DeterministicComponent, e : Event, title : string, elementIndex? : number) {
+    let caja = e.target as any
+    this.createDialog(c, caja, title, elementIndex)
+    this.dialogo.showModal()
+    let textoDialogo = this.dialogo.getElementsByTagName("textarea")[0];
+    textoDialogo.value = caja!.value;
+    this.dialogo.getElementsByTagName("textarea")[0].focus();
+  }
+
+  protected createDialog(cc: DeterministicComponent, caja: any, title: string, parameterIndex? : number) {
+    let selfCaja = caja
+    let textArea: any
+    if (!this.dialogo) {
+        this.dialogo = document.createElement("dialog")
+        this.dialogo.setAttribute("id", "dialogo");
+
+        // Estilos para el modal
+        this.dialogo.style.backgroundColor = "#eaf7f7";
+        this.dialogo.style.borderRadius = "12px";
+        this.dialogo.style.padding = "20px";
+        this.dialogo.style.maxWidth = "80%";
+        this.dialogo.style.boxShadow = "0px 10px 30px rgba(0, 0, 0, 0.2)";
+        this.dialogo.style.position = "relative";
+        this.dialogo.style.border = "2px solid #007d86";
+
+        // Crear y configurar el título
+        let label = document.createElement("strong")
+        label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+
+        // Crear y configurar la "X" para cerrar el modal
+        let a = document.createElement("u")
+        a.innerHTML = "&times;"
+        a.style.fontSize = "24px";
+        a.style.position = "absolute";
+        a.style.top = "10px";
+        a.style.right = "10px";
+        a.style.cursor = "pointer";
+
+        let self = this
+        a.onclick = function() {
+            selfCaja.parentElement.removeChild(self.dialogo)
+            self.dialogo = null
+            selfCaja.focus()
+        }
+
+        // Agregar el título y la "X" al modal
+        this.dialogo.appendChild(label)
+        this.dialogo.appendChild(a)
+
+        this.dialogo.appendChild(document.createElement("br"))
+
+        // Crear y configurar el textarea
+        textArea = document.createElement("textarea");
+        textArea.style.width = "95%";
+        textArea.style.height = "150px";
+        textArea.style.padding = "10px";
+        textArea.style.fontSize = "16px";
+        textArea.style.borderRadius = "8px";
+        textArea.style.border = "2px solid #ccc";
+        textArea.style.backgroundColor = "#f9f9f9";
+        textArea.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
+        textArea.style.transition = "all 0.3s ease";
+        textArea.style.border = "2px solid #007d86";
+
+        this.dialogo.appendChild(textArea);
+        textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 == 1\n" +
+            "q4 == 0\ninput%2 == 0\n")
+        textArea.setAttribute("rows", "15");
+        textArea.setAttribute("cols", "60");
+        textArea.ondblclick = function() {
+            textArea.value = "q3 == 1\nq4 == 0\ninput%2 == 0\n"
+        }
+
+        // Crear y configurar el botón "Add"
+        let addButton = document.createElement("button");
+        addButton.innerHTML = "Add";
+        addButton.style.marginTop = "10px";
+        addButton.style.padding = "8px 15px";
+        addButton.style.borderRadius = "5px";
+        addButton.style.border = "1px solid #ccc";
+        addButton.style.backgroundColor = "#008b95";
+        addButton.style.color = "#fff";
+        addButton.style.fontSize = "16px";
+        addButton.style.cursor = "pointer";
+
+        addButton.addEventListener("mouseenter", () => {
+          addButton.style.backgroundColor = "#006f78";
+          addButton.style.transform = "scale(1.05)";
+          addButton.style.transition = "all 0.3s ease";
+      });
+
+      addButton.addEventListener("mouseleave", () => {
+          addButton.style.backgroundColor = "#008b95";
+          addButton.style.transform = "scale(1)";
+      });
+
+        addButton.onclick = function() {
+            if (textArea!.value.trim().length > 0) {
+                let expressions = textArea!.value.split("\n")
+                for (let i = 0; i < expressions.length; i++) {
+                    if (expressions[i].trim().length == 0)
+                        continue
+                    self.currentUserExpression = expressions[i]
+                    self.addUserExpression()
+                }
+            }
+            selfCaja.parentElement.removeChild(self.dialogo)
+            self.dialogo = null
+            selfCaja.focus()
+        }
+
+        this.dialogo.appendChild(addButton);
+    }
+
+    caja.parentElement.appendChild(this.dialogo);
+  }
+
+  onSearchInput() {
+
+    this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
+    
+    this.filteredExpressions = [...this.expressions];
+    
+    if (this.searchQuery.trim() != "") {
+
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'grover' && 
+        (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      );
+
+      
+    const foundExpression = this.manager.expressions.find(exp =>
+      exp.type === 'grover' &&
+      exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
+    );
+
+    // if (foundExpression) {
+    //     console.log("Expression found:", foundExpression);
+    // }
+    
+    if (foundExpression) {
+        this.recommendation = `${foundExpression.jsExpression}`;
+        this.showRecommendations = true;
+    }
+
+    }
+  }
+
+
+  searchExpressions() {
+    this.filteredExpressions = this.expressions;
+
+    if (this.searchQuery.trim() != ""){
+      this.filteredExpressions = this.expressions.filter(exp =>
+        exp.type === 'grover' &&
+        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+  }
+
+
+
+  // Recommendations
+
+  checkForExpressions() {
+
+    if (!this.currentUserExpression || !this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;
+    }
+
+    if (!this.currentUserExpression.trim()) {
+      this.showRecommendations = false;
+      return;
+    }
+
+    this.checkForOrExpression();
+    this.checkForAndExpression();
+    this.isPrimeNumber();
+    this.isEvenNumber();
+    this.sumQubits();
+    this.xorExpression();
+    this.isPowerOfTwo();
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab' && this.showRecommendations) {
+      this.searchQuery = this.recommendation;
+      this.showRecommendations = false;
+    }
+  }
+
+  onFocusInput() {
+    this.checkForExpressions();
+  }
+
+  selectRecommendation() {
+    this.currentUserExpression = this.recommendation;
+    this.showRecommendations = false;
+    this.searchQuery = this.currentUserExpression;
+  }
+
+
+  checkForOrExpression() {
+    if (this.currentUserExpression.includes('||') && this.currentUserExpression !== this.recommendation) {
+      this.recommendOrExpression();
+    }
+  }
+
+  recommendOrExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const orExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a | b, 0) == 1`;
+  
+    this.recommendation = orExpression;
+    this.showRecommendations = true;
+  }
+
+  checkForAndExpression() {
+    if (this.currentUserExpression.includes('&&') && this.currentUserExpression !== this.recommendation) {
+      this.recommendAndExpression();
+    }
+  }
+
+  recommendAndExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const andExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a & b, 1) == 1`;
+  
+    this.recommendation = andExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPrimeNumber() {
+    if (/is\s*prime/i.test(this.currentUserExpression) && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPrimeExpression();
+    }
+  }
+
+  recommendIsPrimeExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPrimeLogic = `(function(n) {
+      if (n < 2) return false;
+      for (let i = 2; i * i <= n; i++) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPrimeLogic;
+    this.showRecommendations = true;
+  }
+  
+
+  isEvenNumber() {
+    if (this.currentUserExpression.includes('isEven') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsEvenExpression();
+    }
+  }
+
+  recommendIsEvenExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].map(Number).join(''), 2)`;
+  
+    const isEvenExpression = `(${binaryToDecimal} % 2 == 0)`;
+  
+    this.recommendation = isEvenExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  sumQubits() {
+    if (this.currentUserExpression.includes('sum') && this.currentUserExpression !== this.recommendation) {
+      this.recommendSumQubitsExpression();
+    }
+  }
+  
+  // Comprueba si la suma es 1 (si hay solo un 1 en los qubits)
+  recommendSumQubitsExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const sumExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a + b, 0) == 1`;
+  
+    this.recommendation = sumExpression;
+    this.showRecommendations = true;
+  }
+  
+
+  xorExpression() {
+    if (this.currentUserExpression.includes('xor') && this.currentUserExpression !== this.recommendation) {
+      this.recommendXorExpression();
+    }
+  }
+
+  recommendXorExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const xorExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a ^ b, 0) == 1`;
+  
+    this.recommendation = xorExpression;
+    this.showRecommendations = true;
+  }  
+
+  isPowerOfTwo() {
+    if (this.currentUserExpression.includes('two') && this.currentUserExpression !== this.recommendation) {
+      this.recommendIsPowerOfTwoExpression();
+    }
+  }
+
+  recommendIsPowerOfTwoExpression() {
+    const qubitIndices = [];
+  
+    for (let i = 0; i < this.qubits; i++) {
+      qubitIndices.push(`q${i}`);
+    }
+  
+    const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
+  
+    const isPowerOfTwoExpression = `(function(n) { return (n > 0 && (n & (n - 1)) === 0); })(${binaryToDecimal}) == true`;
+  
+    this.recommendation = isPowerOfTwoExpression;
+    this.showRecommendations = true;
+  }
+  
 
 }
