@@ -1442,5 +1442,9 @@ export class DeterministicComponent extends GroverStyle {
     this.showRecommendations = true;
   }
   
+  isGroverOption (): boolean {
+    console.log("isGroverOption", this.isGrover);
+    return this.isGrover;
+  }
 
 }

@@ -577,7 +577,7 @@
   </div>
 </div>
 
-<div>
+<!-- <div>
     <strong>Your expressions:</strong>
     <br>
     <input type="text" size="50" [(ngModel)]="currentUserExpression">&nbsp;<a style="color : blue" (click)="addUserExpression()">Add</a>
@@ -587,9 +587,9 @@
     <br>
     <button *ngIf="!isGrover" (click)="setFrequenciesWithUserExpressions()">Fill frequencies with these expressions</button>
     &nbsp;
-    <!-- <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button> -->
+    <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button>
     <button (click)="fillTableWithUserExpressions()">Mark elements with these expressions</button>
-    <!-- &nbsp;
+    &nbsp;
 
     Available templates:
     <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
@@ -602,12 +602,12 @@
       <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
           {{ template.fileName }}
       </option>
-    </select>  -->
+    </select>
 
     <div *ngIf="selectedElements>0">
         <i style="color : blue">{{ selectedElements }} elements selected </i>
     </div>
-</div>
+</div> -->
 
 <div style="display: flex; align-items: flex-start; gap: 20px;">
     <!-- Tabla -->

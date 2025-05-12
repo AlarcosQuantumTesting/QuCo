@@ -1302,4 +1302,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
   
 
+  isGroverOption (): boolean {
+    return true;
+  }
 }
