@@ -141,11 +141,11 @@
 
               <th colspan="5" class="config-cell">
                 <div class="config-container">
-                  <div class="config-item checkbox">
-                    <label><input type="checkbox" [(ngModel)]="inParallel"> Parallel circuit</label>
-                    <label><input type="checkbox" [(ngModel)]="splitCircuits"> Split in several circuits</label>
+                  <div class="config-item checkbox" style="margin-bottom: 5px;">
+                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel">Parallel circuit
+                    <input type="checkbox" style="margin-left: 15px;" class="custom-checkbox" [(ngModel)]="splitCircuits">Split in several circuits
                   </div>
-                  <div *ngIf="!isGrover" class="config-inputs-container">
+                  <div *ngIf="!isGrover" class="config-inputs-container" style="margin-top: 5px;">
                     <div class="config-input" *ngIf="!isGrover" style="margin-right: 8px;">
                       <!-- <label for="angle">Physical angle:</label> -->
                       Physical angle:
@@ -676,7 +676,7 @@
       </div>
   </div>
 </div>
-
+<i style="color : blue">{{ totalSelectedElements }} elements selected </i>
 <!-- <div>
     <strong>Your expressions:</strong>
     <br>
@@ -709,9 +709,9 @@
     </div>
 </div> -->
 
-<div style="display: flex; align-items: flex-start; gap: 20px;">
-    <!-- Tabla -->
-    <!-- <table border="1">
+<!-- <div style="display: flex; align-items: flex-start; gap: 20px;">
+    Tabla
+    <table border="1">
       <tr>
         <th colspan="5" align="left">
           <input type="checkbox" [(ngModel)]="originalGR"> Original Grover & Rudolph
@@ -772,27 +772,24 @@
           <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
         </td>
       </tr>
-    </table> -->
+    </table>
   
-  <!-- SVG -->
   <div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
         <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
           <g [innerHTML]="svgTree"></g>
         </svg>
       </div>
-  </div>
+  </div> -->
 
-  <div id="divCode">
-      <i style="color : blue">{{ totalSelectedElements }} elements selected </i>
-
-    <!-- <strong 
+  <!-- <div id="divCode">
+    <strong 
         (click)="copyCode(copyTooltip)" 
         #copyTooltip 
         title="Copy code"
         style="cursor: pointer;"
       >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
-    </strong> -->
-    <!-- &nbsp;
+    </strong>
+    &nbsp;
     <span *ngIf="quirkCodes.length>0">
       <u style="color:blue" *ngIf="quirkCodes.length==1" (click)="showQuirk()">Show in quirk</u>
       <span *ngIf="quirkCodes.length>1">
@@ -801,25 +798,25 @@
           <u style="color : blue"  (click)="showQuirk(i)">{{ i+1 }}</u>&nbsp;
         </span>
       </span>
-    </span> -->
+    </span>
 
     &nbsp;
     <span style="color : red">{{ error }}</span>
     <br>
-    <!-- <u (click)="switchOutput()">
+    <u (click)="switchOutput()">
       Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
       <span *ngIf="!codeAsFunctions">functions</span>
-    </u> -->
-    <!-- <div>
+    </u>
+    <div>
       <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
     </div>
     <div>
         <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
         <button (click)="saveCode()">Save</button>
-    </div> -->
-    <!-- <div style="font-size: x-small;" #codeArea>
+    </div>
+    <div style="font-size: x-small;" #codeArea>
         <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
-    </div> -->
-  </div>
+    </div>
+  </div> -->
 
 </body>

@@ -1484,3 +1484,33 @@ input[disabled], textarea[disabled], select[disabled] {
     background-color: #0b555a;
     transform: scale(1.05);
   }
+
+  
+.custom-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2ea3ac;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  transition: all 0.2s;
+  vertical-align: middle;
+}
+
+.custom-checkbox:checked {
+  background-color: #2ea3ac;
+  border-color: #2ea3ac;
+}
+
+.custom-checkbox:checked::after {
+  content: '✔';
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  left: 2px;
+  top: -2px;
+}
