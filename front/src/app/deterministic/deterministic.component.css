@@ -1459,3 +1459,28 @@ input[disabled], textarea[disabled], select[disabled] {
       transform: rotate(360deg);
     }
   }
+
+  .enlaces-modal .quirk-select:hover {
+    background: none;
+    color: white;
+    text-decoration: none;
+    transform: scale(1);
+    cursor: default;
+  }
+
+  .btn-quirk {
+    background-color: #37abaf;
+    color: white;
+    padding: 6px 7px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-left: 10px;
+  }
+
+  .btn-quirk:hover {
+    background-color: #0b555a;
+    transform: scale(1.05);
+  }

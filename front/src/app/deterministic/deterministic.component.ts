@@ -83,6 +83,7 @@ export class DeterministicComponent extends GroverStyle {
   cambioInput: boolean = false;
   selectedAlgorithm: string = 'grover';
   selectedOptionFreq: string = '';
+  selectedQuirk: number = 0;
 
 
   isNone: boolean = false;
@@ -104,6 +105,7 @@ export class DeterministicComponent extends GroverStyle {
   mostrarModalGuargarCode: boolean = false;
   mostrarModalNombreFuncion: boolean = false;
   isLoadingQiskitCode = false;
+  mostrarModalTree: boolean = false;
 
   expressionToDelete: any = null;
   deleteIndex: number = -1;
@@ -843,6 +845,10 @@ export class DeterministicComponent extends GroverStyle {
     this.isGrenoble = value === 'grenoble';
     this.isOriginalGR = value === 'originalGR';
   }
+
+  onQuirkChange(index: number): void {
+    this.selectedQuirk = index;
+  }  
 
   isAddDisabled(): boolean {
     return !this.currentUserExpression || this.currentUserExpression.trim() === '';
