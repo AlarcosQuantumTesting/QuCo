@@ -174,7 +174,42 @@
               <th colspan="3">
                 <div class="header-with-button">
                   <div style="margin-top: 5px; margin-bottom: 5px;">
-                    Expected frequency
+                    <!-- Expected frequency -->
+                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                      <span>Expected frequency</span>
+                      <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                          <i class="fa fa-info-circle"></i>
+                      </button>
+
+                      <div class="tooltip" *ngIf="tooltipVisible && isGrover">
+                          <p>
+                              Do click on any row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
+                          </p>
+                          <div class="divider"><span>Or</span></div>
+                          <p>
+                              Write
+                              <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+                                  JavaScript expressions
+                              </span>
+                              to mark the desired rows.
+                              <br>
+                          </p>
+                      </div>
+
+                      <div class="tooltip" *ngIf="tooltipVisible && !isGrover">
+                        <p>
+                          You can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.
+                        </p>
+                        <div class="divider"><span>Or</span></div>
+                        <p>
+                            You can fill-in the absolute frequencies using
+                            <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+                                JavaScript expressions.
+                            </span>
+                            <br>
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
                   <div class="actions-container">
@@ -324,13 +359,49 @@
 </div>
 
 
+<div class="modal instrucciones" *ngIf="mostrarInstrucciones">
+        <div class="modal-content instrucciones"
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Instructions</h2>
+                <button class="close"><i class="close-i" (click)="mostrarInstrucciones = false;">&times;</i></button>
+            </div>
+            <div class="intructions-content">
+                <p class="text-instructions">
+                    The expressions you can introduce must be JavaScript 
+                    <span class="highlight">boolean</span> expressions. The rows for which at least one expression 
+                    is true are marked to be included in the Grover's oracle.
+                </p>
+                <p class="text-instructions">
+                    You can use the following <i>reseved words:</i>
+                </p>
+                <ol class="list-instructions">
+                    <li>
+                        <b>q0</b>, <b>q1</b>...<b>q<i>x</i></b> to reference a given qubit.
+                    </li>
+                    <li>
+                        <b>input</b> to reference the decimal value of the input.
+                    </li>
+                    <li>
+                        <b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.
+                    </li>
+                </ol>
+                <div class="help-actions">
+                    <button class="action-btn" (click)="mostrarInstrucciones = false">Got it!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 <!-- <div>
     Number of qubits: <input type="number" min="1" max = "24" [(ngModel)]="qubits" (change)="updateOutputs()">
     &nbsp;
     <i>(The table shows only the first {{ maxRows}} rows)</i>
 </div>
 <span style="color : red">{{ error }}</span> -->
-
+<!-- 
 <div>
     <p>You can use this code and circuits generator in three ways:</p>
     <ol>
@@ -342,7 +413,7 @@
         If you want to use this approach, you can add the expressions you desire to set the output frequencies (second case) or to mark the elements that must be selected (third case).
     </li>
     </ol>
-</div>
+</div> -->
 
 <div [hidden]="hideExamples">
     <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
@@ -376,6 +447,134 @@
             </span>
         </li>
     </ol>
+</div>
+
+<!-- Crear y ver expresiones -->
+
+<div class="modal" *ngIf="mostrarModalCrearExp">
+  <div class="modal-content">
+      <!-- Botón para cerrar el modal -->
+      <div class="modal-header">
+          <h2 class="title-modal">Create expression</h2>
+          <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false;">&times;</i></button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="expression-output">
+
+          <div class="expressionsContainer">
+              <div class="form-group">
+                  <div class="label-container">
+                      <label for="expressionName">Expression name:</label>
+                  </div>
+  
+                  <input id="expressionName" type="text" [disabled]="isNameDisabled" 
+                  [(ngModel)]="expressionToSave.expressionName" class="form-control">
+              </div>
+  
+              <div class="form-group">
+                  <div class="label-container">
+                      <label for="jsExpression">Expression in javaScript:</label>
+                  </div>
+                  <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control">
+              </div>
+
+              <div class="form-group">
+                  <div class="label-container">
+                      <label for="expressionDescription">Description:</label>
+                  </div>
+                  <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control">
+              </div>
+
+              <div class="form-group">
+                  <div class="label-container">
+                      <label for="expressionDescription">Type:</label>
+                  </div>
+                  <input id="expDescription" type="text" [disabled]="isType"
+                  [(ngModel)]="expressionToSave.type" class="form-control">
+              </div>
+  
+              <!-- <div class="form-actions">
+                  <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
+              </div> -->
+          </div>
+
+          <div class="help-actions">
+              <button (click)="save()" [disabled]="isInvalid" class="save-new-btn">Save</button>
+              <button class="cancel-btn" (click)="mostrarModalCrearExp = false">Cancel</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="mostrarModalVerExp">
+  <div class="modal-content">
+      <!-- Encabezado del modal -->
+      <div class="modal-header">
+          <div class="header-with-button">
+              <h2 class="title-modal">Manage expressions</h2>
+              <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
+          </div>
+          <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false">&times;</i></button>
+      </div>
+      
+      <!-- Tabla de expresiones -->
+      <div class="table-container-expressions">
+          <table class="expressions-table">
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>JavaScript Expression</th>
+                      <th>Description</th>
+                      <th style="min-width: 100px;">Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let expression of expressions; let i = index">
+                      <td>{{ expression.expressionName }}</td>
+                      <td>{{ expression.jsExpression }}</td>
+                      <td>{{ expression.description }}</td>
+                      <td>
+                          <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
+                              <i class="fas fa-edit edit-expression-icon"></i>
+                          </button>
+                          <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
+                              <i class="fas fa-trash"></i> 
+                          </button> -->
+                          <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
+                              <i class="fas fa-trash"></i> 
+                          </button>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+
+      <!-- Botón de cerrar -->
+      <div class="modal-footer">
+          <!-- <div class="help-actions" style="margin-bottom: 15px;">
+              <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
+          </div> -->
+          <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+      </div>
+  </div>
+</div>
+
+<div *ngIf="showDeleteModal" class="modal-delete">
+  <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+          <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
+          <button class="close"><i class="close-i" (click)="showDeleteModal = false">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+          <p>Are you sure you want to delete the expression <strong>{{expressionToDelete}}</strong>?</p>
+          <div class="modal-buttons">
+              <button class="btn btn-delete-modal" (click)="confirmDelete()">Yes, delete</button>
+              <button class="btn btn-cancel-delete-modal" (click)="cancelDelete()">Cancel</button>
+          </div>
+      </div>
+      
+  </div>
 </div>
 
 <div>
