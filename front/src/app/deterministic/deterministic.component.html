@@ -577,6 +577,71 @@
   </div>
 </div>
 
+<div class="modal" *ngIf="mostrarModal">
+  <div class="modal-content" *ngIf="isLoadingQiskitCode">
+      <div *ngIf="isLoadingQiskitCode" class="spinner-container">
+          <div class="spinner"></div>
+          <p>Generating Qiskit code...</p>
+      </div>              
+  </div>
+  <div class="modal-content" *ngIf="!isLoadingQiskitCode">
+      <!-- Botón para cerrar el modal -->
+      <div class="modal-header">
+          <h2 class="title-modal">Qiskit Code</h2>
+          <button class="close"><i class="close-i" (click)="mostrarModal = false">&times;</i></button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="intructions-content">
+          <div class="code-output">
+              <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
+          </div>
+      </div>
+
+      <!-- Botón para copiar el código -->
+      <div class="modal-footer">
+          <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+          <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
+      </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="mostrarModalGuargarCode">
+  <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="title-modal">Save Qiskit code</h2>
+        <button class="close"><i class="close-i" (click)="mostrarModalGuargarCode = false">&times;</i></button>
+      </div>
+      <div class="expressionsContainer">
+          <div class="form-group">
+              <div class="label-container">
+                  <label>Name:</label>
+              </div>
+              <input class="input-function" type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0" class="form-control">
+          </div>
+
+              <div class="form-group">
+                  <div class="label-container">
+                      <label>Description:</label>
+                  </div>
+                  <input class="input-function" type="text" [(ngModel)]="qiskitCode.description" [disabled]="qiskitCode.lines.length==0" class="form-control">
+              </div>
+
+          <div class="modal-buttons-function">
+              <button class="btn-confirm" (click)="saveCode()" [disabled]="!qiskitCode.name.trim()">
+                <i class="fa fa-check" aria-hidden="true"></i> Save
+              </button>
+      
+              <button class="btn-cancel" (click)="mostrarModalGuargarCode = false">
+                <i class="fa fa-times" aria-hidden="true"></i> Cancel
+              </button>
+          </div>
+      
+          <div class="error" *ngIf="error">{{ error }}</div>
+      </div>
+  </div>
+</div>
+
 <!-- <div>
     <strong>Your expressions:</strong>
     <br>
@@ -683,6 +748,8 @@
   </div>
 
   <div id="divCode">
+      <i style="color : blue">{{ totalSelectedElements }} elements selected </i>
+
     <strong 
         (click)="copyCode(copyTooltip)" 
         #copyTooltip 
@@ -715,9 +782,9 @@
         <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
         <button (click)="saveCode()">Save</button>
     </div>
-    <div style="font-size: x-small;" #codeArea>
+    <!-- <div style="font-size: x-small;" #codeArea>
         <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
-    </div>
+    </div> -->
   </div>
 
 </body>

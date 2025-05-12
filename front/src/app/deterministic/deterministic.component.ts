@@ -103,6 +103,7 @@ export class DeterministicComponent extends GroverStyle {
   showDeleteModal: boolean = false;
   mostrarModalGuargarCode: boolean = false;
   mostrarModalNombreFuncion: boolean = false;
+  isLoadingQiskitCode = false;
 
   expressionToDelete: any = null;
   deleteIndex: number = -1;
@@ -133,8 +134,7 @@ export class DeterministicComponent extends GroverStyle {
       this.expressions = data.filter(exp => exp.type === 'grover');
     });
     
-    this.totalSelectedElements = this.matrix ? this.matrix.filter(row => row[row.length - 1] === true).length : 0;
-
+    this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
@@ -309,7 +309,7 @@ export class DeterministicComponent extends GroverStyle {
       }
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
-    this.goToCode()
+    //this.goToCode()
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
@@ -353,6 +353,8 @@ export class DeterministicComponent extends GroverStyle {
     this.running = true;
     this.state   = "Calculating";
     this.error   = undefined;
+    this.isLoadingQiskitCode = true;
+    this.mostrarModal = true;
 
     if (!asGrover) 
       asGrover = false
@@ -375,6 +377,8 @@ export class DeterministicComponent extends GroverStyle {
           } catch (e) {
             this.error   = 'Error parseando JSON: ' + e;
             this.running = false;
+            this.isLoadingQiskitCode = false;
+            this.mostrarModal = false;
             return;
           }
   
@@ -388,11 +392,19 @@ export class DeterministicComponent extends GroverStyle {
           this.svgHeight = height;
           this.state     = undefined;
           this.running   = false;
+          this.isLoadingQiskitCode = false;
+          this.mostrarModal = true;
         })
       },
       err => {
         this.error   = err.error?.message || err.message;
         this.running = false;
+        this.isLoadingQiskitCode = false;
+        this.mostrarModal = false;
+        this.mensajeTemporal = 'Error generating code';
+        setTimeout(() => {
+            this.mensajeTemporal = '';
+        }, 2000);
       }
     );
   }
@@ -1445,6 +1457,16 @@ export class DeterministicComponent extends GroverStyle {
   isGroverOption (): boolean {
     console.log("isGroverOption", this.isGrover);
     return this.isGrover;
+  }
+
+  updateTotalSelectedElements(): void {
+    const totalRows = Math.min(this.expectedFrequencies.rows, this.maxRows);
+  
+    for (let i = 0; i < totalRows; i++) {
+      if (this.expectedFrequencies.getFreq(i) === 1) {
+        this.totalSelectedElements++;
+      }
+    }
   }
 
 }
