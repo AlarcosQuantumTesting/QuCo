@@ -173,7 +173,9 @@
                       <i *ngIf="totalSelectedElements<=0" style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
                     </div>
                     <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-                      <span>Expected frequency</span>
+                      <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh" title="Reset values"></i></button>
+                  
+                      <span>Expected frequency <i>(p<sub>i</sub>)</i></span>
                       <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
                           <i class="fa fa-info-circle"></i>
                       </button>
@@ -223,8 +225,6 @@
             <tr>
               <th colspan="6" class="probability-cell">
                 <div class="pi-label">
-                  <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh" title="Reset values"></i></button>
-                  <i>p<sub>i</sub></i>
                   <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
                     <option [ngValue]="'none'">None</option>
                     <option [ngValue]="'random'">Random</option>
@@ -233,9 +233,9 @@
                     <option [ngValue]="'probabilityOf0'" *ngIf="!isGrover">Probability of 0</option>
                     <option [ngValue]="'amountOfValues'">This amount of values</option>
                   </select>
-                  <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button> 
+                  <!-- <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button>  -->
 
-                  <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;">
+                  <!-- <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;"> -->
                       <span *ngIf="isProbabilityOf0" style="font-size: 13px;">
                         Probability of 0:
                         <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0">
@@ -246,7 +246,7 @@
                         <input type="number" step="1" min="1" [max]="expectedFrequencies.rows" [(ngModel)]="amountOfValues">
                       </span>
                       <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
-                  </div>
+                  <!-- </div> -->
                 </div>
 
                 <div class="prob-controls">
