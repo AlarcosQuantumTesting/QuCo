@@ -207,6 +207,8 @@ export class DeterministicComponent extends GroverStyle {
         this.expectedFrequencies.setFreq(i, result)
     }
     this.updateOutputs()
+
+    this.updateTotalSelectedElements();
   }
 
   private replaceQ(expr: string, row: string) {
@@ -880,6 +882,8 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq);
+
+    this.updateTotalSelectedElements();
   }
 
 
@@ -901,6 +905,7 @@ export class DeterministicComponent extends GroverStyle {
         this.setFreq({ target: { value: 0 } }, rowIndex);
       }
     }
+    this.updateTotalSelectedElements();
   }
 
   clearExpressions() {
@@ -1461,18 +1466,19 @@ export class DeterministicComponent extends GroverStyle {
   }
   
   isGroverOption (): boolean {
-    console.log("isGroverOption", this.isGrover);
     return this.isGrover;
   }
 
   updateTotalSelectedElements(): void {
     const totalRows = Math.min(this.expectedFrequencies.rows, this.maxRows);
-  
+    this.totalSelectedElements = 0;
+
     for (let i = 0; i < totalRows; i++) {
       if (this.expectedFrequencies.getFreq(i) === 1) {
         this.totalSelectedElements++;
       }
     }
   }
+
 
 }

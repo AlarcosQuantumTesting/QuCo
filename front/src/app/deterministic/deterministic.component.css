@@ -1514,3 +1514,12 @@ input[disabled], textarea[disabled], select[disabled] {
   left: 2px;
   top: -2px;
 }
+
+.header-left-info {
+  position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+}

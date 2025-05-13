@@ -174,7 +174,10 @@
               <th colspan="3">
                 <div class="header-with-button">
                   <div style="margin-top: 5px; margin-bottom: 5px;">
-                    <!-- Expected frequency -->
+                    <div class="header-left-info" *ngIf="isGrover">
+                      <i *ngIf="totalSelectedElements>0" style="font-family: cursive; font-weight: normal; font-size: 12px;">{{ totalSelectedElements }} elements selected </i>
+                      <i *ngIf="totalSelectedElements<=0" style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
+                    </div>
                     <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                       <span>Expected frequency</span>
                       <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
@@ -218,7 +221,7 @@
                     <button *ngIf="!isGrover" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGrover" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button *ngIf="isGrover && totalSelectedElements > 0" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit(true)">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>
@@ -676,7 +679,7 @@
       </div>
   </div>
 </div>
-<i style="color : blue">{{ totalSelectedElements }} elements selected </i>
+<!-- <i style="color : blue">{{ totalSelectedElements }} elements selected </i> -->
 <!-- <div>
     <strong>Your expressions:</strong>
     <br>
