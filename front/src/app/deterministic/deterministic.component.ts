@@ -34,14 +34,12 @@ export class DeterministicComponent extends GroverStyle {
     if (this.editor) {
       this.editor.parent = this;
 
-      console.log("Parent asignado en AfterViewInit:", this.editor.parent);
     }
   }
 
   ngAfterViewChecked() {
     if (this.editor && !this.editor.parent) {
       this.editor.parent = this;
-      console.log("Parent asignado en AfterViewChecked:", this.editor.parent);
     }
   }
 
@@ -73,6 +71,7 @@ export class DeterministicComponent extends GroverStyle {
   // mensajeTemporal: string = '';
   numberOfQubits : number | null = null;
   isInvalid: boolean = true;
+  isInvalidSave: boolean = true;
   tooltipVisible: boolean = false;
   tooltipTableVisible: boolean = false;
   showRecommendations: boolean = false;
@@ -118,7 +117,7 @@ export class DeterministicComponent extends GroverStyle {
   searchQuery: string = "";
   recommendation: string = '';
 
-  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+  expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: '' };
 
   //De grover
   totalSelectedElements: number = 0;
@@ -133,15 +132,13 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   ngOnInit() {
-
-    this.expService.getExpressions().subscribe((data: Expression[]) => {
-      this.expressions = data.filter(exp => exp.type === 'grover');
-    });
     
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
+
+    this.onAlgorithmChange(this.selectedAlgorithm);
     
     this.isGrover = this.selectedAlgorithm === 'grover';
     this.isGrenoble = this.selectedAlgorithm === 'grenoble';
@@ -170,6 +167,19 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     this.validateInputs();
+    this.validateSaveInputs();
+
+    if (this.isGrover) {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grover');
+      });
+    } else {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grenoble' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
+      });
+    }
   }
 
   override tryFill(index: number): void {
@@ -749,6 +759,30 @@ export class DeterministicComponent extends GroverStyle {
     this.isInvalid = false;
   }
 
+  validateSaveInputs() {
+    if (this.expressionToSave.expressionName.trim() === '') {
+      this.error = 'Expression name is required';
+      this.isInvalidSave = true;
+      return;
+    }
+
+    if (this.expressionToSave.jsExpression.trim() === '') {
+      this.error = 'Expression is required';
+      this.isInvalidSave = true;
+      return;
+    }
+
+    if (this.expressionToSave.description.trim() === '') {
+      this.error = 'Description is required';
+      this.isInvalidSave = true;
+      return;
+    }
+
+    // Si todo está correcto
+    this.error = '';
+    this.isInvalidSave = false;
+  }
+
   buildMatrixActions() {
     this.numberOfQubits = this.qubits;
     this.userExpressions = [];
@@ -765,6 +799,7 @@ export class DeterministicComponent extends GroverStyle {
     
     //this.getEmptyMatrix();
     // this.goToSpecifications();
+    this.onAlgorithmChange(this.selectedAlgorithm);
     this.goToTable();
     // this.clearExpressions();
   }
@@ -881,6 +916,26 @@ export class DeterministicComponent extends GroverStyle {
     this.isGrover = value === 'grover';
     this.isGrenoble = value === 'grenoble';
     this.isOriginalGR = value === 'originalGR';
+
+    if (this.isGrover) {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+      this.expressionToSave.type = 'grover';
+    } else {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grenoble' };
+      this.expressionToSave.type = 'grenoble';
+    }
+
+    if (this.isGrover) {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grover');
+      });
+    } else {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grenoble' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
+      });
+    }
   }
 
   onQuirkChange(index: number): void {
@@ -1112,26 +1167,41 @@ export class DeterministicComponent extends GroverStyle {
     
     if (this.searchQuery.trim() != "") {
 
-      this.filteredExpressions = this.expressions.filter(exp =>
-        exp.type === 'grover' && 
-        (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
-      );
+      if (this.isGrover) {
+        this.filteredExpressions = this.expressions.filter(exp =>
+          exp.type === 'grover' && 
+          (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+        );
 
-      
-    const foundExpression = this.manager.expressions.find(exp =>
-      exp.type === 'grover' &&
-      exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
-    );
+        
+        const foundExpression = this.manager.expressions.find(exp =>
+          exp.type === 'grover' &&
+          exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
+        );
 
-    // if (foundExpression) {
-    //     console.log("Expression found:", foundExpression);
-    // }
-    
-    if (foundExpression) {
-        this.recommendation = `${foundExpression.jsExpression}`;
-        this.showRecommendations = true;
-    }
+        if (foundExpression) {
+          this.recommendation = `${foundExpression.jsExpression}`;
+          this.showRecommendations = true;
+        }
+      } else {
+        this.filteredExpressions = this.expressions.filter(exp =>
+          exp.type === 'grenoble' || exp.type === 'grover' && 
+          (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+        );
+
+        
+        const foundExpression = this.manager.expressions.find(exp =>
+          exp.type === 'grenoble' || exp.type === 'grover' && 
+          exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
+        );
+
+        if (foundExpression) {
+          this.recommendation = `${foundExpression.jsExpression}`;
+          this.showRecommendations = true;
+        }
+      }
 
     }
   }
@@ -1141,10 +1211,18 @@ export class DeterministicComponent extends GroverStyle {
     this.filteredExpressions = this.expressions;
 
     if (this.searchQuery.trim() != ""){
-      this.filteredExpressions = this.expressions.filter(exp =>
-        exp.type === 'grover' &&
-        exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      if (this.isGrover) {
+        this.filteredExpressions = this.expressions.filter(exp =>
+          exp.type === 'grover' &&
+          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+      } else {
+        this.filteredExpressions = this.expressions.filter(exp =>
+          exp.type === 'grenoble' || exp.type === 'grover' && 
+          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+      }
+      
     }
   }
 
@@ -1227,7 +1305,7 @@ export class DeterministicComponent extends GroverStyle {
                 this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
 
                 // Limpiamos el formulario y cerramos el modal
-                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
                 this.creatingExpression = false;
                 this.mostrarModalCrearExp = false;
                 this.mensajeTemporal = 'Expression updated successfully';
@@ -1251,7 +1329,7 @@ export class DeterministicComponent extends GroverStyle {
               expressionName: this.expressionToSave.expressionName,
               jsExpression: this.expressionToSave.jsExpression,
               description: this.expressionToSave.description,
-              type: 'grover'
+              type: this.expressionToSave.type
             }).subscribe(
                 data => {
                     // Aseguramos que `this.expressions` esté inicializado
@@ -1264,7 +1342,7 @@ export class DeterministicComponent extends GroverStyle {
                     this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
 
                     // Limpiamos el formulario y cerramos el modal
-                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
                     this.creatingExpression = false;
                     this.mostrarModalCrearExp = false;
                     this.mensajeTemporal = 'Expression created successfully';
@@ -1286,13 +1364,18 @@ export class DeterministicComponent extends GroverStyle {
 
   saveUserExpression(index: number) {
     this.expressionToSave.jsExpression = this.userExpressions[index];
-    this.expressionToSave.type = 'grover';
+    if (this.isGrover) {
+      this.expressionToSave.type = 'grover';
+    } else {
+      this.expressionToSave.type = 'grenoble';
+    }
     this.mostrarModalCrearExp = true;
   }
 
   editExpression(expression: any, index: number) {
     this.expressionToSave = { ...expression };
     this.fromEdit = true;
+    this.validateSaveInputs();
     this.isNameDisabled = true;
     this.mostrarModalCrearExp = true;
     this.mostrarModalVerExp = false;
@@ -1302,6 +1385,19 @@ export class DeterministicComponent extends GroverStyle {
     this.expressionToDelete = expression;
     this.deleteIndex = index;
     this.showDeleteModal = true;
+  }
+
+  cerrarCrear() {
+    this.mostrarModalCrearExp = false;
+    this.creatingExpression = false;
+    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
+    if(this.isGrover) {
+      this.expressionToSave.type = 'grover';
+    } else {
+      this.expressionToSave.type = 'grenoble';
+    }
+    this.isNameDisabled = false;
+    this.validateSaveInputs();
   }
 
   // Confirmar eliminación
