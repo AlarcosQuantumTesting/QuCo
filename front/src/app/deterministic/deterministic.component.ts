@@ -149,6 +149,24 @@ export class DeterministicComponent extends GroverStyle {
     this.onOptionFreqChange(this.selectedOptionFreq);
     this.applyOption();
 
+
+    const savedQubits = localStorage.getItem('qubits');
+    const savedUserExpressions = localStorage.getItem('processedExpressionsDeterministic');
+
+    if (savedQubits) {
+        this.buildMatrixActions();
+        setTimeout(() => {
+
+            if (savedUserExpressions) {
+              // Agregar expresiones guardadas al sistema
+              this.userExpressions = JSON.parse(savedUserExpressions);
+              this.fillTableWithUserExpressions();
+              
+          }
+        }, 50);
+
+    }
+
     this.validateInputs();
   }
 
@@ -209,6 +227,8 @@ export class DeterministicComponent extends GroverStyle {
     this.updateOutputs()
 
     this.updateTotalSelectedElements();
+
+    localStorage.setItem('processedExpressionsDeterministic', JSON.stringify(this.userExpressions));
   }
 
   private replaceQ(expr: string, row: string) {
