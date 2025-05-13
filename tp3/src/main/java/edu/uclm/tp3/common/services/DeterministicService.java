@@ -27,12 +27,12 @@ import org.springframework.stereotype.Service;
 import edu.uclm.tp3.Utils;
 import edu.uclm.tp3.common.deterministic.BinaryTree;
 import edu.uclm.tp3.common.deterministic.Coder;
+import edu.uclm.tp3.common.deterministic.FilterSolver;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.deterministic.GRCircuit;
 import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QColumn;
-import edu.uclm.tp3.common.deterministic.Solver;
 import edu.uclm.tp3.common.deterministic.UnifierSolver;
 import edu.uclm.tp3.dao.BinaryTreeDao;
 import edu.uclm.tp3.dao.BinaryTreeEntity;
@@ -116,11 +116,42 @@ public class DeterministicService {
 		tree.getCircuit().setQubits(qubits);
 		return tree;
 	}
+
+	public Map<String, Object> calculateFiltering(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
+		int shots = expectedFrequencies.getShots();
+		FilterSolver filter = new FilterSolver(qubits, expectedFrequencies);
+		BinaryTree tree = filter.solve();
+		UnifierSolver solver = new UnifierSolver(tree, functionPrefix, originalGR);
+		Map<String, Object> result = solver.solve(shots);
+		
+		QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
+		Map<String, Object> cleanCircuit =clean(quirkCircuit, qubits, null);
+		List<Map<String, Object>> partialCircuits = new ArrayList<>();
+		partialCircuits.add(cleanCircuit);
+		result.put("QUIRK", partialCircuits);
+		result.put("#QUBITS#", qubits);
+		result.put("#OUTPUT_QUBITS#", qubits);
+		result.put("#SHOTS#", shots);
+		result.put("#CALCULUS#", "circuits[0].append(get" + functionPrefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])");
+		StringBuilder sbExpected = new StringBuilder("expected = [");
+		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			int freq = pair.getFreq();
+			sbExpected.append("(" + index + ", " + (1.0*freq/shots) + "),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
+		result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, qubits)");
+		result.put("tree", tree.toMap());
+		return result;
+	}
 	
 	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		BinaryTree tree = this.buildTree(qubits, expectedFrequencies.getPairs(), functionPrefix, null);
 		
-		Solver solver = null;
 		if (!originalGR && physicalAngle>0) {
 			double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
 			minProb = minProb * minProb;
@@ -128,7 +159,7 @@ public class DeterministicService {
 		}
 
 		int shots = expectedFrequencies.getShots();
-		solver = new UnifierSolver(tree, functionPrefix, originalGR);
+		UnifierSolver solver = new UnifierSolver(tree, functionPrefix, originalGR);
 		Map<String, Object> result = solver.solve(shots);
 
 		QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
@@ -139,6 +170,7 @@ public class DeterministicService {
 		result.put("#SHOTS#", shots);
 		result.put("#CALCULUS#", "circuits[0].append(get" + functionPrefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])");
 		result.put("tree", tree.toMap());
+		
 
 		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 		partialCircuits.add(cleanCircuit);
@@ -177,14 +209,13 @@ public class DeterministicService {
 			String splitIndex = "v" + i + "_";
 			BinaryTree tree = this.buildTree(qubits, currentPair, functionPrefix, splitIndex);
 					
-			Solver solver = null;
 			if (!originalGR && physicalAngle>0) {
 				double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
 				minProb = minProb * minProb;
 				tree.removeLowAngles(physicalAngle);
 			}
 
-			solver = new UnifierSolver(tree, functionPrefix, originalGR);
+			UnifierSolver solver = new UnifierSolver(tree, functionPrefix, originalGR);
 			Map<String, Object> partialResult = solver.solve(shots);
 
 			QCircuit quirkCircuit = (QCircuit) partialResult.get("QUIRK");

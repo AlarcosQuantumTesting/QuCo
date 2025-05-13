@@ -19,7 +19,6 @@ public class BinaryTree implements Serializable{
     int rightFreq;
     float leftProbability, rightProbability;
     float leftAngle;
-    //float rightAngle;
     
     BinaryTree parent;
     BinaryTree leftChild;
@@ -80,16 +79,6 @@ public class BinaryTree implements Serializable{
     private void removeLowAnglesRecursive(BinaryTree node, double physicalAngle) {
 		if (node==null)
 			return;
-		
-		/*if (Math.abs(node.leftAngle)<physicalAngle && Math.abs(node.rightAngle)<physicalAngle)
-			node.leftAngle = node.rightAngle = 0;
-		else if (Math.abs(node.leftAngle)<physicalAngle) {
-			node.rightAngle = node.rightAngle + node.leftAngle;
-			node.leftAngle = 0;
-		} else if (Math.abs(node.rightAngle)<physicalAngle) {
-			node.leftAngle = node.leftAngle + node.rightAngle;
-			node.rightAngle = 0;
-		}*/
 
         if (Math.abs(node.leftAngle)<physicalAngle) {
 			node.leftAngle = 0;
@@ -117,9 +106,6 @@ public class BinaryTree implements Serializable{
         }
         
         node.leftAngle = (float) (2*Math.acos(Math.sqrt(node.leftProbability)) - Math.PI/2);
-        //node.rightAngle = (float) (Math.PI - node.leftAngle);
-        //if (node.rightAngle>=Math.PI)
-        //    node.rightAngle = (float) (node.rightAngle-Math.PI);
 
         normalizeProbabilitiesRecursive(node.leftChild);
         normalizeProbabilitiesRecursive(node.rightChild);

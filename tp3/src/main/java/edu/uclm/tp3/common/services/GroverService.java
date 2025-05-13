@@ -14,7 +14,7 @@ import edu.uclm.tp3.common.deterministic.Coder;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
-import edu.uclm.tp3.common.deterministic.QGroverDifussor;
+import edu.uclm.tp3.common.deterministic.QGroverDiffuser;
 import edu.uclm.tp3.common.deterministic.QGroverOracle;
 import edu.uclm.tp3.qiskit.NewGroverCoder;
 
@@ -24,31 +24,35 @@ public class GroverService {
     @Autowired
     private NewGroverCoder coder;
 
-    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies) {
         int shots = 1000;
 
         int numberOfPairs = expectedFrequencies.getPairs().size();
-        List<QCircuit> partialCircuits = new ArrayList<>();
-        for (int i=0; i<numberOfPairs; i++) {
-            //QCircuit circuit = this.buildGrover(expectedFrequencies, qubits);
-            //partialCircuits.add(circuit);
-        }
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
 
-        QCircuit generalCircuit = this.groupCircuits(partialCircuits, qubits);
-        String code = this.coder.getCode(generalCircuit, qubits);
-
-        Map<String, Object> result = new HashMap<>();
-		result.put("QUIRK", generalCircuit.toJson().toMap());
-        result.put("#QUBITS#", qubits*numberOfPairs);
-		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
+        Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
+        List<Map<String, Object>> partialCircuits = GroverSplitter.split(partialCircuit, qubits, numberOfPairs, optimal);
+		result.put("QUIRK", partialCircuits);
+        result.put("#QUBITS#", qubits);
+		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", shots);
-        result.put("#INITIALIZE#", code);
-		result.put("#HADAMARDS#", "");
-		result.put("#CALCULUS#", "");
+
+        StringBuilder sbCalculus = new StringBuilder();
+        StringBuilder circuitsDeclaration = new StringBuilder();
+        for (int i=0; i<numberOfPairs; i++) {
+            sbCalculus.append("for i in range(0, " + optimal + ") :\n");
+            sbCalculus.append("\tcircuits[" + i + "].append(oracle_" + i + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+            sbCalculus.append("\tcircuits[" + i + "].append(diffuser(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+            circuitsDeclaration.append("QuantumCircuit(qubits, qubits), ");
+        }
+		result.put("#CALCULUS#", sbCalculus.toString());
+        result.put("#CIRCUITS_DECLARATION#", circuitsDeclaration);	
 
         StringBuilder sbExpected = new StringBuilder("expected = [");
         double expectedFreq = 1.0/expectedFrequencies.getPairs().size();
-		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+		for (int i=0; i<numberOfPairs; i++) {
 			Pair pair = expectedFrequencies.getPairs().get(i);
 			int index = pair.getIndex();
 			sbExpected.append("(" + index + ", " + expectedFreq + "),");
@@ -60,47 +64,128 @@ public class GroverService {
         return result;
     }
 
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies) {
+        int shots = 1000;
+
+        int numberOfPairs = expectedFrequencies.getPairs().size();
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
+
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
+        Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
+        partialCircuit = this.parallelize(partialCircuit, qubits, numberOfPairs, optimal);
+        List<Map<String, Object>> partialCircuits = new ArrayList<>();
+        partialCircuits.add(partialCircuit);
+		result.put("QUIRK", partialCircuits);
+        result.put("#QUBITS#", qubits*numberOfPairs);
+		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
+		result.put("#SHOTS#", shots);
+
+        StringBuilder sbCalculus = new StringBuilder();
+        int startQubit = 0;
+        for (int i=0; i<numberOfPairs; i++) {
+            for (int j=0; j<optimal; j++) {
+                sbCalculus.append("circuits[0].append(oracle_" + i + "(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+                sbCalculus.append("circuits[0].append(diffuser(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+            }
+            startQubit = startQubit + qubits;
+        }
+		result.put("#CALCULUS#", sbCalculus.toString());
+
+        StringBuilder sbExpected = new StringBuilder("expected = [");
+        double expectedFreq = 1.0/expectedFrequencies.getPairs().size();
+		for (int i=0; i<numberOfPairs; i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			int index = pair.getIndex();
+			sbExpected.append("(" + index + ", " + expectedFreq + "),");
+			if (i>0 && i%10==0)
+				sbExpected.append("\n");
+		}
+		sbExpected.append("]");
+		result.put("#EXPECTED#", sbExpected.toString());
+        return result;
+    }
+
+    private Map<String, Object> parallelize(Map<String, Object> partialCircuit, int qubits, int numberOfPairs, int optimal) {
+        JSONObject jsoCircuit = new JSONObject(partialCircuit);
+        JSONArray jsaCols = new JSONArray();        
+        JSONArray jsaColH = new JSONArray();
+
+        int targetQubits = qubits * numberOfPairs;
+        for (int i=0; i<targetQubits; i++)
+            jsaColH.put("H");
+        jsaCols.put(jsaColH);
+
+        JSONArray jsaGates = jsoCircuit.getJSONArray("gates");
+        JSONArray jsaOracles = new JSONArray();
+        for (int i=0; i<jsaGates.length(); i++) {
+            String gateId = jsaGates.getJSONObject(i).getString("id");
+            if (gateId.startsWith("~oracle"))
+                jsaOracles.put(gateId);
+        }
+
+        for (int i=0; i<optimal; i++) {
+            JSONArray jsaCol = new JSONArray();
+            JSONArray jsaDiffuser = new JSONArray();
+            for (int j=0; j<jsaOracles.length(); j++) {
+                String oracleId = jsaOracles.getString(j);
+                this.put(jsaCol, oracleId, qubits*j);
+                this.put(jsaDiffuser, "~diffuser", qubits*j);
+            }
+            jsaCols.put(jsaCol);
+            jsaCols.put(jsaDiffuser);
+        }
+        jsoCircuit.put("cols", jsaCols);
+        return jsoCircuit.toMap();
+    }
+
+    private void put(JSONArray jsaCol, String oracleId, int startQubit) {
+        for (int i=1; i<startQubit; i++)
+            jsaCol.put(1);
+        jsaCol.put(oracleId);
+    }
+
     @SuppressWarnings("unchecked")
     public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies) {
         int shots = 1000;
 
-        Object[] oraclesAndDifussor = this.buildGrover(expectedFrequencies, qubits);
-        List<QGroverOracle> groverOracles = (List<QGroverOracle>) oraclesAndDifussor[0];
-        QGroverDifussor difussor = (QGroverDifussor) oraclesAndDifussor[1];
+        Object[] oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits);
+        List<QGroverOracle> groverOracles = (List<QGroverOracle>) oraclesAnddiffuser[0];
+        QGroverDiffuser diffuser = (QGroverDiffuser) oraclesAnddiffuser[1];
         
         QCircuit quirkCircuit = new QCircuit();
         StringBuilder code = new StringBuilder();
         for (int i=0; i<groverOracles.size(); i++) {
-            code.append("def oracle_" + i + "() :\t # Looks for " + expectedFrequencies.getPairs().get(i).getIndex() +"\n");
+            String oracleName = "oracle_" + i;
+
+            code.append("def " + oracleName + "() :\t # Looks for " + expectedFrequencies.getPairs().get(i).getIndex() +"\n");
             code.append("\tU = QuantumCircuit(" + qubits + ")\n");
             QGroverOracle oracle = groverOracles.get(i);
             code.append(this.coder.getCode(oracle));
             code.append("\treturn U\n");
             QCircuit oracleCircuit = oracle.toCircuit();
-            oracleCircuit.setName("oracle_" + i);
+            oracleCircuit.setName(oracleName);
             quirkCircuit.addGate(oracleCircuit);
         }
 
-        QCircuit difussorGate = difussor.toCircuit();
-        difussorGate.setName("difussor");
-        quirkCircuit.addGate(difussorGate);
+        QCircuit diffuserGate = diffuser.toCircuit();
+        diffuserGate.setName("diffuser");
+        quirkCircuit.addGate(diffuserGate);
 
-        int optimal = (int) Math.round(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
+        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
 
         JSONObject jsoCircuit = this.prepareCircuit(quirkCircuit, qubits, groverOracles.size(), optimal);
 
-        code.append("def difussor() :\n");
+        code.append("def diffuser() :\n");
         code.append("\tU = QuantumCircuit(" + qubits + ")\n");
-        code.append(this.coder.getCode(difussor));
+        code.append(this.coder.getCode(diffuser));
         code.append("\treturn U\n");
 
-        StringBuilder sbCalculus = new StringBuilder();
-        for (int i=0; i<optimal; i++) {
-            for (int j=0; j<groverOracles.size(); j++) {
-                sbCalculus.append("circuits[0].append(oracle_" + j + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
-            }
-            sbCalculus.append("circuits[0].append(difussor(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
-        }
+        StringBuilder sbCalculus = new StringBuilder("for i in range (0, " + optimal + ") :\n");        
+        for (int i=0; i<groverOracles.size(); i++)
+            sbCalculus.append("\tcircuits[0].append(oracle_" + i + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+        sbCalculus.append("\tcircuits[0].append(diffuser(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
 
         Map<String, Object> result = new HashMap<>();
         result.put("#QUBITS#", qubits);
@@ -128,7 +213,7 @@ public class GroverService {
         return result;
     }
 
-	private JSONObject prepareCircuit(QCircuit quirkCircuit, int qubits, int oracles, int optimal) {
+    private JSONObject prepareCircuit(QCircuit quirkCircuit, int qubits, int oracles, int optimal) {
         JSONObject jsoCircuit = quirkCircuit.toJson();
         jsoCircuit.remove("circuit");
         JSONArray jsaCols = new JSONArray();
@@ -144,9 +229,9 @@ public class GroverService {
                 jsaOracle.put("~oracle_" + j);
                 jsaCols.put(jsaOracle);
             }
-            JSONArray jsaDifussor = new JSONArray();
-            jsaDifussor.put("~difussor");
-            jsaCols.put(jsaDifussor);
+            JSONArray jsaDiffuser = new JSONArray();
+            jsaDiffuser.put("~diffuser");
+            jsaCols.put(jsaDiffuser);
         }
         jsoCircuit.put("cols", jsaCols);
 
@@ -172,8 +257,6 @@ public class GroverService {
             }
             sRows.add(row);
         }
-        int optimal = this.getOptimal(sRows, qubits);
-        System.out.println(optimal);
         return buildGrover(sRows, false);
     }
 
@@ -186,22 +269,10 @@ public class GroverService {
             groverOracles.add(oracle);
         }
 
-        QGroverDifussor difussor = new QGroverDifussor(qubits);
+        QGroverDiffuser diffuser = new QGroverDiffuser(qubits);
 
-        Object[] result = { groverOracles, difussor };
+        Object[] result = { groverOracles, diffuser };
         return result;
-    }
-
-    private int getOptimal(List<List<Integer>> sRows, int qubits) {
-        double N = Math.pow(2, qubits);
-        double M = sRows.size();
-        if (M >= N / 2) {
-            for (int i = 0; i < M; i++)
-                sRows.get(i).add(0);
-            qubits++;
-        }
-        int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(N / M));
-        return nOptimal;
     }
 
     private QCircuit groupCircuits(List<QCircuit> generalCircuits, int qubits) {
