@@ -116,6 +116,7 @@ export class DeterministicComponent extends GroverStyle {
   expressions: Expression[] = [];
   searchQuery: string = "";
   recommendation: string = '';
+  elementsZero: number = 0;
 
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: '' };
 
@@ -1609,6 +1610,23 @@ export class DeterministicComponent extends GroverStyle {
         this.totalSelectedElements++;
       }
     }
+  }
+
+  isEmpty(): boolean {
+    const totalRows = Math.min(this.expectedFrequencies.rows, this.maxRows);
+    this.elementsZero = 0;
+
+    for (let i = 0; i < totalRows; i++) {
+      if (this.expectedFrequencies.getFreq(i) === 0 && this.expectedFrequencies.getRelativeFreq(i, 2) === 0) {
+        this.elementsZero++;
+      }
+    }
+
+    if (this.elementsZero === totalRows) {
+      return true;
+    }
+
+    return false;
   }
 
 

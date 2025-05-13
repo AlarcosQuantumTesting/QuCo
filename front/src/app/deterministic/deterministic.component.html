@@ -210,7 +210,7 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button *ngIf="!isGrover" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
+                    <button *ngIf="!isGrover && !isEmpty()" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
                     <button *ngIf="isGrover && totalSelectedElements > 0" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit(true)">
