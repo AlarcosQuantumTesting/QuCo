@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QColumn;
-import edu.uclm.tp3.common.deterministic.QGroverDifussor;
+import edu.uclm.tp3.common.deterministic.QGroverDiffuser;
 import edu.uclm.tp3.common.deterministic.QGroverOracle;
 import edu.uclm.tp3.common.model.CodeTemplate;
 
 @Service
 public class NewGroverCoder {
 
-    public String getCode(QGroverDifussor difussor) {
+    public String getCode(QGroverDiffuser difussor) {
         StringBuilder code = new StringBuilder();
 		List<QColumn> columns = difussor.getColumns();
 		for (QColumn column : columns)

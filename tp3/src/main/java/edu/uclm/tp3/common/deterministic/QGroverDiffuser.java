@@ -3,7 +3,7 @@ package edu.uclm.tp3.common.deterministic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QGroverDifussor {
+public class QGroverDiffuser {
     private QColumn h0;
     private QColumn x0;
     private QColumn oneH0;
@@ -12,7 +12,7 @@ public class QGroverDifussor {
     private QColumn x1;
     private QColumn h1;
 
-    public QGroverDifussor(int qubits) {
+    public QGroverDiffuser(int qubits) {
         this.h0 = new QColumn();
         this.x0 = new QColumn();
         this.oneH0 = new QColumn();
