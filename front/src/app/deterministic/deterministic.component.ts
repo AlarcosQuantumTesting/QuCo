@@ -33,6 +33,8 @@ export class DeterministicComponent extends GroverStyle {
     
     if (this.editor) {
       this.editor.parent = this;
+
+      console.log("Parent asignado en AfterViewInit:", this.editor.parent);
     }
   }
 
@@ -616,6 +618,7 @@ export class DeterministicComponent extends GroverStyle {
     this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
     this.updateOutputs()
+    this.updateTotalSelectedElements();
   }
 
   random(factor : number) {
@@ -862,7 +865,19 @@ export class DeterministicComponent extends GroverStyle {
 
   onAlgorithmChange(value: string): void {
     this.selectedAlgorithm = value;
-    this.mostrarTabla = false;
+    if(this.isGrover) {
+      if(value === 'grover'){
+        this.mostrarTabla = true;
+      } else {
+        this.mostrarTabla = false;
+      }
+    } else {
+      if (value === 'grenoble' || value === 'originalGR') {
+        this.mostrarTabla = true;
+      } else {
+        this.mostrarTabla = false;
+      }
+    }
     this.isGrover = value === 'grover';
     this.isGrenoble = value === 'grenoble';
     this.isOriginalGR = value === 'originalGR';

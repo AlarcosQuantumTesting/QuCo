@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { DeterministicComponent } from '../deterministic/deterministic.component';
 
 @Component({
   selector: 'app-editor',
@@ -8,6 +9,12 @@ import { Component, Input } from '@angular/core';
 export class EditorComponent {
 
   @Input() parent: any;
+
+  isDeterministic: boolean = false;
+
+  ngOnInit() {
+    this.isDeterministic = this.parent instanceof DeterministicComponent;
+  }
 
   callParentMethodEx() {
     if (this.parent) {

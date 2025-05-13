@@ -25,11 +25,20 @@
           </a>
         </li>
         <li>
+          <a routerLink="grenoble" routerLinkActive="active">
+            <i class="fas fas fa-search" title="Grover, Grover and Rudolph, Grenoble"></i>
+            <span *ngIf="menuAbierto">Algorithms
+              <br>
+              <small style="font-size: 12px;">Grover, Grover and Rudolph, Grenoble</small>
+            </span>
+          </a>
+        </li>
+        <!-- <li>
           <a routerLink="grover" routerLinkActive="active">
             <i class="fas fa-search" title="Grover"></i>
             <span *ngIf="menuAbierto">Grover</span>
           </a>
-        </li>
+        </li> -->
         <li>
           <a routerLink="elonging" routerLinkActive="active">
             <i class="fas fa-dna" title="Genetic algorithm"></i>
@@ -40,12 +49,6 @@
           <a routerLink="blocks" routerLinkActive="active">
             <i class="fas fa-th-large" title="Blocks genetic algorithm"></i>
             <span *ngIf="menuAbierto">Blocks genetic algorithm</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="grenoble" routerLinkActive="active">
-            <i class="fas fa-project-diagram" title="Grover and Rudolph + Grenoble"></i>
-            <span *ngIf="menuAbierto">Grover and Rudolph + Grenoble</span>
           </a>
         </li>
         <li class="separador">
