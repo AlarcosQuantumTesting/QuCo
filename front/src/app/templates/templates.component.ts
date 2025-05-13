@@ -150,6 +150,7 @@ export class TemplatesComponent implements OnInit {
     this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
     this.descriptionTemplate = this.manager.selectedTemplate?.description?.trim();
     this.codeTemplate = this.manager.selectedTemplate?.code?.trim();
+    this.templateToSave = new CodeTemplate("", "", "");
   }
   isExistingTemplate: boolean = false;
 
@@ -276,6 +277,9 @@ export class TemplatesComponent implements OnInit {
     this.service.createTemplate(this.templateToSave).subscribe(
       data => {
         this.mensajeTemporal = 'Template created successfully!';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
         this.mostrarModalCrear = false;
         this.mostrarInstrucciones = false;
         this.manager.templates.push(data);
@@ -290,62 +294,77 @@ export class TemplatesComponent implements OnInit {
     console.log("Nombre del template:", this.templateToSave.fileName);
     console.log("Descripción del template:", this.templateToSave.description);
     console.log("Código del template:", this.templateToSave.code);
-    this.nameTemplate = '';
+    /*this.nameTemplate = '';
     this.descriptionTemplate = '';
     this.codeTemplate = '';
     this.currentName = '';
     this.currentDescription = '';
     this.currentCode = '';
     this.creatingTemplate = false;
-    this.mensajeTemporal = '';
+    this.mensajeTemporal = '';*/
     this.templateToSave = new CodeTemplate("", "", "");
     this.cancelEdit();
   }
 
   updateTemplate() {
-    this.templateToSave.fileName = this.currentName;
+    /*this.templateToSave.fileName = this.currentName;
     this.templateToSave.description = this.currentDescription;
-    this.templateToSave.code = this.currentCode;
-
-    let forgottenTokens = this.templateToSave.getForgottenTokens()
-    if (forgottenTokens.length > 0) {
-      let option = window.confirm("The following tokens are not used in the code: " + forgottenTokens.join(", ") + ". Do you want to continue?")
-      if (!option)
-        return
-    }
+    this.templateToSave.code = this.currentCode;*/
     
-    this.service.updateTemplate(this.templateToSave).subscribe(
-      data => {
-        this.templateToSave = data;
+
+    this.isExistingTemplate = this.templateExists();
+
+    this.manager.selectedTemplate.description =  this.currentDescription;
+    this.manager.selectedTemplate.code = this.currentCode;
+
+    console.log("Nombre del template sel:", this.manager.selectedTemplate.fileName);
+    console.log("Descripción del template sel:", this.manager.selectedTemplate.description);
+    console.log("Código del template sel:", this.manager.selectedTemplate.code);
+
+  
+    /*const forgottenTokens = this.manager.selectedTemplate.getForgottenTokens();
+    if (forgottenTokens.length > 0) {
+      const confirmMsg = `The following tokens are not used in the code: ${forgottenTokens.join(", ")}. Do you want to continue?`;
+      const option = window.confirm(confirmMsg);
+      if (!option) return;
+    }*/
+
+    
+  
+    this.service.updateTemplate(this.manager.selectedTemplate).subscribe(
+      (data) => {
+        /*console.log("Nombre del template:", this.templateToSave.fileName);
+        console.log("Descripción del template:", this.templateToSave.description);
+        console.log("Código del template:", this.templateToSave.code);*/
+        console.log("Respuesta del backend:", data);
+        if (!data || !data.fileName) {
+          console.error("Error: respuesta inválida del backend", data);
+          return;
+        }
+    
+        const index = this.manager.templates
+          .filter(t => t && t.fileName)
+          .findIndex(t => t.fileName === data.fileName);
+    
+        if (index === -1) {
+          this.manager.templates.push(data);
+        } else {
+          this.manager.templates[index] = data;
+        }
+    
+        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
+        this.manager.selectedTemplate = data;
         this.mensajeTemporal = 'Template updated successfully!';
-        this.mostrarModalCrear = false;
-        this.mostrarInstrucciones = false;
-        this.manager.selectedTemplate = this.templateToSave;
-
-
-        this.manager.templates.push(data)
-        this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName))
-        this.manager.selectedTemplate = data
-        this.creatingTemplate = false
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+    
+        this.cancelEdit();
       },
-      error => {
-        console.error(error)
+      (error) => {
+        console.error("Error updating template:", error);
       }
-    )
-
-    console.log("Nombre del template:", this.templateToSave.fileName);
-    console.log("Descripción del template:", this.templateToSave.description);
-    console.log("Código del template:", this.templateToSave.code);
-
-    this.templateToSave = new CodeTemplate("", "", "");
-    this.mensajeTemporal = '';
-    this.nameTemplate = '';
-    this.descriptionTemplate = '';
-    this.codeTemplate = '';
-    this.currentName = '';
-    this.currentDescription = '';
-    this.currentCode = '';
-    this.cancelEdit();
-
+    );
+    
   }
 }

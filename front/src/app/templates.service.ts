@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
 import { CodeTemplate } from './templates/CodeTemplate';
 
@@ -20,7 +20,13 @@ export class TemplatesService {
     return this.client.post<Template>(environment.beUrl + this.controller + "/createTemplate", selectedTemplate, { responseType : 'json' })
   }
 
-  updateTemplate<Template>(selectedTemplate: Template) {
+  /*updateTemplate<Template>(selectedTemplate: Template) {
     return this.client.post<Template>(environment.beUrl + this.controller + "/updateTemplate", selectedTemplate, { responseType : 'json' })
+  }*/
+
+  updateTemplate<Template>(selectedTemplate: Template) {
+    console.log("updateTemplate", selectedTemplate)
+    return this.client.post<Template>(environment.beUrl + this.controller + "/updateTemplate", selectedTemplate)
   }
+  
 }

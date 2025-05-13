@@ -51,4 +51,20 @@ public class TemplatesService {
         }
 	}
 	
+    public CodeTemplate updateTemplate(CodeTemplate template) {
+
+        if (template == null || template.getFileName() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File name is required");
+        }
+        
+        // Verificar si la expresión existe
+        if (!templateDao.existsById(template.getFileName())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found");
+        }
+        
+    
+        return templateDao.save(template);
+    }
+    
+    
 }

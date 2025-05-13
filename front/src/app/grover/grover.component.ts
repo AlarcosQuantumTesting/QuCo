@@ -19,10 +19,6 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
 
   @ViewChild(EditorComponent) editor!: EditorComponent;
   
-    someMethodInMatrixes() {
-      console.log('Método en grover llamado');
-    }
-  
     ngAfterViewInit() {
       setTimeout(() => {
         if (this.editor) {
@@ -819,7 +815,6 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
         this.userExpressions.push(exprs[i]);
     }
 
-    // Si deseas actualizar la variable `currentUserExpression`
     if (exprs.length > 0) {
         this.currentUserExpression = exprs[0];
     }
@@ -1307,4 +1302,7 @@ export class GroverComponent extends GroverStyle  implements AfterViewInit {
   }
   
 
+  isGroverOption (): boolean {
+    return true;
+  }
 }

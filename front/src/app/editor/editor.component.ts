@@ -21,6 +21,13 @@ export class EditorComponent {
     }
   }
 
+  callParentBoolean(methodName: string, ...args: any[]): boolean {
+    if (this.parent && typeof this.parent[methodName] === 'function') {
+      return this.parent[methodName](...args);
+    }
+    return false;
+  }  
+
   onUserInput() {
     if (this.parent) {
       this.parent.checkForExpressions();
