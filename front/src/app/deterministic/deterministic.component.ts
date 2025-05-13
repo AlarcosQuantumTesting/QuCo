@@ -404,6 +404,7 @@ export class DeterministicComponent extends GroverStyle {
       this.inParallel,
       this.splitCircuits,
       asGrover,
+      this.useMCX,
       this.prefix
     ).subscribe(
       blob => {

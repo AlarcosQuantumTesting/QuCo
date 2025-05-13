@@ -40,6 +40,7 @@ export class DeterministicService {
       inParallel: boolean,
       splitCircuits: boolean,
       asGrover : boolean,
+      useMCX: boolean,
       functionPrefix?: string,
     ): Observable<Blob> {
       const info = {
@@ -51,6 +52,7 @@ export class DeterministicService {
         splitCircuits,
         functionPrefix,
         asGrover,
+        useMCX,
       };
       let url = environment.beUrl + this.controller + '/newCalculate';
     
