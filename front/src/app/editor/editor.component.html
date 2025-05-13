@@ -68,4 +68,8 @@
             [disabled]="parent?.userExpressions.length <= 0">
             <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
         </button>
-</div>
+        <button class="btn-apply" *ngIf="!callParentBoolean('isGroverOption')" (click)="callParentMethod('setFrequenciesWithUserExpressions')"
+            [disabled]="parent?.userExpressions.length <= 0">
+            <i class="fa fa-sliders-h" aria-hidden="true"></i> Fill frequencies
+        </button>
+    </div>

@@ -1437,4 +1437,8 @@ export class MatrixesComponent implements AfterViewInit  {
 
   }
 
+  isGroverOption (): boolean {
+    return true;
+  }
+
 }
