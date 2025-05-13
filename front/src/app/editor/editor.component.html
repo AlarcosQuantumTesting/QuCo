@@ -8,7 +8,7 @@
         </button>
 
         <div class="editorTitle-container">
-            <h3 style="margin-left: 20px; padding-right: 0px;">Editor access</h3>
+            <h3 style="margin-left: 20px; padding-right: 0px;">Expressions editor</h3>
             <button class="btn-search" (click)="callParentMethod('showExpressions')">
                 <i class="fa fa-edit editorIcon" title="Edit your expressions"></i>
             </button>
@@ -64,9 +64,13 @@
     </div>
 
     <div class="btn-container">
-        <button class="btn-apply" (click)="callParentMethod('fillTableWithUserExpressions')"
+        <button class="btn-apply" *ngIf="!isDeterministic" (click)="callParentMethod('fillTableWithUserExpressions')"
             [disabled]="parent?.userExpressions.length <= 0">
             <i class="fa fa-list-check" aria-hidden="true"></i> Apply expressions
+        </button>
+        <button class="btn-apply" *ngIf="isDeterministic" (click)="callParentMethod('fillTableWithUserExpressions')"
+            [disabled]="parent?.userExpressions.length <= 0">
+            <i class="fa fa-list-check" aria-hidden="true"></i> Mark elements
         </button>
         <button class="btn-apply" *ngIf="!callParentBoolean('isGroverOption')" (click)="callParentMethod('setFrequenciesWithUserExpressions')"
             [disabled]="parent?.userExpressions.length <= 0">

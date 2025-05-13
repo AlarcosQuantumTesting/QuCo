@@ -20,7 +20,6 @@
         <div class="help-text">
             <h2>💡 How to use 'Matrices' 💡</h2>
 
-            <!-- <h4>🟢 Features:</h4> -->
             <ol>
                 <li>Select the number of input and output qubits</li>
                 <span class="span-help-modal">When you click on matrices the first thing you need to do to build your matrix is write the
@@ -172,13 +171,6 @@
     <h1>MATRIX</h1>
 </div>
 
-<!-- <div class="matrixTitle-container">
-    <h2 class="buildTitle">Build matrix</h2>
-    <button class="btn-reset" (click)="resetValues()">
-        <i class="fa fa-refresh" title="Reset matrix"></i>
-    </button>
-</div> -->
-
 <div class="container matrix-container">
     <div class="form-row">
         <div class="section buildText">
@@ -204,18 +196,14 @@
             <div class="form-group">
                 <div class="label-container">
                     <label for="outputQubits">Output qubits:</label>
-                    <small class="input-hint">[>= 0]</small>
+                    <small class="input-hint">[>= 1]</small>
                 </div>
-                <input id="outputQubits" type="number" min="0" [(ngModel)]="outputQubits" (input)="validateInputs()" class="form-control">
+                <input id="outputQubits" type="number" min="1" [(ngModel)]="outputQubits" (input)="validateInputs()" class="form-control">
 
-                <span *ngIf="outputQubits !== null && outputQubits < 0" class="error-text">
-                    Must be 0 or more
+                <span *ngIf="outputQubits !== null && outputQubits < 1" class="error-text">
+                    Must be 1 or more
                 </span>
             </div>
-
-            <!-- <div class="form-actions" style="margin-top: 25px;">
-                <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build matrix</button>
-            </div> -->
 
             <div class="matrixTitle-container" style="margin-top: 25px;">
                 <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
@@ -294,9 +282,10 @@
                             </div>
                         </div>
                     </th>
-                    <th *ngIf="!actionsHidden">
+                    <!-- <th *ngIf="!actionsHidden"> -->
+                    <th>
                         <div style="display: flex; justify-content: center; align-items: center;">
-                            <span>Actions</span>
+                            <span>Reduce</span>
                             <label title="Reduce Qiskit and Quirk" style="color: white; font-weight: normal; font-size: small;">
                                 <input type="checkbox" class="custom-checkbox" [checked]="reduceQuiskit && reduceQuirk"
                                     (change)="reduceQuiskit = $any($event.target).checked; reduceQuirk = $any($event.target).checked"/>
@@ -312,13 +301,11 @@
                     <th style="width: 100px;">
                         <small class="decimal">Decimal value</small>
                     </th>
-                    <th class="actions-cell" *ngIf="!actionsHidden">
+                    <!-- <th class="actions-cell" *ngIf="!actionsHidden"> -->
+                    <th class="actions-cell">
                         <button class="action-icon-header" title="Draw in Quirk" (click)="drawAllQuirk(matrix)">
                             <i class="fas fa-microchip"></i>
                         </button>
-                        <!-- <button class="action-icon-header" title="View Unitary Matrix" (click)="getUnitaryMatrix(matrix)">
-                            <i class="fa fa-border-all"></i>
-                        </button> -->
                         <button class="action-icon-header" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false)">
                             <i class="fa fa-code"></i>
                         </button>
@@ -341,14 +328,12 @@
                             [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
                     </td>
 
-                    <td class="actions-cell" *ngIf="!actionsHidden">
+                    <!-- <td class="actions-cell" *ngIf="!actionsHidden"> -->
+                    <td class="actions-cell">
                         <button class="action-icon" title="Draw in Quirk" (click)="drawQuirk(rowIndex, matrix)">
                             
                             <i class="fas fa-microchip"></i>
                         </button>
-                        <!-- <button class="action-icon" title="View Unitary Matrix" (click)="getUnitaryMatrix(matrix, rowIndex)">
-                            <i class="fa fa-border-all"></i>
-                        </button> -->
                         <button class="action-icon" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false)">
                             <i class="fa fa-code"></i>
                         </button>
@@ -361,191 +346,15 @@
             </table>
 
         </div>
-        <button class="toggle-actions-btn" [title]="actionsHidden ? 'Show actions' : 'Hide actions'" (click)="toggleActions()">
+        <!-- <button class="toggle-actions-btn" [title]="actionsHidden ? 'Show actions' : 'Hide actions'" (click)="toggleActions()">
             <i class="fa" [ngClass]="actionsHidden ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
-        </button>
+        </button> -->
     </div>
     <div class="section half expressions-section">
          <app-editor [parent]="this"></app-editor>
     </div>
     
 </div>
-<!-- <div class="table-container" *ngIf="matrix">
-    <table id="myTable" border="1">
-        <tr>
-            <th></th>
-            <th [colSpan]="inputQubits">Input</th>
-            <th [colSpan]="outputQubits + 1">Output</th>
-            <th rowspan="2">
-                <u href="#" (click)="drawAllQuirk(matrix)">Quirk</u>
-                <br>
-                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuirk">Reduce</small>
-            </th>
-            <th rowspan="2">
-                <u href="#" (click)="getUnitaryMatrix(matrix)">Matrices</u>
-            </th>
-            <th rowspan="2">
-                Qiskit code: <u href="#" (click)="mostrarModal = true; getQiskitCode(matrix, false)">as a whole program</u>
-                &nbsp;
-                <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
-                <br>
-                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
-            </th>
-        </tr>
-        <tr>
-            <th></th>
-            <th *ngFor="let i of [].constructor(cols); let cont = index" align="center">
-                q<sub>{{cont}}</sub>
-            </th>
-            <th>
-                <small class="decimal" style="width: auto;">Decimal value</small>
-            </th>
-        </tr>
-
-        <tr *ngFor="let row of matrix; let rowIndex = index"
-                align="center">
-            <th>
-                {{rowIndex}}
-            </th>
-
-            <td *ngFor="let value of row; let colIndex = index"
-                align="right" (click)="negate(rowIndex, colIndex)">
-                <span *ngIf="colIndex<inputQubits" style="color: green">
-                    {{ value }}
-                </span>
-                <span *ngIf="colIndex>=inputQubits"  class="clickable-span">
-                   {{ value }}
-               </span>
-            </td>
-            <td>
-                <input class="table-input" type="number" min="0" [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
-            </td>
-            <td>
-                <u href="#" (click)="drawQuirk(rowIndex, matrix)">Draw</u>
-            </td>
-            <td>
-                <u href="#" (click)="getUnitaryMatrix(matrix, rowIndex)">Unitary matrix</u>
-            </td>
-            <td>
-                Qiskit code: <u href="#" (click)="mostrarModal = true; getQiskitCode(matrix, false)">as a whole program</u>
-                &nbsp;
-                <u href="#" (click)="getQiskitCode(matrix, true)">as a function</u>
-                <br>
-                <small><input type="checkbox" class="custom-checkbox" [(ngModel)]="reduceQuiskit">Reduce</small>
-            </td>
-        </tr>
-    </table>
-
-    <table border="1" *ngIf="finalMatrixNumberOfRows>0">
-        <tr>
-            <th rowspan="3"></th>
-            <th [colSpan]="inputQubits + outputQubits + 2">
-                <small>Original expanded matrix</small>
-            </th>
-
-            <th rowspan="3" style="background-color: beige;">→</th>
-
-            <th [colSpan]="inputQubits + outputQubits + 2">
-                <small>Expected matrix</small>
-            </th>
-        </tr>
-        <tr>
-            <th [colSpan]="inputQubits">Input</th>
-            <th [colSpan]="outputQubits">Output</th>
-            <th rowspan="2">
-                <u href="#" (click)="drawAllQuirk(startMatrix!)">Quirk</u>
-            </th>
-            <th rowspan="2">
-                <u href="#" (click)="getUnitaryMatrix(startMatrix!)">Matrix</u>
-            </th>
-
-            <th [colSpan]="inputQubits">Input</th>
-            <th [colSpan]="outputQubits">Output</th>
-
-            <th rowspan="2">
-                <u href="#" (click)="drawAllQuirk(finalMatrix!)">Quirk</u>
-            </th>
-            <th rowspan="2">
-                <u href="#" (click)="getUnitaryMatrix(finalMatrix!)">Matrix</u>
-            </th>
-        </tr>
-        <tr>
-            <th *ngFor="let i of [].constructor(cols); let cont = index" align="center">
-                q<sub>{{cont}}</sub>
-            </th>
-            <th *ngFor="let i of [].constructor(cols); let cont = index" align="center">
-                q<sub>{{cont}}</sub>
-            </th>
-        </tr>
-        <tr *ngFor="let row of startMatrix; let rowIndex = index">
-            <th>
-                {{ rowIndex }}
-            </th>
-            <td *ngFor="let value of row; let colIndex = index"
-                align="right">
-                <span *ngIf="colIndex<inputQubits" style="color: green">
-                    {{ value }}
-                </span>
-                <span *ngIf="colIndex>=inputQubits" style="color: red"
-                    (click)="negate(rowIndex, colIndex)">
-                    {{ value }}
-                </span>
-            </td>
-            <td>
-                <u href="#" (click)="drawQuirk(rowIndex, startMatrix!)">Draw</u>
-            </td>
-            <td>
-                <u href="#" (click)="getUnitaryMatrix(startMatrix!, rowIndex)">Unitary matrix</u>
-            </td>
-            <td style="background-color: beige;"></td>
-            <td *ngFor="let value of row; let colIndex = index"
-                align="right">
-                <span *ngIf="colIndex<inputQubits" style="color: green">
-                    {{ finalMatrix![rowIndex][colIndex] }}
-                </span>
-                <span *ngIf="colIndex>=inputQubits" style="color: red"
-                    (click)="negate(rowIndex, colIndex)">
-                    {{ finalMatrix![rowIndex][colIndex] }}
-                </span>
-            </td>
-            <td>
-                <u href="#" (click)="drawQuirk(rowIndex, finalMatrix!)">Draw</u>
-            </td>
-            <td>
-                <u href="#" (click)="getUnitaryMatrix(finalMatrix!, rowIndex)">Unitary matrix</u>
-            </td>
-        </tr>
-    </table>
-</div> -->
-
-    <!-- <p *ngIf="numberOfReceivedMatrixes!=0">
-        Received one matrix of {{ qiskitMatrix.length }} x {{ qiskitMatrix.length }}.<br>
-        The calculus time on the server has been of {{ calculusTime }} seconds.
-    </p>
-
-    <p *ngIf="numberOfReceivedMatrixes==-1">
-        Since the data sent contain zero in all the output qubits, no matrices have been produced.
-    </p>
-
-    <div *ngIf="qiskitMatrix">
-        <small style="font-family: 'Courier New', Courier, monospace;">
-            <pre>{{ qiskitMatrixStart }}</pre>
-            <code>component = Operator([<br></code>
-            <code *ngFor="let row of qiskitMatrix; let i = index">
-                &nbsp;&nbsp;[
-                <span *ngFor="let cell of row; let j = index">
-                    <b *ngIf="cell!=0">{{ cell }}</b>
-                    <span *ngIf="cell==0">0</span>
-                    <span *ngIf="j<row.length-1">,</span>
-                </span>
-                ]<span *ngIf="i<row.length-1">,</span>
-                <br>
-            </code>
-            <code>])</code>
-            <pre>circuit.unitary(component, qreg)</pre>
-            <pre>{{ qiskitMatrixEnd }}</pre>
-        </small>
-    </div> -->
 
 <!-- Modales -->
 
