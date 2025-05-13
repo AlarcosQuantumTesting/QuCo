@@ -41,7 +41,7 @@ public class QGroverer {
             groverOracles.add(oracle);
         }
 
-        QGroverDifussor difussor = new QGroverDifussor(qubits);
+        QGroverDiffuser difussor = new QGroverDiffuser(qubits);
 
         if (!inParallel) {
             int nOptimal = getOptimal(sRows, qubits);
@@ -60,7 +60,7 @@ public class QGroverer {
         return decimal;
     }
 
-    private static QCircuit buildGroverCircuitIParallel(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
+    private static QCircuit buildGroverCircuitIParallel(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDiffuser difussor, int nOptimal) {
         List<QCircuit> circuits = new ArrayList<>();
 
         int ones = 0;
@@ -114,7 +114,7 @@ public class QGroverer {
         return resultCircuit;
     }
 
-    private static QCircuit buildGroverCircuit(int qubits, List<QGroverOracle> groverOracles, QGroverDifussor difussor, int nOptimal) {
+    private static QCircuit buildGroverCircuit(int qubits, List<QGroverOracle> groverOracles, QGroverDiffuser difussor, int nOptimal) {
         QCircuit circuit = new QCircuit();
         QColumn column0 = new QColumn();
         QColumn barrier = new QColumn();

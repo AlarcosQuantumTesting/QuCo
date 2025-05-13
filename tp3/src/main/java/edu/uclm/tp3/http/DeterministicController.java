@@ -3,7 +3,8 @@ package edu.uclm.tp3.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.services.DeterministicService;
 import edu.uclm.tp3.common.services.GroverService;
+import edu.uclm.tp3.common.services.RequestsService;
 
 @RestController
 @RequestMapping("deterministic")
@@ -35,6 +37,8 @@ public class DeterministicController {
 	private DeterministicService service;
 	@Autowired
 	private GroverService groverService;
+	@Autowired
+	private RequestsService requestsService;
 	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
@@ -42,7 +46,7 @@ public class DeterministicController {
 	}
 
 	@PostMapping(path = "/newCalculate", produces = MediaType.APPLICATION_JSON_VALUE) @ResponseBody
-	public ResponseEntity<StreamingResponseBody> newCalculate(HttpSession session, @RequestBody Map<String, Object> info) {
+	public ResponseEntity<StreamingResponseBody> newCalculate(HttpServletRequest req, @RequestBody Map<String, Object> info) {
 		JSONObject jso = new JSONObject(info);
 		
 		int qubits = jso.getInt("qubits");
@@ -53,6 +57,8 @@ public class DeterministicController {
 		boolean splitCircuits = jso.getBoolean("splitCircuits");
 		String functionPrefix = jso.optString("functionPrefix");
 		boolean asGrover = jso.optBoolean("asGrover", false);
+		
+		this.requestsService.insert(req, info);
 		
 		expectedFrequencies.sort();
 		try {
@@ -71,6 +77,7 @@ public class DeterministicController {
 					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 				else
 					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					//result = this.service.calculateFiltering(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 			}
 			return this.buildResponse(result);
 		} catch (IOException e) {

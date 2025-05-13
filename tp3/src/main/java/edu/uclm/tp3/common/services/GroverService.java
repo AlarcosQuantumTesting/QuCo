@@ -14,7 +14,7 @@ import edu.uclm.tp3.common.deterministic.Coder;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
-import edu.uclm.tp3.common.deterministic.QGroverDifussor;
+import edu.uclm.tp3.common.deterministic.QGroverDiffuser;
 import edu.uclm.tp3.common.deterministic.QGroverOracle;
 import edu.uclm.tp3.qiskit.NewGroverCoder;
 
@@ -35,20 +35,17 @@ public class GroverService {
         Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
         List<Map<String, Object>> partialCircuits = GroverSplitter.split(partialCircuit, qubits, numberOfPairs, optimal);
 		result.put("QUIRK", partialCircuits);
-        result.put("#QUBITS#", qubits*numberOfPairs);
-		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
+        result.put("#QUBITS#", qubits);
+		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", shots);
 
         StringBuilder sbCalculus = new StringBuilder();
-        int startQubit = 0;
         StringBuilder circuitsDeclaration = new StringBuilder();
         for (int i=0; i<numberOfPairs; i++) {
-            for (int j=0; j<optimal; j++) {
-                sbCalculus.append("circuits[" + i + "].append(oracle_" + i + "(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
-                sbCalculus.append("circuits[" + i + "].append(difussor(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
-            }
+            sbCalculus.append("for i in range(0, " + optimal + ") :\n");
+            sbCalculus.append("\tcircuits[" + i + "].append(oracle_" + i + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+            sbCalculus.append("\tcircuits[" + i + "].append(diffuser(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
             circuitsDeclaration.append("QuantumCircuit(qubits, qubits), ");
-            startQubit = startQubit + qubits;
         }
 		result.put("#CALCULUS#", sbCalculus.toString());
         result.put("#CIRCUITS_DECLARATION#", circuitsDeclaration);	
@@ -90,7 +87,7 @@ public class GroverService {
         for (int i=0; i<numberOfPairs; i++) {
             for (int j=0; j<optimal; j++) {
                 sbCalculus.append("circuits[0].append(oracle_" + i + "(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
-                sbCalculus.append("circuits[0].append(difussor(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+                sbCalculus.append("circuits[0].append(diffuser(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
             }
             startQubit = startQubit + qubits;
         }
@@ -130,14 +127,14 @@ public class GroverService {
 
         for (int i=0; i<optimal; i++) {
             JSONArray jsaCol = new JSONArray();
-            JSONArray jsaDifussor = new JSONArray();
+            JSONArray jsaDiffuser = new JSONArray();
             for (int j=0; j<jsaOracles.length(); j++) {
                 String oracleId = jsaOracles.getString(j);
                 this.put(jsaCol, oracleId, qubits*j);
-                this.put(jsaDifussor, "~difussor", qubits*j);
+                this.put(jsaDiffuser, "~diffuser", qubits*j);
             }
             jsaCols.put(jsaCol);
-            jsaCols.put(jsaDifussor);
+            jsaCols.put(jsaDiffuser);
         }
         jsoCircuit.put("cols", jsaCols);
         return jsoCircuit.toMap();
@@ -153,9 +150,9 @@ public class GroverService {
     public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies) {
         int shots = 1000;
 
-        Object[] oraclesAndDifussor = this.buildGrover(expectedFrequencies, qubits);
-        List<QGroverOracle> groverOracles = (List<QGroverOracle>) oraclesAndDifussor[0];
-        QGroverDifussor difussor = (QGroverDifussor) oraclesAndDifussor[1];
+        Object[] oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits);
+        List<QGroverOracle> groverOracles = (List<QGroverOracle>) oraclesAnddiffuser[0];
+        QGroverDiffuser diffuser = (QGroverDiffuser) oraclesAnddiffuser[1];
         
         QCircuit quirkCircuit = new QCircuit();
         StringBuilder code = new StringBuilder();
@@ -172,25 +169,23 @@ public class GroverService {
             quirkCircuit.addGate(oracleCircuit);
         }
 
-        QCircuit difussorGate = difussor.toCircuit();
-        difussorGate.setName("difussor");
-        quirkCircuit.addGate(difussorGate);
+        QCircuit diffuserGate = diffuser.toCircuit();
+        diffuserGate.setName("diffuser");
+        quirkCircuit.addGate(diffuserGate);
 
         int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
 
         JSONObject jsoCircuit = this.prepareCircuit(quirkCircuit, qubits, groverOracles.size(), optimal);
 
-        code.append("def difussor() :\n");
+        code.append("def diffuser() :\n");
         code.append("\tU = QuantumCircuit(" + qubits + ")\n");
-        code.append(this.coder.getCode(difussor));
+        code.append(this.coder.getCode(diffuser));
         code.append("\treturn U\n");
 
-        StringBuilder sbCalculus = new StringBuilder();
-        for (int i=0; i<optimal; i++) {
-            for (int j=0; j<groverOracles.size(); j++)
-                sbCalculus.append("circuits[0].append(oracle_" + j + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
-            sbCalculus.append("circuits[0].append(difussor(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
-        }
+        StringBuilder sbCalculus = new StringBuilder("for i in range (0, " + optimal + ") :\n");        
+        for (int i=0; i<groverOracles.size(); i++)
+            sbCalculus.append("\tcircuits[0].append(oracle_" + i + "(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+        sbCalculus.append("\tcircuits[0].append(diffuser(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
 
         Map<String, Object> result = new HashMap<>();
         result.put("#QUBITS#", qubits);
@@ -234,9 +229,9 @@ public class GroverService {
                 jsaOracle.put("~oracle_" + j);
                 jsaCols.put(jsaOracle);
             }
-            JSONArray jsaDifussor = new JSONArray();
-            jsaDifussor.put("~difussor");
-            jsaCols.put(jsaDifussor);
+            JSONArray jsaDiffuser = new JSONArray();
+            jsaDiffuser.put("~diffuser");
+            jsaCols.put(jsaDiffuser);
         }
         jsoCircuit.put("cols", jsaCols);
 
@@ -274,9 +269,9 @@ public class GroverService {
             groverOracles.add(oracle);
         }
 
-        QGroverDifussor difussor = new QGroverDifussor(qubits);
+        QGroverDiffuser diffuser = new QGroverDiffuser(qubits);
 
-        Object[] result = { groverOracles, difussor };
+        Object[] result = { groverOracles, diffuser };
         return result;
     }
 

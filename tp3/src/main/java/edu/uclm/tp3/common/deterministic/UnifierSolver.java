@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class UnifierSolver extends Solver {
+public class UnifierSolver {
+	protected BinaryTree tree;
 	private String functionPrefix;
 	private boolean originalGR;
 		
 	public UnifierSolver(BinaryTree tree, String functionPrefix, boolean originalGR) {
-		super(tree);
+		this.tree = tree;
 		this.functionPrefix = functionPrefix;
 		this.originalGR = originalGR;
 	}
