@@ -744,7 +744,7 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
 
-    if (this.outputQubits < 0) {
+    if (this.outputQubits < 1) {
       this.error = 'Output qubits must be 0 or more';
       this.isInvalid = true;
       return;

@@ -1369,6 +1369,12 @@ i {
   transform: scale(1.05);
 }
 
+.save-new-btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .btn-confirm {
   padding: 10px 20px;
   font-size: 14px;
@@ -1522,4 +1528,35 @@ input[disabled], textarea[disabled], select[disabled] {
     transform: translateY(-50%);
     display: flex;
     gap: 5px;
+}
+
+.custom-radio {
+    margin-bottom: 0px;
+    font-size: 13px;
+
+    display: flex;
+    align-items: center;
+}
+
+.custom-radio:hover {
+    cursor: pointer;
+}
+.custom-radio .pRadio:hover {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.637);
+}
+
+
+.custom-radio .pRadio {
+  margin: 0px;
+  margin-top: 5px;
+  font-size: 13px;
+  padding: 0px;
+}
+
+.custom-radio .pRadioTitle {
+  margin: 0px;
+  margin-top: 2px;
+  font-size: 15px;
+  padding: 0px;
 }

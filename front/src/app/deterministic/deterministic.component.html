@@ -11,15 +11,11 @@
   </div>
 
   <div class="titulo">
-      <h1>Algorithms</h1>
+      <h1>Algorithms
+        <br>
+        <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
+      </h1>
   </div>
-
-  <!-- <div class="matrixTitle-container">
-      <h2 class="buildTitle">Build matrix</h2>
-      <button class="btn-reset" (click)="resetValues()">
-          <i class="fa fa-refresh" title="Reset matrix"></i>
-      </button>
-  </div> -->
 
   <div class="container matrix-container">
       <div class="form-row">
@@ -72,7 +68,7 @@
   <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative;">
     <div style="display: flex; align-items: center;">
       <h2 *ngIf="mostrarTabla" style="margin-top: 10px;">Table</h2>
-      <div style="position: relative;">
+      <!-- <div style="position: relative;">
         <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
           <i class="fa fa-edit"></i>
         </button>
@@ -88,29 +84,22 @@
               </label>
           </div>
 
-          <div *ngIf="isGrover">
-              <p class="radioTitle">Configuration:</p>
-              <label class="custom-radio">
-                  <input type="checkbox"  class="custom-checkbox" [(ngModel)]="inParallel" [value]="false" style="margin-left: 5px;"> Separate circuits
-              </label>
-          </div>
-
           <div>
-              <p class="radioTitle">Available templates:</p>
-              <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
-                <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
-                    {{ template.fileName }}
-                </option>
+            <p class="radioTitle">Available templates:</p>
+            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
+              <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
+                {{ template.fileName }}
+              </option>
             </select> 
         
             <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
               <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
-                  {{ template.fileName }}
+                {{ template.fileName }}
               </option>
             </select> 
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -119,33 +108,26 @@
         <div class="table-container" *ngIf="mostrarTabla">
           <table border="1">
             <tr>
-              <!-- <th colspan="5" align="left">
-                <input type="checkbox" [(ngModel)]="originalGR"> Original Grover & Rudolph
-                <br>
-                Physical angle:
-                &nbsp;
-                <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
-                <br>
-                Functions' prefix: <input type="text" [(ngModel)]="prefix">
-                &nbsp;
-                <input type="checkbox" [(ngModel)]="inParallel">Parallel circuit
-                &nbsp;
-                <input type="checkbox" [(ngModel)]="splitCircuits">Split in several circuits
-                &nbsp;
-                <button *ngIf="!isGrover" (click)="getCircuit()">Get whole Qiskit code</button>
-                &nbsp;
-                <button *ngIf="isGrover" (click)="getCircuit(true)">Get Grover code</button>
-                &nbsp;
-                <u style="color:white" (click)="goToCode()">Go to code</u>
-              </th> -->
 
               <th colspan="5" class="config-cell">
                 <div class="config-container">
                   <div class="config-item checkbox" style="margin-bottom: 5px;">
+                    Available templates:
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
+                      <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
+                        {{ template.fileName }}
+                      </option>
+                    </select> 
+                
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
+                      <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
+                        {{ template.fileName }}
+                      </option>
+                    </select> 
                     <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel">Parallel circuit
-                    <input type="checkbox" style="margin-left: 15px;" class="custom-checkbox" [(ngModel)]="splitCircuits">Split in several circuits
+                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits">Split in several circuits
                   </div>
-                  <div *ngIf="!isGrover" class="config-inputs-container" style="margin-top: 5px;">
+                  <div class="config-inputs-container" style="margin-top: 5px;">
                     <div class="config-input" *ngIf="!isGrover" style="margin-right: 8px;">
                       <!-- <label for="angle">Physical angle:</label> -->
                       Physical angle:
@@ -154,9 +136,21 @@
                     </div>
                 
                     <div class="config-input" *ngIf="!isGrover" style="margin-left: 8px;">
-                      <!-- <label for="prefix">Functions' prefix:</label> -->
                       Functions' prefix:
                       <input id="prefix" type="text" [(ngModel)]="prefix">
+                    </div>
+
+                    <div *ngIf="isGrover" class="config-input">
+                        
+                        <label class="custom-radio">
+                          <p class="pRadioTitle">Use:</p>
+                          <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
+                          <p class="pRadio">MCX</p>
+                        </label>
+                        <label class="custom-radio">
+                          <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">
+                          <p class="pRadio">H-MCZ-H</p>
+                        </label>
                     </div>
                   </div>
                 </div>
@@ -179,7 +173,9 @@
                       <i *ngIf="totalSelectedElements<=0" style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
                     </div>
                     <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-                      <span>Expected frequency</span>
+                      <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh" title="Reset values"></i></button>
+                  
+                      <span>Expected frequency <i>(p<sub>i</sub>)</i></span>
                       <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
                           <i class="fa fa-info-circle"></i>
                       </button>
@@ -216,9 +212,7 @@
                   </div>
                   
                   <div class="actions-container">
-                    <!-- <button *ngIf="!isGrover" (click)="getCircuit()">Get whole Qiskit code</button>
-                    <button *ngIf="isGrover" (click)="getCircuit(true)">Get Grover code</button> -->
-                    <button *ngIf="!isGrover" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
+                    <button *ngIf="!isGrover && !isEmpty()" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
                     <button *ngIf="isGrover && totalSelectedElements > 0" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit(true)">
@@ -229,25 +223,8 @@
               </th>
             </tr>
             <tr>
-              <!-- <th colspan="6">
-                <i>p<sub>i</sub></i>
-                &nbsp;
-                <small><small style="color: white" (click)="random(1)">Random</small></small>
-                &nbsp;
-                <small><small style="color: white" (click)="random(10)">Random*10</small></small>
-                &nbsp;
-                <small><small style="color: white" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-                &nbsp;
-                <small><small style="color: white" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
-                &nbsp;
-                <small><small style="color: white" (click)="reset()">Reset</small></small>
-                &nbsp;
-                <small><small style="color: white" (click)="fixedAmount()">This amount of values: <input type="number" step="1" min="1" max="expectedFrequencies.rows" [(ngModel)]="amountOfValues"></small></small>
-              </th> -->
               <th colspan="6" class="probability-cell">
                 <div class="pi-label">
-                  <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh" title="Reset values"></i></button>
-                  <i>p<sub>i</sub></i>
                   <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
                     <option [ngValue]="'none'">None</option>
                     <option [ngValue]="'random'">Random</option>
@@ -256,25 +233,20 @@
                     <option [ngValue]="'probabilityOf0'" *ngIf="!isGrover">Probability of 0</option>
                     <option [ngValue]="'amountOfValues'">This amount of values</option>
                   </select>
-                  <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button> 
+                  <!-- <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button>  -->
 
-                  <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;">
-                    <!-- <span class="clickable" (click)="random(1)">Random</span>
-                    <span class="clickable" (click)="random(10)">Random ×10</span>
-                    <span class="clickable" (click)="zeroTo2N()">0 to 2⁽ⁿ⁻¹⁾</span> -->
-                      <!-- <span class="clickable" (click)="withProb()"> -->
+                  <!-- <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;"> -->
                       <span *ngIf="isProbabilityOf0" style="font-size: 13px;">
                         Probability of 0:
                         <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0">
                       </span>
                   
-                      <!-- <span class="clickable" (click)="fixedAmount()"> -->
                       <span *ngIf="isAmountOfValues" style="font-size: 13px;">
                         This amount of values:
                         <input type="number" step="1" min="1" [max]="expectedFrequencies.rows" [(ngModel)]="amountOfValues">
                       </span>
                       <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
-                  </div>
+                  <!-- </div> -->
                 </div>
 
                 <div class="prob-controls">
@@ -397,27 +369,6 @@
   </div>
 </div>
 
-
-<!-- <div>
-    Number of qubits: <input type="number" min="1" max = "24" [(ngModel)]="qubits" (change)="updateOutputs()">
-    &nbsp;
-    <i>(The table shows only the first {{ maxRows}} rows)</i>
-</div>
-<span style="color : red">{{ error }}</span> -->
-<!-- 
-<div>
-    <p>You can use this code and circuits generator in three ways:</p>
-    <ol>
-        <li>In the <strong>first time</strong>, you can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.</li>
-        <li>In the <strong>second time</strong>, you can fill-in the absolute frequencies using JavaScript expressions.</li>
-        <li>In the <strong>third time</strong>, you can use it in a <i>"Grover approach"</i>: i.e, you can type an expression for highlighting those 
-            elements that must be searched by the circuit or program.
-        <br>For the second and third cases, press <a style="color : blue" (click)="hideExamples=!hideExamples">here</a> to show or hide some examples.<br>
-        If you want to use this approach, you can add the expressions you desire to set the output frequencies (second case) or to mark the elements that must be selected (third case).
-    </li>
-    </ol>
-</div> -->
-
 <div [hidden]="hideExamples">
     <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
     <p>
@@ -459,7 +410,7 @@
       <!-- Botón para cerrar el modal -->
       <div class="modal-header">
           <h2 class="title-modal">Create expression</h2>
-          <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false;">&times;</i></button>
+          <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false; cerrarCrear()">&times;</i></button>
       </div>
 
       <!-- Contenido del modal -->
@@ -472,21 +423,21 @@
                   </div>
   
                   <input id="expressionName" type="text" [disabled]="isNameDisabled" 
-                  [(ngModel)]="expressionToSave.expressionName" class="form-control">
+                  [(ngModel)]="expressionToSave.expressionName" class="form-control" (input)="validateSaveInputs()">
               </div>
   
               <div class="form-group">
                   <div class="label-container">
                       <label for="jsExpression">Expression in javaScript:</label>
                   </div>
-                  <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control">
+                  <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control" (input)="validateSaveInputs()">
               </div>
 
               <div class="form-group">
                   <div class="label-container">
                       <label for="expressionDescription">Description:</label>
                   </div>
-                  <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control">
+                  <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control" (input)="validateSaveInputs()">
               </div>
 
               <div class="form-group">
@@ -496,15 +447,11 @@
                   <input id="expDescription" type="text" [disabled]="isType"
                   [(ngModel)]="expressionToSave.type" class="form-control">
               </div>
-  
-              <!-- <div class="form-actions">
-                  <button (click)="save()" [disabled]="isInvalid" class="btn btn-primary">Save</button>
-              </div> -->
           </div>
 
           <div class="help-actions">
-              <button (click)="save()" [disabled]="isInvalid" class="save-new-btn">Save</button>
-              <button class="cancel-btn" (click)="mostrarModalCrearExp = false">Cancel</button>
+              <button (click)="save()" [disabled]="isInvalidSave" class="save-new-btn">Save</button>
+              <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarCrear()">Cancel</button>
           </div>
       </div>
   </div>
@@ -516,7 +463,6 @@
       <div class="modal-header">
           <div class="header-with-button">
               <h2 class="title-modal">Manage expressions</h2>
-              <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
           </div>
           <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false">&times;</i></button>
       </div>
@@ -541,9 +487,6 @@
                           <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
                               <i class="fas fa-edit edit-expression-icon"></i>
                           </button>
-                          <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)">
-                              <i class="fas fa-trash"></i> 
-                          </button> -->
                           <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
                               <i class="fas fa-trash"></i> 
                           </button>
@@ -555,9 +498,6 @@
 
       <!-- Botón de cerrar -->
       <div class="modal-footer">
-          <!-- <div class="help-actions" style="margin-bottom: 15px;">
-              <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
-          </div> -->
           <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
       </div>
   </div>
@@ -679,147 +619,5 @@
       </div>
   </div>
 </div>
-<!-- <i style="color : blue">{{ totalSelectedElements }} elements selected </i> -->
-<!-- <div>
-    <strong>Your expressions:</strong>
-    <br>
-    <input type="text" size="50" [(ngModel)]="currentUserExpression">&nbsp;<a style="color : blue" (click)="addUserExpression()">Add</a>
-    <div *ngFor="let userExpression of userExpressions; let i = index">
-        <code>{{ userExpression }}</code>&nbsp;<a style="color : blue" (click)="removeUserExpression(i)">Remove</a>
-    </div>
-    <br>
-    <button *ngIf="!isGrover" (click)="setFrequenciesWithUserExpressions()">Fill frequencies with these expressions</button>
-    &nbsp;
-    <button (click)="markElementsWithUserExpressions()">Mark elements with these expressions</button>
-    <button (click)="fillTableWithUserExpressions()">Mark elements with these expressions</button>
-    &nbsp;
-
-    Available templates:
-    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
-        <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
-            {{ template.fileName }}
-        </option>
-    </select> 
-
-    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
-      <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
-          {{ template.fileName }}
-      </option>
-    </select>
-
-    <div *ngIf="selectedElements>0">
-        <i style="color : blue">{{ selectedElements }} elements selected </i>
-    </div>
-</div> -->
-
-<!-- <div style="display: flex; align-items: flex-start; gap: 20px;">
-    Tabla
-    <table border="1">
-      <tr>
-        <th colspan="5" align="left">
-          <input type="checkbox" [(ngModel)]="originalGR"> Original Grover & Rudolph
-          <br>
-          Physical angle:
-          &nbsp;
-          <input type="number" min="0" max="3.1416" [(ngModel)]="physicalAngle" step="0.0625"> radians
-          <br>
-          Functions' prefix: <input type="text" [(ngModel)]="prefix">
-          &nbsp;
-          <input type="checkbox" [(ngModel)]="inParallel">Parallel circuit
-          &nbsp;
-          <input type="checkbox" [(ngModel)]="splitCircuits">Split in several circuits
-          &nbsp;
-          <button (click)="getCircuit()">Get whole Qiskit code</button>
-          &nbsp;
-          <button (click)="getCircuit(true)">Get Grover code</button>
-          &nbsp;
-          <u style="color:white" (click)="goToCode()">Go to code</u>
-        </th>
-      </tr>
-      <tr>
-        <th rowspan="2">
-          Output
-          <br>
-          <small>
-            ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
-          </small>
-        </th>
-        <th colspan="3">Expected frequency</th>
-      </tr>
-      <tr>
-        <th colspan="6">
-          <i>p<sub>i</sub></i>
-          &nbsp;
-          <small><small style="color: white" (click)="random(1)">Random</small></small>
-          &nbsp;
-          <small><small style="color: white" (click)="random(10)">Random*10</small></small>
-          &nbsp;
-          <small><small style="color: white" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-          &nbsp;
-          <small><small style="color: white" (click)="withProb()">Probability of 0: <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0"></small></small>
-          &nbsp;
-          <small><small style="color: white" (click)="reset()">Reset</small></small>
-          &nbsp;
-          <small><small style="color: white" (click)="fixedAmount()">This amount of values: <input type="number" step="1" min="1" max="expectedFrequencies.rows" [(ngModel)]="amountOfValues"></small></small>
-        </th>
-      </tr>
-      <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center">
-        <td>
-          {{ rowIndex }}
-          <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
-        </td>
-        <td>
-          <input type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
-        </td>
-        <td>
-          <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
-        </td>
-      </tr>
-    </table>
-  
-  <div style="overflow: auto; width: 100%; height: 600px; border: 1px solid #ccc;" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
-        <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
-          <g [innerHTML]="svgTree"></g>
-        </svg>
-      </div>
-  </div> -->
-
-  <!-- <div id="divCode">
-    <strong 
-        (click)="copyCode(copyTooltip)" 
-        #copyTooltip 
-        title="Copy code"
-        style="cursor: pointer;"
-      >Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span>
-    </strong>
-    &nbsp;
-    <span *ngIf="quirkCodes.length>0">
-      <u style="color:blue" *ngIf="quirkCodes.length==1" (click)="showQuirk()">Show in quirk</u>
-      <span *ngIf="quirkCodes.length>1">
-        Show in quirk:
-        <span style="color : blue" *ngFor="let quirkCode of quirkCodes; let i = index">
-          <u style="color : blue"  (click)="showQuirk(i)">{{ i+1 }}</u>&nbsp;
-        </span>
-      </span>
-    </span>
-
-    &nbsp;
-    <span style="color : red">{{ error }}</span>
-    <br>
-    <u (click)="switchOutput()">
-      Switch to <span *ngIf="codeAsFunctions">unitary matrix</span>
-      <span *ngIf="!codeAsFunctions">functions</span>
-    </u>
-    <div>
-      <strong>Name:</strong> <input type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0">
-    </div>
-    <div>
-        <strong>Description: </strong> <input type="text" [(ngModel)]="qiskitCode.description"  [disabled]="qiskitCode.lines.length==0">
-        <button (click)="saveCode()">Save</button>
-    </div>
-    <div style="font-size: x-small;" #codeArea>
-        <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
-    </div>
-  </div> -->
 
 </body>
