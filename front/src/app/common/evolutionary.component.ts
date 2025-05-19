@@ -264,6 +264,16 @@ export abstract class EvolutionaryComponent {
 
   selectFitnesser(rf : RemoteFitnesser) {
     rf.selected=!rf.selected
+
+    for (let i=0; i<this.remoteFitnessers.length; i++) {
+      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
+        rf = this.remoteFitnessers[i]
+        rf.selected = true
+      }
+    }
+
+    console.log("rf: ", rf)
+
     this.service.selectFitnesser(rf.name!, rf.selected, this.pc.inputConfiguration.shots, this.pc.desiredError, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.populationSize).
       subscribe(
         result=> {
@@ -316,7 +326,7 @@ export abstract class EvolutionaryComponent {
   abstract generateInitialPopulation() : void
 
   firstRun() {
-    this.state = "Running population"
+    this.state = "Running population..."
     this.service.firstRun(this.pc).subscribe(
       result => {
         if (this.running)
@@ -331,7 +341,7 @@ export abstract class EvolutionaryComponent {
   }
 
   runPopulation() {
-    this.state = "Running population"
+    this.state = "Running population..."
     this.service.runPopulation(this.pc, this.existingStrategies, this.stratego).subscribe(
       result => {
         if (this.running)

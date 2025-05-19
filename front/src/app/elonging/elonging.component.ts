@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Individual } from '../common/Individual';
 import { EvolutionaryService } from '../evolutionary.service';
@@ -18,6 +18,14 @@ export class ElongingComponent extends EvolutionaryComponent {
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService) {
     super(evolutionaryService, "elonging")
   }
+
+  mensajeTemporal: string = '';
+  tooltipGenerationVisible: boolean = false;
+  modalStrategyDetails: boolean = false;
+  selectedOptionFreq: string = 'none';
+  isNone: boolean = true;
+  isRandom: boolean = false;
+  isZeroTo2N: boolean = false;
 
   override generateInitialPopulation() {
     this.running = true
@@ -76,5 +84,53 @@ export class ElongingComponent extends EvolutionaryComponent {
      
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+  }
+
+  toggleTooltipGeneration(event: MouseEvent): void {
+    //this.tooltipVisible = !this.tooltipVisible;
+    event.stopPropagation();
+
+    if (this.tooltipGenerationVisible) {
+      this.tooltipGenerationVisible = false;
+      //this.tooltipVisible = false;
+    } else {
+      this.tooltipGenerationVisible = true;
+      //this.tooltipVisible = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent): void {
+      // Verifica si el clic fue fuera del tooltip y el botón
+      const tooltipElement = document.querySelector('.tooltip');
+      const tooltipCustomElement = document.querySelector('.custom-tooltip');
+      const buttonElement = document.querySelector('button');
+      
+  
+      if (this.tooltipGenerationVisible &&
+        tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+          buttonElement && !buttonElement.contains(event.target as Node)) {
+        this.tooltipGenerationVisible = false;
+      }
+    }
+
+    onOptionFreqChange(value: string): void {
+    
+    this.isNone = value === 'none';
+    this.isRandom = value === 'random';
+    this.isZeroTo2N = value === 'zeroTo2N';
+  }
+
+  applyOption() {
+    if (this.isNone) {
+      this.resetMatrix();
+    } else if (this.isRandom) {
+      this.random();
+    } else if (this.isZeroTo2N) {
+      this.zeroTo2N();
+    }
+
+    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq);
+
   }
 }

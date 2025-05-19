@@ -1,5 +1,5 @@
 {
-	"environment" : "Mac de Maco",
+	"environment" : "Ordenador de Patri",
 	"DEBUG" : true,
 	"environments" : [
 		{
@@ -31,6 +31,18 @@
 			"inheritIO" : false,
 			"working directory" : "C:/Users/Public/",
 			"output directory" : "C:/Users/Public/"
+		},
+		{
+			"name": "Ordenador de Patri",
+			"path": "C:/Windows/system32;C:/Windows;C:/Windows/System32/Wbem;C:/Windows/System32/WindowsPowerShell/v1.0/;C:/Windows/System32/OpenSSH/;C:/Users/patri/AppData/Local/Programs/Python/Python311/Scripts/;C:/Users/patri/AppData/Local/Programs/Python/Python311/;C:/Users/patri/AppData/Local/Programs/Microsoft VS Code/bin",
+			"PYTHONPATH": "C:/Users/patri/AppData/Local/Programs/Python/Python311/Lib/site-packages",
+			"commands": [ "cmd", "/c", "C:/Users/patri/AppData/Local/Programs/Python/Python311/python.exe" ],
+			"commands2": [ "python" ],
+			"joinLastCommand": true,
+			"inheritIO": false,
+			"working directory": "C:/Users/patri/OneDrive/Escritorio/quco/",
+			"output directory": "C:/Users/patri/OneDrive/Escritorio/quco/"
 		}
+
 	]
 }
