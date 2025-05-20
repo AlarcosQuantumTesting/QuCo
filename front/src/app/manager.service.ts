@@ -8,6 +8,7 @@ import { ExpressionsService } from './expressions.service';
   providedIn: 'root'
 })
 export class ManagerService {
+
   selectedTemplate: CodeTemplate = new CodeTemplate("", "", "")
   templates: CodeTemplate[] = []
   expressions: Expression[] = []
@@ -26,6 +27,12 @@ export class ManagerService {
   getTemplatesStartingBy(prefixes: string[]): CodeTemplate[] {
     prefixes.push("common")
     return this.templates.filter(t =>
+      prefixes.some(prefix => t.fileName.startsWith(prefix))
+    );
+  }
+
+  getTemplatesStartingExactlyBy(prefixes: string[]): any {
+  return this.templates.filter(t =>
       prefixes.some(prefix => t.fileName.startsWith(prefix))
     );
   }
