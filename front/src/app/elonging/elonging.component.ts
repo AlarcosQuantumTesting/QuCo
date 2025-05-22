@@ -70,6 +70,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   notBuilt: boolean = true;
   templateSelected: boolean = false;
   generateClicked: boolean = false;
+  
 
   override generateInitialPopulation() {
     this.running = true
@@ -279,5 +280,26 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.moveDown(index);
     }, 300);
   }
+
+  hasNonZeroFrequencies(): boolean {
+    const frequencies = this.pc.inputConfiguration!.expectedFrequencies;
+    for (let i = 0; i < frequencies.length; i++) {
+      if (frequencies[i] !== 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  copiarCodigo() {
+    const codigo = this.code?.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      console.log('Código copiado al portapapeles');
+      alert('Code copied to clipboard');
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
+    });
+  }
+
 
 }

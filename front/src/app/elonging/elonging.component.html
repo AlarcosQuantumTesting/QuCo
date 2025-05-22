@@ -19,7 +19,7 @@
             <div class="info1">
                 <div>
                     Available templates:
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;">
+                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;">
                         <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
                             {{ template.fileName }}
                         </option>
@@ -27,22 +27,22 @@
                 </div>
                 
                 <div>
-                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
+                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
                 </div>
                 
                 <div>
                     <span style="margin-left: 20px;">
-                        % of 1 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates" style="margin-right: 10px;">
+                        % of 1 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates" style="margin-right: 10px;">
                         
-                        % of 2 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates" style="margin-right: 10px;">
+                        % of 2 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates" style="margin-right: 10px;">
                         
-                        % of =3 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates" style="margin-right: 10px;">
+                        % of =3 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates" style="margin-right: 10px;">
                         
-                        % of >=4 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates" style="margin-right: 10px;">
+                        % of >=4 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates" style="margin-right: 10px;">
                     </span>
                 </div>
 
-                <button class="btn primary" (click)="buildActions()" [disabled]="validarDatos()">Build</button>
+                <button class="btn primary" (click)="buildActions()" [disabled]="validarDatos() || running">Build</button>
             </div>
         </div>
 
@@ -58,7 +58,7 @@
                             <tr>
                                 <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
                                 <td [attr.colspan]="pc.inputConfiguration!.qubits">
-                                    <input id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
+                                    <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
                                         (change)="updateExpectedFrequencies()">
                                     <span *ngIf="pc.inputConfiguration!.qubits !== null && (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)" class="error-text">
                                         Must be between 1 and 24
@@ -74,14 +74,14 @@
                             <tr>
                                 <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
                                 <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                                    <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
                                         (change)="updateOutputs()">
                                 </td>
                             </tr>
                             <tr>
                                 <th align="left"><label for="numberOfQubits">Start with Hadamard:</label></th>
                                 <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.startWithH[qubitIndex]" (change)="updateOutputs()">
+                                    <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.startWithH[qubitIndex]" (change)="updateOutputs()">
                                 </td>
                             </tr>
                         </table>
@@ -97,19 +97,19 @@
 
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <label>Number of columns: between</label>
-                                        <input type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns">
+                                        <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns">
                                         <label>and</label>
-                                        <input type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
+                                        <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
                                     </div>
 
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <label>Initial population size:</label>
-                                        <input type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
+                                        <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
                                     </div>
 
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <label>Max population size:</label>
-                                        <input type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize">
+                                        <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize">
                                     </div>
 
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -120,7 +120,7 @@
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <label>Desired error (%):</label>
                                         <input type="number" class="form-control" min="0" step="0.025"
-                                            [(ngModel)]="pc.desiredError"
+                                            [(ngModel)]="pc.desiredError" [disabled]="running"
                                             (change)="saveConf(); updateDesiredError()">
                                     </div>
 
@@ -138,7 +138,7 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 12px;">
                             <ng-container *ngFor="let gate of gates; let i = index">
                             <label style="display: flex; align-items: center; gap: 4px;">
-                                <input type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> {{ gate.name }}
+                                <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> {{ gate.name }}
                             </label>
                             </ng-container>
                         </div>
@@ -155,7 +155,7 @@
                 <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
                 <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
                 
-                <button *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
+                <button class="generate-btn" *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
             </div>
             <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                 <!-- <div style="display: flex; align-items: center;">
@@ -210,19 +210,22 @@
                 
             </div>
             <div class="buttons-generation">
-                <button (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
-                <button (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
+                <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
+                <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
                 <!-- <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running"> -->
-                <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="running && tieneFrecuenciasEsperadas()" *ngIf="!generateClicked">
+                <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="!hasNonZeroFrequencies() || running" *ngIf="!generateClicked">
                 <!-- Generate initial population and start running -->
                 Generate
                 </button>
-                <button class="generate-btn" (click)="reload()" *ngIf="generateClicked && !running">Reset</button>
-                <button style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
+                
+                <button class="btn-cancel" style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
+                <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
+                    <i class="fa fa-refresh" title="Reset all"></i>
+                </button>
             </div>
         </div>
 
-        <div>
+        <div style="width: 100%;">
             <span style="color : red">{{ error }}</span>
 
             <!-- <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;"
@@ -240,131 +243,143 @@
             </div> -->
 
 
+            <div class="generation-table-wrapper" *ngIf="generateClicked">
+                <table class="generation-table">
+                    <tr>
+                        <th colspan="2" valign="right">Generation</th>
+                        <!-- <th *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            {{ pc.iterationIndex - 1 - iterationIndex }}
+                        </th> -->
+                        <ng-container *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            <th *ngIf="(pc.iterationIndex - 1 - iterationIndex) > 0">
+                                {{ pc.iterationIndex - 1 - iterationIndex }}
+                            </th>
+                        </ng-container>
 
-            <table class="generation-table"  *ngIf="generateClicked">
-                <tr>
-                    <th colspan="2" valign="right">Generation</th>
-                    <th *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
-                        {{ pc.iterationIndex - 1 - iterationIndex }}
-                    </th>
-                </tr>
-                <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
+                    </tr>
+                    <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
+                        <!-- <tr>
+                            <th rowspan="5">{{ fitnesser.shortName }}</th>
+                        </tr> -->
+                        <tr>
+                            <th>Strategy</th>
+                            <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                                {{ strategies[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Best fitness</th>
+                            <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                                {{ bestFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Mean fitness</th>
+                            <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                                {{ meanFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Error</th>
+                            <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                                {{ meanErrors[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                            </td>
+                        </tr>
+                    </ng-container>
+                </table>
+            </div>
+
+            <div class="generation-table-wrapper">
+                <table class="generation-table" style="margin-top: 10px;" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
+                    <tr>
+                        <th [colSpan]="2 + individuals.length" align="left" *ngIf="running">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <div>
+                                    <!-- {{ rf.shortName }} -->
+                                </div>
+                                <div>
+                                    <i style="font-size: 13px;" [hidden]="state == undefined">{{ state }}</i>
+                                    &nbsp;
+                                    <small><i [hidden]="substate == undefined">( {{ substate }} )</i></small>
+                                </div>
+                            </div>
+                        </th>
+
+                    </tr>
                     <!-- <tr>
-                        <th rowspan="5">{{ fitnesser.shortName }}</th>
+                        <th [colSpan]="2+individuals.length" align="left">
+                            <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+                            &nbsp;
+                            <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+                        </th>
                     </tr> -->
                     <tr>
-                        <th>Strategy</th>
-                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
-                            {{ strategies[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        <th>Output</th>
+                        <th>
+                            <div>
+                                <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                                    <button class="reset-btn" (click)="resetMatrix()"><i class="fa fa-refresh" title="Reset values"></i></button>
+                        
+                                    <i>p<sub>i</sub></i>
+                                </div>
+                                <div>
+                                    <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
+                                        <option [ngValue]="'none'">None</option>
+                                        <option [ngValue]="'random'">Random</option>
+                                        <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
+                                    </select>
+
+                                    <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
+                                </div>
+                            </div>
+                        </th>
+                        <th *ngFor="let individual of individuals; let individualIndex = index" 
+                            [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
+                            <span (click)="getCode(individual)" class="solutionFound" *ngIf="individual.selected[fitnesserIndex]">💃</span>
+                            <u (click)="isResultCode(individual, fitnesserIndex)" [class.solutionFound]="individual.selected[fitnesserIndex]">
+                                {{ individuals[individualIndex].index }}
+                            </u>
+                            <span (click)="getCode(individual)" *ngIf="individual.selected[fitnesserIndex]" class="solutionFound">💃</span>
+                        </th>
+                    </tr>
+                    <tr *ngFor="let i of [].constructor(pc.inputConfiguration!.expectedFrequencies.length); let rowIndex = index" align="center">
+                        <td>
+                            {{ rowIndex }}
+                            <sub>{{ rowIndex.toString(2) }}</sub>
+                        </td>
+                        <td>
+                            <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration!.expectedFrequencies[rowIndex]" (change)="updateExpectedFrequencies()">
+                        </td>
+                        <td *ngFor="let individual of individuals" align="right">
+                            {{ individual.gotFrequencies[fitnesserIndex][rowIndex] }}
                         </td>
                     </tr>
                     <tr>
-                        <th>Best fitness</th>
-                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
-                            {{ bestFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        <td colspan="2" align="right">
+                            <strong><i>Error</i></strong>
+                        </td>
+                        <td *ngFor="let individual of individuals" align="right">
+                            {{ individual.error[fitnesserIndex] }}
                         </td>
                     </tr>
                     <tr>
-                        <th>Mean fitness</th>
-                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
-                            {{ meanFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        <td colspan="2" align="right">
+                            <strong><i>Fitness</i></strong>
+                        </td>
+                        <td *ngFor="let individual of individuals" align="right">
+                            {{ individual.fitness[fitnesserIndex] }}
                         </td>
                     </tr>
                     <tr>
-                        <th>Error</th>
-                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
-                            {{ meanErrors[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        <td colspan="2" align="right">
+                            <strong><i>Length</i></strong>
                         </td>
-                    </tr>
-                </ng-container>
-            </table>
-
-            <table class="generation-table" style="margin-top: 10px;" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
-                <tr>
-                    <th [colSpan]="2 + individuals.length" align="left" *ngIf="running">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div>
-                                <!-- {{ rf.shortName }} -->
-                            </div>
-                            <div>
-                                <i style="font-size: 13px;" [hidden]="state == undefined">{{ state }}</i>
-                                &nbsp;
-                                <small><i [hidden]="substate == undefined">( {{ substate }} )</i></small>
-                            </div>
-                        </div>
-                    </th>
-
-                </tr>
-                <!-- <tr>
-                    <th [colSpan]="2+individuals.length" align="left">
-                        <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-                        &nbsp;
-                        <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
-                    </th>
-                </tr> -->
-                <tr>
-                    <th>Output</th>
-                    <th>
-                        <div>
-                            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-                                <button class="reset-btn" (click)="resetMatrix()"><i class="fa fa-refresh" title="Reset values"></i></button>
-                    
-                                <i>p<sub>i</sub></i>
-                            </div>
-                            <div>
-                                <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
-                                    <option [ngValue]="'none'">None</option>
-                                    <option [ngValue]="'random'">Random</option>
-                                    <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
-                                </select>
-
-                                <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
-                            </div>
-                        </div>
-                    </th>
-                    <th *ngFor="let individual of individuals; let individualIndex = index" 
-                        [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
-                        <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
-                        <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
-                    </th>
-                </tr>
-                <tr *ngFor="let i of [].constructor(pc.inputConfiguration!.expectedFrequencies.length); let rowIndex = index" align="center">
-                    <td>
-                        {{ rowIndex }}
-                        <sub>{{ rowIndex.toString(2) }}</sub>
-                    </td>
-                    <td>
-                        <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration!.expectedFrequencies[rowIndex]" (change)="updateExpectedFrequencies()">
-                    </td>
-                    <td *ngFor="let individual of individuals" align="right">
-                        {{ individual.gotFrequencies[fitnesserIndex][rowIndex] }}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="right">
-                        <strong><i>Error</i></strong>
-                    </td>
-                    <td *ngFor="let individual of individuals" align="right">
-                        {{ individual.error[fitnesserIndex] }}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="right">
-                        <strong><i>Fitness</i></strong>
-                    </td>
-                    <td *ngFor="let individual of individuals" align="right">
-                        {{ individual.fitness[fitnesserIndex] }}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" align="right">
-                        <strong><i>Length</i></strong>
-                    </td>
-                    <td *ngFor="let individual of individuals" align="right">
-                        {{ individual.length[fitnesserIndex] }}
-                    </td>
-                </tr>    
-            </table>
+                        <td *ngFor="let individual of individuals" align="right">
+                            {{ individual.length[fitnesserIndex] }}
+                        </td>
+                    </tr>    
+                </table>
+            </div>
 
             <!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
             &nbsp;
@@ -809,6 +824,34 @@
         </div>
     </div>
 
+    <div class="modal" *ngIf="mostrarModalCode">
+        <!-- <div class="modal-content" *ngIf="isLoadingQiskitCode">
+            <div *ngIf="isLoadingQiskitCode" class="spinner-container">
+                <div class="spinner"></div>
+                <p>Generating Qiskit code...</p>
+            </div>              
+        </div> -->
+        <!-- <div class="modal-content" *ngIf="!isLoadingQiskitCode"> -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Qiskit Code</h2>
+
+                <button class="close"><i class="close-i" (click)="mostrarModalCode = false">&times;</i></button>
+            </div>
+
+            <div class="code-output">
+                <!-- <small id="codeArea"> -->
+                    <pre>
+                    {{ code }}
+                    </pre>
+                <!-- </small> -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+    </div>
     
 </body>
 
@@ -1063,9 +1106,9 @@
     <canvas id="timesChart"></canvas>
 </div> -->
 
-<strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
+<!-- <strong (click)="copyCode()">Copy code&nbsp;<span style="font-size: 30px;">&#x2398;</span></strong>
 <small id="codeArea">
     <pre>
     {{ code }}
     </pre>
-</small>
+</small> -->

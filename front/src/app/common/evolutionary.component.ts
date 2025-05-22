@@ -16,6 +16,7 @@ export abstract class EvolutionaryComponent {
   @ViewChildren('card') cardElems!: QueryList<ElementRef>;
   pc : ProblemConfiguration = new ProblemConfiguration()
 
+  mostrarModalCode: boolean = false;
   individuals : Individual[] = []
   selectedIndividual? : Individual
   selectedIndividualFitnesser? : string
@@ -454,6 +455,14 @@ export abstract class EvolutionaryComponent {
         this.error = JSON.parse(result.error).message
       }
     )
+
+    this.mostrarModalCode = true;
+  }
+
+  isResultCode(individual : Individual, fitnesserIndex: number) {
+    if(individual.selected[fitnesserIndex]) {
+      this.getCode(individual);
+    }
   }
 
   copyCode() {
@@ -511,6 +520,4 @@ export abstract class EvolutionaryComponent {
        }
       })
   }
-
-  
 }
