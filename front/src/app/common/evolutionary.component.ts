@@ -5,10 +5,15 @@ import { Gate } from "./Gate"
 import { IService } from "./IService"
 import { ProblemConfiguration } from "./ProblemConfiguration"
 import { Strategy } from "./Strategy"
+import { Component, ViewChildren, ElementRef, QueryList } from '@angular/core';
 
 Chart.register(...registerables)
 
+import { Directive } from '@angular/core';
+
+@Directive()
 export abstract class EvolutionaryComponent {
+  @ViewChildren('card') cardElems!: QueryList<ElementRef>;
   pc : ProblemConfiguration = new ProblemConfiguration()
 
   individuals : Individual[] = []
@@ -89,6 +94,7 @@ export abstract class EvolutionaryComponent {
     this.existingStrategies[index] = this.existingStrategies[index+1]
     this.existingStrategies[index+1] = source
   }
+
 
   reset() {
     this.error = undefined

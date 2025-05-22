@@ -69,12 +69,14 @@ export class ElongingComponent extends EvolutionaryComponent {
   showCharts: boolean = false;
   notBuilt: boolean = true;
   templateSelected: boolean = false;
+  generateClicked: boolean = false;
 
   override generateInitialPopulation() {
     this.running = true
     this.state = "Generating initial population!"
     this.error = undefined
     this.showCharts = true;
+    this.generateClicked = true;
 
     if (this.selectedRemoteFitnessers.length==0 ) {
       this.error = "You must select one fitnesser at least"
@@ -244,6 +246,38 @@ export class ElongingComponent extends EvolutionaryComponent {
   tieneFrecuenciasEsperadas(): boolean {
     console.log("Freq esperadas: ", this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0))
     return this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0);
+  }
+
+  reload() {
+    location.reload();
+  }
+
+  animateMoveUp(index: number) {
+    if (index <= 0) return;
+
+    const cardsArray = this.cardElems.toArray();
+    const element = cardsArray[index].nativeElement;
+
+    element.classList.add('move-up');
+
+    setTimeout(() => {
+      element.classList.remove('move-up');
+      this.moveUp(index);
+    }, 300);
+  }
+
+  animateMoveDown(index: number) {
+    if (index >= this.existingStrategies.length - 1) return;
+
+    const cardsArray = this.cardElems.toArray();
+    const element = cardsArray[index].nativeElement;
+
+    element.classList.add('move-down');
+
+    setTimeout(() => {
+      element.classList.remove('move-down');
+      this.moveDown(index);
+    }, 300);
   }
 
 }

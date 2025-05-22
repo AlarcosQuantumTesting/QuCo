@@ -210,12 +210,14 @@
                 
             </div>
             <div class="buttons-generation">
-                <button (click)="showChartsMethod()" *ngIf="running">Show charts</button>
+                <button (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
+                <button (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
                 <!-- <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running"> -->
-                <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="running && tieneFrecuenciasEsperadas()">
+                <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="running && tieneFrecuenciasEsperadas()" *ngIf="!generateClicked">
                 <!-- Generate initial population and start running -->
                 Generate
                 </button>
+                <button class="generate-btn" (click)="reload()" *ngIf="generateClicked && !running">Reset</button>
                 <button style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
             </div>
         </div>
@@ -239,7 +241,7 @@
 
 
 
-            <table class="generation-table">
+            <table class="generation-table"  *ngIf="generateClicked">
                 <tr>
                     <th colspan="2" valign="right">Generation</th>
                     <th *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
@@ -722,7 +724,42 @@
                 <button class="close"><i class="close-i" (click)="modalStrategyDetails = false">&times;</i></button>
             </div>
             <div class="intructions-content">
-                <div>
+                <div class="strategies-container">
+                    <div class="strategy-card" *ngFor="let st of existingStrategies; let i = index"
+                        #card>
+                        <span class="strategy-name">{{ st.name }}</span>
+
+                        <input
+                        type="number"
+                        [(ngModel)]="st.probability"
+                        (change)="modifyProbability()"
+                        step="1"
+                        min="0"
+                        max="100"
+                        class="strategy-input"
+                        />
+
+                        <span class="strategy-percent">
+                        ({{ (100 * st.probability / selectedStrategiesProbability).toFixed(2) }}%)
+                        </span>
+
+                        <i class="fas fa-undo-alt strategy-icon"
+                        title="Reset"
+                        (click)="st.probability = 0"></i>
+
+                        <i *ngIf="i > 0"
+                        class="fas fa-arrow-up strategy-icon"
+                        title="Mover arriba"
+                        (click)="animateMoveUp(i)"></i>
+
+                        <i *ngIf="i < existingStrategies.length - 1"
+                        class="fas fa-arrow-down strategy-icon"
+                        title="Mover abajo"
+                        (click)="animateMoveDown(i)"></i>
+                    </div>
+                </div>
+
+                <!-- <div>
                     <div *ngFor="let st of existingStrategies; let i = index">
                         <span>{{ st.name}}</span>
                         &nbsp;
@@ -736,7 +773,7 @@
                         &nbsp;
                         <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>        
                     </div>
-                </div>
+                </div> -->
                 <div class="help-actions">
                     <button class="action-btn" (click)="modalStrategyDetails = false">Done!</button>
                 </div>
