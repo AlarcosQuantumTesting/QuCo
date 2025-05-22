@@ -48,8 +48,7 @@ public class QiskitRunner implements TaskReceptor {
 		
 		TextLogger.write(gt, 4, "files= " + files + "\n");
 		
-		int cores = 1; 
-		//Runtime.getRuntime().availableProcessors();
+		int cores = Runtime.getRuntime().availableProcessors();
 		cores = cores*2;
 		if (files<cores)
 			cores = files;

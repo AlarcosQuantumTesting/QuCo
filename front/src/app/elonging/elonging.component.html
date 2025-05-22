@@ -7,7 +7,406 @@
       <h1>Genetic algorithm</h1>
     </div>
 
-    <div class="container matrix-container">
+
+
+    <div class="tabs">
+        <button class="tab active" data-tab="0">Data</button>
+        <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
+    </div>
+
+    <div class="tab-content active" id="tab-0">
+        <div class="container matrix-container">
+            <div class="info1">
+                <div>
+                    Available templates:
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;">
+                        <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
+                            {{ template.fileName }}
+                        </option>
+                    </select>
+                </div>
+                
+                <div>
+                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
+                </div>
+                
+                <div>
+                    <span style="margin-left: 20px;">
+                        % of 1 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates" style="margin-right: 10px;">
+                        
+                        % of 2 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates" style="margin-right: 10px;">
+                        
+                        % of =3 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates" style="margin-right: 10px;">
+                        
+                        % of >=4 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates" style="margin-right: 10px;">
+                    </span>
+                </div>
+
+                <button class="btn primary" (click)="buildActions()" [disabled]="validarDatos()">Build</button>
+            </div>
+        </div>
+
+        <div class="container matrix-container">
+            <div class="form-row">
+                <div class="section qubitsContainer">
+                    <div class="form-group">
+                        <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                            Qubits
+                        </label>
+                        
+                        <table class="qubit-table">
+                            <tr>
+                                <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
+                                <td [attr.colspan]="pc.inputConfiguration!.qubits">
+                                    <input id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
+                                        (change)="updateExpectedFrequencies()">
+                                    <span *ngIf="pc.inputConfiguration!.qubits !== null && (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)" class="error-text">
+                                        Must be between 1 and 24
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left"><label for="numberOfQubits">Qubits:</label></th>
+                                <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                                    <label>{{qubitIndex}}</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
+                                <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                                        (change)="updateOutputs()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left"><label for="numberOfQubits">Start with Hadamard:</label></th>
+                                <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.startWithH[qubitIndex]" (change)="updateOutputs()">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="section parameterizationContainer">
+                    <div class="form-group">
+                        <label style="font-size: 16px; align-items: center; justify-content: center; display: flex; font-weight: bold;">Parameterization</label>
+                        <table class="qubit-table">
+                            <tr>
+                                <td rowspan="2">
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label>Number of columns: between</label>
+                                        <input type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns">
+                                        <label>and</label>
+                                        <input type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label>Initial population size:</label>
+                                        <input type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label>Max population size:</label>
+                                        <input type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize">
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label>Shots:</label>
+                                        <label style="color: black;">{{ pc.inputConfiguration!.shots }}</label>
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label>Desired error (%):</label>
+                                        <input type="number" class="form-control" min="0" step="0.025"
+                                            [(ngModel)]="pc.desiredError"
+                                            (change)="saveConf(); updateDesiredError()">
+                                    </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="section gatesContainer">
+                    <div class="form-group">
+                        <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                            Available gates
+                        </label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                            <ng-container *ngFor="let gate of gates; let i = index">
+                            <label style="display: flex; align-items: center; gap: 4px;">
+                                <input type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> {{ gate.name }}
+                            </label>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-1">
+        <div class="generation-header">
+            <div>
+                Strategies policy:
+                <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
+                <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
+                
+                <button *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                <!-- <div style="display: flex; align-items: center;">
+                    <h2 style="margin-top: 10px;">Generation</h2>
+                    <div style="position: relative;">
+                        <button class="editTable-button" title="Generation specifications" (click)="toggleTooltipGeneration($event)">
+                        <i class="fa fa-edit"></i>
+                        </button>
+
+                        <div class="custom-tooltip" *ngIf="tooltipGenerationVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
+
+                            <div>
+                                <p class="radioTitle">Available templates:</p>
+                                <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+                                    <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
+                                        {{ template.fileName }}
+                                    </option>
+                                </select> 
+                            </div>
+
+                            <div>
+                                <label class="radioTitle">
+                                    <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.deleteFiles">Delete files
+                                </label>
+                            </div>
+
+                            <div>
+                                <p class="radioTitle">Qubit gates:</p>
+                                <span style="padding-bottom: 5px;">
+                                    % of 1 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates">
+                                    <br>
+                                    % of 2 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates">
+                                    <br>
+                                    % of =3 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates">
+                                    <br>
+                                    % of >=4 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates">
+                                </span>
+                            </div>
+
+                            <div>
+                                <p class="radioTitle">Strategies policy:</p>
+                                <label class="custom-radio">
+                                    <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
+                                </label>
+                                <label class="custom-radio">
+                                    <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                
+            </div>
+            <div class="buttons-generation">
+                <button (click)="showChartsMethod()" *ngIf="running">Show charts</button>
+                <!-- <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running"> -->
+                <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="running && tieneFrecuenciasEsperadas()">
+                <!-- Generate initial population and start running -->
+                Generate
+                </button>
+                <button style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
+            </div>
+        </div>
+
+        <div>
+            <span style="color : red">{{ error }}</span>
+
+            <!-- <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;"
+                [ngClass]="{ 'hidden': !showCharts }">
+
+                <div class="chart-container" [ngClass]="{ 'hidden': !showCharts }"
+                    style="flex: 1 1 48%; position: relative; height:40vh;"
+                    *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
+                    <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+                </div>
+
+                <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" [ngClass]="{ 'hidden': !showCharts }">
+                    <canvas id="timesChart"></canvas>
+                </div>
+            </div> -->
+
+
+
+            <table class="generation-table">
+                <tr>
+                    <th colspan="2" valign="right">Generation</th>
+                    <th *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                        {{ pc.iterationIndex - 1 - iterationIndex }}
+                    </th>
+                </tr>
+                <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
+                    <!-- <tr>
+                        <th rowspan="5">{{ fitnesser.shortName }}</th>
+                    </tr> -->
+                    <tr>
+                        <th>Strategy</th>
+                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            {{ strategies[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Best fitness</th>
+                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            {{ bestFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Mean fitness</th>
+                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            {{ meanFitnesses[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Error</th>
+                        <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
+                            {{ meanErrors[fitnesserIndex][pc.iterationIndex - 1 - iterationIndex] }}
+                        </td>
+                    </tr>
+                </ng-container>
+            </table>
+
+            <table class="generation-table" style="margin-top: 10px;" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
+                <tr>
+                    <th [colSpan]="2 + individuals.length" align="left" *ngIf="running">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div>
+                                <!-- {{ rf.shortName }} -->
+                            </div>
+                            <div>
+                                <i style="font-size: 13px;" [hidden]="state == undefined">{{ state }}</i>
+                                &nbsp;
+                                <small><i [hidden]="substate == undefined">( {{ substate }} )</i></small>
+                            </div>
+                        </div>
+                    </th>
+
+                </tr>
+                <!-- <tr>
+                    <th [colSpan]="2+individuals.length" align="left">
+                        <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+                        &nbsp;
+                        <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+                    </th>
+                </tr> -->
+                <tr>
+                    <th>Output</th>
+                    <th>
+                        <div>
+                            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                                <button class="reset-btn" (click)="resetMatrix()"><i class="fa fa-refresh" title="Reset values"></i></button>
+                    
+                                <i>p<sub>i</sub></i>
+                            </div>
+                            <div>
+                                <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
+                                    <option [ngValue]="'none'">None</option>
+                                    <option [ngValue]="'random'">Random</option>
+                                    <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
+                                </select>
+
+                                <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
+                            </div>
+                        </div>
+                    </th>
+                    <th *ngFor="let individual of individuals; let individualIndex = index" 
+                        [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
+                        <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
+                        <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
+                    </th>
+                </tr>
+                <tr *ngFor="let i of [].constructor(pc.inputConfiguration!.expectedFrequencies.length); let rowIndex = index" align="center">
+                    <td>
+                        {{ rowIndex }}
+                        <sub>{{ rowIndex.toString(2) }}</sub>
+                    </td>
+                    <td>
+                        <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration!.expectedFrequencies[rowIndex]" (change)="updateExpectedFrequencies()">
+                    </td>
+                    <td *ngFor="let individual of individuals" align="right">
+                        {{ individual.gotFrequencies[fitnesserIndex][rowIndex] }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <strong><i>Error</i></strong>
+                    </td>
+                    <td *ngFor="let individual of individuals" align="right">
+                        {{ individual.error[fitnesserIndex] }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <strong><i>Fitness</i></strong>
+                    </td>
+                    <td *ngFor="let individual of individuals" align="right">
+                        {{ individual.fitness[fitnesserIndex] }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <strong><i>Length</i></strong>
+                    </td>
+                    <td *ngFor="let individual of individuals" align="right">
+                        {{ individual.length[fitnesserIndex] }}
+                    </td>
+                </tr>    
+            </table>
+
+            <!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+            &nbsp;
+            <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+
+            <span *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
+                <div class="chart-container" style="position: relative; height:40vh; width:80vw" [hidden]="!rf.selected">
+                    <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+                </div>
+            </span>
+
+            <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                <canvas id="timesChart"></canvas>
+            </div> -->
+
+            <!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+            &nbsp;
+            <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small> -->
+        </div>
+        <!-- <div>
+            <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                <div style="display: flex; align-items: center;">
+                    <h2 style="margin-top: 10px;">Charts</h2>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" 
+                    *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index" 
+                    [hidden]="!rf.selected">
+                    <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+                </div>
+
+                <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;">
+                    <canvas id="timesChart"></canvas>
+                </div>
+            </div>
+
+        </div> -->
+    </div>
+
+
+
+
+    <!-- <div class="container matrix-container">
         <div class="form-row">
             <div class="section qubitsContainer">
                 <div class="form-group">
@@ -106,8 +505,11 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="generation-header">
+    </div> -->
+
+
+
+    <!-- <div class="generation-header">
         <div>
             <button *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
         </div>
@@ -119,7 +521,6 @@
                     <i class="fa fa-edit"></i>
                     </button>
 
-                    <!-- Tooltip personalizado -->
                     <div class="custom-tooltip" *ngIf="tooltipGenerationVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
 
                         <div>
@@ -166,7 +567,6 @@
         </div>
         <div class="buttons-generation">
             <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running">
-            <!-- Generate initial population and start running -->
              Generate
             </button>
             <button style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
@@ -184,9 +584,6 @@
                 </th>
             </tr>
             <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
-                <tr>
-                    <th rowspan="5">{{ fitnesser.shortName }}</th>
-                </tr>
                 <tr>
                     <th>Strategy</th>
                     <td *ngFor="let i of [].constructor(pc.iterationIndex).slice().reverse(); let iterationIndex = index">
@@ -216,10 +613,9 @@
 
         <table class="generation-table" style="margin-top: 10px;" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
             <tr>
-                <th [colSpan]="2 + individuals.length" align="left">
+                <th [colSpan]="2 + individuals.length" align="left" *ngIf="running">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div>
-                            {{ rf.shortName }}
                         </div>
                         <div>
                             <i style="font-size: 13px;" [hidden]="state == undefined">{{ state }}</i>
@@ -230,13 +626,6 @@
                 </th>
 
             </tr>
-            <!-- <tr>
-                <th [colSpan]="2+individuals.length" align="left">
-                    <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-                    &nbsp;
-                    <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
-                </th>
-            </tr> -->
             <tr>
                 <th>Output</th>
                 <th>
@@ -256,13 +645,6 @@
                             <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
                         </div>
                     </div>
-<!--                     
-                    &nbsp;
-                    <small><small style="color : blue" (click)="random()">Random</small></small>
-                    &nbsp;
-                    <small><small style="color : blue" (click)="zeroTo2N()">0 to 2^(n-1)</small></small>
-                    &nbsp;
-                    <small><small style="color : blue" (click)="resetMatrix()">Reset</small></small> -->
                 </th>
                 <th *ngFor="let individual of individuals; let individualIndex = index" 
                     [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
@@ -307,24 +689,6 @@
                 </td>
             </tr>    
         </table>
-
-        <!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-        &nbsp;
-        <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
-
-        <span *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
-            <div class="chart-container" style="position: relative; height:40vh; width:80vw" [hidden]="!rf.selected">
-                <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
-            </div>
-        </span>
-
-        <div class="chart-container" style="position: relative; height:40vh; width:80vw">
-            <canvas id="timesChart"></canvas>
-        </div> -->
-
-        <!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-        &nbsp;
-        <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small> -->
     </div>
     <div>
         <div style="display: flex; justify-content: center; align-items: center; position: relative;">
@@ -333,20 +697,17 @@
             </div>
         </div>
         <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-            <!-- Gráfico izquierdo -->
             <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" 
                 *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index" 
                 [hidden]="!rf.selected">
                 <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
             </div>
-
-            <!-- Gráfico derecho -->
             <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;">
                 <canvas id="timesChart"></canvas>
             </div>
         </div>
 
-    </div>
+    </div> -->
 
 
 
@@ -382,6 +743,36 @@
             </div>
         </div>
     </div>
+
+    <div class="modal instrucciones" [ngClass]="{ 'hidden': !showCharts }">
+        <div class="modal-content instrucciones"
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Charts</h2>
+                <button class="close"><i class="close-i" (click)="showCharts = false">&times;</i></button>
+            </div>
+            <div class="intructions-content">
+                <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;"
+                    [ngClass]="{ 'hidden': !showCharts }">
+
+                    <!-- Gráfico izquierdo -->
+                    <div class="chart-container" [ngClass]="{ 'hidden': !showCharts }"
+                        style="flex: 1 1 48%; position: relative; height:40vh;"
+                        *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
+                        <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+                    </div>
+
+                    <!-- Gráfico derecho -->
+                    <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" [ngClass]="{ 'hidden': !showCharts }">
+                        <canvas id="timesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
 </body>
 
 <!-- <div> -->

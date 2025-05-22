@@ -32,7 +32,7 @@ export class ManagerService {
   }
 
   getTemplatesStartingExactlyBy(prefixes: string[]): any {
-  return this.templates.filter(t =>
+    return this.templates.filter(t =>
       prefixes.some(prefix => t.fileName.startsWith(prefix))
     );
   }

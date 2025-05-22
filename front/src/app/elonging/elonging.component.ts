@@ -19,6 +19,46 @@ export class ElongingComponent extends EvolutionaryComponent {
     super(evolutionaryService, "elonging")
   }
 
+  ngAfterViewInit(): void {
+    this.tieneFrecuenciasEsperadas()
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+    const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const selectedIndex = parseInt(tab.dataset['tab'] || "0");
+
+        tabs.forEach((t, i) => {
+          t.classList.toggle("active", i === selectedIndex);
+          contents[i].classList.toggle("active", i === selectedIndex);
+        });
+      });
+    });
+  }
+
+  ngOnInit () {
+
+    this.validarDatos()
+    this.tieneFrecuenciasEsperadas()
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+      const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          const selectedIndex = parseInt(tab.dataset['tab'] || "0");
+
+          tabs.forEach((t, i) => {
+            t.classList.toggle("active", i === selectedIndex);
+            contents[i].classList.toggle("active", i === selectedIndex);
+          });
+        });
+      });
+    });
+
+  }
+
   mensajeTemporal: string = '';
   tooltipGenerationVisible: boolean = false;
   modalStrategyDetails: boolean = false;
@@ -26,11 +66,15 @@ export class ElongingComponent extends EvolutionaryComponent {
   isNone: boolean = true;
   isRandom: boolean = false;
   isZeroTo2N: boolean = false;
+  showCharts: boolean = false;
+  notBuilt: boolean = true;
+  templateSelected: boolean = false;
 
   override generateInitialPopulation() {
     this.running = true
     this.state = "Generating initial population!"
     this.error = undefined
+    this.showCharts = true;
 
     if (this.selectedRemoteFitnessers.length==0 ) {
       this.error = "You must select one fitnesser at least"
@@ -84,6 +128,8 @@ export class ElongingComponent extends EvolutionaryComponent {
      
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    console.log("Temp: ", this.manager.selectedTemplate)
+    this.templateSelected = true;
   }
 
   toggleTooltipGeneration(event: MouseEvent): void {
@@ -130,7 +176,74 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.zeroTo2N();
     }
 
-    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq);
-
+    localStorage.setItem('selectedOptionFreqGenetic', this.selectedOptionFreq);
+    this.tieneFrecuenciasEsperadas()
   }
+
+  showChartsMethod() {
+    if (this.showCharts) {
+      this.showCharts = false;
+    } else {
+      this.showCharts = true;
+    }
+  }
+
+  buildActions() {
+    this.notBuilt = false;
+
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+    const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+
+    const selectedIndex = 1;
+
+    tabs.forEach((t, i) => {
+      t.classList.toggle("active", i === selectedIndex);
+      contents[i].classList.toggle("active", i === selectedIndex);
+    });
+
+    this.tieneFrecuenciasEsperadas()
+  }
+
+  validarDatos(): boolean {
+    const config = this.pc.inputConfiguration;
+
+    if (!this.templateSelected) return true;
+    if (!config) return true;
+
+    if (config.qubits == null || config.qubits < 1 || config.qubits > 24) return true;
+
+    if (
+      config.minNumberOfColumns == null || config.minNumberOfColumns < 4 ||
+      config.maxNumberOfColumns == null || config.maxNumberOfColumns < 4
+    ) return true;
+
+    if (
+      config.populationSize == null || config.populationSize < 2 || config.populationSize % 2 !== 0 ||
+      config.maxPopulationSize == null || config.maxPopulationSize < 2 || config.maxPopulationSize % 2 !== 0
+    ) return true;
+
+    if (this.pc.desiredError == null || this.pc.desiredError < 0) return true;
+
+    const hayPuertaSeleccionada = this.gates.some(g => g.selected);
+    if (!hayPuertaSeleccionada) return true;
+
+    const hayOutputSeleccionado = config.outputs?.some(o => o === true);
+    if (!hayOutputSeleccionado) return true;
+
+    const porcentajes = [
+      this.pc.probOf1QubitGates,
+      this.pc.probOf2QubitGates,
+      this.pc.probOf3QubitGates,
+      this.pc.probOfNQubitGates
+    ];
+    if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
+
+    return false;
+  }
+
+  tieneFrecuenciasEsperadas(): boolean {
+    console.log("Freq esperadas: ", this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0))
+    return this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0);
+  }
+
 }

@@ -123,6 +123,30 @@ button:hover {
     background-color: #2980b9;
 }
 
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .matrixTitle-container {
     text-align: center;
     display: flex;
@@ -147,6 +171,14 @@ button:hover {
     padding: 5px;
     margin-bottom: 10px;
 }
+
+.info1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
 
 .input-button-row {
     display: flex;
@@ -182,8 +214,6 @@ button:hover {
 
 .qubitsContainer {
     width: 32%;
-    display: flex;
-    justify-content: flex-start;
     align-items: center;
     overflow-x: auto;
     white-space: nowrap;
@@ -277,6 +307,11 @@ label {
   border-radius: 4px;
   text-align: center;
   min-width: 24px;
+}
+
+.qubit-table {
+  justify-content: center;
+  width: 100%;
 }
 
 .qubit-table th {
@@ -714,4 +749,57 @@ ol.list-instructions {
 .action-btn:hover {
     background-color: #218838;
     transform: scale(1.05);
+}
+
+
+
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  background-color: #1a63667a;
+  border-radius: 0px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.tab.active {
+  /* border-bottom: 2px solid #007bff; */
+  border-right: 2px solid #007b7f;
+  border-left: 2px solid #007b7f;
+  border-top: 2px solid #007b7f;
+  background-color: #0c9397;
+}
+
+.tab:hover {
+  transition: all 0.3s ease;
+  background-color: #0066695a;
+}
+
+.tab-content {
+  display: none;
+  padding: 20px 0;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.generate-btn {
+    background-color: #0b555a;
 }
