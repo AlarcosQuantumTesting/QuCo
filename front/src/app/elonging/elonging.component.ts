@@ -37,6 +37,14 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   ngOnInit () {
+    const qucoConfiguracion = localStorage.getItem('qucoConfiguracion');
+
+    /*if(qucoConfiguracion) {
+      const configuracion = JSON.parse(qucoConfiguracion);
+      this.pc.inputConfiguration = configuracion;
+      this.pc.inputConfiguration.expectedFrequencies = configuracion.expectedFrequencies || [];
+      this.pc.inputConfiguration.outputs = configuracion.outputs || [];
+    }*/
 
     this.validarDatos()
     this.tieneFrecuenciasEsperadas()

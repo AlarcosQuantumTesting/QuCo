@@ -150,13 +150,32 @@
 
     <div class="tab-content" id="tab-1">
         <div class="generation-header">
-            <div>
+            <!-- <div>
                 Strategies policy:
                 <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
                 <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
                 
                 <button class="generate-btn" *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
+            </div> -->
+            <div class="strategies-policy">
+                <label class="policy-option">
+                    Strategies policy:
+                </label>
+                <label class="policy-option">
+                    <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">
+                    <span>Fixed stratego</span>
+                </label>
+
+                <label class="policy-option">
+                    <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">
+                    <span>Parameterizable stratego</span>
+                </label>
+
+                <button class="generate-btn" *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">
+                    Strategy details
+                </button>
             </div>
+
             <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                 <!-- <div style="display: flex; align-items: center;">
                     <h2 style="margin-top: 10px;">Generation</h2>

@@ -580,8 +580,8 @@ button:disabled {
     transform: scale(1.05);
 }
 
-.btn-confirm,
-.generate-btn,
+  .btn-confirm,
+  .generate-btn,
   .btn-cancel {
     padding: 5px 10px;
     font-size: 14px;
@@ -626,10 +626,18 @@ button:disabled {
     transform: none;
   }
 
+  .generate-btn:disabled:hover,
+  .btn-confirm:disabled:hover,
+  .btn-cancel:disabled:hover {
+    background-color: #8f929073;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .disabled {
-    pointer-events: none; /* Bloquea los clics */
-    opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
-    cursor: not-allowed; /* Cambia el cursor */
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Modales */
@@ -684,26 +692,26 @@ button:disabled {
 
 
 .modal-footer {
-    position: sticky; /* Se mantiene fija en la parte superior dentro del modal */
-    bottom: 0; /* Pegada abajo */
+    position: sticky;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 50px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    z-index: 100; /* Asegura que esté por encima del contenido */
+    z-index: 100;
 }
 
 .modal.instrucciones {
     position: fixed;
     z-index: 1000;
     background-color: transparent;
-    pointer-events: none; /* Permite hacer clic fuera del modal */
+    pointer-events: none;
 }
   
 .modal-content.instrucciones {
-    pointer-events: auto; /* Solo el contenido del modal es interactivo */
+    pointer-events: auto;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -713,14 +721,11 @@ button:disabled {
     overflow-y: auto;
     position: relative;
 
-    /* 🪟 Estilo de ventana emergente */
     resize: both;
     overflow: auto;
 
     min-width: 300px;
     min-height: 200px;
-
-    /* Opcional: borde para dar sensación de "ventana" */
     border: 1px solid #ccc;
 }
 
@@ -885,7 +890,13 @@ ol.list-instructions {
 
 .tab:hover {
   transition: all 0.3s ease;
-  background-color: #0066695a;
+  background-color: #073c3dd8;
+}
+
+.tab:disabled:hover {
+  background-color: #8f929073;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .tab-content {
@@ -964,6 +975,10 @@ ol.list-instructions {
   transition: transform 300ms ease;
 }
 
+.strategy-card i {
+  color: #008b95;
+}
+
 .strategy-card.move-up {
   transform: translateY(-100%);
 }
@@ -975,4 +990,27 @@ ol.list-instructions {
 
 .solutionFound:hover {
   cursor: pointer;
+}
+
+.strategies-policy {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.policy-option {
+  padding-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.policy-option input[type="radio"] {
+  accent-color: #0b555a;
+  cursor: pointer;
+  margin: 0px;
 }
