@@ -76,9 +76,33 @@ export class ProblemInputConfiguration {
     blockCircuit : BlockCircuit 
 
     constructor() {
-        this.qubits = 5
-        this.outputs = [false, false, true, true, true]
-        this.blockCircuit = new BlockCircuit(this.qubits)
+        const config = JSON.parse(localStorage.getItem("qucoConfiguration") || "{}")
+        if (config) {
+            this.qubits = config.qubits || 5
+            this.populationSize = config.populationSize || 24
+            this.maxPopulationSize = config.maxPopulationSize || 24
+            this.minNumberOfColumns = config.minNumberOfColumns || 4
+            this.maxNumberOfColumns = config.maxNumberOfColumns || 20
+            this.deleteFiles = config.deleteFiles || true
+            this.shots = config.shots || 99
+            this.startWithH = config.startWithH || []
+            this.expectedFrequencies = config.expectedFrequencies || []
+            this.outputs = config.outputs || [false, false, true, true, true]
+            for (let i=0; i<this.qubits; i++) {
+                if (this.startWithH.length <= i) {
+                    this.startWithH[i] = false
+                }
+                if (this.expectedFrequencies.length <= i) {
+                    this.expectedFrequencies[i] = 0.5
+                }
+            }
+            this.blockCircuit = new BlockCircuit(this.qubits)
+        } else {
+            this.qubits = 5
+            this.outputs = [false, false, true, true, true]
+            this.blockCircuit = new BlockCircuit(this.qubits)
+        }
+        
     }
 
     updateNumberOfQubits(qubits : number) {

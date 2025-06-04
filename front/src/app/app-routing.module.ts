@@ -21,9 +21,8 @@ const routes: Routes = [
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "home", component: HomeComponent },
-  // { path: "", redirectTo: "/quco", pathMatch: "full" }
-  { path: "", redirectTo: "/home", pathMatch: "full" }
-  // { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
+  { path: '**', redirectTo: 'home' }
+  //{ path: "", redirectTo: "/home", pathMatch: "full" }
 ];
 
 

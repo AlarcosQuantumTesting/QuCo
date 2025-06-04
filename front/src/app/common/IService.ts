@@ -11,16 +11,26 @@ import { CodeTemplate } from '../templates/CodeTemplate';
     providedIn: 'root'
 })
 export abstract class IService {
-    ws?: WebSocket
+    //ws?: WebSocket
     httpSessionId? : string
     controller?: string
+    private eventSource?: EventSource;
+
 
     constructor(private client: HttpClient) { }
 
-    connectWS() {
-        let localUrl = environment.wsUrl
-        this.ws = new WebSocket(localUrl + "wstp3?httpSessionId=" + this.httpSessionId)
+
+    connectSSE(): EventSource {
+        if (!this.eventSource) {
+            this.eventSource = new EventSource('http://localhost:8080/sse');
+        }
+        return this.eventSource;
     }
+
+    /*connectWS() {
+        let localUrl = environment.wsUrl
+        //this.ws = new WebSocket(localUrl + "wstp3?httpSessionId=" + this.httpSessionId)
+    }*/
 
     resetSession() {
         return this.client.get(environment.beUrl + this.controller + "/resetSession", { withCredentials: true, responseType: 'text' })
@@ -70,7 +80,11 @@ export abstract class IService {
         return this.client.put<any>(environment.beUrl + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
     }
 
-    firstRun(pc: ProblemConfiguration) {
+    /*firstRun(pc: ProblemConfiguration) {
+        return this.client.get<any>(environment.beUrl + this.controller + "/firstRun", { withCredentials: true })
+    }*/
+
+    firstRun() {
         return this.client.get<any>(environment.beUrl + this.controller + "/firstRun", { withCredentials: true })
     }
 

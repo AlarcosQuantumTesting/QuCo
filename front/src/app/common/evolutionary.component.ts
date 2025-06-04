@@ -48,8 +48,9 @@ export abstract class EvolutionaryComponent {
   error ? : string
 
   running : boolean = false
+  private eventSource?: EventSource;
 
-  ws? : WebSocket
+  //ws? : WebSocket
 
   math = Math
   _Array = Array
@@ -59,18 +60,29 @@ export abstract class EvolutionaryComponent {
     this.service.resetSession().subscribe(
       result=> {
         this.service.httpSessionId = result
-        this.service.connectWS()
+       // this.service.connectWS()
         this.loadRemoteFitnessers()
         this.random()
         this.loadConf()
-        this.ws = this.service.ws
+        /*this.ws = this.service.ws
         let self = this
         this.ws!.onmessage = function(e) {
           if (self.running)
             self.substate = e.data
           else
             self.substate = undefined
-        }
+        }*/
+       this.eventSource = this.service.connectSSE();
+
+        this.eventSource.onmessage = (event) => {
+          if (this.running){
+            this.substate = event.data;
+            console.log("Event received: " + this.substate);
+          }else{
+            this.substate = undefined;
+          }
+        };
+
       },
       error => {
         this.state = undefined
@@ -139,10 +151,46 @@ export abstract class EvolutionaryComponent {
 
   private async loadConf() {
     await this.loadGates()
-    let conf = localStorage.getItem("qucoConfiguration")
-    if (conf) {
+    let savedConfig = localStorage.getItem("qucoConfiguration")
+    /*if (conf) {
       let parsedConf = JSON.parse(conf)
       this.pc = new ProblemConfiguration(parsedConf.inputConfiguration)
+    }*/
+
+    if (savedConfig) {
+      try {
+        const conf = JSON.parse(savedConfig);
+        const config = this.pc.inputConfiguration;
+
+        config.qubits = conf.qubits;
+        console.log('Configuración qubit:', config.qubits);
+        config.populationSize = conf.populationSize;
+        console.log('Configuración populationSize:', config.populationSize);
+        config.maxPopulationSize = conf.maxPopulationSize;
+        console.log('Configuración maxPopulationSize:', config.maxPopulationSize);
+        config.minNumberOfColumns = conf.minNumberOfColumns;
+        console.log('Configuración minNumberOfColumns:', config.minNumberOfColumns);
+        config.maxNumberOfColumns = conf.maxNumberOfColumns;
+        console.log('Configuración maxNumberOfColumns:', config.maxNumberOfColumns);
+        config.deleteFiles = conf.deleteFiles;
+        console.log('Configuración deleteFiles:', config.deleteFiles);
+        config.shots = conf.shots;
+        console.log('Configuración shots:', config.shots);
+        config.outputs = conf.outputs;
+        console.log('Configuración outputs:', config.outputs);
+        config.expectedFrequencies = conf.expectedFrequencies;
+        console.log('Configuración expectedFrequencies:', config.expectedFrequencies);
+        config.startWithH = conf.startWithH;
+        console.log('Configuración startWithH:', config.startWithH);
+
+
+        if (conf.blockCircuit) {
+          config.blockCircuit = { ...conf.blockCircuit };
+        }
+
+      } catch (error) {
+        console.error('Error al parsear configuración desde localStorage:', error);
+      }
     }
 
     let qucoGates = localStorage.getItem("qucoGates")
@@ -279,7 +327,6 @@ export abstract class EvolutionaryComponent {
       }
     }
 
-    console.log("rf: ", rf)
 
     this.service.selectFitnesser(rf.name!, rf.selected, this.pc.inputConfiguration.shots, this.pc.desiredError, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.populationSize).
       subscribe(
@@ -334,7 +381,8 @@ export abstract class EvolutionaryComponent {
 
   firstRun() {
     this.state = "Running population..."
-    this.service.firstRun(this.pc).subscribe(
+    // this.service.firstRun(this.pc).subscribe(
+    this.service.firstRun().subscribe(
       result => {
         if (this.running)
           this.renderResults(result)

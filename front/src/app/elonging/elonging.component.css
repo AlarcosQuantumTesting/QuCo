@@ -640,6 +640,25 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.is-invalid {
+  border: 1px solid red;
+}
+.text-danger {
+  color: red;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error-text-top {
+  display: flex;
+  justify-content: center;
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+
 /* Modales */
 
 .modal {

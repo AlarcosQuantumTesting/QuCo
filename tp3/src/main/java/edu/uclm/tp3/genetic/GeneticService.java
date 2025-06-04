@@ -1,15 +1,19 @@
 package edu.uclm.tp3.genetic;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.model.ProblemInputConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
-import edu.uclm.tp3.ws.HWSession;
+import edu.uclm.tp3.http.SseEmitters;
 
 @Service
 public class GeneticService extends EvolutionaryService {
+
+	@Autowired
+    private SseEmitters emitters;
 	
 	@Override
 	public String getInitialization(ProblemConfiguration pc) {
@@ -23,13 +27,16 @@ public class GeneticService extends EvolutionaryService {
 	}
 
 	@Override
-	protected void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength, HWSession hw) throws Exception {
+	// protected void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength, HWSession hw) throws Exception {
+	protected void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength) throws Exception {
 		int targetGeneration = pc.getTargetGeneration();
 		int populationSize = pc.getInputConfiguration().getPopulationSize();
 		for (int i=0; i<populationSize; i++) {
 			Circuit circuit = generateRandomCircuit(pc, initialLength);
+			/*if (i%10==0 || i==populationSize-1)
+				hw.send((i+1) + " of " + populationSize);*/
 			if (i%10==0 || i==populationSize-1)
-				hw.send((i+1) + " of " + populationSize);
+				emitters.sendMessage((i+1) + " of " + populationSize);
 			circuit.save(pc, token, targetGeneration, i, null);
 			String gatesCode = circuit.getGatesCode();
 			StringBuilder sb = new StringBuilder().append(startEnd[0]).append(gatesCode).append(startEnd[1]);

@@ -17,31 +17,50 @@
     <div class="tab-content active" id="tab-0">
         <div class="container matrix-container">
             <div class="info1">
+                <small *ngIf="this.pc.probOf1QubitGates === null || this.pc.probOf2QubitGates === null || this.pc.probOf3QubitGates === null || this.pc.probOfNQubitGates === null"
+                    class="error-text-top">
+                    All probabilities must be defined.
+                </small>
+                <small *ngIf="(this.pc.probOf1QubitGates < 0 || this.pc.probOf1QubitGates > 100) || (this.pc.probOf2QubitGates < 0 || this.pc.probOf2QubitGates > 100) ||
+                        (this.pc.probOf3QubitGates < 0 || this.pc.probOf3QubitGates > 100) || (this.pc.probOfNQubitGates < 0 || this.pc.probOfNQubitGates > 100)"
+                        class="error-text-top">
+                        All probabilities must be between 0 and 100.
+                </small>
+                <small *ngIf="templateSelected === false"
+                    class="error-text-top">
+                    You must select a template.
+                </small>
+            </div>
+            <div class="info1">
                 <div>
                     Available templates:
-                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;">
+                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;"
+                    [ngClass]="{'is-invalid': templateSelected === false}">
                         <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
                             {{ template.fileName }}
                         </option>
                     </select>
                 </div>
-                
+
                 <div>
                     <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
                 </div>
-                
+
                 <div>
                     <span style="margin-left: 20px;">
-                        % of 1 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates" style="margin-right: 10px;">
-                        
-                        % of 2 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates" style="margin-right: 10px;">
-                        
-                        % of =3 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates" style="margin-right: 10px;">
-                        
-                        % of >=4 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates" style="margin-right: 10px;">
+                        % of 1 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates" style="margin-right: 10px;"
+                        [ngClass]="{'is-invalid': this.pc.probOf1QubitGates === null || (this.pc.probOf1QubitGates < 0 || this.pc.probOf1QubitGates > 100)}">
+
+                        % of 2 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates" style="margin-right: 10px;"
+                        [ngClass]="{'is-invalid': this.pc.probOf2QubitGates === null || (this.pc.probOf2QubitGates < 0 || this.pc.probOf2QubitGates > 100)}">
+
+                        % of =3 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates" style="margin-right: 10px;"
+                        [ngClass]="{'is-invalid': this.pc.probOf3QubitGates === null || (this.pc.probOf3QubitGates < 0 || this.pc.probOf3QubitGates > 100)}">
+
+                        % of >=4 qubit gates <input [disabled]="running" type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates" style="margin-right: 10px;"
+                        [ngClass]="{'is-invalid': this.pc.probOfNQubitGates === null || (this.pc.probOfNQubitGates < 0 || this.pc.probOfNQubitGates > 100)}">
                     </span>
                 </div>
-
                 <button class="btn primary" (click)="buildActions()" [disabled]="validarDatos() || running">Build</button>
             </div>
         </div>
@@ -53,16 +72,19 @@
                         <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
                             Qubits
                         </label>
-                        
+                        <span *ngIf="pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)"
+                            class="error-text">
+                                Must be between 1 and 24
+                        </span>
+
                         <table class="qubit-table">
                             <tr>
                                 <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
                                 <td [attr.colspan]="pc.inputConfiguration!.qubits">
-                                    <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
-                                        (change)="updateExpectedFrequencies()">
-                                    <span *ngIf="pc.inputConfiguration!.qubits !== null && (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)" class="error-text">
-                                        Must be between 1 and 24
-                                    </span>
+                                    <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
+                                        (change)="updateExpectedFrequencies()" 
+                                        [ngClass]="{'is-invalid': pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || 
+                                        pc.inputConfiguration!.qubits > 24)}">
                                 </td>
                             </tr>
                             <tr>
@@ -74,7 +96,7 @@
                             <tr>
                                 <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
                                 <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                    <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                                    <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
                                         (change)="updateOutputs()">
                                 </td>
                             </tr>
@@ -95,34 +117,56 @@
                                 <td rowspan="2">
                                     <div style="display: flex; flex-direction: column; gap: 8px;">
 
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label>Number of columns: between</label>
-                                        <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns">
-                                        <label>and</label>
-                                        <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
-                                    </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label>Number of columns: between</label>
+                                            <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns" 
+                                            [ngClass]="{'is-invalid': validarDatosInputMin()}">
+                                            <label>and</label>
+                                            <input [disabled]="running" type="number" class="form-control" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns"
+                                            [ngClass]="{'is-invalid': validarDatosInputMax()}">
+                                        </div>
 
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label>Initial population size:</label>
-                                        <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
-                                    </div>
+                                        <small *ngIf="validarDatosInputMin() || validarDatosInputMax()" class="text-danger">
+                                            The number must be equal or greater than 4.
+                                        </small>
 
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label>Max population size:</label>
-                                        <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize">
-                                    </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label>Initial population size:</label>
+                                            <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize"
+                                            [ngClass]="{'is-invalid': validarInputPopSizeInit()}">
+                                        </div>
 
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label>Shots:</label>
-                                        <label style="color: black;">{{ pc.inputConfiguration!.shots }}</label>
-                                    </div>
+                                        <small *ngIf="validarInputPopSizeInit()" class="text-danger">
+                                            The number must be equal or greater than 2 and an even number.
+                                        </small>
 
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label>Desired error (%):</label>
-                                        <input type="number" class="form-control" min="0" step="0.025"
-                                            [(ngModel)]="pc.desiredError" [disabled]="running"
-                                            (change)="saveConf(); updateDesiredError()">
-                                    </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label>Max population size:</label>
+                                            <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxPopulationSize"
+                                            [ngClass]="{'is-invalid': validarInputPopSizeMax()}">
+                                        </div>
+
+                                        <small *ngIf="validarInputPopSizeMax()" class="text-danger">
+                                            The number must be equal or greater than 2 and an even number.
+                                        </small>
+
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label>Shots:</label>
+                                            <label *ngIf="!notBuilt" style="color: black;">{{ pc.inputConfiguration!.shots }}</label>
+                                            <label *ngIf="notBuilt" style="color: black;">0</label>
+                                        </div>
+
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label>Desired error (%):</label>
+                                            <input type="number" class="form-control" min="0" step="0.025"
+                                                [(ngModel)]="pc.desiredError" [disabled]="running"
+                                                (change)="saveConf(); updateDesiredError()"
+                                                [ngClass]="{'is-invalid': validarInputError()}">
+                                        </div>
+
+                                        <small *ngIf="validarInputError()" class="text-danger">
+                                            The number must be equal or greater than 0.
+                                        </small>
 
                                     </div>
                                 </td>
@@ -154,7 +198,7 @@
                 Strategies policy:
                 <input type="radio" [(ngModel)]="stratego" [value]="'fixedStratego'">Fixed stratego
                 <input type="radio" [(ngModel)]="stratego" [value]="'parameterizableStratego'">Parameterizable stratego
-                
+
                 <button class="generate-btn" *ngIf="stratego === 'parameterizableStratego'" (click)="modalStrategyDetails = true">Strategy details</button>
             </div> -->
             <div class="strategies-policy">
@@ -192,7 +236,7 @@
                                     <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
                                         {{ template.fileName }}
                                     </option>
-                                </select> 
+                                </select>
                             </div>
 
                             <div>
@@ -226,7 +270,7 @@
                         </div>
                     </div>
                 </div> -->
-                
+
             </div>
             <div class="buttons-generation">
                 <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
@@ -236,7 +280,7 @@
                 <!-- Generate initial population and start running -->
                 Generate
                 </button>
-                
+
                 <button class="btn-cancel" style="margin-left: 5px;" (click)="stop()" [disabled]="!running">Stop</button>
                 <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
                     <i class="fa fa-refresh" title="Reset all"></i>
@@ -338,7 +382,7 @@
                             <div>
                                 <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                                     <button class="reset-btn" (click)="resetMatrix()"><i class="fa fa-refresh" title="Reset values"></i></button>
-                        
+
                                     <i>p<sub>i</sub></i>
                                 </div>
                                 <div>
@@ -348,11 +392,11 @@
                                         <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
                                     </select>
 
-                                    <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
+                                    <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button>
                                 </div>
                             </div>
                         </th>
-                        <th *ngFor="let individual of individuals; let individualIndex = index" 
+                        <th *ngFor="let individual of individuals; let individualIndex = index"
                             [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
                             <span (click)="getCode(individual)" class="solutionFound" *ngIf="individual.selected[fitnesserIndex]">💃</span>
                             <u (click)="isResultCode(individual, fitnesserIndex)" [class.solutionFound]="individual.selected[fitnesserIndex]">
@@ -396,7 +440,7 @@
                         <td *ngFor="let individual of individuals" align="right">
                             {{ individual.length[fitnesserIndex] }}
                         </td>
-                    </tr>    
+                    </tr>
                 </table>
             </div>
 
@@ -425,8 +469,8 @@
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-                <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" 
-                    *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index" 
+                <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;"
+                    *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index"
                     [hidden]="!rf.selected">
                     <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
                 </div>
@@ -449,12 +493,12 @@
                     <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
                         Qubits
                     </label>
-                    
+
                     <table class="qubit-table">
                         <tr>
                             <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
                             <td [attr.colspan]="pc.inputConfiguration!.qubits">
-                                <input id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
+                                <input id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
                                     (change)="updateExpectedFrequencies()">
                                 <span *ngIf="pc.inputConfiguration!.qubits !== null && (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)" class="error-text">
                                     Must be between 1 and 24
@@ -470,7 +514,7 @@
                         <tr>
                             <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
                             <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
                                     (change)="updateOutputs()">
                             </td>
                         </tr>
@@ -565,7 +609,7 @@
                                 <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
                                     {{ template.fileName }}
                                 </option>
-                            </select> 
+                            </select>
                         </div>
 
                         <div>
@@ -599,7 +643,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
         <div class="buttons-generation">
             <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running">
@@ -668,7 +712,7 @@
                     <div>
                         <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                             <button class="reset-btn" (click)="resetMatrix()"><i class="fa fa-refresh" title="Reset values"></i></button>
-                  
+
                             <i>p<sub>i</sub></i>
                         </div>
                         <div>
@@ -678,11 +722,11 @@
                                 <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
                             </select>
 
-                            <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button> 
+                            <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button>
                         </div>
                     </div>
                 </th>
-                <th *ngFor="let individual of individuals; let individualIndex = index" 
+                <th *ngFor="let individual of individuals; let individualIndex = index"
                     [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
                     <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
                     <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
@@ -723,7 +767,7 @@
                 <td *ngFor="let individual of individuals" align="right">
                     {{ individual.length[fitnesserIndex] }}
                 </td>
-            </tr>    
+            </tr>
         </table>
     </div>
     <div>
@@ -733,8 +777,8 @@
             </div>
         </div>
         <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-            <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" 
-                *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index" 
+            <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;"
+                *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index"
                 [hidden]="!rf.selected">
                 <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
             </div>
@@ -805,7 +849,7 @@
                         &nbsp;
                         <span *ngIf="i>0" (click)="moveUp(i)">⬆️</span>
                         &nbsp;
-                        <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>        
+                        <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>
                     </div>
                 </div> -->
                 <div class="help-actions">
@@ -848,7 +892,7 @@
             <div *ngIf="isLoadingQiskitCode" class="spinner-container">
                 <div class="spinner"></div>
                 <p>Generating Qiskit code...</p>
-            </div>              
+            </div>
         </div> -->
         <!-- <div class="modal-content" *ngIf="!isLoadingQiskitCode"> -->
         <div class="modal-content">
@@ -871,11 +915,11 @@
             </div>
         </div>
     </div>
-    
+
 </body>
 
 <!-- <div> -->
-    <!-- Number of qubits: <input type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits" 
+    <!-- Number of qubits: <input type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
         (change)="updateExpectedFrequencies()">
     &nbsp;
     <table style="border : solid 1px">
@@ -890,11 +934,11 @@
         <tr>
             <th align="left"><i>Output qubits</i></th>
             <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]" 
+                <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
                     (change)="updateOutputs()">
             </td>
             <td rowspan="2">
-                Number of columns: between <input type="number" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns"> and 
+                Number of columns: between <input type="number" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.minNumberOfColumns"> and
                     <input type="number" min="4" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.maxNumberOfColumns">
                 <br>
                 Initial population size: <input type="number" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize">
@@ -943,7 +987,7 @@
             </td>
         </tr>
     </table> -->
-    
+
     <!-- <br>
     Delete files: <input type="checkbox" [(ngModel)]="pc.inputConfiguration!.deleteFiles">
     &nbsp;
@@ -978,17 +1022,17 @@
                 &nbsp;
                 <span *ngIf="i>0" (click)="moveUp(i)">⬆️</span>
                 &nbsp;
-                <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>        
+                <span *ngIf="i<existingStrategies.length-1" (click)="moveDown(i)">⬇️</span>
             </div>
         </div>
 
         <u>Massive mutation</u>:
-        <br>&nbsp;&nbsp;Apply after <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold"> 
-            falls of the <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><u>best fitness</u> 
+        <br>&nbsp;&nbsp;Apply after <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold">
+            falls of the <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><u>best fitness</u>
             <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><u>mean fitness</u>
-        <br>&nbsp;&nbsp;Apply when the best indivudal reaches a fitness of <input type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"> 
-            of the expected fitness 
-        <br>&nbsp;&nbsp;Maximum times of consecutive massive mutations: <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
+        <br>&nbsp;&nbsp;Apply when the best indivudal reaches a fitness of <input type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage">
+            of the expected fitness
+        <br>&nbsp;&nbsp;Maximum times of consecutive massive mutations: <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications">
     </div>
     <br> -->
     <!-- &nbsp;
@@ -997,7 +1041,7 @@
         <option *ngFor="let template of manager.getTemplatesStartingBy(['elonging'])" [ngValue]="template">
             {{ template.fileName }}
         </option>
-    </select> 
+    </select>
     <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running">Generate initial population and start running</button>
     &nbsp;
     <button (click)="stop()" [disabled]="!running">Stop</button> -->
@@ -1042,7 +1086,7 @@
                 </td>
             </tr>
         </ng-container>
-    </table>    
+    </table>
 </small>
 
 <table border="1" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
@@ -1067,7 +1111,7 @@
             &nbsp;
             <small><small style="color : blue" (click)="resetMatrix()">Reset</small></small>
         </th>
-        <th *ngFor="let individual of individuals; let individualIndex = index" 
+        <th *ngFor="let individual of individuals; let individualIndex = index"
             [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
             <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
             <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
@@ -1108,7 +1152,7 @@
         <td *ngFor="let individual of individuals" align="right">
             {{ individual.length[fitnesserIndex] }}
         </td>
-    </tr>    
+    </tr>
 </table>
 
 <i style="color : green" [hidden]="state==undefined">{{ state }}</i>

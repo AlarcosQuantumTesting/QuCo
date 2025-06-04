@@ -5,6 +5,8 @@ import { EvolutionaryService } from '../evolutionary.service';
 import { EvolutionaryComponent } from '../common/evolutionary.component';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
+import { NotificationService } from '../notification.service';
+
 
 Chart.register(...registerables)
 
@@ -15,7 +17,9 @@ Chart.register(...registerables)
 })
 export class ElongingComponent extends EvolutionaryComponent {
 
-  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService) {
+  message: string | null = null;
+
+  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService) {
     super(evolutionaryService, "elonging")
   }
 
@@ -37,14 +41,69 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   ngOnInit () {
-    const qucoConfiguracion = localStorage.getItem('qucoConfiguracion');
 
-    /*if(qucoConfiguracion) {
+    this.notificationService.getMessages().subscribe(msg => {
+      this.message = msg;
+      console.log("Mensaje SSE:", msg);
+    });
+
+    this.updateOutputs();
+
+    const savedConfig = localStorage.getItem('qucoConfiguration');
+    if (savedConfig) {
+      try {
+        const conf = JSON.parse(savedConfig);
+        const config = this.pc.inputConfiguration;
+
+        config.qubits = conf.qubits;
+        console.log('Configuración qubit:', config.qubits);
+        config.populationSize = conf.populationSize;
+        console.log('Configuración populationSize:', config.populationSize);
+        config.maxPopulationSize = conf.maxPopulationSize;
+        console.log('Configuración maxPopulationSize:', config.maxPopulationSize);
+        config.minNumberOfColumns = conf.minNumberOfColumns;
+        console.log('Configuración minNumberOfColumns:', config.minNumberOfColumns);
+        config.maxNumberOfColumns = conf.maxNumberOfColumns;
+        console.log('Configuración maxNumberOfColumns:', config.maxNumberOfColumns);
+        config.deleteFiles = conf.deleteFiles;
+        console.log('Configuración deleteFiles:', config.deleteFiles);
+        config.shots = conf.shots;
+        console.log('Configuración shots:', config.shots);
+        config.outputs = conf.outputs;
+        console.log('Configuración outputs:', config.outputs);
+        config.expectedFrequencies = conf.expectedFrequencies;
+        console.log('Configuración expectedFrequencies:', config.expectedFrequencies);
+        config.startWithH = conf.startWithH;
+        console.log('Configuración startWithH:', config.startWithH);
+
+
+        if (conf.blockCircuit) {
+          config.blockCircuit = { ...conf.blockCircuit };
+        }
+
+      } catch (error) {
+        console.error('Error al parsear configuración desde localStorage:', error);
+      }
+    }
+
+
+    /*const qucoConfiguracion = localStorage.getItem('qucoConfiguracion');
+
+    const configuracion = JSON.parse(qucoConfiguracion || '{}');
+
+    if(qucoConfiguracion) {
       const configuracion = JSON.parse(qucoConfiguracion);
       this.pc.inputConfiguration = configuracion;
       this.pc.inputConfiguration.expectedFrequencies = configuracion.expectedFrequencies || [];
       this.pc.inputConfiguration.outputs = configuracion.outputs || [];
     }*/
+
+    
+    
+    if(!savedConfig) {
+      console.log('No hay configuración guardada en localStorage');
+    }
+    
 
     this.validarDatos()
     this.tieneFrecuenciasEsperadas()
@@ -78,6 +137,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   notBuilt: boolean = true;
   templateSelected: boolean = false;
   generateClicked: boolean = false;
+  //qucoConfiguration: any;
   
 
   override generateInitialPopulation() {
@@ -104,8 +164,8 @@ export class ElongingComponent extends EvolutionaryComponent {
       if (qubitGates.length==0)
         this.pc.probOfNQubitGates = 0
 
-      if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
-        this.evolutionaryService.connectWS()
+      /*if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
+        this.evolutionaryService.connectWS()*/
 
       this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
         result => {
@@ -139,7 +199,6 @@ export class ElongingComponent extends EvolutionaryComponent {
      
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
-    console.log("Temp: ", this.manager.selectedTemplate)
     this.templateSelected = true;
   }
 
@@ -202,6 +261,9 @@ export class ElongingComponent extends EvolutionaryComponent {
   buildActions() {
     this.notBuilt = false;
 
+    this.updateOutputs();
+    this.resetMatrix();
+
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
     const contents = document.querySelectorAll<HTMLElement>(".tab-content");
 
@@ -211,8 +273,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       t.classList.toggle("active", i === selectedIndex);
       contents[i].classList.toggle("active", i === selectedIndex);
     });
-
-    this.tieneFrecuenciasEsperadas()
+    this.tieneFrecuenciasEsperadas();
   }
 
   validarDatos(): boolean {
@@ -252,12 +313,42 @@ export class ElongingComponent extends EvolutionaryComponent {
     return false;
   }
 
+  validarDatosInputMin() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 4) return true;
+    return false;
+  }
+
+  validarDatosInputMax() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 4) return true;
+    return false;
+  }
+
+  validarInputPopSizeInit() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.populationSize == null || config.populationSize < 2 || config.populationSize % 2 !== 0) return true;
+    return false;
+  }
+
+  validarInputPopSizeMax() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.maxPopulationSize == null || config.maxPopulationSize < 2 || config.maxPopulationSize % 2 !== 0) return true;
+    return false;
+  }
+
+  validarInputError() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (this.pc.desiredError == null || this.pc.desiredError < 0) return true;
+    return false;
+  }
+
   tieneFrecuenciasEsperadas(): boolean {
-    console.log("Freq esperadas: ", this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0))
     return this.pc.inputConfiguration.expectedFrequencies.some(freq => freq !== 0);
   }
 
   reload() {
+    localStorage.removeItem('qucoConfiguration');
     location.reload();
   }
 
