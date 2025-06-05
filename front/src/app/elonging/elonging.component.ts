@@ -6,6 +6,8 @@ import { EvolutionaryComponent } from '../common/evolutionary.component';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
+import { CanComponentDeactivate } from '../CanComponentDeactivate';
+
 
 
 Chart.register(...registerables)
@@ -41,6 +43,8 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   ngOnInit () {
+
+    window.addEventListener('beforeunload', this.confirmExit);
 
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
@@ -134,6 +138,24 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
 
   }
+
+  canDeactivate(): boolean {
+    if (this.running || !this.notBuilt) {
+      return confirm('Are you sure you want to exit Genetic algorithm?');
+    }
+    return true;
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeunload', this.confirmExit);
+  }
+
+  confirmExit = (event: BeforeUnloadEvent): void => {
+    if (this.running || !this.notBuilt) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  };
 
   mensajeTemporal: string = '';
   tooltipGenerationVisible: boolean = false;
@@ -424,6 +446,5 @@ export class ElongingComponent extends EvolutionaryComponent {
       console.error('Error al copiar el código:', err);
     });
   }
-
 
 }
