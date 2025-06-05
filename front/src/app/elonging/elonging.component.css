@@ -492,6 +492,8 @@ button:disabled {
 .generation-table-wrapper {
   width: 90vw; /* 95% del ancho del viewport */
   overflow-x: auto;
+  max-height: 700px;
+  overflow-y: auto;
 }
 
 .generation-table {
@@ -1032,4 +1034,9 @@ ol.list-instructions {
   accent-color: #0b555a;
   cursor: pointer;
   margin: 0px;
+}
+
+.generations-tables-container {
+  max-width: 100%;
+  max-height: 700px;
 }

@@ -42,8 +42,6 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit () {
 
-    
-
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
       //console.log("Mensaje SSE:", msg);
@@ -77,10 +75,10 @@ export class ElongingComponent extends EvolutionaryComponent {
     this.templateSelected = false;
     this.manager.selectedTemplate = new CodeTemplate("", "", "");*/
 
-    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGates') ? JSON.parse(localStorage.getItem('probOf1QubitGates') || '0') : 50;
-    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGates') ? JSON.parse(localStorage.getItem('probOf2QubitGates') || '0') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '0') : 20;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '0') : 20;
+    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGates') ? JSON.parse(localStorage.getItem('probOf1QubitGates') || '50') : 50;
+    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGates') ? JSON.parse(localStorage.getItem('probOf2QubitGates') || '50') : 50;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '20') : 20;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '20') : 20;
 
     this.updateOutputs();
 
