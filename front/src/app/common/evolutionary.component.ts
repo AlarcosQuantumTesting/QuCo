@@ -163,25 +163,15 @@ export abstract class EvolutionaryComponent {
         const config = this.pc.inputConfiguration;
 
         config.qubits = conf.qubits;
-        console.log('Configuración qubit:', config.qubits);
         config.populationSize = conf.populationSize;
-        console.log('Configuración populationSize:', config.populationSize);
         config.maxPopulationSize = conf.maxPopulationSize;
-        console.log('Configuración maxPopulationSize:', config.maxPopulationSize);
         config.minNumberOfColumns = conf.minNumberOfColumns;
-        console.log('Configuración minNumberOfColumns:', config.minNumberOfColumns);
         config.maxNumberOfColumns = conf.maxNumberOfColumns;
-        console.log('Configuración maxNumberOfColumns:', config.maxNumberOfColumns);
         config.deleteFiles = conf.deleteFiles;
-        console.log('Configuración deleteFiles:', config.deleteFiles);
         config.shots = conf.shots;
-        console.log('Configuración shots:', config.shots);
         config.outputs = conf.outputs;
-        console.log('Configuración outputs:', config.outputs);
         config.expectedFrequencies = conf.expectedFrequencies;
-        console.log('Configuración expectedFrequencies:', config.expectedFrequencies);
         config.startWithH = conf.startWithH;
-        console.log('Configuración startWithH:', config.startWithH);
 
 
         if (conf.blockCircuit) {

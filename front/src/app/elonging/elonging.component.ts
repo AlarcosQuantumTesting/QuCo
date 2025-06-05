@@ -42,10 +42,40 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit () {
 
+    
+
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
-      console.log("Mensaje SSE:", msg);
+      //console.log("Mensaje SSE:", msg);
     });
+
+    this.templateSelected = localStorage.getItem('templateSelected') === 'true' || false;
+    if (this.templateSelected) {
+      const savedTemplate = localStorage.getItem('selectedTemplate');
+      if (savedTemplate) {
+        try {
+          const template = JSON.parse(savedTemplate);
+          setTimeout(() => {
+            this.onTemplateChange(template);
+          }, 1000);
+          console.log('Nombre:', template.fileName);
+          this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === template.fileName) || new CodeTemplate("", "", "");
+          //this.manager.selectedTemplate = new CodeTemplate(template.fileName, template.code, template.description);
+          console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
+        } catch (error) {
+          console.error('Error al parsear plantilla desde localStorage:', error);
+        }
+      } else {
+        console.log('No hay plantilla guardada en localStorage');
+      }
+    } else {
+      console.log('No hay plantilla seleccionada');
+    }
+
+    /*localStorage.removeItem('templateSelected');
+    localStorage.removeItem('selectedTemplate');
+    this.templateSelected = false;
+    this.manager.selectedTemplate = new CodeTemplate("", "", "");*/
 
     this.updateOutputs();
 
@@ -56,25 +86,15 @@ export class ElongingComponent extends EvolutionaryComponent {
         const config = this.pc.inputConfiguration;
 
         config.qubits = conf.qubits;
-        console.log('Configuración qubit:', config.qubits);
         config.populationSize = conf.populationSize;
-        console.log('Configuración populationSize:', config.populationSize);
         config.maxPopulationSize = conf.maxPopulationSize;
-        console.log('Configuración maxPopulationSize:', config.maxPopulationSize);
         config.minNumberOfColumns = conf.minNumberOfColumns;
-        console.log('Configuración minNumberOfColumns:', config.minNumberOfColumns);
         config.maxNumberOfColumns = conf.maxNumberOfColumns;
-        console.log('Configuración maxNumberOfColumns:', config.maxNumberOfColumns);
         config.deleteFiles = conf.deleteFiles;
-        console.log('Configuración deleteFiles:', config.deleteFiles);
         config.shots = conf.shots;
-        console.log('Configuración shots:', config.shots);
         config.outputs = conf.outputs;
-        console.log('Configuración outputs:', config.outputs);
         config.expectedFrequencies = conf.expectedFrequencies;
-        console.log('Configuración expectedFrequencies:', config.expectedFrequencies);
         config.startWithH = conf.startWithH;
-        console.log('Configuración startWithH:', config.startWithH);
 
 
         if (conf.blockCircuit) {
@@ -85,20 +105,6 @@ export class ElongingComponent extends EvolutionaryComponent {
         console.error('Error al parsear configuración desde localStorage:', error);
       }
     }
-
-
-    /*const qucoConfiguracion = localStorage.getItem('qucoConfiguracion');
-
-    const configuracion = JSON.parse(qucoConfiguracion || '{}');
-
-    if(qucoConfiguracion) {
-      const configuracion = JSON.parse(qucoConfiguracion);
-      this.pc.inputConfiguration = configuracion;
-      this.pc.inputConfiguration.expectedFrequencies = configuracion.expectedFrequencies || [];
-      this.pc.inputConfiguration.outputs = configuracion.outputs || [];
-    }*/
-
-    
     
     if(!savedConfig) {
       console.log('No hay configuración guardada en localStorage');
@@ -199,7 +205,13 @@ export class ElongingComponent extends EvolutionaryComponent {
      
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
+    console.log('plantillas:', this.manager.templates);
+    //console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
     this.templateSelected = true;
+
+    localStorage.setItem('templateSelected', JSON.stringify(this.templateSelected));
+    localStorage.setItem('selectedTemplate', JSON.stringify(this.manager.selectedTemplate));
   }
 
   toggleTooltipGeneration(event: MouseEvent): void {
@@ -260,6 +272,9 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   buildActions() {
     this.notBuilt = false;
+
+    localStorage.setItem('templateSelected', JSON.stringify(this.templateSelected));
+    localStorage.setItem('selectedTemplate', JSON.stringify(this.manager.selectedTemplate));
 
     this.updateOutputs();
     this.resetMatrix();
@@ -348,7 +363,10 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   reload() {
-    localStorage.removeItem('qucoConfiguration');
+    //localStorage.removeItem('qucoConfiguration');
+    //localStorage.removeItem('selectedOptionFreqGenetic');
+    //localStorage.removeItem('templateSelected');
+    //localStorage.removeItem('selectedTemplate');
     location.reload();
   }
 
