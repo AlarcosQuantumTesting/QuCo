@@ -256,6 +256,15 @@ p {
     margin-top: 0px;
 }
 
+.btn-code {
+  background-color: #149099;
+}
+
+.btn-code:hover {
+  background-color: #267375;
+  transform: scale(1.05);
+}
+
 .container {
     max-width: 100%;
     margin: auto;
@@ -1559,4 +1568,9 @@ input[disabled], textarea[disabled], select[disabled] {
   margin-top: 2px;
   font-size: 15px;
   padding: 0px;
+}
+
+.custom-radio input[type="radio"] {
+  accent-color: #10989c;
+  cursor: pointer;
 }

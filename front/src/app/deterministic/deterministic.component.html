@@ -141,15 +141,14 @@
                     </div>
 
                     <div *ngIf="isGrover" class="config-input">
-                        
                         <label class="custom-radio">
-                          <p class="pRadioTitle">Use:</p>
-                          <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
-                          <p class="pRadio">MCX</p>
+                            <p class="pRadioTitle">Use:</p>
+                            <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
+                            <p class="pRadio">MCX</p>
                         </label>
                         <label class="custom-radio">
-                          <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">
-                          <p class="pRadio">H-MCZ-H</p>
+                            <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">
+                            <p class="pRadio">H-MCZ-H</p>
                         </label>
                     </div>
                   </div>
@@ -215,7 +214,7 @@
                     <button *ngIf="!isGrover && !isEmpty()" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGrover && totalSelectedElements > 0" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button class="btn-code" *ngIf="isGrover && totalSelectedElements > 0" title="Get Qiskit code" (click)="getCircuit(true)">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>
