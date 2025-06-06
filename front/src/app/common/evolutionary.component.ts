@@ -353,18 +353,20 @@ export abstract class EvolutionaryComponent {
   }
 
   stop() {
-    this.service.resetSession().subscribe(
-      result => {
-        this.running = false
-        this.state = "Process stopped"
-        this.substate = undefined
-      },
-      error => {
-        this.state = undefined
-        this.substate = undefined
-        this.error = error.error.message
-      }
-    )
+    if (confirm('Are you sure you want to stop the execution?')) {
+      this.service.resetSession().subscribe(
+        result => {
+          this.running = false
+          this.state = "Process stopped"
+          this.substate = undefined
+        },
+        error => {
+          this.state = undefined
+          this.substate = undefined
+          this.error = error.error.message
+        }
+      )
+    }
   }
 
   abstract generateInitialPopulation() : void

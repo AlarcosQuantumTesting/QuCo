@@ -49,6 +49,34 @@ public abstract class EvolutionaryController {
 		session.removeAttribute("pc");
 		return session.getId();
 	}
+
+	/*@GetMapping("/resetSession")
+	@ResponseBody
+	public String resetSession(HttpSession session, HttpServletRequest request) {
+		String gt = (String) session.getAttribute("gt");
+		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
+
+		if (gt != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
+			try {
+				String workingFolderPath = EvolutionaryService.generationFolder((String) gt);
+				if (workingFolderPath != null) {
+					File workingFolder = new File(workingFolderPath);
+					FileUtils.deleteDirectory(workingFolder);
+					System.out.println("Deleted directory: " + workingFolder.getAbsolutePath());
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+				return "Error deleting files: " + e.getMessage();
+			}
+		}
+
+		session.removeAttribute("gt");
+		session.removeAttribute("pc");
+		return session.getId();
+	}*/
+
+
 	
 	@GetMapping("/getFitnessers") @ResponseBody
 	public List<String> getFitnessers() {
