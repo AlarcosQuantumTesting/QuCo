@@ -211,11 +211,11 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button *ngIf="!isGrover && !isEmpty()" class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">
+                    <button class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">Qiskit
                       <i class="fa fa-code"></i>
                     </button>
-                    <button class="btn-code" *ngIf="isGrover && totalSelectedElements > 0" title="Get Qiskit code" (click)="getCircuit(true)">
-                      <i class="fa fa-code"></i>
+                    <button *ngIf="isGrover" title="Get Qiskit code" (click)="getCircuit(true)">
+                      <i class="fa fa-code"></i>Grover
                     </button>
                   </div>
                 </div>
