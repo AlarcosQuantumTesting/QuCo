@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.tp3.blocks.strategies.StrategyWrapper;
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.BlocksService;
 import edu.uclm.tp3.common.services.EvolutionaryService;
@@ -24,11 +27,9 @@ import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.elonging.strategies.IStratego;
 import edu.uclm.tp3.elonging.strategies.ParameterizableStratego;
 import edu.uclm.tp3.elonging.strategies.Stratego;
-import edu.uclm.tp3.blocks.strategies.StrategyWrapper;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.ws.HWSession;
-import javax.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("blocks")
@@ -37,6 +38,9 @@ public class BlocksController extends EvolutionaryController {
 	
 	@Autowired
 	private BlocksService service;
+
+	@Autowired
+    private SseEmitters emitters;
 	
 	@PutMapping("/generateInitialPopulation") @ResponseBody
 	public long generateInitialPopulation(HttpSession session, @RequestBody ProblemConfiguration pc) {
@@ -85,7 +89,8 @@ public class BlocksController extends EvolutionaryController {
 			
 			int sourceGeneration = pc.getSourceGeneration();
 			IStratego stratego = selectedStratego.equalsIgnoreCase("fixedStratego") ? new Stratego() : new ParameterizableStratego();
-			RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
 			for (int i=0; i<fitnessers.length; i++) {
 				fitnesser = fitnessers[i];
 				pc.setSourceGeneration(sourceGeneration);
@@ -97,7 +102,9 @@ public class BlocksController extends EvolutionaryController {
 				TextLogger.write(gt, "\t\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
 				TextLogger.write(gt, "\t\ttargetGeneration=" + pc.getTargetGeneration() + "\n");				
 				
-				hw.send("Applying " + strategy.getClass().getSimpleName());
+				
+				//hw.send("Applying " + strategy.getClass().getSimpleName());
+				emitters.sendMessage("Applying " + strategy.getClass().getSimpleName());
 				StrategyWrapper sw = new StrategyWrapper(strategy);
 				sw.apply(gt, pc, templateStart, templateEnd, fitnesser);
 				result.put("strategyTime", System.currentTimeMillis()-strategyTime);

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +30,6 @@ import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 import edu.uclm.tp3.genetic.fitnessers.FitnessersService;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.ws.HWSession;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 @RestController
 public abstract class EvolutionaryController {
@@ -38,6 +39,9 @@ public abstract class EvolutionaryController {
 	
 	@Autowired
 	protected ManagerService manager;
+
+	@Autowired
+    private SseEmitters emitters;
 	
 	@GetMapping("/resetSession") @ResponseBody
 	public String resetSession(HttpSession session, HttpServletRequest request) {
@@ -45,6 +49,34 @@ public abstract class EvolutionaryController {
 		session.removeAttribute("pc");
 		return session.getId();
 	}
+
+	/*@GetMapping("/resetSession")
+	@ResponseBody
+	public String resetSession(HttpSession session, HttpServletRequest request) {
+		String gt = (String) session.getAttribute("gt");
+		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
+
+		if (gt != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
+			try {
+				String workingFolderPath = EvolutionaryService.generationFolder((String) gt);
+				if (workingFolderPath != null) {
+					File workingFolder = new File(workingFolderPath);
+					FileUtils.deleteDirectory(workingFolder);
+					System.out.println("Deleted directory: " + workingFolder.getAbsolutePath());
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+				return "Error deleting files: " + e.getMessage();
+			}
+		}
+
+		session.removeAttribute("gt");
+		session.removeAttribute("pc");
+		return session.getId();
+	}*/
+
+
 	
 	@GetMapping("/getFitnessers") @ResponseBody
 	public List<String> getFitnessers() {
@@ -151,12 +183,13 @@ public abstract class EvolutionaryController {
 		long startTime = System.currentTimeMillis();
 		String gt = ""  + EvolutionaryService.dado.nextInt();
 		session.setAttribute("gt", gt);
-		HWSession hw = this.manager.get(session);
+		//HWSession hw = this.manager.get(session);
 		Map<String, Fitnesser> fitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
 		pc.setRemoteFitnessers(fitnessers.values().toArray(new Fitnesser[0]));
 		
 		try {
-			String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength, hw);
+			//String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength, hw);
+			String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength);
 			session.setAttribute("templateStart", startEnd[0]);
 			session.setAttribute("templateEnd", startEnd[1]);
 			session.setAttribute("pc", pc);
@@ -195,7 +228,12 @@ public abstract class EvolutionaryController {
 			
 			Fitnesser fitnesser;
 			
-			RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			if (emitters == null) {
+				emitters = new SseEmitters(); // solo si el constructor no necesita nada
+			}
+
+			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
 			TaskData taskData = runPopulation.execute();
 	
 			long startCalculusTime = System.currentTimeMillis();

@@ -5,12 +5,18 @@ import { Gate } from "./Gate"
 import { IService } from "./IService"
 import { ProblemConfiguration } from "./ProblemConfiguration"
 import { Strategy } from "./Strategy"
+import { Component, ViewChildren, ElementRef, QueryList } from '@angular/core';
 
 Chart.register(...registerables)
 
+import { Directive } from '@angular/core';
+
+@Directive()
 export abstract class EvolutionaryComponent {
+  @ViewChildren('card') cardElems!: QueryList<ElementRef>;
   pc : ProblemConfiguration = new ProblemConfiguration()
 
+  mostrarModalCode: boolean = false;
   individuals : Individual[] = []
   selectedIndividual? : Individual
   selectedIndividualFitnesser? : string
@@ -42,8 +48,9 @@ export abstract class EvolutionaryComponent {
   error ? : string
 
   running : boolean = false
+  private eventSource?: EventSource;
 
-  ws? : WebSocket
+  //ws? : WebSocket
 
   math = Math
   _Array = Array
@@ -53,18 +60,29 @@ export abstract class EvolutionaryComponent {
     this.service.resetSession().subscribe(
       result=> {
         this.service.httpSessionId = result
-        this.service.connectWS()
+       // this.service.connectWS()
         this.loadRemoteFitnessers()
         this.random()
         this.loadConf()
-        this.ws = this.service.ws
+        /*this.ws = this.service.ws
         let self = this
         this.ws!.onmessage = function(e) {
           if (self.running)
             self.substate = e.data
           else
             self.substate = undefined
-        }
+        }*/
+       this.eventSource = this.service.connectSSE();
+
+        this.eventSource.onmessage = (event) => {
+          if (this.running){
+            this.substate = event.data;
+            console.log("Event received: " + this.substate);
+          }else{
+            this.substate = undefined;
+          }
+        };
+
       },
       error => {
         this.state = undefined
@@ -89,6 +107,7 @@ export abstract class EvolutionaryComponent {
     this.existingStrategies[index] = this.existingStrategies[index+1]
     this.existingStrategies[index+1] = source
   }
+
 
   reset() {
     this.error = undefined
@@ -132,10 +151,36 @@ export abstract class EvolutionaryComponent {
 
   private async loadConf() {
     await this.loadGates()
-    let conf = localStorage.getItem("qucoConfiguration")
-    if (conf) {
+    let savedConfig = localStorage.getItem("qucoConfiguration")
+    /*if (conf) {
       let parsedConf = JSON.parse(conf)
       this.pc = new ProblemConfiguration(parsedConf.inputConfiguration)
+    }*/
+
+    if (savedConfig) {
+      try {
+        const conf = JSON.parse(savedConfig);
+        const config = this.pc.inputConfiguration;
+
+        config.qubits = conf.qubits;
+        config.populationSize = conf.populationSize;
+        config.maxPopulationSize = conf.maxPopulationSize;
+        config.minNumberOfColumns = conf.minNumberOfColumns;
+        config.maxNumberOfColumns = conf.maxNumberOfColumns;
+        config.deleteFiles = conf.deleteFiles;
+        config.shots = conf.shots;
+        config.outputs = conf.outputs;
+        config.expectedFrequencies = conf.expectedFrequencies;
+        config.startWithH = conf.startWithH;
+
+
+        if (conf.blockCircuit) {
+          config.blockCircuit = { ...conf.blockCircuit };
+        }
+
+      } catch (error) {
+        console.error('Error al parsear configuración desde localStorage:', error);
+      }
     }
 
     let qucoGates = localStorage.getItem("qucoGates")
@@ -264,6 +309,15 @@ export abstract class EvolutionaryComponent {
 
   selectFitnesser(rf : RemoteFitnesser) {
     rf.selected=!rf.selected
+
+    for (let i=0; i<this.remoteFitnessers.length; i++) {
+      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
+        rf = this.remoteFitnessers[i]
+        rf.selected = true
+      }
+    }
+
+
     this.service.selectFitnesser(rf.name!, rf.selected, this.pc.inputConfiguration.shots, this.pc.desiredError, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.populationSize).
       subscribe(
         result=> {
@@ -299,25 +353,28 @@ export abstract class EvolutionaryComponent {
   }
 
   stop() {
-    this.service.resetSession().subscribe(
-      result => {
-        this.running = false
-        this.state = "Process stopped"
-        this.substate = undefined
-      },
-      error => {
-        this.state = undefined
-        this.substate = undefined
-        this.error = error.error.message
-      }
-    )
+    if (confirm('Are you sure you want to stop the execution?')) {
+      this.service.resetSession().subscribe(
+        result => {
+          this.running = false
+          this.state = "Process stopped"
+          this.substate = undefined
+        },
+        error => {
+          this.state = undefined
+          this.substate = undefined
+          this.error = error.error.message
+        }
+      )
+    }
   }
 
   abstract generateInitialPopulation() : void
 
   firstRun() {
-    this.state = "Running population"
-    this.service.firstRun(this.pc).subscribe(
+    this.state = "Running population..."
+    // this.service.firstRun(this.pc).subscribe(
+    this.service.firstRun().subscribe(
       result => {
         if (this.running)
           this.renderResults(result)
@@ -331,7 +388,7 @@ export abstract class EvolutionaryComponent {
   }
 
   runPopulation() {
-    this.state = "Running population"
+    this.state = "Running population..."
     this.service.runPopulation(this.pc, this.existingStrategies, this.stratego).subscribe(
       result => {
         if (this.running)
@@ -438,6 +495,14 @@ export abstract class EvolutionaryComponent {
         this.error = JSON.parse(result.error).message
       }
     )
+
+    this.mostrarModalCode = true;
+  }
+
+  isResultCode(individual : Individual, fitnesserIndex: number) {
+    if(individual.selected[fitnesserIndex]) {
+      this.getCode(individual);
+    }
   }
 
   copyCode() {
@@ -495,6 +560,4 @@ export abstract class EvolutionaryComponent {
        }
       })
   }
-
-  
 }

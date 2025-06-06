@@ -1,8 +1,5 @@
 package edu.uclm.tp3.ws;
 
-import java.io.IOException;
-
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import edu.uclm.tp3.elonging.strategies.ManagerService;
@@ -27,14 +24,14 @@ public class HWSession {
 		return session;
 	}
 
-	public synchronized void send(String msg) {
+	/*public synchronized void send(String msg) {
 		TextMessage tm = new TextMessage(msg); 
 		try {
 			this.session.sendMessage(tm);
 		} catch (IOException e) {
 			this.manager.remove(this);
 		}
-	}
+	}*/
 
 
 }

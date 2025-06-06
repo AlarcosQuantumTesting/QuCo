@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+import edu.uclm.tp3.http.SseEmitters;
 import edu.uclm.tp3.http.TextLogger;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.parallel.TaskReceptor;
@@ -21,11 +24,15 @@ public class QiskitRunner implements TaskReceptor {
 	private Map<Integer, List<Integer>> executionResults;
 	private Map<Integer, Integer> circuitLengths;
 	private String processDirectory;
+
+	@Autowired
+    private SseEmitters emitters;
 	
-	public QiskitRunner(String gt, int numberOfOutputs, int generation) {
+	public QiskitRunner(String gt, int numberOfOutputs, int generation, SseEmitters emitters) {
 		this.gt = gt;
 		this.numberOfOutputs = numberOfOutputs;
 		this.processDirectory = EvolutionaryService.generationFolder(gt, generation);
+		this.emitters = emitters;
 		
 		this.executionResults = new HashMap<>();
 		this.circuitLengths = new HashMap<>();
@@ -70,8 +77,10 @@ public class QiskitRunner implements TaskReceptor {
 				TextLogger.write(this.gt, 5, "tt[" + j + "] = new Thread(runner);\n");
 				tt[j].start();
 				TextLogger.write(this.gt, 5, "tt[" + j + "].start();\n");
+				/*if (cont%10==0 || cont==files-1)
+					hw.send("Executing " + (cont+1) + "/" + files);*/
 				if (cont%10==0 || cont==files-1)
-					hw.send("Executing " + (cont+1) + "/" + files);
+					emitters.sendMessage("Executing " + (cont+1) + "/" + files);
 			}
 			for (int j=0; j<chunkSize; j++)
 				tt[j].join();
@@ -85,8 +94,10 @@ public class QiskitRunner implements TaskReceptor {
 			cont++;
 			tt[j] = new Thread(runner);
 			tt[j].start();
+			/*if (cont%10==0 || cont==files-1)
+				hw.send("Executing " + (cont+1) + "/" + files);*/
 			if (cont%10==0 || cont==files-1)
-				hw.send("Executing " + (cont+1) + "/" + files);
+				emitters.sendMessage("Executing " + (cont+1) + "/" + files);
 		}
 		for (int j=0; j<chunkSize; j++)
 			tt[j].join();

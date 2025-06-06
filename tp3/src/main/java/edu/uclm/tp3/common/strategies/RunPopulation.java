@@ -7,13 +7,14 @@ import java.util.Map;
 
 import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.model.ExecutionResults;
-import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.model.History;
 import edu.uclm.tp3.common.model.Pair;
+import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.utils.Files;
 import edu.uclm.tp3.elonging.strategies.ManagerService;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+import edu.uclm.tp3.http.SseEmitters;
 import edu.uclm.tp3.http.TextLogger;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.parallel.TaskScheduler;
@@ -27,17 +28,20 @@ public class RunPopulation {
 	private Fitnesser fitnesser;
 	private HWSession hw;
 
-	public RunPopulation(String gt, ProblemConfiguration pc, HWSession hw) {
+    private final SseEmitters emitters;
+
+	public RunPopulation(String gt, ProblemConfiguration pc, HWSession hw, SseEmitters emitters) {
 		this.gt = gt;
 		this.pc = pc;
 		this.hw = hw;
+		this.emitters = emitters;
 	}
 	
 	public TaskData execute() throws Exception {
 		TextLogger.write(gt, "\t\tRunPopulation:execute\n");
 		TextLogger.write(gt, "\t\t\texecuting generation: " + pc.getGenerationToExecute() + "\n");
 		int generationToExecute = pc.getGenerationToExecute();
-		QiskitRunner runner = new QiskitRunner(gt, pc.getInputConfiguration().getNumberOfOutputs(), generationToExecute);
+		QiskitRunner runner = new QiskitRunner(gt, pc.getInputConfiguration().getNumberOfOutputs(), generationToExecute, emitters);
 		
 		TaskData freqsAndLengths = runner.runAll(pc, this.fitnesser, hw);
 		
@@ -50,6 +54,7 @@ public class RunPopulation {
 		List<Object> obtainedFrequencies = (List<Object>) freqsAndLengths.get("frequencies");	
 
 		TextLogger.write(gt, "\t\tRunPopulation:apply\n");
+		//emitters.sendMessage("\t\tRunPopulation:apply\n");
 		int executedGeneration = pc.getGenerationToExecute();
 		
 		int outputBits = (int) Math.pow(2, pc.getInputConfiguration().getNumberOfOutputs());
@@ -71,7 +76,8 @@ public class RunPopulation {
 		double expectedFitness = fitnesser.getExpectedFitness();
 		double totalFitness = 0;
 
-		this.hw.send("Calculating totals");
+		//this.hw.send("Calculating totals");
+		emitters.sendMessage("Calculating totals");
 		TextLogger.write(gt, "\t\t\tobtainedFrequencies= " + obtainedFrequencies.size() + "\n");
 		for (int i=0; i<obtainedFrequencies.size(); i++) {
 			List<Integer> individualExecution = (List<Integer>) obtainedFrequencies.get(i);
@@ -88,7 +94,8 @@ public class RunPopulation {
 			}
 				
 			if (er.getFitness(i)>=expectedFitness) {
-				hw.send("Good news: one individual selected!");
+				//hw.send("Good news: one individual selected!");
+				emitters.sendMessage("Good news: one individual selected!");
 				er.setSelecteds(i, true);
 				String outputFileName = "" + EvolutionaryService.getFile(gt, executedGeneration) + "." + 
 						i + "." + this.fitnesser.getClass().getSimpleName() + ".selected.circ";
