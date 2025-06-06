@@ -9,21 +9,21 @@ import { CircuitEditorComponent } from './circuit-editor/circuit-editor.componen
 import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 import { HomeComponent } from './home/home.component';
+import { CanDeactivateGuard } from './CanDeactivateGuard';
 
 const routes: Routes = [
   // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
   { path: "matrix", component: MatrixesComponent },
   { path: "grover", component: GroverComponent },
-  { path: "elonging", component: ElongingComponent },
+  { path: "elonging", component: ElongingComponent, canDeactivate: [CanDeactivateGuard] },
   { path: "blocks", component: BlocksComponent },
   { path: "grenoble", component: DeterministicComponent },
   { path: "editor", component: CircuitEditorComponent },
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "home", component: HomeComponent },
-  // { path: "", redirectTo: "/quco", pathMatch: "full" }
+  //{ path: '**', redirectTo: 'home' }
   { path: "", redirectTo: "/home", pathMatch: "full" }
-  // { path: "**", redirectTo: "/matrix" } // Redirect unknown routes
 ];
 
 

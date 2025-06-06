@@ -37,6 +37,9 @@ public class ElongingController extends EvolutionaryController {
 	
 	@Autowired
 	private GeneticService service;
+
+	@Autowired
+    private SseEmitters emitters;
 	
 	@PutMapping("/generateInitialPopulation") @ResponseBody
 	public long generateInitialPopulation(HttpSession session, @RequestBody ProblemConfiguration pc) {
@@ -88,7 +91,8 @@ public class ElongingController extends EvolutionaryController {
 			IStratego stratego = selectedStratego.equalsIgnoreCase("fixedStratego") ? new Stratego() : new ParameterizableStratego();
 			
 			int sourceGeneration = pc.getSourceGeneration();
-			RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
 			for (int i=0; i<fitnessers.length; i++) {
 				fitnesser = fitnessers[i];
 				pc.setSourceGeneration(sourceGeneration);
@@ -100,7 +104,10 @@ public class ElongingController extends EvolutionaryController {
 				TextLogger.write(gt, "\t\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
 				TextLogger.write(gt, "\t\ttargetGeneration=" + pc.getTargetGeneration() + "\n");				
 				
-				hw.send("Applying " + strategy.getClass().getSimpleName());
+
+				
+				//hw.send("Applying " + strategy.getClass().getSimpleName());
+				emitters.sendMessage("Applying " + strategy.getClass().getSimpleName());
 				strategy.apply(templateStart, templateEnd);
 				result.put("strategyTime", System.currentTimeMillis()-strategyTime);
 

@@ -151,8 +151,8 @@ public class QiskitSimpleRunner implements Runnable {
 				} 
 			}
 
-			outputFile.delete();
-			errorsFile.delete();
+		//outputFile.delete();
+		//	errorsFile.delete();
 			
 			QiskitSimpleRunner.this.runner.setResults(fileIndex, obtainedFrequencies, circuitLength);
 		} catch (Exception e) {

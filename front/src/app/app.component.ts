@@ -50,4 +50,20 @@ export class AppComponent implements AfterViewInit {
     // window.location.href = '/quco';
     window.location.href = '/home';
   }
+
+  /*
+  // Para confirmar la recarga de la página
+  ngOnInit(): void {
+    window.addEventListener('beforeunload', this.confirmExit);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeunload', this.confirmExit);
+  }
+
+  confirmExit = (event: BeforeUnloadEvent): void => {
+    event.preventDefault();
+    event.returnValue = '';
+  };
+  */
 }
