@@ -1,0 +1,40 @@
+
+
+<table border ="1" class="table table-striped">
+    <caption>Transpilation Works</caption>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Backends</th>
+            <th>Creation date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let transpilation of transpilationWorks">
+            <td>{{transpilation.id}}</td>
+            <td>{{transpilation.name}}</td>
+            <td>
+                <div *ngFor="let backendState of transpilation.backendStates">
+                    <a *ngIf="backendState[3] && backendState[4]==false" style="color : blue" (click)="getTranspiledCode(backendState[0])">
+                        {{backendState[1]}}
+                        ✅
+                    </a>
+                    <a *ngIf="backendState[3] && backendState[4]==true" style="color : blue" (click)="getErrors(backendState[0])">
+                        {{backendState[1]}}
+                        ❌
+                    </a>
+                    <span *ngIf="!backendState[3]" class="badge badge-secondary">
+                        {{backendState[1]}}
+                    </span>
+                </div>
+            </td>
+            <td>{{transpilation.creationDateTime}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<textarea rows="10" cols="100" class="form-control" 
+          [ngModel]="transpiledCode" 
+          placeholder="Transpiled code will appear here">
+</textarea>
