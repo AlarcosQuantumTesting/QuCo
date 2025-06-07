@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Retention;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -47,25 +46,6 @@ public class TranspilationTask implements Runnable {
         this.transpilationWorkDao = transpilationWorkDao;
         this.transpilationWorkDao.save(this.work);
         this.transpiledCircuitDao = transpiledCircuitDao;
-    }
-
-    private void saveCode() {
-        ensureTranspileScriptPresent();
-        try {
-            this.sourceFile = new File(this.outputDirectory + this.id + ".py");
-            this.outputFile = new File(this.outputDirectory + this.id + ".output.txt");
-            this.errorsFile = new File(this.outputDirectory + this.id + ".errors.txt");
-            try (FileWriter writer = new FileWriter(this.sourceFile)) {
-                writer.write(code);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Podrías lanzar una excepción o manejar el error según tus necesidades
-        }
-    }
-
-    public String getId() {
-        return id;
     }
 
     @Override
@@ -121,11 +101,18 @@ public class TranspilationTask implements Runnable {
             tp.setTranspilationTime(System.currentTimeMillis() - time);
             String transpiledCode = this.read(backend);
             tp.setCode(transpiledCode);
-            tp.setErrors(errors.trim());
+            if (errors!=null)
+                tp.setErrors(errors.trim());
             this.transpiledCircuitDao.save(tp);
             this.work.setProgress(this.work.getProgress() + 1);
             this.transpilationWorkDao.save(this.work);
+            File transpiledFile = new File(this.outputDirectory + this.id + "." + backend + ".py");
+            if (transpiledFile.exists()) 
+                transpiledFile.delete(); // Eliminar el archivo transpileado después de procesar
         }
+        this.errorsFile.delete(); // Limpiar el archivo de errores después de procesar
+        this.outputFile.delete(); // Limpiar el archivo de salida después de procesar  
+        this.sourceFile.delete(); // Limpiar el archivo fuente después de procesar
     }
     private String read(String backend) {
         try {
@@ -156,5 +143,24 @@ public class TranspilationTask implements Runnable {
             e.printStackTrace();
             throw new RuntimeException("Error al copiar transpile.py al directorio temporal", e);
         }
+    }
+
+    private void saveCode() {
+        ensureTranspileScriptPresent();
+        try {
+            this.sourceFile = new File(this.outputDirectory + this.id + ".py");
+            this.outputFile = new File(this.outputDirectory + this.id + ".output.txt");
+            this.errorsFile = new File(this.outputDirectory + this.id + ".errors.txt");
+            try (FileWriter writer = new FileWriter(this.sourceFile)) {
+                writer.write(code);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Podrías lanzar una excepción o manejar el error según tus necesidades
+        }
+    }
+
+    public String getId() {
+        return id;
     }
 }
