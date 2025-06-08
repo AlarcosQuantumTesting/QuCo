@@ -124,8 +124,8 @@ public class TranspilationTask implements Runnable {
             this.work.setProgress(this.work.getProgress() + 1);
             this.transpilationWorkDao.save(this.work);
             File transpiledFile = new File(this.outputDirectory + this.id + "." + backend + ".py");
-            //if (transpiledFile.exists()) 
-              //  transpiledFile.delete(); // Eliminar el archivo transpileado después de procesar
+            if (transpiledFile.exists()) 
+                transpiledFile.delete(); // Eliminar el archivo transpileado después de procesar
         }
         this.errorsFile.delete(); // Limpiar el archivo de errores después de procesar
         this.outputFile.delete(); // Limpiar el archivo de salida después de procesar  

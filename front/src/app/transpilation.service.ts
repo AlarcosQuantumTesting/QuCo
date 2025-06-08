@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -28,4 +28,7 @@ export class TranspilationService {
     return this.client.delete<any>(environment.beUrl + this.controller + "/cancelTranspilation?id=" + id)
   }
 
+  getCircuitSvg(id: string): Observable<Blob> {
+	  return this.client.get(environment.beUrl + '/transpiler/draw?id=' + id, { responseType: 'blob' });
+  }
 }

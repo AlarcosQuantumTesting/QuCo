@@ -10,6 +10,7 @@ export class TranspilationComponent {
 
   transpilationWorks: any[] = [];
   transpiledCode?: string;
+  svgCircuit? : any
 
   constructor(private service: TranspilationService) { 
     this.getTranspilationWorks();
@@ -63,4 +64,15 @@ export class TranspilationComponent {
     });
   }
 
+  loadSvg(id: string): void {
+    this.service.getCircuitSvg(id).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        this.svgCircuit = url;
+      },
+      error: err => {
+        console.error('Error loading image', err);
+      }
+    });
+  }
 }

@@ -27,9 +27,15 @@
             <td>
                 <div *ngFor="let statusLine of transpilation.statusLines">
                     <span *ngIf="statusLine.id">
-                        <a *ngIf="statusLine.finished && !statusLine.hasErrors" style="color : blue" (click)="getTranspiledCode(statusLine.id)">
-                            {{ statusLine.backend }} ✅
-                        </a>
+                        <span *ngIf="statusLine.finished && !statusLine.hasErrors" style="color : blue">
+                            <a (click)="getTranspiledCode(statusLine.id)">
+                                {{ statusLine.backend }} ✅ 
+                            </a>
+                            <!--
+                            <a (click)="loadSvg(statusLine.id)">
+                                ✍️
+                            </a>-->
+                        </span>
                         <a *ngIf="statusLine.finished && statusLine.hasErrors" style="color : blue" (click)="getErrors(statusLine.id)">
                             {{ statusLine.backend }} ❌
                         </a>
@@ -48,3 +54,5 @@
           [ngModel]="transpiledCode" 
           placeholder="Transpiled code will appear here">
 </textarea>
+
+<img [src]="'data:image/png;base64,' + svgCircuit" *ngIf="svgCircuit">

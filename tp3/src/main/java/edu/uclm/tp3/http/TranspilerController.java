@@ -1,10 +1,15 @@
 package edu.uclm.tp3.http;
 
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -82,5 +87,13 @@ public class TranspilerController {
 		Map<String, String> result = new HashMap<>();
 		result.put("code", service.getErrors(id));
 		return result;
+	}
+
+	@GetMapping("/draw")
+	public ResponseEntity<byte[]> draw(@RequestParam String id) {
+		byte[] image = this.service.draw(id);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.IMAGE_PNG);
+		return new ResponseEntity<>(image, headers, HttpStatus.OK);
 	}
 }
