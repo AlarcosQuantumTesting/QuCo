@@ -1,6 +1,7 @@
 package edu.uclm.tp3.common.services;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ public class TranspilerService {
     @Autowired
     private edu.uclm.tp3.common.transpilation.TranspiledCircuitDao transpiledCircuitDao;
 
+    private Map<String, TranspilationTask> transpilationTasks = new java.util.HashMap<>();
+
     public List<Backend> getBackends() {
         return this.backendDao.findAll();
     }
@@ -30,11 +33,21 @@ public class TranspilerService {
     }
 
     public String transpile(String code, String name, List<String> backends) {
-        TranspilationTask tw = new TranspilationTask(code, name, backends, this.transpilationWorkDao, this.transpiledCircuitDao);
+        TranspilationTask tw = new TranspilationTask(this, code, name, backends, this.transpilationWorkDao, this.transpiledCircuitDao);
+        this.transpilationTasks.put(tw.getId(), tw);
         Thread t = new Thread(tw);
         t.start();
         return tw.getId();
     }
+
+    public void cancelTranspilation(String id) {
+        TranspilationTask tw = this.transpilationTasks.get(id);
+        if (tw!=null) {
+            tw.stop();
+            this.transpilationTasks.remove(id);
+        }
+        this.transpilationWorkDao.deleteById(id);
+    }    
 
     public TranspilationWork getTranspilationWork(String id) {
         return this.transpilationWorkDao.findById(id)
@@ -53,28 +66,23 @@ public class TranspilerService {
             dto.setId(tw.getId());
             dto.setName(tw.getName());
             dto.setCreationDateTime(tw.getCreationDateTime());
+            dto.setProgress(tw.getProgress());
             List<String> backends = tw.getBackends();
             for (String backend : backends) {
                 TranspiledCircuit tc = this.transpiledCircuitDao.findByParentWorkIdAndBackend(tw.getId(), backend);
-                Object[] statusLine = new Object[5];
+                DtoStatusLine dtoStatusLine = new DtoStatusLine();
+                dtoStatusLine.setBackend(backend);
                 if (tc!=null) {
-                    statusLine[0] = tc.getId();
-                    statusLine[1] = backend;
+                    dtoStatusLine.setId(tc.getId());
                     if (tc.getErrors() != null) {
-                        statusLine[4] = true;
-                        statusLine[2] = tc.getErrors();
+                        dtoStatusLine.setHasErrors(true);
                     } else {
-                        statusLine[4] = false;
-                        statusLine[2] = tc.getCode();
+                        dtoStatusLine.setHasErrors(false);
                     }
-                    statusLine[3] = true;
-                } else {
-                    statusLine[0] = null;
-                    statusLine[1] = backend;
-                    statusLine[2] = "Not transpiled yet";
-                    statusLine[3] = false;
-                }                     
-                dto.addBackend(statusLine);
+                    dtoStatusLine.setTime(tc.getTime());
+                    dtoStatusLine.setFinished(true);
+                } 
+                dto.addStatusLine(dtoStatusLine);
             }
             result.add(dto);
         }
@@ -87,5 +95,9 @@ public class TranspilerService {
 
     public String getErrors(String id) {
        return this.transpiledCircuitDao.findById(id).get().getErrors();
+    }
+
+    public void removeTask(String id) {
+       this.transpilationTasks.remove(id);
     }
 }

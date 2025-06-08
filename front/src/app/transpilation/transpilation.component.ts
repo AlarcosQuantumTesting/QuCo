@@ -26,6 +26,21 @@ export class TranspilationComponent {
     });
   }
 
+  cancelTranspilation(id: any) {
+    let option = confirm("Are you sure you want to delete this work?");
+    if (!option) 
+      return
+
+    this.service.cancelTranspilation(id).subscribe({
+      next: (data) => {
+       this.getTranspilationWorks(); // Refresh the list after cancellation
+      },
+      error: (err) => {
+        console.error("Error fetching transpilation works:", err);
+      }
+    });
+  }
+
   getTranspiledCode(id : any) {
     this.service.getTranspiledCode(id).subscribe({
       next: (data) => {

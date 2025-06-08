@@ -7,29 +7,39 @@
             <th>Id</th>
             <th>Name</th>
             <th>Backends</th>
-            <th>Creation date</th>
         </tr>
     </thead>
     <tbody>
         <tr *ngFor="let transpilation of transpilationWorks">
-            <td>{{transpilation.id}}</td>
+            <td>
+                <strong>{{transpilation.id}}</strong>
+                <br>
+                <strong>Started at: </strong> {{transpilation.creationDateTime}}
+                <br>                
+                <button (click)="cancelTranspilation(transpilation.id)" class="btn btn-danger btn-sm" *ngIf="transpilation.progress<transpilation.statusLines.length">
+                    Stop
+                </button>
+                <button (click)="cancelTranspilation(transpilation.id)" class="btn btn-danger btn-sm" *ngIf="transpilation.progress==transpilation.statusLines.length">
+                    Delete
+                </button>
+            </td>
             <td>{{transpilation.name}}</td>
             <td>
-                <div *ngFor="let backendState of transpilation.backendStates">
-                    <a *ngIf="backendState[3] && backendState[4]==false" style="color : blue" (click)="getTranspiledCode(backendState[0])">
-                        {{backendState[1]}}
-                        ✅
-                    </a>
-                    <a *ngIf="backendState[3] && backendState[4]==true" style="color : blue" (click)="getErrors(backendState[0])">
-                        {{backendState[1]}}
-                        ❌
-                    </a>
-                    <span *ngIf="!backendState[3]" class="badge badge-secondary">
-                        {{backendState[1]}}
+                <div *ngFor="let statusLine of transpilation.statusLines">
+                    <span *ngIf="statusLine.id">
+                        <a *ngIf="statusLine.finished && !statusLine.hasErrors" style="color : blue" (click)="getTranspiledCode(statusLine.id)">
+                            {{ statusLine.backend }} ✅
+                        </a>
+                        <a *ngIf="statusLine.finished && statusLine.hasErrors" style="color : blue" (click)="getErrors(statusLine.id)">
+                            {{ statusLine.backend }} ❌
+                        </a>
+                        Time: {{ statusLine.transpilationTime }} ms
+                    </span>
+                    <span *ngIf="!statusLine.id" class="badge badge-secondary">
+                        {{ statusLine.backend }} <span class="spin">⚙️</span>
                     </span>
                 </div>
             </td>
-            <td>{{transpilation.creationDateTime}}</td>
         </tr>
     </tbody>
 </table>

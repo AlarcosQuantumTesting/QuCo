@@ -24,5 +24,8 @@ export class TranspilationService {
     return this.client.get<any>(environment.beUrl + this.controller + "/getErrors?id=" + id)
   }
 
+  cancelTranspilation(id: any) {
+    return this.client.delete<any>(environment.beUrl + this.controller + "/cancelTranspilation?id=" + id)
+  }
 
 }

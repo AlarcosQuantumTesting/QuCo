@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.uclm.tp3.Manager;
+import edu.uclm.tp3.common.services.TranspilerService;
 
 public class TranspilationTask implements Runnable {
 
@@ -30,8 +31,11 @@ public class TranspilationTask implements Runnable {
     private TranspilationWork work;
     private TranspilationWorkDao transpilationWorkDao;
     private TranspiledCircuitDao transpiledCircuitDao;
+    private TranspilerService transpilerService;
+    private  boolean stop = false;
 
-    public TranspilationTask(String code, String name, List<String> backends, TranspilationWorkDao transpilationWorkDao, TranspiledCircuitDao transpiledCircuitDao) {
+    public TranspilationTask(TranspilerService transpilerService, String code, String name, List<String> backends, TranspilationWorkDao transpilationWorkDao, TranspiledCircuitDao transpiledCircuitDao) {
+        this.transpilerService = transpilerService;
         this.id = UUID.randomUUID().toString();
         this.code = code;
         this.name = name;
@@ -48,8 +52,15 @@ public class TranspilationTask implements Runnable {
         this.transpiledCircuitDao = transpiledCircuitDao;
     }
 
+    public void stop() {
+        this.stop = true;
+    }
+
     @Override
     public void run() {
+        if (stop)
+            return;
+
         JSONObject jsoConf = Manager.get().getConfiguration();
         boolean inheritIO = jsoConf.optBoolean("inheritIO");
         JSONArray jsaCommands = jsoConf.getJSONArray("commands");
@@ -63,7 +74,12 @@ public class TranspilationTask implements Runnable {
         baseCommand.add(transpileScript.getAbsolutePath());
         baseCommand.add(this.sourceFile.getAbsolutePath());
 
-        for (String backend : this.backends) {
+
+        for (int i=0; i<this.backends.size(); i++) {
+            if (stop)
+                return;
+
+            String backend = this.backends.get(i);
             List<String> fullCommand = new ArrayList<>(baseCommand);
             fullCommand.add(backend);
 
@@ -94,7 +110,8 @@ public class TranspilationTask implements Runnable {
 				e.printStackTrace();
 				return;
 			}
-            
+            if (stop)
+                return;
             TranspiledCircuit tp = new TranspiledCircuit();
             tp.setTranspilationWork(this.work);
             tp.setBackend(backend);
@@ -107,12 +124,13 @@ public class TranspilationTask implements Runnable {
             this.work.setProgress(this.work.getProgress() + 1);
             this.transpilationWorkDao.save(this.work);
             File transpiledFile = new File(this.outputDirectory + this.id + "." + backend + ".py");
-            if (transpiledFile.exists()) 
-                transpiledFile.delete(); // Eliminar el archivo transpileado después de procesar
+            //if (transpiledFile.exists()) 
+              //  transpiledFile.delete(); // Eliminar el archivo transpileado después de procesar
         }
         this.errorsFile.delete(); // Limpiar el archivo de errores después de procesar
         this.outputFile.delete(); // Limpiar el archivo de salida después de procesar  
         this.sourceFile.delete(); // Limpiar el archivo fuente después de procesar
+        this.transpilerService.removeTask(this.id);
     }
     private String read(String backend) {
         try {

@@ -33,48 +33,56 @@ def local_transpile(code_path: str, backend, backend_name):
 
 
 def generate_python_code(circuit: QuantumCircuit) -> str:
-    """
-    Genera código Python equivalente al circuito dado, con una clase TranspiledCircuit,
-    una lista self.qubits que puede pasarse al constructor, y un método get_circuit().
-    """
+    
     lines = [
         "from qiskit import QuantumCircuit",
         "",
         "class TranspiledCircuit:",
-        "    def __init__(self, qubits=None):"
+        "\tdef __init__(self, qubits=None):"
     ]
 
     # Crear el mapa de cúbits usados
     qubit_map = {}
+    physical_qubits = []
     index = 0
     for instr in circuit.data:
         for qubit in instr.qubits:
             if qubit not in qubit_map:
+                qubit_index = circuit.qubits.index(qubit)
                 qubit_map[qubit] = index
+                physical_qubits.append(qubit_index)
                 index += 1
 
-    num_used_qubits = len(qubit_map)
-
-    # Línea para inicializar self.qubits
-    lines.append(f"        self.qubits = qubits if qubits is not None else [{', '.join(['0'] * num_used_qubits)}]")
+    # Inicialización de self.qubits con los índices físicos usados
+    lines.append(f"\t\tself.qubits = qubits if qubits is not None else {physical_qubits}")
     lines.append("")
 
     # Método get_circuit()
-    lines.append("    def get_circuit(self):")
-    lines.append(f"        circuit = QuantumCircuit({circuit.num_qubits}, {circuit.num_clbits})")
+    lines.append("\tdef get_circuit(self, targetQubits=None):")
+    lines.append(f"\t\tcircuit = QuantumCircuit({circuit.num_qubits}, {circuit.num_clbits})")
+    lines.append("\t\tif targetQubits is None:")
+    lines.append("\t\t\ttargetQubits = self.qubits")
 
     for instr in circuit.data:
         operation = instr.operation
-        qargs = [f"self.qubits[{qubit_map[q]}]" for q in instr.qubits]
+        params = operation.params
+        qargs = [f"targetQubits[{qubit_map[q]}]" for q in instr.qubits]
         cargs = [str(circuit.clbits.index(c)) for c in instr.clbits]
+        params_str = ", ".join(map(str, params))
         all_args = qargs + cargs
         args_str = ", ".join(all_args)
-        lines.append(f"        circuit.{operation.name}({args_str})")
+        if len(params_str)>0 :
+            lines.append(f"\t\tcircuit.{operation.name}({params_str}, {args_str})")
+        else :
+            lines.append(f"\t\tcircuit.{operation.name}({args_str})")
 
-    lines.append("        return circuit")
-
+    lines.append("#\t\tprint(circuit)")
+    lines.append("\t\treturn circuit")
+    lines.append("\n")
+    lines.append("if __name__ == \"__main__\":")
+    lines.append("\ttc = TranspiledCircuit()")
+    lines.append("\ttc.get_circuit()")
     return "\n".join(lines)
-
 
 
 
