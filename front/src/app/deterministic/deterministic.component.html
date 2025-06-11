@@ -211,11 +211,11 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button class="action-icon-header" title="Get Qiskit code" (click)="getCircuit()">Qiskit
+                    <button *ngIf="!isGrover"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGrover" title="Get Qiskit code" (click)="getCircuit(true)">
-                      <i class="fa fa-code"></i>Grover
+                    <button *ngIf="isGrover" [disabled]="totalSelectedElements<=0" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
+                      <i class="fa fa-code"></i>
                     </button>
                   </div>
                 </div>
@@ -558,8 +558,9 @@
 
       <!-- Botón para copiar el código -->
       <div class="modal-footer">
-          <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
-          <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
+        <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+        <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
       </div>
   </div>
 </div>
@@ -618,5 +619,62 @@
       </div>
   </div>
 </div>
+
+<div class="modal" *ngIf="modalTranspile">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h2 class="title-modal">Transpile Code</h2>
+          <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="intructions-content">
+        <label for="circuitName">Circuit name:</label>
+        <input
+          id="circuitName"
+          class="input-function form-control"
+          type="text"
+          [(ngModel)]="circuitName"
+          placeholder="Circuit name..."
+        />
+      </div>
+      <div class="intructions-content">
+        <div class="form-row">
+            <!-- Backends disponibles -->
+            <div class="section contenedorBackends">
+              <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
+              <ul class="listaBackends">
+                <li *ngFor="let backend of availableBackends" class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ backend }}
+                  <button type="button" class="apply-button" (click)="selectBackend(backend)">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Backends seleccionados -->
+            <div class="section contenedorBackends">
+              <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
+              <ul class="listaBackends">
+                <li *ngFor="let backend of selectedBackends" class="list-group-item d-flex justify-content-between align-items-center bg-success-subtle">
+                    {{ backend }}
+                  <button type="button" class="apply-button" (click)="deselectBackend(backend)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+        </div>
+      </div>
+
+
+      <!-- Botón para copiar el código -->
+      <div class="modal-footer">
+        <button class="transpile-code-btn" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+      </div>
+  </div>
+</div>
+
 
 </body>

@@ -12,6 +12,7 @@ import { GroverService } from '../grover.service';
 import { EditorComponent } from '../editor/editor.component';
 import { Expression } from '../matrixes/Expression';
 import { ExpressionsService } from '../expressions.service';
+import { TranspileService } from '../transpile.service';  
 
 Chart.register(...registerables)
 
@@ -107,6 +108,7 @@ export class DeterministicComponent extends GroverStyle {
   mostrarModalNombreFuncion: boolean = false;
   isLoadingQiskitCode = false;
   mostrarModalTree: boolean = false;
+  modalTranspile: boolean = false;
 
   expressionToDelete: any = null;
   deleteIndex: number = -1;
@@ -124,15 +126,24 @@ export class DeterministicComponent extends GroverStyle {
   totalSelectedElements: number = 0;
   useMCX: boolean = false;
 
+  circuitName: string = '';
+  transpiledCode: string = '';
+  availableBackends: string[] = [];
+  selectedBackends: string[] = [];
+
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
-     public manager : ManagerService, public expService : ExpressionsService) {
+     public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService) {
     super(qiskitService)
 
     this.updateOutputs()
   }
 
   ngOnInit() {
+
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends.map(b => b.name);
+    });
     
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
@@ -145,7 +156,11 @@ export class DeterministicComponent extends GroverStyle {
     this.isGrenoble = this.selectedAlgorithm === 'grenoble';
     this.isOriginalGR = this.selectedAlgorithm === 'originalGR';
     
-    this.selectedOptionFreq = localStorage.getItem('selectedOptionFreq') || 'none';
+    if(this.isGrover) {
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
+    } else {
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
+    }
     this.onOptionFreqChange(this.selectedOptionFreq);
     this.applyOption();
 
@@ -623,7 +638,13 @@ export class DeterministicComponent extends GroverStyle {
 
   reset() {
     this.selectedOptionFreq = 'none'
-    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq)
+    if(this.isGrover) {
+      localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq)
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
+    } else {
+      localStorage.setItem('selectedOptionFreqAlgorithms', this.selectedOptionFreq)
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
+    }
     this.isNone = true
     this.onOptionFreqChange(this.selectedOptionFreq)
     this.expectedFrequencies = new FreqTable()
@@ -731,7 +752,11 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrix');
-    localStorage.removeItem('selectedOptionFreq');
+    if(this.isGrover) {
+      localStorage.removeItem('selectedOptionFreqGrover')
+    } else {
+      localStorage.removeItem('selectedOptionFreqAlgorithms')
+    }
     localStorage.removeItem('mostrarTabla');
     localStorage.removeItem('selectedAlgorithm');
     location.reload();  // Reiniciar
@@ -973,7 +998,11 @@ export class DeterministicComponent extends GroverStyle {
       this.fixedAmount();
     }
 
-    localStorage.setItem('selectedOptionFreq', this.selectedOptionFreq);
+    if(this.isGrover) {
+      localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq);
+    } else {
+      localStorage.setItem('selectedOptionFreqAlgorithms', this.selectedOptionFreq);
+    }
 
     this.updateTotalSelectedElements();
   }
@@ -1278,6 +1307,28 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarModalNombreFuncion = false;
     this.mostrarModal = false;
   }
+
+  transpileCodigo() {
+    this.modalTranspile = true;
+  }
+
+  selectBackend(backend: string) {
+    this.selectedBackends.push(backend);
+    this.availableBackends = this.availableBackends.filter(b => b !== backend);
+  }
+
+  deselectBackend(backend: string) {
+    this.availableBackends.push(backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b !== backend);
+  }
+
+  transpile() {
+    this.transpileService.transpile(this.qiskitCode.lines.join('\n'), this.selectedBackends, this.circuitName).subscribe(result => {
+      this.transpiledCode = result;
+    });
+  }
+
+
   // Expressions actions
 
   create() {

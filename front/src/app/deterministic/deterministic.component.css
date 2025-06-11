@@ -895,6 +895,40 @@ th, td {
     transform: scale(1.05);
 }
 
+.generate-code-btn {
+    background-color: #10989c;
+}
+
+.generate-code-btn:hover {
+    background-color: #267375;
+    transform: scale(1.05);
+}
+
+.generate-code-btn:disabled {
+    background-color: #7e838482;
+    cursor: not-allowed;
+}
+
+.generate-code-btn:disabled i{
+    color: rgba(255, 255, 255, 0.387);
+    transform: none;
+}
+
+.contenedorBackends {
+  background-color: #b5d2e5;
+  border-radius: 8px;
+  max-width: 45%;
+  min-width: 45%;
+  height: 300px;
+  max-height: 300px;
+}
+
+.listaBackends {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+
 /* Modales */
 
   
@@ -1193,6 +1227,25 @@ i {
 
 .save-code-btn:hover {
   background-color: #1b3763;
+  transform: scale(1.05);
+}
+
+.transpile-code-btn {
+  background-color: #10989c;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.transpile-code-btn:hover {
+  background-color: #267375;
   transform: scale(1.05);
 }
 
