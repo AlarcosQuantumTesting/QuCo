@@ -8,6 +8,6 @@ public interface TranspiledCircuitDao extends JpaRepository<TranspiledCircuit, S
 
     List<TranspiledCircuit> findByParentWorkId(String id);
 
-    TranspiledCircuit findByParentWorkIdAndBackend(String id, String string);
+    TranspiledCircuit findByParentWorkIdAndBackend(String id, String backend);
 
 }

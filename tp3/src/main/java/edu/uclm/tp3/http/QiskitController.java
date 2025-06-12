@@ -54,7 +54,7 @@ public class QiskitController {
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/getCode")
-	public Map<String, String[]> getCode(@RequestBody Map<String, Object> info) {
+	public Map<String, String> getCode(@RequestBody Map<String, Object> info) {
 		try {
 			boolean reduce = info.containsKey("reduce") && (boolean) info.get("reduce");
 
@@ -73,9 +73,10 @@ public class QiskitController {
 
 			Object receivedMatrixes = info.get("matrix");
 
-			String[] code = this.coder.getCode(receivedMatrixes, inputQubits, qubits, domain, reduce, template, functionName);			
-			Map<String, String[]> result = new HashMap<>();
-			
+			String code = this.coder.getCode(receivedMatrixes, inputQubits, qubits, domain, reduce, template, functionName);
+			String expected = this.coder.getExpected(receivedMatrixes, qubits-inputQubits);
+			code = code.replace("#EXPECTED#", "expected = " + expected);
+			Map<String, String> result = new HashMap<>();			
 			result.put("code", code);
 			return result;
 		} catch (Exception e) {

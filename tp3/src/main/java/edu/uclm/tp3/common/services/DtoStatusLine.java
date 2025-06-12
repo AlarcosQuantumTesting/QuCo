@@ -7,6 +7,7 @@ public class DtoStatusLine {
     private boolean hasErrors;
     private boolean finished;
     private long transpilationTime;
+    private int size;
 
     public void setId(String id) {
         this.id = id;
@@ -46,5 +47,13 @@ public class DtoStatusLine {
 
     public long getTranspilationTime() {
         return transpilationTime;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getSize() {
+        return size;
     }
 }

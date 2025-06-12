@@ -15,8 +15,8 @@ public class TranspiledCircuit {
     private TranspilationWork parentWork;
     private String backend;
     private long time;
-    @Column(columnDefinition = "TEXT")
-    private String code;
+    @Column(columnDefinition = "LONGTEXT")
+    private String sourceCode;
     @Column(columnDefinition = "TEXT")
     private String errors;
 
@@ -36,8 +36,8 @@ public class TranspiledCircuit {
         this.time = time;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setCode(String sourceCode) {
+        this.sourceCode = sourceCode;
     }
 
     public String getBackend() {
@@ -45,7 +45,7 @@ public class TranspiledCircuit {
     }
 
     public String getCode() {
-        return code;
+        return sourceCode;
     }
 
     public TranspilationWork getParentWork() {

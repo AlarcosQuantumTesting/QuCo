@@ -1,7 +1,13 @@
 
 
+
 <table border ="1" class="table table-striped">
-    <caption>Transpilation Works</caption>
+    <caption>
+        Transpilation Works 
+        <a (click)="getTranspilationWorks()" class="btn btn-primary" style="color: blue;">
+            Reload
+        </a>
+    </caption>
     <thead>
         <tr>
             <th>Id</th>
@@ -27,10 +33,11 @@
             <td>
                 <div *ngFor="let statusLine of transpilation.statusLines">
                     <span *ngIf="statusLine.id">
-                        <span *ngIf="statusLine.finished && !statusLine.hasErrors" style="color : blue">
-                            <a (click)="getTranspiledCode(statusLine.id)">
-                                {{ statusLine.backend }} ✅ 
+                        <span *ngIf="statusLine.finished && !statusLine.hasErrors">
+                            <a (click)="getTranspiledCode(statusLine.id)" style="color : blue">
+                                {{ statusLine.backend }}
                             </a>
+                            ({{statusLine.size}} Mbytes) ✅ 
                             <!--
                             <a (click)="loadSvg(statusLine.id)">
                                 ✍️

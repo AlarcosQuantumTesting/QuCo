@@ -92,6 +92,7 @@ public class TranspilerService {
                         dtoStatusLine.setHasErrors(true);
                     } else {
                         dtoStatusLine.setHasErrors(false);
+                        dtoStatusLine.setSize(tc.getCode().length());
                     }
                     dtoStatusLine.setTime(tc.getTime());
                     dtoStatusLine.setFinished(true);
