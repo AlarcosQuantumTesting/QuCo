@@ -4,7 +4,7 @@ import sys
 from qiskit import QuantumCircuit, transpile
 from qiskit_ibm_runtime.fake_provider import *
 
-def local_transpile(code_path: str, backend):
+def local_transpile(code_path: str, backend, backend_name):
     with open(code_path, 'r', encoding='utf-8') as f:
         code_str = f.read()
 
@@ -21,11 +21,11 @@ def local_transpile(code_path: str, backend):
     t_transpile = time.time() - t0
 
     base, _ = os.path.splitext(code_path)
-    transpiled_path = base + "." + backend.name + ".py"
+    transpiled_path = base + "." + backend_name + ".py"
 
     name = backend.name if not callable(backend.name) else backend.name()
     with open(transpiled_path, 'w', encoding='utf-8') as f:
-        f.write("# Circuito transpileado automáticamente\n")
+        f.write("# Circuito transpilado automáticamente\n")
         f.write(f"# Backend: {name}\n")
         f.write(f"# Tiempo de transpilación: {t_transpile:.4f} segundos\n\n")
         f.write(generate_python_code(transpiled))
@@ -33,24 +33,57 @@ def local_transpile(code_path: str, backend):
 
 
 def generate_python_code(circuit: QuantumCircuit) -> str:
-    """
-    Genera código Python equivalente al circuito dado, compatible con Qiskit ≥ 1.2.
-    """
+    
     lines = [
         "from qiskit import QuantumCircuit",
-        f"qc = QuantumCircuit({circuit.num_qubits}, {circuit.num_clbits})"
+        "",
+        "class TranspiledCircuit:",
+        "\tdef __init__(self, qubits=None):"
     ]
+
+    # Crear el mapa de cúbits usados
+    qubit_map = {}
+    physical_qubits = []
+    index = 0
+    for instr in circuit.data:
+        for qubit in instr.qubits:
+            if qubit not in qubit_map:
+                qubit_index = circuit.qubits.index(qubit)
+                qubit_map[qubit] = index
+                physical_qubits.append(qubit_index)
+                index += 1
+
+    # Inicialización de self.qubits con los índices físicos usados
+    lines.append(f"\t\tself.qubits = qubits if qubits is not None else {physical_qubits}")
+    lines.append("")
+
+    # Método get_circuit()
+    lines.append("\tdef get_circuit(self, targetQubits=None):")
+    lines.append(f"\t\tcircuit = QuantumCircuit({circuit.num_qubits}, {circuit.num_clbits})")
+    lines.append("\t\tif targetQubits is None:")
+    lines.append("\t\t\ttargetQubits = self.qubits")
 
     for instr in circuit.data:
         operation = instr.operation
-        qargs = [circuit.qubits.index(q) for q in instr.qubits]
-        cargs = [circuit.clbits.index(c) for c in instr.clbits]
+        params = operation.params
+        qargs = [f"targetQubits[{qubit_map[q]}]" for q in instr.qubits]
+        cargs = [str(circuit.clbits.index(c)) for c in instr.clbits]
+        params_str = ", ".join(map(str, params))
+        all_args = qargs + cargs
+        args_str = ", ".join(all_args)
+        if len(params_str)>0 :
+            lines.append(f"\t\tcircuit.{operation.name}({params_str}, {args_str})")
+        else :
+            lines.append(f"\t\tcircuit.{operation.name}({args_str})")
 
-        args_str = ", ".join(map(str, qargs + cargs))
-        lines.append(f"qc.{operation.name}({args_str})")
-
-    lines.append("return qc")
+    lines.append("#\t\tprint(circuit)")
+    lines.append("\t\treturn circuit")
+    lines.append("\n")
+    lines.append("if __name__ == \"__main__\":")
+    lines.append("\ttc = TranspiledCircuit()")
+    lines.append("\ttc.get_circuit()")
     return "\n".join(lines)
+
 
 
 def load_backend(name: str):
@@ -76,7 +109,7 @@ def main():
 
     try:
         backend = load_backend(backend_name)
-        local_transpile(code_path, backend)
+        local_transpile(code_path, backend, backend_name)
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(2)

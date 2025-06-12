@@ -1,11 +1,11 @@
 {
-	"environment" : "Mac de Patri",
+	"environment" : "Mac de Maco",
 	"DEBUG" : true,
 	"environments" : [
 		{
 			"name" : "Mac de Maco",
 			"path" : "/usr/local/bin:/usr/local/sbin:$PATH",
-			"commands" : [ "bash", "-c", "/Users/macariopolousaola/virtualenvironments/qiskit/bin/python3 " ],
+			"commands" : [ "bash", "-c", "/Users/macariopolousaola/virtualenvironments/qiskit/bin/python3" ],
 			"commands2" : [ "python" ],
 			"joinLastCommand" : true,
 			"inheritIO" : false,

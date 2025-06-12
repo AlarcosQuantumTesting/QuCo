@@ -38,6 +38,7 @@ public class GroverService {
         result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", shots);
+        result.put("#ALGORITHM#", "Grover split");
 
         StringBuilder sbCalculus = new StringBuilder();
         StringBuilder circuitsDeclaration = new StringBuilder();
@@ -81,6 +82,7 @@ public class GroverService {
         result.put("#QUBITS#", qubits*numberOfPairs);
 		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
 		result.put("#SHOTS#", shots);
+        result.put("#ALGORITHM#", "Grover parallel");
 
         StringBuilder sbCalculus = new StringBuilder();
         int startQubit = 0;
@@ -173,7 +175,9 @@ public class GroverService {
         diffuserGate.setName("diffuser");
         quirkCircuit.addGate(diffuserGate);
 
-        int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/expectedFrequencies.getPairs().size()));
+        double N = Math.pow(2, qubits);
+        double M = expectedFrequencies.getPairs().size();
+        int optimal = (int) Math.floor((Math.PI/4) * Math.sqrt(N/M));
 
         JSONObject jsoCircuit = this.prepareCircuit(quirkCircuit, qubits, groverOracles.size(), optimal);
 
@@ -193,7 +197,7 @@ public class GroverService {
 		result.put("#SHOTS#", shots);
         result.put("#INITIALIZE#", code);
         result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, qubits),");	
-
+        result.put("#ALGORITHM#", "Grover");
 		result.put("#HADAMARDS#", "");
 		result.put("#CALCULUS#", sbCalculus.toString());
 		List<Map<String, Object>> partialCircuits = new ArrayList<>();

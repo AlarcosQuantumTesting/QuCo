@@ -19,6 +19,7 @@ public class UnifierSolver {
 
 	public Map<String, Object> solve(int shots) {
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
+
 		List<String> nodeNames = nodes.keySet().stream()
 				.sorted((key1, key2) -> Integer.compare(key1.length(), key2.length())) 
 				.collect(Collectors.toList());

@@ -1,108 +1,98 @@
 package edu.uclm.tp3.common.transpilation;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 
-import edu.uclm.tp3.Manager;
-
-public class TranspilationWork implements Runnable {
-
-    private String code;
-    private String name;
-    private List<String> backends;
+@Entity
+public class TranspilationWork {
+    @Id @Column(name = "id", length = 36)
     private String id;
-    private String tempFilePath;
+    private String name;
+    @Column(columnDefinition = "TEXT")
+    private String code;
+    @ElementCollection
+    @CollectionTable(name = "transpilation_backends", joinColumns = @JoinColumn(name = "transpilation_work_id"))
+    private List<String> backends;
+    private int size;
+    private int progress;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime creationDateTime;
 
-    public TranspilationWork(String code, String name, List<String> backends) {
+    public TranspilationWork() {
         this.id = UUID.randomUUID().toString();
-        this.code = code;
-        this.name = name;
-        this.backends = backends;
-
-        this.saveCode();
     }
 
-    private void saveCode() {
-        ensureTranspileScriptPresent();
-        try {
-            // Crea archivo temporal con nombre aleatorio que termina en .py
-            File tempFile = File.createTempFile("code_" + this.id, ".py");
-            try (FileWriter writer = new FileWriter(tempFile)) {
-                writer.write(code);
-            }
-            this.tempFilePath = tempFile.getAbsolutePath(); // Guarda la ruta si la necesitas después
-        } catch (IOException e) {
-            e.printStackTrace();
-            // Podrías lanzar una excepción o manejar el error según tus necesidades
-        }
+    public TranspilationWork(String id, String name, String code, List<String> backends) {
+        this.id = id;
+        this.name = name;
+        this.code = code;
+        this.setBackends(backends);
+        this.size = backends.size();
+        this.progress = 0;
+        this.creationDateTime = LocalDateTime.now();
     }
 
     public String getId() {
         return id;
     }
 
-    @Override
-    public void run() {
-        JSONObject jsoConf = Manager.get().getConfiguration();
-			
-        boolean inheritIO = jsoConf.optBoolean("inheritIO");
-        
-        JSONArray jsaCommands = jsoConf.getJSONArray("commands");
-        
-        String[] commands = new String[jsaCommands.length()+2];
-        
-        for (int i=0; i<jsaCommands.length(); i++) 
-            commands[i] = jsaCommands.getString(i);
-
-        commands[jsaCommands.length()] = "transpile.py";
-        commands[jsaCommands.length()+1] = this.tempFilePath;
-        
-        String cLog = "";
-        for (int i=0; i<commands.length; i++)
-            cLog = cLog + commands[i] + " ";
-        
-        ProcessBuilder pb = new ProcessBuilder();
-        
-        if (inheritIO)
-            pb.inheritIO();
-        Map<String, String> env = pb.environment();
-        env.clear();
-        env.put("path", jsoConf.getString("path"));
-        env.put("PYTHONPATH", jsoConf.optString("PYTHONPATH"));
+    public void setId(String id) {
+        this.id = id;
     }
 
-    private void ensureTranspileScriptPresent() {
-        try {
-            File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-            File transpileCopy = new File(tmpDir, "transpile.py");
-            
-            if (!transpileCopy.exists()) {
-                // Ruta al recurso dentro de resources/
-                File resourceFile = new File("resources/transpile.py");
-                if (!resourceFile.exists()) {
-                    throw new IOException("No se encuentra el archivo transpile.py en resources/");
-                }
+    public int getProgress() {
+        return progress;
+    }
 
-                try (
-                    FileWriter writer = new FileWriter(transpileCopy);
-                    java.util.Scanner scanner = new java.util.Scanner(resourceFile)
-                ) {
-                    while (scanner.hasNextLine()) {
-                        writer.write(scanner.nextLine() + System.lineSeparator());
-                    }
-                }
-                transpileCopy.setExecutable(true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al copiar transpile.py al directorio temporal", e);
-        }
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public LocalDateTime getCreationDateTime() {
+        return creationDateTime;
+    }
+
+    public void setCreationDateTime(LocalDateTime creationDateTime) {
+        this.creationDateTime = creationDateTime;
+    }
+   
+    public List<String> getBackends() {
+        return backends;
+    }
+
+    public void setBackends(List<String> backends) {
+        this.backends = backends;
     }
 }

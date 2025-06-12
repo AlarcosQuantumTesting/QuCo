@@ -21,7 +21,7 @@ public class QucoRequest {
     @Column(nullable = false, updatable = false)
     private LocalDateTime time;
 
-    @Column(length = 10000)
+    @Column(columnDefinition = "TEXT")
     private String info;
 
     private String uri;
