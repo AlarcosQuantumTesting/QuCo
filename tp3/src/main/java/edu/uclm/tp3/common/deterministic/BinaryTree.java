@@ -309,9 +309,7 @@ public class BinaryTree implements Serializable{
     @Override
     public int hashCode() {
         // 1. Iniciamos con los bits de leftAngle
-        int result = Float.floatToIntBits(this.leftAngle);
-        // 2. Mezclamos el número de qubits
-        result = 31 * result + this.qubits;
+        int result = Float.floatToIntBits(this.leftProbability);
         // 3. Añadimos la profundidad (depth)
         result = 31 * result + this.depth;
         // 4. Incorporamos el hash recursivo del hijo izquierdo

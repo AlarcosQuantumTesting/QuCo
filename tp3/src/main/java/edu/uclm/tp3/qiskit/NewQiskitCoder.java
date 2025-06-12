@@ -2,8 +2,9 @@ package edu.uclm.tp3.qiskit;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.common.model.CodeTemplate;
@@ -13,16 +14,14 @@ import edu.uclm.tp3.quirk.QuirkReducer;
 public class NewQiskitCoder {
 
     @SuppressWarnings("unchecked")
-    public String[] getCode(Object oReceivedMatrixes, int inputQubits, int qubits, String domain, boolean reduce, CodeTemplate template, String functionName) throws IOException {
+    public String getCode(Object oReceivedMatrixes, int inputQubits, int qubits, String domain, boolean reduce, CodeTemplate template, String functionName) throws IOException {
         StringBuilder sbCalculus;
         if (reduce) {
             List<List<Integer>> receivedMatrixes = (List<List<Integer>>) oReceivedMatrixes;
             List<List<List<Integer>>> reducedMatrixes = QuirkReducer.reduce(receivedMatrixes, inputQubits, qubits);
-
             sbCalculus = this.getReducedCalculusCode(reducedMatrixes, inputQubits, domain);
         } else {
             List<List<Integer>> receivedMatrixes = (List<List<Integer>>) oReceivedMatrixes;
-
             sbCalculus = this.getWholeCalculusCode(receivedMatrixes, inputQubits, domain);
         }
 
@@ -31,8 +30,51 @@ public class NewQiskitCoder {
             code = this.prepareCodeAsAProgram(inputQubits, qubits, sbCalculus, template);
         else
             code = this.prepareCodeAsAFunction(qubits, sbCalculus, functionName);
-		return code.split("\n");
+
+		return code;
     }
+
+	@SuppressWarnings("unchecked")
+	public String getExpected(Object oReceivedMatrixes, int outputQubits) {
+		List<List<Integer>> receivedMatrixes = (List<List<Integer>>) oReceivedMatrixes;
+		int l = receivedMatrixes.get(0).size();
+		HashMap<Integer, Integer> expected = new HashMap<>();
+		for (int i=0; i<receivedMatrixes.size(); i++) {
+			List<Integer> row = receivedMatrixes.get(i);
+			List<Integer> last = row.subList(l-outputQubits, l);
+
+			Integer decimal = toDecimal(last);
+			Integer value = expected.get(decimal);
+			if (value==null) {
+				expected.put(decimal, 1);
+			} else {
+				expected.put(decimal, value+1);
+			}				 
+		}
+		double outputs = l - outputQubits;
+		outputs = Math.pow(2, outputs);
+		List<Map.Entry<Integer, Integer>> list = new ArrayList<>(expected.entrySet());
+		list.sort(Map.Entry.comparingByKey());
+
+		StringBuilder sb = new StringBuilder("[");
+		for (int i=0; i<list.size(); i++) {
+			Map.Entry<Integer, Integer> entry = list.get(i);
+			sb.append("(" + entry.getKey() + ", " + (entry.getValue()/outputs) + "), ");
+			if (i%10==0 && i>0)
+				sb.append("\n");
+		}
+		sb.append("]\n");
+		return sb.toString();
+	}
+
+	private Integer toDecimal(List<Integer> bits) {
+		Integer decimal = 0;
+		for (int i=0; i<bits.size(); i++) {
+			if (bits.get(i)==1)
+				decimal += (int) Math.pow(2, bits.size()-1-i);
+		}
+		return decimal;
+	}
 
 	private String prepareCodeAsAFunction(int qubits, StringBuilder sbCalculus, String functionName) {
 		StringBuilder function = new StringBuilder("def get" + functionName + "() : \n");
@@ -55,14 +97,14 @@ public class NewQiskitCoder {
 	private final String prepareCodeAsAProgram(int inputQubits, int qubits, StringBuilder sbCalculus, CodeTemplate template) {
 		String initialize = "#Input qubits initialization:\n";
 		for (int i=0; i<inputQubits; i++) 
-			initialize = initialize + "circuit.initialize(ZERO, " + i + ")\n";
+			initialize = initialize + "circuits[0].h(" + i + ")\n";
 		
 		initialize = initialize + "#Output qubits MUST BE set to 0\n";
 		for (int i=inputQubits; i<qubits; i++)
-			initialize = initialize + "circuit.initialize(ZERO, " + i + ")\n";
+			initialize = initialize + "circuits[0].initialize(ZERO, " + i + ")\n";
 
 		String code = template.getCode();
-		code = code.replace("#QUBITS#", "" + qubits);
+		code = code.replace("#QUBITS#", "" + qubits + "\noutputQubits = " + (qubits-inputQubits));
 		code = code.replace("#OUTPUT_QUBITS#", "" + (qubits-inputQubits));
 		code = code.replace("#INITIALIZE#", initialize);
 		code = code.replace("#CALCULUS#", sbCalculus.toString());
@@ -70,7 +112,7 @@ public class NewQiskitCoder {
 		String measures = "";
 		int contC = qubits-inputQubits-1;
 		for (int i=inputQubits; i<qubits; i++) 
-			measures = measures + "circuit.measure(qreg[" + i + "], creg[" + contC-- + "])\n";
+			measures = measures + "circuits[0].measure(qreg[" + i + "], creg[" + contC-- + "])\n";
 		code = code.replace("#MEASURES#", measures);
 		return code;
 	}
@@ -144,9 +186,9 @@ public class NewQiskitCoder {
 		
 		String qubit = oldLine.substring(posLeft+1, posRight);
 		ArrayList<String> newLines = new ArrayList<>();
-		newLines.add("circuit.h(" + qubit + ")\n");
-		newLines.add("circuit.z(" + qubit + ")\n");
-		newLines.add("circuit.h(" + qubit + ")\n");
+		newLines.add("circuits[0].h(" + qubit + ")\n");
+		newLines.add("circuits[0].z(" + qubit + ")\n");
+		newLines.add("circuits[0].h(" + qubit + ")\n");
 		return newLines;
 	}
 
@@ -158,9 +200,9 @@ public class NewQiskitCoder {
 		String controlledQubit = oldLine.substring(posRight+3, oldLine.length()-1);
 		
 		ArrayList<String> newLines = new ArrayList<>();
-		newLines.add("circuit.h(" + controlledQubit + ")\n");
-		newLines.add("circuit.mcrz(pi, [" + controlQubits + "], " + controlledQubit + ")\n");
-		newLines.add("circuit.h(" + controlledQubit + ")\n");
+		newLines.add("circuits[0].h(" + controlledQubit + ")\n");
+		newLines.add("circuits[0].mcrz(pi, [" + controlQubits + "], " + controlledQubit + ")\n");
+		newLines.add("circuits[0].h(" + controlledQubit + ")\n");
 		return newLines;
 	}
 
@@ -170,7 +212,7 @@ public class NewQiskitCoder {
 		for (int j=0; j<inputQubits; j++) {
 			value = row.get(j);
 			if (value!=null && value==0)
-				sbPrepare.append("circuit.x(" + j + ")\n");
+				sbPrepare.append("circuits[0].x(" + j + ")\n");
 		}
 		
 		StringBuilder sbMcx = new StringBuilder();
@@ -181,7 +223,7 @@ public class NewQiskitCoder {
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(sbPrepare).append(sbMcx).append(sbPrepare).append("\ncircuit.barrier()\n");
+		sb.append(sbPrepare).append(sbMcx).append(sbPrepare).append("\ncircuits[0].barrier()\n");
 		return sb;
 	}
 
@@ -191,7 +233,7 @@ public class NewQiskitCoder {
 		for (int j=0; j<inputQubits; j++) {
 			value = row.get(j);
 			if (value!=null && value==0)
-				sbPrepare.append("circuit.x(" + j + ")\n");
+				sbPrepare.append("circuits[0].x(" + j + ")\n");
 		}
 		
 		StringBuilder sbMcx = new StringBuilder();
@@ -204,12 +246,12 @@ public class NewQiskitCoder {
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(sbPrepare).append(sbMcx).append(sbPrepare).append("\ncircuit.barrier()\n");
+		sb.append(sbPrepare).append(sbMcx).append(sbPrepare).append("\ncircuits[0].barrier()\n");
 		return sb;
 	}
 
     private String buildMcx(List<Integer> row, int inputQubits, int rowIndex) {
-		StringBuilder sb = new StringBuilder("circuit.mcx([");
+		StringBuilder sb = new StringBuilder("circuits[0].mcx([");
 		for (int i=0; i<inputQubits; i++) {
 			if (row.get(i)!=null)
 				sb.append(i + ", ");

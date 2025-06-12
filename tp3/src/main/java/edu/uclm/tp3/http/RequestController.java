@@ -20,7 +20,14 @@ public class RequestController {
 
     @GetMapping("/get")
     public void get(HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr(); // fallback a la IP directa
+        }
+
         String userAgent = request.getHeader("User-Agent");
         service.insert(ip, userAgent);
     }

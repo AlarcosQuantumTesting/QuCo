@@ -1,0 +1,3 @@
+cd tp3
+export JAVA_HOME='/Library/Java/JavaVirtualMachines/jdk1.8.0_301.jdk/Contents/Home'
+/Applications/apache-maven-3.9.9/bin/mvn install

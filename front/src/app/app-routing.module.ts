@@ -10,6 +10,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { QubitsConfigurationComponent } from './qubits-configuration/qubits-configuration.component';
 import { HomeComponent } from './home/home.component';
 import { CanDeactivateGuard } from './CanDeactivateGuard';
+import { TranspilationComponent } from './transpilation/transpilation.component';
 
 const routes: Routes = [
   // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
@@ -21,6 +22,7 @@ const routes: Routes = [
   { path: "editor", component: CircuitEditorComponent },
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
+  { path: "transpilation", component: TranspilationComponent },
   { path: "home", component: HomeComponent },
   //{ path: '**', redirectTo: 'home' }
   { path: "", redirectTo: "/home", pathMatch: "full" }

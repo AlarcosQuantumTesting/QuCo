@@ -356,6 +356,7 @@ export class DeterministicComponent extends GroverStyle {
             else
               tag = tag + "SPLIT = False\n"
             code = code?.replace("#INITIALIZE#", tag + this.responseReceived["#INITIALIZE#"])
+            code = code?.replace("#ALGORITHM#", tag + this.responseReceived["#ALGORITHM#"])
           } else if (key!='tree' && key!='unitaryMatrix' && key!='QUIRK') {
             let value = this.responseReceived[key]
             code = code?.replace(key, value)

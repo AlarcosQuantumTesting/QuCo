@@ -17,6 +17,7 @@ import { QubitsConfigurationComponent } from './qubits-configuration/qubits-conf
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { EditorComponent } from './editor/editor.component';
 import { HomeComponent } from './home/home.component';
+import { TranspilationComponent } from './transpilation/transpilation.component';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -40,7 +41,8 @@ const appRoutes : Routes = [
     TemplatesComponent,
     QubitsConfigurationComponent,
     EditorComponent,
-    HomeComponent
+    HomeComponent,
+    TranspilationComponent
   ],
   imports: [
     BrowserModule,

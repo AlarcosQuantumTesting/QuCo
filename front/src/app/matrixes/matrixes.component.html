@@ -490,7 +490,7 @@
 
             <div *ngIf="qiskitCode && qiskitCode.length>0">
                 <div style="margin: 20px;">
-                    <pre *ngFor="let line of qiskitCode">{{ line }}</pre>
+                    <pre>{{ qiskitCode }}</pre>
                 </div>
                 <div class="mensaje-temporal" *ngIf="mensajeTemporal">
                     {{ mensajeTemporal }}

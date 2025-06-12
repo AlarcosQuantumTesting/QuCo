@@ -77,7 +77,7 @@ export class MatrixesComponent implements AfterViewInit  {
   max : number = 50000
   dataReceived : boolean = false
   numberOfReceivedMatrixes : number = 0
-  qiskitCode? : string[]
+  qiskitCode? : string
 
   hideExamples : boolean = true
   javaExamples : any[] = [
@@ -360,7 +360,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.finalMatrix = []
     this.dataReceived = false
     this.numberOfReceivedMatrixes = 0
-    this.qiskitCode = []
+    this.qiskitCode = ""
     this.calculusTime = 0
     this.qiskitMatrixStart = ""
     this.qiskitMatrixEnd = ""
@@ -467,8 +467,26 @@ export class MatrixesComponent implements AfterViewInit  {
       next: result => {
         this.isLoadingQiskitCode = true;
         this.qiskitCode = result.code
-        this.replaceShotsToken(1000)
+        if (this.qiskitCode) {
+          this.qiskitCode = this.qiskitCode.replace("#SHOTS#", "1000")
+          this.qiskitCode = this.qiskitCode.replace("#ALGORITHM#", "Matrixes")
+          
+          this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
+          this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
 
+          this.qiskitCode = this.qiskitCode.replace("for i in range(0, len(circuits)) :", "")
+          this.qiskitCode = this.qiskitCode.replace("\tfor j in range (0, qubits) :", "")
+          this.qiskitCode = this.qiskitCode.replace("\t\tcircuits[i].h(j)", "")
+          this.qiskitCode = this.qiskitCode.replace("for i in range(0, len(circuits)) :", "")
+          this.qiskitCode = this.qiskitCode.replace("\tfor j in range(0, qubits) :", "")
+          this.qiskitCode = this.qiskitCode.replace("\t\tcircuits[i].measure(j, qubits-j-1)", "").trim()
+          
+          let cont = this.inputQubits
+          for (let i=0; i<this.outputQubits; i++) {
+            this.qiskitCode = this.qiskitCode + "\ncircuits[0].measure(" + cont + ", " + i + ")"
+            cont++
+          }
+        }
 
         // Mostrar modal solo si el usuario ingresó un nombre válido
         if (asFunction) {
@@ -525,10 +543,14 @@ export class MatrixesComponent implements AfterViewInit  {
     this.mostrarModal = true;
     this.qiskitService.getCode(info).subscribe({
       next: result => {
-      this.qiskitCode = result.code;
-      this.replaceShotsToken(1000);
-      this.isLoadingQiskitCode = false;
-      this.mostrarModal = true;
+        this.qiskitCode = result.code;
+        if (this.qiskitCode) {
+          this.qiskitCode = this.qiskitCode.replace("#SHOTS#", "1000")
+          this.qiskitCode = this.qiskitCode.replace("#ALGORITHM#", "Matrixes")
+          this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
+        }
+        this.isLoadingQiskitCode = false;
+        this.mostrarModal = true;
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
@@ -543,19 +565,9 @@ export class MatrixesComponent implements AfterViewInit  {
 
   //mio
 
-
-  replaceShotsToken(shots : any) {
-    if (!this.qiskitCode)
-      return
-    for (let i=0; i<this.qiskitCode.length; i++)
-      this.qiskitCode[i] = this.qiskitCode[i].replace("#SHOTS#", "1000")
-  }
-
   addHadamardGates() {
-
-    if (this.isDisabled) return; // Si ya está deshabilitado, no hace nada
+    /*if (this.isDisabled) return; // Si ya está deshabilitado, no hace nada
     this.isDisabled = true;
-
 
     let start = 0
     for (let i=0; i<this.qiskitCode!.length; i++) {
@@ -576,11 +588,10 @@ export class MatrixesComponent implements AfterViewInit  {
     this.mensajeTemporal = 'Added Hadamard gates!';
     setTimeout(() => {
         this.mensajeTemporal = '';
-    }, 2000); // Se oculta después de 2 segundos
+    }, 2000); // Se oculta después de 2 segundos*/
   }
 
   countLastQubit() {
-
     if (this.isDisabled2) return; // Si ya está deshabilitado, no hace nada
     this.isDisabled2 = true;
 
@@ -590,9 +601,7 @@ export class MatrixesComponent implements AfterViewInit  {
       "print(f\"Probability of getting 1 in the output qubit: {result}\")"
     ]
     for (let i=0; i<code.length; i++)
-      this.qiskitCode?.push(code[i])
-
-
+      this.qiskitCode += code[i]
 
     this.mensajeTemporal = 'Counted last qubit!';
     setTimeout(() => {
@@ -867,7 +876,9 @@ export class MatrixesComponent implements AfterViewInit  {
   mostrarModal: boolean = false;
 
   copiarCodigo() {
-    const codigo = this.qiskitCode ? this.qiskitCode.join('\n') : '';
+    if (!this.qiskitCode)
+      return;
+    const codigo = this.qiskitCode 
     navigator.clipboard.writeText(codigo).then(() => {
       alert('Code copied to clipboard');
         }).catch(err => {
