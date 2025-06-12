@@ -768,6 +768,10 @@ export class DeterministicComponent extends GroverStyle {
     }
     localStorage.removeItem('mostrarTabla');
     localStorage.removeItem('selectedAlgorithm');
+    localStorage.removeItem('selectedBackends');
+    localStorage.removeItem('availableBackends');
+    this.selectedBackends = [];
+    this.availableBackends = [];
     location.reload();  // Reiniciar
   }
 
