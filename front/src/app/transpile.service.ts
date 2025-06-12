@@ -2,13 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
-
-export interface Backend {
-  id: number;
-  name: string;
-  description: string;
-}
-
+import { Backend } from '../app/deterministic/Backend';
 @Injectable({
   providedIn: 'root'
 })

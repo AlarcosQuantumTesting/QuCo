@@ -628,24 +628,26 @@
       </div>
 
       <!-- Contenido del modal -->
-      <div class="intructions-content">
-        <label for="circuitName">Circuit name:</label>
-        <input
-          id="circuitName"
-          class="input-function form-control"
-          type="text"
-          [(ngModel)]="circuitName"
-          placeholder="Circuit name..."
-        />
+      <div class="intructions-content" style="justify-content: center; display: flex;">
+        <div class="form-row" style="justify-content: center; width: 100%;">
+          <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
+          <input
+            id="circuitName"
+            class="input-function form-control"
+            type="text"
+            [(ngModel)]="circuitName"
+            placeholder="circuit name..."
+            style="max-width: 40%;"
+          />
+        </div>
       </div>
       <div class="intructions-content">
-        <div class="form-row">
-            <!-- Backends disponibles -->
+        <div class="form-row-backends">
             <div class="section contenedorBackends">
               <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
               <ul class="listaBackends">
-                <li *ngFor="let backend of availableBackends" class="list-group-item d-flex justify-content-between align-items-center">
-                  {{ backend }}
+                <li *ngFor="let backend of availableBackends" class="list-group-item">
+                  <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
                   <button type="button" class="apply-button" (click)="selectBackend(backend)">
                     <i class="fas fa-plus"></i>
                   </button>
@@ -653,13 +655,12 @@
               </ul>
             </div>
 
-            <!-- Backends seleccionados -->
             <div class="section contenedorBackends">
               <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
               <ul class="listaBackends">
-                <li *ngFor="let backend of selectedBackends" class="list-group-item d-flex justify-content-between align-items-center bg-success-subtle">
-                    {{ backend }}
-                  <button type="button" class="apply-button" (click)="deselectBackend(backend)">
+                <li *ngFor="let backend of selectedBackends" class="list-group-item">
+                  <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                  <button type="button" class="deselect-button" (click)="deselectBackend(backend)">
                     <i class="fas fa-times"></i>
                   </button>
                 </li>
@@ -668,10 +669,8 @@
         </div>
       </div>
 
-
-      <!-- Botón para copiar el código -->
       <div class="modal-footer">
-        <button class="transpile-code-btn" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+        <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
       </div>
   </div>
 </div>

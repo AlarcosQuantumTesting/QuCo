@@ -13,6 +13,7 @@ import { EditorComponent } from '../editor/editor.component';
 import { Expression } from '../matrixes/Expression';
 import { ExpressionsService } from '../expressions.service';
 import { TranspileService } from '../transpile.service';  
+import { Backend } from './Backend';
 
 Chart.register(...registerables)
 
@@ -128,8 +129,8 @@ export class DeterministicComponent extends GroverStyle {
 
   circuitName: string = '';
   transpiledCode: string = '';
-  availableBackends: string[] = [];
-  selectedBackends: string[] = [];
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
@@ -141,9 +142,17 @@ export class DeterministicComponent extends GroverStyle {
 
   ngOnInit() {
 
-    this.transpileService.getBackends().subscribe(backends => {
+    /*this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends.map(b => b.name);
+    });*/
+
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
     });
+
+
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
     
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
@@ -1312,20 +1321,39 @@ export class DeterministicComponent extends GroverStyle {
     this.modalTranspile = true;
   }
 
-  selectBackend(backend: string) {
+  selectBackend(backend: Backend) {
     this.selectedBackends.push(backend);
-    this.availableBackends = this.availableBackends.filter(b => b !== backend);
+    this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
   }
 
-  deselectBackend(backend: string) {
+  deselectBackend(backend: Backend) {
     this.availableBackends.push(backend);
-    this.selectedBackends = this.selectedBackends.filter(b => b !== backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
   }
 
   transpile() {
-    this.transpileService.transpile(this.qiskitCode.lines.join('\n'), this.selectedBackends, this.circuitName).subscribe(result => {
-      this.transpiledCode = result;
-    });
+    try{
+      const backendsToTranspile = this.selectedBackends.map(b => b.name);
+      this.transpileService.transpile(this.qiskitCode.lines.join('\n'), backendsToTranspile, this.circuitName).subscribe(result => {
+        this.transpiledCode = result;
+      });
+      this.mensajeTemporal = 'The code will be transpiled.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }
+      , 2000);
+    } catch (error) {
+      console.error('Error during transpilation:', error);
+      this.mensajeTemporal = 'Error during transpilation. Please try again.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+    }
+    
   }
 
 

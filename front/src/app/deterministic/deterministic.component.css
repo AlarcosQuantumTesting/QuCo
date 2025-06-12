@@ -901,6 +901,7 @@ th, td {
 
 .generate-code-btn:hover {
     background-color: #267375;
+    cursor: pointer;
     transform: scale(1.05);
 }
 
@@ -914,18 +915,62 @@ th, td {
     transform: none;
 }
 
+.form-row-backends {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px
+}
+
+.form-row-backends h4 {
+  margin: 0px;
+  width: 100%;
+  height: 25px;
+  background-color: #0b555a;
+  color: white;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  align-items: center;
+  padding: 0px;
+}
+
+
 .contenedorBackends {
-  background-color: #b5d2e5;
+  background-color: #d8e2ea;
   border-radius: 8px;
-  max-width: 45%;
-  min-width: 45%;
+  max-width: 49%;
+  min-width: 49%;
+  width: 49%;
   height: 300px;
   max-height: 300px;
+  padding: 0px;
 }
 
 .listaBackends {
-  max-height: 100%;
+  height: 250px;
+  max-height: 250px;
   overflow-y: auto;
+  padding-inline-start: 10px;
+  margin-block-start: 0px;
+}
+
+.list-group-item {
+  padding: 8px;
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #0b555a;
+  margin-right: 8px;
+}
+
+.deselect-button {
+    background-color: #dc3545;
+}
+
+.deselect-button:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+    cursor: pointer;
 }
 
 
@@ -1236,7 +1281,6 @@ i {
   border: none;
   border-radius: 40px;
   font-size: 14px;
-  cursor: pointer;
   transition: background-color 0.3s;
   margin: 0;
   margin-bottom: 15px;
@@ -1247,6 +1291,12 @@ i {
 .transpile-code-btn:hover {
   background-color: #267375;
   transform: scale(1.05);
+  cursor: pointer;
+}
+
+.transpile-code-btn:disabled {
+  background-color: #7e838482;
+  cursor: not-allowed;
 }
 
 .help-actions {
