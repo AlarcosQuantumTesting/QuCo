@@ -1,5 +1,5 @@
 {
-	"environment" : "Mac de Maco",
+	"environment" : "Mac de Patri",
 	"DEBUG" : true,
 	"environments" : [
 		{
@@ -46,12 +46,12 @@
 		{
 			"name" : "Mac de Patri",
 			"path" : "/usr/local/bin:/usr/local/sbin:$PATH",
-			"commands" : [ "bash", "-c", "source /Users/patri/virtualenvironments/qiskit/bin/activate && python" ],
+			"commands" : [ "bash", "-c", "/Users/patri/virtualenvironments/qiskit/bin/python3" ],
 			"commands2" : [ "python" ],
 			"joinLastCommand" : true,
 			"inheritIO" : false,
 			"working directory" : "/Users/patri/Desktop/quco/",
-			"output directory" : "/Users/patri∫/Desktop/quco/"
+			"output directory" : "/Users/patri/Desktop/quco/"
 		}
 
 	]

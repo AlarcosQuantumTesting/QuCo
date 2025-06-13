@@ -1,14 +1,18 @@
 package edu.uclm.tp3.http;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,38 +47,67 @@ public abstract class EvolutionaryController {
 	@Autowired
     private SseEmitters emitters;
 	
-	@GetMapping("/resetSession") @ResponseBody
+	/*@GetMapping("/resetSession") @ResponseBody
 	public String resetSession(HttpSession session, HttpServletRequest request) {
 		session.removeAttribute("gt");
 		session.removeAttribute("pc");
 		return session.getId();
-	}
+	}*/
 
-	/*@GetMapping("/resetSession")
+	@GetMapping("/resetSession")
 	@ResponseBody
 	public String resetSession(HttpSession session, HttpServletRequest request) {
-		String gt = (String) session.getAttribute("gt");
+		Object gtObj = session.getAttribute("gt");
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
 
-		if (gt != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
-			try {
-				String workingFolderPath = EvolutionaryService.generationFolder((String) gt);
-				if (workingFolderPath != null) {
-					File workingFolder = new File(workingFolderPath);
-					FileUtils.deleteDirectory(workingFolder);
-					System.out.println("Deleted directory: " + workingFolder.getAbsolutePath());
-				}
+		if (gtObj != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
+			String gt = (String) gtObj;
 
+			// 🛑 Solicita cancelación antes de bloquear
+			RunPopulation.requestCancellation(gt);
+
+			ReentrantLock lock = RunPopulation.getLockFor(gt);
+			lock.lock();
+			try {
+				File dirToDelete = new File(EvolutionaryService.generationFolder(gt));
+
+				if (dirToDelete.exists()) {
+					FileUtils.deleteDirectory(dirToDelete);
+					System.out.println("Deleted directory: " + dirToDelete.getAbsolutePath());
+				} else {
+					System.out.println("Directory does not exist: " + dirToDelete.getAbsolutePath());
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				return "Error deleting files: " + e.getMessage();
+			} finally {
+				lock.unlock();
+				deleteDirectorySafelyLater(new File(EvolutionaryService.generationFolder(gt)));
 			}
 		}
 
 		session.removeAttribute("gt");
 		session.removeAttribute("pc");
-		return session.getId();
-	}*/
+
+		return "Session reset and files deleted.";
+	}
+
+
+	public static void deleteDirectorySafelyLater(File dir) {
+		new Thread(() -> {
+			try {
+				Thread.sleep(3000); // Espera 3 segundos para asegurar que todo ha terminado
+				if (dir.exists()) {
+					FileUtils.deleteDirectory(dir);
+					System.out.println("📂 Directorio eliminado en segundo intento: " + dir.getAbsolutePath());
+				}
+			} catch (Exception e) {
+				System.err.println("⚠️ Error al eliminar en segundo intento: " + e.getMessage());
+			}
+		}).start();
+	}
+
+
 
 
 	
@@ -241,6 +274,7 @@ public abstract class EvolutionaryController {
 			
 			int sourceGeneration = pc.getSourceGeneration();
 			for (int i=0; i<fitnessers.length; i++) {
+
 				fitnesser = fitnessers[i];
 				pc.setSourceGeneration(sourceGeneration);
 				TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");
