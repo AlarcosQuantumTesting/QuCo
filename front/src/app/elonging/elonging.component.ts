@@ -44,6 +44,10 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit () {
 
+    this.selectedRemoteFitnessers = JSON.parse(localStorage.getItem('selectedRemoteFitnessers') || '[]');
+
+    this.loadStrategies();
+
     window.addEventListener('beforeunload', this.confirmExit);
 
     this.notificationService.getMessages().subscribe(msg => {
@@ -73,6 +77,10 @@ export class ElongingComponent extends EvolutionaryComponent {
     } else {
       console.log('No hay plantilla seleccionada');
     }
+
+    //localStorage.setItem("selectedRemoteFitnessers", JSON.stringify(this.selectedRemoteFitnessers));
+
+    
 
     /*localStorage.removeItem('templateSelected');
     localStorage.removeItem('selectedTemplate');

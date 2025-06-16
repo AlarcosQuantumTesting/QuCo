@@ -63,7 +63,7 @@ public abstract class EvolutionaryController {
 		if (gtObj != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
 			String gt = (String) gtObj;
 
-			// 🛑 Solicita cancelación antes de bloquear
+			// Solicita cancelación antes de bloquear
 			RunPopulation.requestCancellation(gt);
 
 			ReentrantLock lock = RunPopulation.getLockFor(gt);
@@ -96,13 +96,13 @@ public abstract class EvolutionaryController {
 	public static void deleteDirectorySafelyLater(File dir) {
 		new Thread(() -> {
 			try {
-				Thread.sleep(3000); // Espera 3 segundos para asegurar que todo ha terminado
+				Thread.sleep(3000);
 				if (dir.exists()) {
 					FileUtils.deleteDirectory(dir);
 					System.out.println("📂 Directorio eliminado en segundo intento: " + dir.getAbsolutePath());
 				}
 			} catch (Exception e) {
-				System.err.println("⚠️ Error al eliminar en segundo intento: " + e.getMessage());
+				System.err.println("Error al eliminar en segundo intento: " + e.getMessage());
 			}
 		}).start();
 	}
