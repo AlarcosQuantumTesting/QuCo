@@ -1112,3 +1112,50 @@ input[type="checkbox"] {
   max-width: 100%;
   max-height: 700px;
 }
+
+
+.circuit-block-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.styled-table {
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  width: max-content;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.styled-table input[type="text"],
+.styled-table input[type="number"] {
+  width: 40px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.block-header {
+  background-color: antiquewhite;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  padding: 0.5rem;
+}
+
+.block-header-center {
+  background-color: antiquewhite;
+  font-weight: bold;
+  vertical-align: middle;
+}

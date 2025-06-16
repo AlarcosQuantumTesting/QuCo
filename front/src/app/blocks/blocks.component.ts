@@ -24,6 +24,9 @@ export class BlocksComponent extends EvolutionaryComponent {
   generateClicked: boolean = false;
   modalStrategyDetails: boolean = false;
   showCharts: boolean = false;
+  isNone: boolean = true;
+  isRandom: boolean = false;
+  selectedOptionFreq: string = 'none';
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService) {
     super(blocksService, "blocks")
@@ -292,5 +295,21 @@ export class BlocksComponent extends EvolutionaryComponent {
     location.reload();
   }
 
+  applyOption() {
+    if (this.isNone) {
+      this.resetMatrix();
+    } else if (this.isRandom) {
+      this.random();
+    }
+
+    localStorage.setItem('selectedOptionFreqGenetic', this.selectedOptionFreq);
+    this.tieneFrecuenciasEsperadas()
+  }
+
+  onOptionFreqChange(value: string): void {
+    
+    this.isNone = value === 'none';
+    this.isRandom = value === 'random';
+  }
 
 }
