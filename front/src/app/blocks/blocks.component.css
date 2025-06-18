@@ -1124,6 +1124,8 @@ input[type="checkbox"] {
 .table-wrapper {
   overflow-x: auto;
   max-width: 100%;
+  border-color: rgba(255, 255, 255, 0) !important;
+  border-radius: 18px;
 }
 
 .styled-table {
@@ -1131,6 +1133,7 @@ input[type="checkbox"] {
   border: 1px solid #ccc;
   background-color: #fff;
   width: max-content;
+  border-radius: 18px;
 }
 
 .styled-table th,

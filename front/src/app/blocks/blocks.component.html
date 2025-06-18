@@ -231,18 +231,18 @@
         <div class="container matrix-container">
 
             <div class="info1">
-                <small *ngIf="this.pc.probOf1QubitGates === null || this.pc.probOf2QubitGates === null || this.pc.probOf3QubitGates === null || this.pc.probOfNQubitGates === null"
+                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfStartColumns === null || pc.inputConfiguration.blockCircuit.numberOfStartColumns < 0"
                     class="error-text-top">
-                    All probabilities must be defined.
+                    The number of starting columns must be equal or greater than 0.
                 </small>
-                <small *ngIf="(this.pc.probOf1QubitGates < 0 || this.pc.probOf1QubitGates > 100) || (this.pc.probOf2QubitGates < 0 || this.pc.probOf2QubitGates > 100) ||
-                        (this.pc.probOf3QubitGates < 0 || this.pc.probOf3QubitGates > 100) || (this.pc.probOfNQubitGates < 0 || this.pc.probOfNQubitGates > 100)"
-                        class="error-text-top">
-                        All probabilities must be between 0 and 100.
-                </small>
-                <small *ngIf="templateSelected === false"
+                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfBlocks === null || pc.inputConfiguration.blockCircuit.numberOfBlocks < 0"
                     class="error-text-top">
-                    You must select a template.
+                    The number of blocks columns must be equal or greater than 0.
+                </small>
+                <small *ngIf="pc.inputConfiguration.minNumberOfColumns === null || pc.inputConfiguration.minNumberOfColumns < 1 || 
+                    pc.inputConfiguration.maxNumberOfColumns === null || pc.inputConfiguration.maxNumberOfColumns < 1"
+                    class="error-text-top">
+                    The number of columns must be equal or greater than 1.
                 </small>
             </div>
             <div class="info1">
