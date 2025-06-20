@@ -477,7 +477,7 @@ label {
 
 .buttons-generation {
     display: flex;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     grid-column: 3;
 }
 
@@ -887,7 +887,7 @@ ol.list-instructions {
 
 
 .btn-reset {
-    padding-bottom: 10px;
+    /* padding-bottom: 10px; */
     padding-top: 3px;
     background: none;
     color: #0b555a;
