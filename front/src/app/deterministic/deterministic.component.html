@@ -519,14 +519,16 @@
   </div>
 </div>
 
-<div class="modal" *ngIf="mostrarModal">
+<div class="modal ejemplos" *ngIf="mostrarModal">
   <div class="modal-content" *ngIf="isLoadingQiskitCode">
       <div *ngIf="isLoadingQiskitCode" class="spinner-container">
           <div class="spinner"></div>
           <p>Generating Qiskit code...</p>
       </div>              
   </div>
-  <div class="modal-content" *ngIf="!isLoadingQiskitCode">
+  <div class="modal-content ejemplos"
+    cdkDrag
+    cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
       <!-- Botón para cerrar el modal -->
       <div class="modal-header">
           <h2 class="title-modal">Qiskit Code</h2>

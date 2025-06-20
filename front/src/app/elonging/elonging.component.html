@@ -446,8 +446,10 @@
         </div>
     </div>
 
-    <div class="modal" *ngIf="mostrarModalCode">
-        <div class="modal-content">
+    <div class="modal instrucciones" *ngIf="mostrarModalCode">
+        <div class="modal-content ejemplos"
+            cdkDrag
+            cdkDragRootElement=".modal-content">
             <div class="modal-header">
                 <h2 class="title-modal">Qiskit Code</h2>
 
