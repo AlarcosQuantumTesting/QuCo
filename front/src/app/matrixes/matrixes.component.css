@@ -1121,6 +1121,102 @@ u:hover {
     transform: scale(1.05);
 }
 
+
+.transpile-code-btn {
+  background-color: #10989c;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.transpile-code-btn:hover {
+  background-color: #267375;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.transpile-code-btn:disabled {
+  background-color: #7e838482;
+  cursor: not-allowed;
+}
+
+
+.form-row-backends {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px
+}
+
+.form-row-backends h4 {
+  margin: 0px;
+  width: 100%;
+  height: 25px;
+  background-color: #0b555a;
+  color: white;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  align-items: center;
+  padding: 0px;
+}
+
+
+.contenedorBackends {
+  background-color: #d8e2ea;
+  border-radius: 8px;
+  max-width: 49%;
+  min-width: 49%;
+  width: 49%;
+  height: 300px;
+  max-height: 300px;
+  padding: 0px;
+}
+
+.listaBackends {
+  height: 250px;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-block-start: 0px;
+  width: 98%;
+}
+
+.list-group-item {
+  padding: 8px;
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #0b555a;
+  margin-right: 8px;
+  width: 93%;
+}
+
+.apply-button {
+    background-color: #10989c;
+}
+
+.apply-button:hover {
+    background-color: #267375;
+    transform: scale(1.05);
+}
+
+.deselect-button {
+    background-color: #dc3545;
+}
+
+.deselect-button:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
 .enlaces-modal {
     display: block;
     text-align: center;
