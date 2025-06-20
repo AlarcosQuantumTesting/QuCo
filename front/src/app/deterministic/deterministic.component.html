@@ -225,7 +225,7 @@
               <th colspan="6" class="probability-cell">
                 <div class="pi-label">
                   <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
-                    <option [ngValue]="'none'">None</option>
+                    <option [ngValue]="'none'">Reset</option>
                     <option [ngValue]="'random'">Random</option>
                     <option [ngValue]="'random10'" *ngIf="!isGrover">Random ×10</option>
                     <option [ngValue]="'zeroTo2N'" *ngIf="!isGrover">0 to 2⁽ⁿ⁻¹⁾</option>
