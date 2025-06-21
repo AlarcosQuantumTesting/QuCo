@@ -19,6 +19,10 @@ export class QiskitService {
     return this.client.post<any>(environment.beUrl + "qiskit/saveCode", code)
   }
 
+  deleteFromServer(gate: EdGate) {
+    return this.client.delete<any>(environment.beUrl + "qiskit/deleteGate/" + gate.name)
+  }
+
   getQiskitMatrix(info : any) {
     return this.client.put<any>(environment.beUrl + "unitaryMatrix/getMatrix", info)
   }

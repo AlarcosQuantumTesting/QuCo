@@ -61,8 +61,6 @@
     <div class="controls-container">
       <button (click)="addColumn()" *ngIf="circuit">Add column</button>
       <button (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2">Remove last column</button>
-      <br>
-      <button (click)="createCustomizedGate()">Create customized gate</button>
     </div>
 
     <div>
@@ -90,6 +88,7 @@
       <button (click)="addCustomizedGate()"
         [disabled]="!selectedGate || selectedGate.name?.trim()?.length==0">Save</button>
       <button (click)="cancel()">Cancel</button>
+      <button (click)="deleteFromServer()">Delete</button>
     </div>
 
     <div *ngIf="customizedGates.length > 0">
@@ -100,7 +99,10 @@
         </button>
         &nbsp;
       </span>
+      
       <button (click)="selectMeasurementGate()">M 📐</button>
+      &nbsp;
+      <button (click)="createCustomizedGate()">Create customized gate</button>
     </div>
 
     <table border="1" *ngIf="qubitsConfiguration">

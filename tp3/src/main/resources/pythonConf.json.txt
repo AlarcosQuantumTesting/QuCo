@@ -51,7 +51,7 @@
 			"joinLastCommand" : true,
 			"inheritIO" : false,
 			"working directory" : "/Users/patri/Desktop/quco/",
-			"output directory" : "/Users/patri∫/Desktop/quco/"
+			"output directory" : "/Users/patri/Desktop/quco/"
 		}
 
 	]
