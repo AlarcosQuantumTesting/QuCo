@@ -129,6 +129,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.generateClicked = true
     this.state = "Generating initial population!"
     this.error = undefined
+    this.showCharts = true;
 
     if (this.selectedRemoteFitnessers.length==0 ) {
       this.error = "You must select one fitnesser at least"
@@ -310,6 +311,16 @@ export class BlocksComponent extends EvolutionaryComponent {
     
     this.isNone = value === 'none';
     this.isRandom = value === 'random';
+  }
+
+  copiarCodigo() {
+    const codigo = this.code?.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      console.log('Código copiado al portapapeles');
+      alert('Code copied to clipboard');
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
+    });
   }
 
 }

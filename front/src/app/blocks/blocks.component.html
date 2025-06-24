@@ -264,7 +264,8 @@
                         <div class="table-wrapper">
                             <table class="styled-table">
                             <tr>
-                                <th [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                                <th style="background-color: #0b555a; color: white;" 
+                                [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
                                 Circuit view
                                 </th>
                             </tr>
@@ -290,21 +291,21 @@
                         <div class="table-wrapper">
                             <table class="styled-table">
                             <tr>
-                                <th
+                                <th style="background-color: #0b555a; color: white;"
                                 [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns + pc.inputConfiguration.blockCircuit.block.numberOfRightColumns + 1)">
                                 Block description
                                 </th>
                             </tr>
                             <tr>
                                 <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
-                                <small>Left</small>
+                                <small style="margin-right: 5px;">Left</small>
                                 <input type="number" min="0" step="1" size="2"
                                     [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
                                     (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)">
                                 </th>
                                 <th [rowSpan]="pc.inputConfiguration.qubits + 1" class="block-header-center">U</th>
                                 <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
-                                <small>Right</small>
+                                <small style="margin-right: 5px;">Right</small>
                                 <input type="number" min="0" step="1" size="2"
                                     [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
                                     (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)">
@@ -336,9 +337,21 @@
 
     
     <div class="tab-content" id="tab-1">
+        <div class="buttons-generation" style="margin-left: 0px;">
+            <button class="generate-btn" style="margin-left: 0px; margin-right: 5px;" (click)="generateInitialPopulation()" [disabled]="!hasNonZeroFrequencies() || selectedRemoteFitnessers.length==0 || running" *ngIf="!generateClicked">
+                Generate
+            </button>
+
+            <button class="btn-cancel" style="margin-left: 0px;" (click)="stop()" [disabled]="!running">Stop</button>
+            <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
+            <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
+            <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
+                <i class="fa fa-refresh" title="Reset all"></i>
+            </button>
+        </div>
         <div class="generation-header">
 
-            <div class="buttons-generation">
+            <!-- <div class="buttons-generation">
                 <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
                 <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
                 <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="!hasNonZeroFrequencies() || selectedRemoteFitnessers.length==0 || running" *ngIf="!generateClicked">
@@ -349,7 +362,7 @@
                 <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
                     <i class="fa fa-refresh" title="Reset all"></i>
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <div style="width: 100%;">
@@ -489,6 +502,65 @@
                         </td>
                     </tr>   
                 </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modales -->
+
+    <div class="modal instrucciones" [ngClass]="{ 'hidden': !showCharts }">
+        <div class="modal-content instrucciones"
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Charts</h2>
+                <button class="close"><i class="close-i" (click)="showCharts = false">&times;</i></button>
+            </div>
+            <div class="intructions-content">
+                <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;"
+                    [ngClass]="{ 'hidden': !showCharts }">
+
+                    <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+                    &nbsp;
+                    <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
+
+                    <!-- Gráfico izquierdo -->
+                    <div class="chart-container" [ngClass]="{ 'hidden': !showCharts }"
+                        style="flex: 1 1 48%; position: relative; height:40vh;"
+                        *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
+                        <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
+                    </div>
+
+                    <!-- Gráfico derecho -->
+                    <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" [ngClass]="{ 'hidden': !showCharts }">
+                        <canvas id="timesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal instrucciones" *ngIf="mostrarModalCode">
+        <div class="modal-content ejemplos"
+            cdkDrag
+            cdkDragRootElement=".modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Qiskit Code</h2>
+
+                <button class="close"><i class="close-i" (click)="mostrarModalCode = false">&times;</i></button>
+            </div>
+
+            <div class="code-output">
+                <!-- <small id="codeArea"> -->
+                    <pre>
+                    {{ code }}
+                    </pre>
+                <!-- </small> -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
             </div>
         </div>
     </div>
@@ -773,7 +845,12 @@
     </tr>    
 </table> -->
 
-<i style="color : green" [hidden]="state==undefined">{{ state }}</i>
+
+
+
+
+
+<!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
 &nbsp;
 <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
 
@@ -785,10 +862,10 @@
 
 <div class="chart-container" style="position: relative; height:40vh; width:80vw">
     <canvas id="timesChart"></canvas>
-</div>
+</div> -->
 
-<small>
+<!-- <small>
     <pre>
     {{ code }}
     </pre>
-</small>
+</small> -->
