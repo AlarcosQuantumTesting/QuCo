@@ -79,9 +79,9 @@ export class DeterministicComponent extends GroverStyle {
   tooltipPiVisible: boolean = false;
   mostrarInstrucciones: boolean = false;
   mostrarTabla: boolean = false;
-  isGrover: boolean = true;
+  /*isGrover: boolean = true;
   isGrenoble: boolean = false;
-  isOriginalGR: boolean = false;
+  isOriginalGR: boolean = false;*/
   cambioInput: boolean = false;
   selectedAlgorithm: string = 'grover';
   selectedOptionFreq: string = '';
@@ -156,11 +156,11 @@ export class DeterministicComponent extends GroverStyle {
 
     this.onAlgorithmChange(this.selectedAlgorithm);
     
-    this.isGrover = this.selectedAlgorithm === 'grover';
+    /*this.isGrover = this.selectedAlgorithm === 'grover';
     this.isGrenoble = this.selectedAlgorithm === 'grenoble';
-    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';
+    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';*/
     
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
@@ -189,7 +189,7 @@ export class DeterministicComponent extends GroverStyle {
     this.validateInputs();
     this.validateSaveInputs();
 
-    if (this.isGrover) {
+    if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
       this.expService.getExpressions().subscribe((data: Expression[]) => {
         this.expressions = data.filter(exp => exp.type === 'grover');
@@ -248,7 +248,7 @@ export class DeterministicComponent extends GroverStyle {
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
       let result = eval(wholeExpression )
       if (marking && result) {
-        if (this.isGrover) {
+        if (this.selectedAlgorithm === 'grover') {
           this.expectedFrequencies.setFreq(i, 1)
         } else {
           this.expectedFrequencies.setFreq(i, 100)
@@ -420,10 +420,10 @@ export class DeterministicComponent extends GroverStyle {
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
-      this.isOriginalGR,
+      //this.isOriginalGR,
       this.inParallel,
       this.splitCircuits,
-      asGrover,
+      this.selectedAlgorithm,
       this.useMCX,
       this.prefix
     ).subscribe(
@@ -643,7 +643,7 @@ export class DeterministicComponent extends GroverStyle {
 
   reset() {
     this.selectedOptionFreq = 'none'
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq)
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
@@ -663,7 +663,7 @@ export class DeterministicComponent extends GroverStyle {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
     for (let i=0; i<this.expectedFrequencies.rows; i++) {
-      if (this.isGrover) {
+      if (this.selectedAlgorithm === 'grover') {
         this.expectedFrequencies.setFreq(i, Math.round(Math.random()*1*factor))
       } else {
         this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100*factor))
@@ -692,7 +692,7 @@ export class DeterministicComponent extends GroverStyle {
         index = Math.floor(Math.random() * this.expectedFrequencies.rows)
       }
       selectedIndexes.push(index)
-      if (this.isGrover) {
+      if (this.selectedAlgorithm === 'grover') {
         this.expectedFrequencies.setFreq(index, 1)
       } else {
         this.expectedFrequencies.setFreq(index, 100)
@@ -757,7 +757,7 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrix');
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       localStorage.removeItem('selectedOptionFreqGrover')
     } else {
       localStorage.removeItem('selectedOptionFreqAlgorithms')
@@ -934,26 +934,27 @@ export class DeterministicComponent extends GroverStyle {
     }
   }
 
-  onAlgorithmChange(value: string): void {
-    this.selectedAlgorithm = value;
-    if(this.isGrover) {
-      if(value === 'grover'){
+  onAlgorithmChange(algorithm: string): void {
+    this.selectedAlgorithm = algorithm;
+    /*if(this.selectedAlgorithm === 'grover') {
+      if(algorithm === 'grover'){
         this.mostrarTabla = true;
       } else {
         this.mostrarTabla = false;
       }
     } else {
-      if (value === 'grenoble' || value === 'originalGR') {
+      if (algorithm === 'grenoble' || algorithm === 'originalGR') {
         this.mostrarTabla = true;
       } else {
         this.mostrarTabla = false;
       }
-    }
-    this.isGrover = value === 'grover';
-    this.isGrenoble = value === 'grenoble';
-    this.isOriginalGR = value === 'originalGR';
+    }*/
+    
+    /*  this.isGrover = algorithm === 'grover';
+    this.isGrenoble = algorithm === 'grenoble';
+    this.isOriginalGR = algorithm === 'originalGR';*/
 
-    if (this.isGrover) {
+    if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
       this.expressionToSave.type = 'grover';
     } else {
@@ -961,7 +962,7 @@ export class DeterministicComponent extends GroverStyle {
       this.expressionToSave.type = 'grenoble';
     }
 
-    if (this.isGrover) {
+    if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
       this.expService.getExpressions().subscribe((data: Expression[]) => {
         this.expressions = data.filter(exp => exp.type === 'grover');
@@ -972,6 +973,8 @@ export class DeterministicComponent extends GroverStyle {
         this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
       });
     }
+
+    
   }
 
   onQuirkChange(index: number): void {
@@ -1007,7 +1010,7 @@ export class DeterministicComponent extends GroverStyle {
       this.fixedAmount();
     }
 
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq);
     } else {
       localStorage.setItem('selectedOptionFreqAlgorithms', this.selectedOptionFreq);
@@ -1026,7 +1029,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   changeRowValue(rowIndex: number, event: any): void {
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       if (this.expectedFrequencies.getFreq(rowIndex) === 0) {
         event.target.value = 1;
         this.setFreq({ target: { value: 1 } }, rowIndex);
@@ -1207,7 +1210,7 @@ export class DeterministicComponent extends GroverStyle {
     
     if (this.searchQuery.trim() != "") {
 
-      if (this.isGrover) {
+      if (this.selectedAlgorithm === 'grover') {
         this.filteredExpressions = this.expressions.filter(exp =>
           exp.type === 'grover' && 
           (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -1251,7 +1254,7 @@ export class DeterministicComponent extends GroverStyle {
     this.filteredExpressions = this.expressions;
 
     if (this.searchQuery.trim() != ""){
-      if (this.isGrover) {
+      if (this.selectedAlgorithm === 'grover') {
         this.filteredExpressions = this.expressions.filter(exp =>
           exp.type === 'grover' &&
           exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
@@ -1445,7 +1448,7 @@ export class DeterministicComponent extends GroverStyle {
 
   saveUserExpression(index: number) {
     this.expressionToSave.jsExpression = this.userExpressions[index];
-    if (this.isGrover) {
+    if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave.type = 'grover';
     } else {
       this.expressionToSave.type = 'grenoble';
@@ -1472,7 +1475,7 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarModalCrearExp = false;
     this.creatingExpression = false;
     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
-    if(this.isGrover) {
+    if(this.selectedAlgorithm === 'grover') {
       this.expressionToSave.type = 'grover';
     } else {
       this.expressionToSave.type = 'grenoble';
@@ -1678,7 +1681,7 @@ export class DeterministicComponent extends GroverStyle {
   }
   
   isGroverOption (): boolean {
-    return this.isGrover;
+    return this.selectedAlgorithm === 'grover';
   }
 
   updateTotalSelectedElements(): void {

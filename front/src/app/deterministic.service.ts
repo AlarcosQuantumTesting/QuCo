@@ -36,10 +36,10 @@ export class DeterministicService {
       qubits: number,
       expectedFrequencies: FreqTable,
       physicalAngle: number,
-      originalGR: boolean,
+      //originalGR: boolean,
       inParallel: boolean,
       splitCircuits: boolean,
-      asGrover : boolean,
+      algorithm: string,
       useMCX: boolean,
       functionPrefix?: string,
     ): Observable<Blob> {
@@ -47,11 +47,11 @@ export class DeterministicService {
         qubits,
         expectedFrequencies,
         physicalAngle,        
-        originalGR,
+        //originalGR,
         inParallel,
         splitCircuits,
         functionPrefix,
-        asGrover,
+        algorithm,
         useMCX,
       };
       let url = environment.beUrl + this.controller + '/newCalculate';

@@ -47,6 +47,7 @@
                   <option value="grover">Grover</option>
                   <option value="grenoble">Grenoble</option>
                   <option value="originalGR">Original Grover & Rudolph</option>
+                  <option value="hamming">Hamming</option>
                 </select>              
               </div>
               
@@ -74,7 +75,7 @@
         </button>
 
         <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">    
-          <div *ngIf="isGrover">
+          <div *ngIf="isGroverOption()">
               <p class="radioTitle">Use:</p>
               <label class="custom-radio">
               <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">MCX
@@ -86,13 +87,13 @@
 
           <div>
             <p class="radioTitle">Available templates:</p>
-            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
+            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGroverOption()">
               <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
                 {{ template.fileName }}
               </option>
             </select> 
         
-            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
+            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGroverOption()">
               <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
                 {{ template.fileName }}
               </option>
@@ -113,13 +114,13 @@
                 <div class="config-container">
                   <div class="config-item checkbox" style="margin-bottom: 5px;">
                     Available templates:
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGrover">
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGroverOption()">
                       <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
                         {{ template.fileName }}
                       </option>
                     </select> 
                 
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGrover">
+                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGroverOption()">
                       <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
                         {{ template.fileName }}
                       </option>
@@ -128,19 +129,19 @@
                     <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits">Split in several circuits
                   </div>
                   <div class="config-inputs-container" style="margin-top: 5px;">
-                    <div class="config-input" *ngIf="!isGrover" style="margin-right: 8px;">
+                    <div class="config-input" *ngIf="!isGroverOption()" style="margin-right: 8px;">
                       <!-- <label for="angle">Physical angle:</label> -->
                       Physical angle:
                       <input id="angle" type="number" min="0" max="3.1416" step="0.0625"
                              [(ngModel)]="physicalAngle">(radians)
                     </div>
                 
-                    <div class="config-input" *ngIf="!isGrover" style="margin-left: 8px;">
+                    <div class="config-input" *ngIf="!isGroverOption()" style="margin-left: 8px;">
                       Functions' prefix:
                       <input id="prefix" type="text" [(ngModel)]="prefix">
                     </div>
 
-                    <div *ngIf="isGrover" class="config-input">
+                    <div *ngIf="isGroverOption()" class="config-input">
                         <label class="custom-radio">
                             <p class="pRadioTitle">Use:</p>
                             <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
@@ -167,7 +168,7 @@
               <th colspan="3">
                 <div class="header-with-button">
                   <div style="margin-top: 5px; margin-bottom: 5px;">
-                    <div class="header-left-info" *ngIf="isGrover">
+                    <div class="header-left-info" *ngIf="isGroverOption()">
                       <i *ngIf="totalSelectedElements>0" style="font-family: cursive; font-weight: normal; font-size: 12px;">{{ totalSelectedElements }} elements selected </i>
                       <i *ngIf="totalSelectedElements<=0" style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
                     </div>
@@ -179,7 +180,7 @@
                           <i class="fa fa-info-circle"></i>
                       </button>
 
-                      <div class="tooltip" *ngIf="tooltipVisible && isGrover">
+                      <div class="tooltip" *ngIf="tooltipVisible && isGroverOption()">
                           <p>
                               Do click on any row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
                           </p>
@@ -194,7 +195,7 @@
                           </p>
                       </div>
 
-                      <div class="tooltip" *ngIf="tooltipVisible && !isGrover">
+                      <div class="tooltip" *ngIf="tooltipVisible && !isGroverOption()">
                         <p>
                           You can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.
                         </p>
@@ -211,10 +212,10 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button *ngIf="!isGrover"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
+                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGrover" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>
@@ -227,9 +228,9 @@
                   <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
                     <option [ngValue]="'none'">Reset</option>
                     <option [ngValue]="'random'">Random</option>
-                    <option [ngValue]="'random10'" *ngIf="!isGrover">Random ×10</option>
-                    <option [ngValue]="'zeroTo2N'" *ngIf="!isGrover">0 to 2⁽ⁿ⁻¹⁾</option>
-                    <option [ngValue]="'probabilityOf0'" *ngIf="!isGrover">Probability of 0</option>
+                    <option [ngValue]="'random10'" *ngIf="!isGroverOption()">Random ×10</option>
+                    <option [ngValue]="'zeroTo2N'" *ngIf="!isGroverOption()">0 to 2⁽ⁿ⁻¹⁾</option>
+                    <option [ngValue]="'probabilityOf0'" *ngIf="!isGroverOption()">Probability of 0</option>
                     <option [ngValue]="'amountOfValues'">This amount of values</option>
                   </select>
                   <!-- <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button>  -->
@@ -255,20 +256,20 @@
               
             </tr>
             <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center"
-            [class.true-row]="isGrover && expectedFrequencies.getFreq(rowIndex) === 1"
-            [class.grover-row]="isGrover" (click)="changeRowValue(rowIndex, $event)">
+            [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(rowIndex) === 1"
+            [class.grover-row]="isGroverOption()" (click)="changeRowValue(rowIndex, $event)">
               <td>
                 {{ rowIndex }}
                 <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
               </td>
               <td>
-                <input *ngIf="!isGrover" type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
-                <label class="label-number" *ngIf="isGrover"> {{expectedFrequencies.getFreq(rowIndex)}} </label>
+                <input *ngIf="!isGroverOption()" type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
+                <label class="label-number" *ngIf="isGroverOption()"> {{expectedFrequencies.getFreq(rowIndex)}} </label>
               </td>
-              <td *ngIf="!isGrover">
+              <td *ngIf="!isGroverOption()">
                 <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
               </td>
-              <td *ngIf="isGrover">
+              <td *ngIf="isGroverOption()">
                 <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 1">true</span>
                 <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 0">false</span>
               </td>
@@ -533,7 +534,7 @@
       <div class="modal-header">
           <h2 class="title-modal">Qiskit Code</h2>
           <div class="enlaces-modal" *ngIf="quirkCodes.length>0">
-            <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover"><i class="fas fa-project-diagram"></i> Show tree</a>
+            <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()"><i class="fas fa-project-diagram"></i> Show tree</a>
             &nbsp;
             <a (click)="showQuirk()" *ngIf="quirkCodes.length==1"><i class="fas fa-microchip"></i> Show in Quirk</a>
             &nbsp;
@@ -613,7 +614,7 @@
         <button class="close"><i class="close-i" (click)="mostrarModalTree = false;">&times;</i></button>
       </div>
       <div class="intructions-content">
-        <div style="overflow: auto; width: 100%" *ngIf="svgTree && !splitCircuits && !inParallel && !isGrover">
+        <div style="overflow: auto; width: 100%" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()">
           <svg [attr.width]="svgWidth" [attr.height]="svgHeight">
             <g [innerHTML]="svgTree"></g>
           </svg>
