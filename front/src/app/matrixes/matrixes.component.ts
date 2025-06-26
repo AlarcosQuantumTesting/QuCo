@@ -8,6 +8,8 @@ import { CodeTemplate } from '../templates/CodeTemplate';
 import { ExpressionsService } from '../expressions.service';
 import { Expression } from './Expression';
 import { EditorComponent } from '../editor/editor.component';
+import { Backend } from '../deterministic/Backend';
+import { TranspileService } from '../transpile.service';
 
 @Component({
   selector: 'app-matrixes',
@@ -127,9 +129,15 @@ export class MatrixesComponent implements AfterViewInit  {
   // expressions: Expression[];
   expressionToSave: Expression = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
 
+  modalTranspile: boolean = false;
+  circuitName: string = '';
+  transpiledCode: string = '';
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
+
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
-    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService) {}
+    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService) {}
 
   addUserExpression(): void {
     console.log('Añadir expresión de usuario');
@@ -703,6 +711,14 @@ export class MatrixesComponent implements AfterViewInit  {
     // Valida cuando se inicializan los valores
     this.validateInputs();
 
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
+    });
+
+
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
+
     // this.service.getExpressions().subscribe((data: Expression[]) => {
     //   this.expressions = data;
     // });
@@ -885,6 +901,46 @@ export class MatrixesComponent implements AfterViewInit  {
           console.error('Error copying code: ', err);
       });
   }
+
+  transpileCodigo() {
+    this.modalTranspile = true;
+  }
+
+  selectBackend(backend: Backend) {
+    this.selectedBackends.push(backend);
+    this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+
+  deselectBackend(backend: Backend) {
+    this.availableBackends.push(backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+
+  transpile() {
+    try{
+      const backendsToTranspile = this.selectedBackends.map(b => b.name);
+      this.transpileService.transpile(this.qiskitCode ?? '', backendsToTranspile, this.circuitName).subscribe(result => {
+        this.transpiledCode = result;
+      });
+      this.mensajeTemporal = 'The code will be transpiled.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }
+      , 2000);
+    } catch (error) {
+      console.error('Error during transpilation:', error);
+      this.mensajeTemporal = 'Error during transpilation. Please try again.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+    }
+    
+  }
+  
 
   toggleHelp() {
     this.showHelp = !this.showHelp;

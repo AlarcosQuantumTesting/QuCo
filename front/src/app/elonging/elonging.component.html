@@ -191,6 +191,18 @@
     </div>
 
     <div class="tab-content" id="tab-1">
+        <div class="buttons-generation" style="margin-left: 0px;">
+                <button class="generate-btn" style="margin-left: 0px; margin-right: 5px;" (click)="generateInitialPopulation()" [disabled]="!hasNonZeroFrequencies() || running" *ngIf="!generateClicked">
+                Generate
+                </button>
+
+                <button class="btn-cancel" style="margin-left: 0px;" (click)="stop()" [disabled]="!running">Stop</button>
+                <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
+                <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
+                <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
+                    <i class="fa fa-refresh" title="Reset all"></i>
+                </button>
+            </div>
         <div class="generation-header">
             <div class="strategies-policy">
                 <label class="policy-option">
@@ -211,12 +223,10 @@
                 </button>
             </div>
 
-            <div class="buttons-generation">
+            <!-- <div class="buttons-generation">
                 <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && !showCharts">Show charts</button>
                 <button class="btn-confirm" (click)="showChartsMethod()" *ngIf="generateClicked && showCharts">Hide charts</button>
-                <!-- <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && !running"> -->
                 <button class="generate-btn" (click)="generateInitialPopulation()" [disabled]="!hasNonZeroFrequencies() || running" *ngIf="!generateClicked">
-                <!-- Generate initial population and start running -->
                 Generate
                 </button>
 
@@ -224,7 +234,7 @@
                 <button class="btn-reset" (click)="reload()" *ngIf="generateClicked && !running">
                     <i class="fa fa-refresh" title="Reset all"></i>
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <div style="width: 100%;">
@@ -304,7 +314,7 @@
                                 </div>
                                 <div>
                                     <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
-                                        <option [ngValue]="'none'">None</option>
+                                        <option [ngValue]="'none'">Reset</option>
                                         <option [ngValue]="'random'">Random</option>
                                         <option [ngValue]="'zeroTo2N'">0 to 2⁽ⁿ⁻¹⁾</option>
                                     </select>
@@ -446,8 +456,10 @@
         </div>
     </div>
 
-    <div class="modal" *ngIf="mostrarModalCode">
-        <div class="modal-content">
+    <div class="modal instrucciones" *ngIf="mostrarModalCode">
+        <div class="modal-content ejemplos"
+            cdkDrag
+            cdkDragRootElement=".modal-content">
             <div class="modal-header">
                 <h2 class="title-modal">Qiskit Code</h2>
 

@@ -218,12 +218,10 @@
 <div *ngIf="matrix" style="display: flex; justify-content: center; align-items: center; position: relative;">
     <div style="display: flex; align-items: center;">
         <h2 *ngIf="matrix" style="margin-top: 10px;">Table</h2>
-        <div style="position: relative;">
+        <!-- <div style="position: relative;">
             <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
               <i class="fa fa-edit"></i>
             </button>
-
-            <!-- Tooltip personalizado -->
             <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
 
               <div>
@@ -245,7 +243,7 @@
                     </select>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 
 </div>
@@ -255,6 +253,28 @@
     <div class="table-button-container">
         <div class="table-container" *ngIf="matrix">
             <table id="myTable" border="1">
+                <tr>
+                    <th [colSpan]="(numberOfInputQubits ?? 0) + (numberOfOutputQubits ?? 0) + 3" class="config-cell">
+                        <div class="config-container">
+                            <div class="config-item checkbox" style="margin-bottom: 5px;">
+                                Available templates:
+                                <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+                                    <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes'])" [ngValue]="template">
+                                        {{ template.fileName }}
+                                    </option>
+                                </select>
+                                <p class="radioTitle">Select domain:</p>
+                                <label class="custom-radio">
+                                <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
+                                </label>
+                                <label class="custom-radio">
+                                <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
+                                </label>
+                            </div>
+                        </div>
+                    </th>
+                    
+                </tr>
                 <tr>
                     <th></th>
                     <th [colSpan]="numberOfInputQubits">Input</th>
@@ -457,14 +477,16 @@
     </div>
 </div>
 
-<div class="modal" *ngIf="mostrarModal">
+<div class="modal ejemplos" *ngIf="mostrarModal">
     <div class="modal-content" *ngIf="isLoadingQiskitCode">
         <div *ngIf="isLoadingQiskitCode" class="spinner-container">
             <div class="spinner"></div>
             <p>Generating Qiskit code...</p>
         </div>              
     </div>
-    <div class="modal-content" *ngIf="!isLoadingQiskitCode">
+    <div class="modal-content ejemplos"
+    cdkDrag
+    cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
         <!-- Botón para cerrar el modal -->
         <div class="modal-header">
             <h2 class="title-modal">Qiskit Code</h2>
@@ -520,6 +542,7 @@
 
         <!-- Botón para copiar el código -->
         <div class="modal-footer">
+            <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
             <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
         </div>
     </div>
@@ -679,5 +702,60 @@
             
         </div>
     </div>
+
+    <div class="modal" *ngIf="modalTranspile">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Transpile Code</h2>
+                <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
+            </div>
+
+            <!-- Contenido del modal -->
+            <div class="intructions-content" style="justify-content: center; display: flex;">
+                <div class="form-row" style="justify-content: center; width: 100%;">
+                <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
+                <input
+                    id="circuitName"
+                    class="input-function form-control"
+                    type="text"
+                    [(ngModel)]="circuitName"
+                    placeholder="circuit name..."
+                    style="max-width: 40%;"
+                />
+                </div>
+            </div>
+            <div class="intructions-content">
+                <div class="form-row-backends">
+                    <div class="section contenedorBackends">
+                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
+                    <ul class="listaBackends">
+                        <li *ngFor="let backend of availableBackends" class="list-group-item">
+                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                        <button type="button" class="apply-button" (click)="selectBackend(backend)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        </li>
+                    </ul>
+                    </div>
+
+                    <div class="section contenedorBackends">
+                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
+                    <ul class="listaBackends">
+                        <li *ngFor="let backend of selectedBackends" class="list-group-item">
+                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                        <button type="button" class="deselect-button" (click)="deselectBackend(backend)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+            </div>
+        </div>
+        </div>
   
 </body>

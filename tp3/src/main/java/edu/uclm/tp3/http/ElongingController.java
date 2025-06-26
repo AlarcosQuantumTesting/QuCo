@@ -1,5 +1,6 @@
 package edu.uclm.tp3.http;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -62,6 +64,22 @@ public class ElongingController extends EvolutionaryController {
 	@PostMapping("/runPopulation") @ResponseBody
 	public Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError, @RequestParam String selectedStratego,
 			@RequestBody List<Map<String, Object>> selectedStrategies) {
+
+
+		HWSession hw = this.manager.get(session);
+		String gt = session.getAttribute("gt").toString();
+
+		String sessionPath = EvolutionaryService.generationFolder(gt);
+		File sessionDir = new File(sessionPath);
+
+		if (!sessionDir.exists()) {
+			System.out.println("Carpeta eliminada. Deteniendo ejecución de runPopulation.");
+			return (Map<String, Object>) ResponseEntity.status(HttpStatus.BAD_REQUEST)
+								.body("La sesión ya no existe. Por favor, reinicia el experimento.");
+		}
+
+
+
 		long startTime = System.currentTimeMillis();
 		try {
 			if (session.getAttribute("gt")==null)
@@ -70,8 +88,10 @@ public class ElongingController extends EvolutionaryController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 		
+		/*
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
+		 */
 		Map<String, Fitnesser> sessionFitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
 		Fitnesser[] fitnessers = sessionFitnessers.values().toArray(new Fitnesser[0]);
 		
