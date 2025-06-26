@@ -26,6 +26,11 @@ public class QucoRequest {
 
     private String uri;
 
+    private String country;  // NUEVO CAMPO
+
+    @Column(columnDefinition = "TEXT")
+    private String location; // NUEVO CAMPO
+
     public QucoRequest() {
          this.time = LocalDateTime.now();
     }
@@ -72,5 +77,21 @@ public class QucoRequest {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getCountry() {  // GETTER
+        return country;
+    }
+
+    public void setCountry(String country) {  // SETTER
+        this.country = country;
+    }
+
+    public String getLocation() {  // GETTER
+        return location;
+    }
+
+    public void setLocation(String location) {  // SETTER
+        this.location = location;
     }
 }

@@ -6,53 +6,39 @@ import java.util.List;
 public class QGroverOracle {
     private QColumn encoding0;
     private QColumn h0;
-    private QColumn mcx;
+    private QColumn mcXOrZ;
     private QColumn h1;
     private QColumn encoding1;
 
-    public QGroverOracle(int index, int qubits) {
-        String binary = Integer.toBinaryString(index);
-        List<Integer> row = new ArrayList<>();
-        for (int i = 0; i < binary.length(); i++) {
-            if (binary.charAt(i) == '1') {
-                row.add(1);
-            } else {
-                row.add(0);
-            }
-        }
-        while (row.size() < qubits) {
-            row.add(0, 0);
-        }
+    public QGroverOracle(List<Integer> row, boolean useMCX) {
         this.encoding0 = this.encode(row);
-        this.h0 = this.buildH(row);
-        this.mcx = this.buildMCX(row);
-        this.h1 = this.buildH(row);
-        this.encoding1 = this.encode(row);   
-    }
-
-    public QGroverOracle(List<Integer> row) {
-        this.encoding0 = this.encode(row);
-        this.h0 = this.buildH(row);
-        this.mcx = this.buildMCX(row);
-        this.h1 = this.buildH(row);
+        if (useMCX) {
+            this.h0 = this.buildH(row);
+            this.mcXOrZ = this.buildMCXOrMCH(row, "X");
+            this.h1 = this.buildH(row);
+        } else {
+            this.mcXOrZ = this.buildMCXOrMCH(row, "Z");
+        }
         this.encoding1 = this.encode(row);   
     }
 
     public List<QColumn> getColumns() {
         List<QColumn> columns = new ArrayList<>();
         columns.add(this.encoding0);
-        columns.add(this.h0);
-        columns.add(this.mcx);
-        columns.add(this.h1);
+        if (this.h0 != null) 
+            columns.add(this.h0);
+        columns.add(this.mcXOrZ);
+        if (this.h1!=null)
+            columns.add(this.h1);
         columns.add(this.encoding1);
         return columns;
     }
 
-    private QColumn buildMCX(List<Integer> row) {
+    private QColumn buildMCXOrMCH(List<Integer> row, String gate) {
         QColumn column = new QColumn();
         for (int i=0; i<row.size(); i++)
             column.addGate("•");
-        column.setGate(row.size()-1, "X");
+        column.setGate(row.size()-1, gate);
         return column;
     }
 
@@ -84,8 +70,8 @@ public class QGroverOracle {
         return h0;
     }
 
-    public QColumn getMcx() {
-        return mcx;
+    public QColumn getMcXOrZ() {
+        return mcXOrZ;
     }
 
     public QColumn getH1() {
@@ -99,12 +85,12 @@ public class QGroverOracle {
     public QCircuit toCircuit() {
         QCircuit result = new QCircuit();
         result.addColumn(encoding0);
-        result.addColumn(h0);
-        result.addColumn(mcx);
-        result.addColumn(h1);
+        if (h0 != null)
+            result.addColumn(h0);
+        result.addColumn(mcXOrZ);
+        if (h1!=null)
+            result.addColumn(h1);
         result.addColumn(encoding1);
         return result;
     }
-
-    
 }

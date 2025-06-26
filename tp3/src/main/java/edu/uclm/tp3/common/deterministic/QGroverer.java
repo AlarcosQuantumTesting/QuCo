@@ -37,11 +37,11 @@ public class QGroverer {
             int index = toDecimal(sRows.get(i));
             expected.add(1.0*index);
             expected.add(expectedElementProbability);
-            QGroverOracle oracle = new QGroverOracle(sRows.get(i));
+            QGroverOracle oracle = new QGroverOracle(sRows.get(i), useMCX);
             groverOracles.add(oracle);
         }
 
-        QGroverDiffuser difussor = new QGroverDiffuser(qubits);
+        QGroverDiffuser difussor = new QGroverDiffuser(qubits, useMCX);
 
         if (!inParallel) {
             int nOptimal = getOptimal(sRows, qubits);

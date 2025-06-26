@@ -214,7 +214,7 @@
                     <button *ngIf="!isGrover"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGrover" [disabled]="totalSelectedElements<=0" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button *ngIf="isGrover" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>

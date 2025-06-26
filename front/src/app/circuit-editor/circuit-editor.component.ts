@@ -76,11 +76,14 @@ export class CircuitEditorComponent {
       let option = confirm("There are gates in this column. Do you want to remove them?")
       if (!option)
         return
-    }
-    for (let i=0; i<this.circuit.qubits.length; i++) {
-      let gate = new EdGate('M', 1)
-      gate.columnIndex = column
-      this.circuit.qubits[i].gates[column] = gate
+      for (let i=0; i<this.circuit.qubits.length; i++) 
+        this.circuit.qubits[i].gates[column] = new EdGate('I', 1)
+    } else {
+      for (let i=0; i<this.circuit.qubits.length; i++) {
+        let gate = new EdGate('M', 1)
+        gate.columnIndex = column
+        this.circuit.qubits[i].gates[column] = gate
+      }
     }
   }
 
@@ -264,13 +267,28 @@ export class CircuitEditorComponent {
     this.creatingNewGate = false;
     this.qiskitService.saveGate(this.selectedGate!).subscribe(
         ok=> {
-          alert("Gate saved")
+          this.customizedGates.push(this.selectedGate!)
         },
         error => {
           this.error = error.error.message
         }
     )
-    this.selectedGate = undefined;
+  }
+
+  deleteFromServer() {
+    let option = confirm("Are you sure you want to delete this gate?");
+    if (!option || !this.selectedGate)
+      return;
+    this.creatingNewGate = false;
+    this.qiskitService.deleteFromServer(this.selectedGate!).subscribe(
+        ok=> {
+          this.customizedGates = this.customizedGates.filter(g => g.name !== this.selectedGate!.name);
+          this.selectedGate = undefined;
+        },
+        error => {
+          this.error = error.error.message
+        }
+    )
   }
   
   cancel() {
