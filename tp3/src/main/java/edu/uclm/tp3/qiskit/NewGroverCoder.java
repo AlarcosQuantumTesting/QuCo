@@ -25,14 +25,16 @@ public class NewGroverCoder {
 	public String getCode(QGroverOracle oracle) {
 		QColumn encoding0 = oracle.getEncoding0();
 		QColumn h0 = oracle.getH0();
-		QColumn mcx = oracle.getMcx();
+		QColumn mcx = oracle.getMcXOrZ();
 		QColumn h1 = oracle.getH1();
 		QColumn encoding1 = oracle.getEncoding1();
 
 		StringBuilder code = this.getCode(encoding0);
-		code.append(this.getCode(h0));
+		if (h0!= null)
+			code.append(this.getCode(h0));
 		code.append(this.getCode(mcx));
-		code.append(this.getCode(h1));
+		if (h1 != null)
+			code.append(this.getCode(h1));
 		code.append(this.getCode(encoding1));
 		return code.toString();
 	}

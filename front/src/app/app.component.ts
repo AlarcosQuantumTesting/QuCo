@@ -1,6 +1,5 @@
 import { Component, AfterViewInit, ElementRef } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router'
-import { QucoRequestService } from './qucorequest.service';
 
 @Component({
   selector: 'app-root',
@@ -13,14 +12,13 @@ export class AppComponent implements AfterViewInit {
   menuAbierto = false;
   mostrarInicio = true;
 
-  constructor(private router: Router, private el: ElementRef, private qucoRequestService: QucoRequestService) {
+  constructor(private router: Router, private el: ElementRef) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         // this.mostrarInicio = this.router.url === '/quco';
         this.mostrarInicio = this.router.url === '/home';
       }
     });
-    this.qucoRequestService.get()
   }
 
   ngAfterViewInit() {

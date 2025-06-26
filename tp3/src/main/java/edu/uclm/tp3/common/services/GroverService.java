@@ -25,11 +25,11 @@ public class GroverService {
     private NewGroverCoder coder;
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies) {
+    public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, boolean useMCX) {
         int shots = 1000;
 
         int numberOfPairs = expectedFrequencies.getPairs().size();
-        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies, useMCX);
 
         int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
         Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
@@ -67,11 +67,11 @@ public class GroverService {
 
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies) {
+    public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies, boolean useMCX) {
         int shots = 1000;
 
         int numberOfPairs = expectedFrequencies.getPairs().size();
-        Map<String, Object> result = this.calculate(qubits, expectedFrequencies);
+        Map<String, Object> result = this.calculate(qubits, expectedFrequencies, useMCX);
 
         int optimal = (int) Math.floor(Math.PI/4*Math.sqrt(Math.pow(2, qubits)/1));
         Map<String, Object> partialCircuit = ((List<Map<String, Object>>) result.get("QUIRK")).get(0);
@@ -149,10 +149,10 @@ public class GroverService {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies) {
+    public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, boolean useMCX) {
         int shots = 1000;
 
-        Object[] oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits);
+        Object[] oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits, useMCX);
         List<QGroverOracle> groverOracles = (List<QGroverOracle>) oraclesAnddiffuser[0];
         QGroverDiffuser diffuser = (QGroverDiffuser) oraclesAnddiffuser[1];
         
@@ -242,7 +242,7 @@ public class GroverService {
         return jsoCircuit;
     }
 
-    private Object[] buildGrover(FreqTable expectedFrequencies, int qubits) {
+    private Object[] buildGrover(FreqTable expectedFrequencies, int qubits, boolean useMCX) {
         List<Pair> pairs = expectedFrequencies.getPairs();
         List<List<Integer>> sRows = new ArrayList<>();
         for (Pair pair : pairs) {
@@ -261,7 +261,7 @@ public class GroverService {
             }
             sRows.add(row);
         }
-        return buildGrover(sRows, false);
+        return buildGrover(sRows, useMCX);
     }
 
     private Object[] buildGrover(List<List<Integer>> sRows, Boolean useMCX) {
@@ -269,24 +269,13 @@ public class GroverService {
 
         List<QGroverOracle> groverOracles = new ArrayList<>();
         for (int i = 0; i < sRows.size(); i++) {
-            QGroverOracle oracle = new QGroverOracle(sRows.get(i));
+            QGroverOracle oracle = new QGroverOracle(sRows.get(i), useMCX);
             groverOracles.add(oracle);
         }
 
-        QGroverDiffuser diffuser = new QGroverDiffuser(qubits);
+        QGroverDiffuser diffuser = new QGroverDiffuser(qubits, useMCX);
 
         Object[] result = { groverOracles, diffuser };
         return result;
     }
-
-    private QCircuit groupCircuits(List<QCircuit> generalCircuits, int qubits) {
-		QCircuit result = new QCircuit();
-        int start = 0;
-        for (int i=0; i<generalCircuits.size(); i++) {
-            QCircuit circuit = generalCircuits.get(i);
-            result.add(circuit, start);
-            start = start + qubits;
-        }
-        return result;
-	}
 }

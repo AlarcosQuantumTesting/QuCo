@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface TranspilationWorkDao extends JpaRepository<TranspilationWork, String> {
 
-    @Query(value = "SELECT * FROM transpilation_work ORDER BY creation_date_time DESC", nativeQuery = true)
+    @Query(value = "SELECT id, name, progress, null as code, size, creation_date_time FROM transpilation_work ORDER BY creation_date_time DESC", nativeQuery = true)
     List<TranspilationWork> getListOfTranspilationWorks();
 
 }
