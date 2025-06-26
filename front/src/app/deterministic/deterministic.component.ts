@@ -8,7 +8,6 @@ import { CodeTemplate } from '../templates/CodeTemplate';
 import { QiskitCode } from '../grover/QiskitCode';
 import { QiskitService } from '../qiskit.service';
 import { FreqTable } from './FreqTable';
-import { GroverService } from '../grover.service';
 import { EditorComponent } from '../editor/editor.component';
 import { Expression } from '../matrixes/Expression';
 import { ExpressionsService } from '../expressions.service';
@@ -141,10 +140,6 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   ngOnInit() {
-
-    /*this.transpileService.getBackends().subscribe(backends => {
-      this.availableBackends = backends.map(b => b.name);
-    });*/
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;

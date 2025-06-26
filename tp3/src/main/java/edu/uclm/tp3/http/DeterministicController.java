@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.uclm.tp3.common.deterministic.FreqTable;
 import edu.uclm.tp3.common.services.DeterministicService;
 import edu.uclm.tp3.common.services.GroverService;
+import edu.uclm.tp3.common.services.HammingService;
 
 @RestController
 @RequestMapping("deterministic")
@@ -36,6 +37,8 @@ public class DeterministicController {
 	private DeterministicService service;
 	@Autowired
 	private GroverService groverService;
+	@Autowired
+	private HammingService hammingService;
 	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
@@ -73,8 +76,10 @@ public class DeterministicController {
 					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 				else
 					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-					//result = this.service.calculateFiltering(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			}
+			} 
+			/*else {
+				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
+			}*/
 			return this.buildResponse(result);
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
