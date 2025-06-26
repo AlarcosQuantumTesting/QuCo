@@ -190,8 +190,26 @@ button:hover {
 
 .form-row {
     display: flex;
-    align-items: center; /* Alinea verticalmente los elementos */
-    gap: 10px; /* Espacio entre elementos */
+    align-items: center;
+    align-items: stretch;
+    gap: 10px;
+}
+
+
+.form-row > * {
+    position: relative;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+/* Inserta el separador */
+.form-row > *:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    width: 3px;
+    height: 85%;
+    border-right: 3px dashed #197a81;   
 }
 
 .form-row label {
@@ -218,7 +236,10 @@ button:hover {
     overflow-x: auto;
     white-space: nowrap;
     padding-bottom: 4px;
-    border-right: 3px dashed #197a81;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 
@@ -227,7 +248,6 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-right: 3px dashed #197a81;
 }
 
 .gatesContainer {
@@ -457,7 +477,7 @@ label {
 
 .buttons-generation {
     display: flex;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     grid-column: 3;
 }
 
@@ -867,7 +887,7 @@ ol.list-instructions {
 
 
 .btn-reset {
-    padding-bottom: 10px;
+    /* padding-bottom: 10px; */
     padding-top: 3px;
     background: none;
     color: #0b555a;

@@ -134,7 +134,8 @@ export abstract class EvolutionaryComponent {
     }
   }
 
-  private async loadStrategies(): Promise<void> {
+  //private async loadStrategies(): Promise<void> {
+  protected async loadStrategies(): Promise<void> {
     try {
         const result = await this.service.getStrategies().toPromise();
         this.error = undefined;
@@ -192,6 +193,7 @@ export abstract class EvolutionaryComponent {
     }
 
     await this.loadStrategies()
+    localStorage.setItem("selectedRemoteFitnessers", JSON.stringify(this.selectedRemoteFitnessers));
   }
 
   saveConf() {
