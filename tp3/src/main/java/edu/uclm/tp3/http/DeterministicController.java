@@ -52,23 +52,26 @@ public class DeterministicController {
 		int qubits = jso.getInt("qubits");
 		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
 		double physicalAngle = jso.getDouble("physicalAngle");
-		boolean originalGR = jso.getBoolean("originalGR");
+		//boolean originalGR = jso.getBoolean("originalGR");
 		boolean inParallel = jso.getBoolean("inParallel");
 		boolean splitCircuits = jso.getBoolean("splitCircuits");
 		String functionPrefix = jso.optString("functionPrefix");
-		boolean asGrover = jso.optBoolean("asGrover", false);
+		String algorithm = jso.optString("algorithm", "grenoble");
+		boolean originalGR = algorithm.equals("originalGR");
 		boolean useMCX = jso.optBoolean("useMCX", false);
 		
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = null;
-			if (asGrover) {
+			if (algorithm.equals("grover")) {
 				if (inParallel)
 					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX);
 				else if (splitCircuits)
 					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX);
 				else
 					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX);
+			} else if (algorithm.equals("hamming")) {
+				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
 			} else {
 				if (inParallel)
 					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
@@ -76,10 +79,7 @@ public class DeterministicController {
 					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 				else
 					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
-			} 
-			/*else {
-				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
-			}*/
+			}
 			return this.buildResponse(result);
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
