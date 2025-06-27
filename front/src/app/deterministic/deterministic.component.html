@@ -623,9 +623,12 @@
   </div>
 </div>
 
-<div class="modal" *ngIf="modalTranspile">
-  <div class="modal-content">
-      <div class="modal-header">
+<div class="modal instrucciones" *ngIf="modalTranspile">
+  <div class="modal-content instrucciones"
+    cdkDrag
+    cdkDragRootElement="modal-content"
+    style="min-width: 950px;">
+      <div class="modal-header" cdkDragHandle>
           <h2 class="title-modal">Transpile Code</h2>
           <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
       </div>

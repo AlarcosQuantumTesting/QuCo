@@ -458,9 +458,9 @@
 
     <div class="modal instrucciones" *ngIf="mostrarModalCode">
         <div class="modal-content ejemplos"
-            cdkDrag
-            cdkDragRootElement=".modal-content">
-            <div class="modal-header">
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Qiskit Code</h2>
 
                 <button class="close"><i class="close-i" (click)="mostrarModalCode = false">&times;</i></button>

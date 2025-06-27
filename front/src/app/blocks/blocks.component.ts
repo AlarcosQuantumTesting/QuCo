@@ -27,6 +27,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   isNone: boolean = true;
   isRandom: boolean = false;
   selectedOptionFreq: string = 'none';
+  selectedGate: String = 'X';
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService) {
     super(blocksService, "blocks")
