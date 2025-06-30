@@ -235,7 +235,7 @@
               </th> 
             </tr>
             <!-- La tr de aquí abajo se ha cambiado para la paginación -->
-            <tr *ngFor="let i of createArray(maxRows); let rowIndex = index" 
+            <tr *ngFor="let i of createArray(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" 
                 align="center"
                 [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(currentOffset + rowIndex) === 1"
                 [class.grover-row]="isGroverOption()"

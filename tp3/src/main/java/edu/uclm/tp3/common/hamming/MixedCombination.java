@@ -80,13 +80,20 @@ public class MixedCombination {
         return result;
     }
 
-    public String getCode() {
-        StringBuilder sb = new StringBuilder("def get");
+    public String getName() {
+        StringBuilder sb = new StringBuilder("get");
         for (int i=0; i<this.values.size(); i++) {
             sb.append(this.values.get(i));
             if (i<this.values.size()-1)
                 sb.append("_");
         }
+        return sb.toString();
+    }
+
+    public String getCode() {
+        StringBuilder sb = new StringBuilder("def ");
+        sb.append(this.getName());
+        
         sb.append("() : # " + this.values.size() + " values\n");
         sb.append("\tU = QuantumCircuit(" + this.qubits + ")\n");
         for (int i=0; i<unified.length(); i++)
@@ -115,6 +122,8 @@ public class MixedCombination {
                 break;
             }
 
+        if (first==-1)
+            first = 0;
         for (int i=0; i<first; i++)
             column.addGate("1");
 

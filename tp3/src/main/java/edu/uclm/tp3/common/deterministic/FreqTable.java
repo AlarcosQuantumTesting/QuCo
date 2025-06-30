@@ -89,4 +89,21 @@ public class FreqTable {
         for (Pair p : this.pairs)
             p.setFreq(freq);
     }
+    
+    public FreqTable deepCopy() {
+        FreqTable copy = new FreqTable();
+        copy.setQubits(this.qubits);
+        copy.setRows(this.rows);
+        
+        List<Pair> copiedPairs = new ArrayList<>();
+        for (Pair originalPair : this.pairs) {
+            Pair newPair = new Pair();
+            newPair.setIndex(originalPair.getIndex());
+            newPair.setFreq(originalPair.getFreq());
+            copiedPairs.add(newPair);
+        }
+        
+        copy.setPairs(copiedPairs);
+        return copy;
+    }
 }
