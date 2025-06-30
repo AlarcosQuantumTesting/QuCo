@@ -73,10 +73,12 @@ export class ProblemInputConfiguration {
     shots : number = 99
 
     startWithH : boolean[] = []
-    blockCircuit : BlockCircuit 
+    blockCircuit : BlockCircuit
 
     constructor() {
-        const config = JSON.parse(localStorage.getItem("qucoConfiguration") || "{}")
+        
+        const config = JSON.parse(localStorage.getItem("qucoConfiguration") || "{}");
+        
         if (config) {
             this.qubits = config.qubits || 5
             this.populationSize = config.populationSize || 24

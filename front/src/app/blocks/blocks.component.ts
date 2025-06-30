@@ -7,6 +7,7 @@ import { Gate } from '../common/Gate';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
+import { BlockCircuit } from './BlockCircuit';
 
 Chart.register(...registerables)
 
@@ -58,6 +59,8 @@ export class BlocksComponent extends EvolutionaryComponent {
       //console.log("Mensaje SSE:", msg);
     });
 
+    this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
+
 
     this.templateSelected = localStorage.getItem('templateSelectedBlocks') === 'true' || false;
     if (this.templateSelected) {
@@ -83,12 +86,21 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
 
 
+    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '{}') : 50;
+    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '{}') : 50;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '{}') : 20;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '{}') : 20;
+
+    localStorage.setItem('isBlocks', "true");
+    localStorage.setItem('isGenetic', "false");
+
   }
 
   updateNumberOfQubits() {
     let qubits = parseInt((document.getElementById("numberOfQubits") as HTMLInputElement).value)
     this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits)
     this.pc.inputConfiguration.qubits = qubits
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   private findGate(e : any) : Gate | undefined {
@@ -109,6 +121,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     let gate = this.findGate(e)
     if (gate) 
       this.pc.inputConfiguration.blockCircuit.setStartGate(qubitIndex, columnIndex, gate)
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
@@ -119,10 +133,14 @@ export class BlocksComponent extends EvolutionaryComponent {
       else
         this.pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex] = gate
     }
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   updateNumberOfBlocks() {
     this.pc.inputConfiguration.blockCircuit.updateNumberOfBlocks(this.pc.inputConfiguration.outputs.filter(output => output).length)
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   override generateInitialPopulation() {
@@ -190,6 +208,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('probOf2QubitGatesBlocks', JSON.stringify(this.pc.probOf2QubitGates));
     localStorage.setItem('probOf3QubitGatesBlocks', JSON.stringify(this.pc.probOf3QubitGates));
     localStorage.setItem('probOfNQubitGatesBlocks', JSON.stringify(this.pc.probOfNQubitGates));
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
 
     this.updateOutputs();
     this.resetMatrix();
@@ -243,7 +262,41 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
+
+    if (this.validarInputPopSizeInit()) return true;
+    if (this.validarInputPopSizeMax()) return true;
+    if (this.validarInputError()) return true;
+    if (this.validarDatosInputThreshold()) return true;
+    if (this.validarDatosInputFitnessPercentage()) return true;
+    if (this.validarStartingColumns()) return true;
+    if (this.validarProbabilities()) return true;
+
     
+    return false;
+  }
+
+  validarInputPopSize() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.populationSize == null || config.populationSize < 2 || config.populationSize % 2 !== 0) return true;
+    if (config.maxPopulationSize == null || config.maxPopulationSize < 2 || config.maxPopulationSize % 2 !== 0) return true;
+    if (config.populationSize > config.maxPopulationSize) return true;
+    return false;
+  }
+
+  validarStartingColumns() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;
+    if (config.minNumberOfColumns > config.maxNumberOfColumns) return true;
+    return false;
+  }
+
+  validarProbabilities() : boolean {
+    const config = this.pc;
+    if (config.probOf1QubitGates == null || config.probOf1QubitGates < 0 || config.probOf1QubitGates > 100) return true;
+    if (config.probOf2QubitGates == null || config.probOf2QubitGates < 0 || config.probOf2QubitGates > 100) return true;
+    if (config.probOf3QubitGates == null || config.probOf3QubitGates < 0 || config.probOf3QubitGates > 100) return true;
+    if (config.probOfNQubitGates == null || config.probOfNQubitGates < 0 || config.probOfNQubitGates > 100) return true;
     return false;
   }
 

@@ -123,15 +123,15 @@
                     <div class="inline-config-row">
                         <div style="gap: 10px; margin: 10px;">
                             Starting columns: 
-                            <input style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
-                                        (change)="pc.inputConfiguration.blockCircuit.updateStartColumns()">
+                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
+                                (change)="pc.inputConfiguration.blockCircuit?.updateStartColumns?.()">
                             Number of blocks: 
-                            <input style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
                         
                             Number of columns in the block: between 
-                            <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
+                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
                             and 
-                            <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
+                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
                             <div class="table-wrapper">
@@ -150,12 +150,12 @@
                                                 <!-- <input size="3" type="text"
                                                 [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
                                                 (change)="setGate(qubitIndex, colIndex, $event)"> -->
-                                                <select [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name" 
+                                                <select [disabled]="running" 
                                                 (ngModelChange)="setGate(qubitIndex, colIndex, $event)">
+                                                    <option selectedGate="gateX">X</option>
                                                     <option selectedGate="gateRX">RX</option>
                                                     <option selectedGate="gateRZ">RZ</option>
-                                                    <option selectedGate="gateX">X</option>
-                                                    <option selectedGate="gateI">Identity</option>
+                                                    <option selectedGate="gateI">I</option>
                                                     <option selectedGate="gateRY">RY</option>
                                                     <option selectedGate="gateZ">Z</option>
                                                     <option selectedGate="gateH">H</option>
@@ -191,6 +191,7 @@
                                     <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
                                     <small style="margin-right: 5px;">Left</small>
                                     <input type="number" min="0" step="1" size="2"
+                                        [disabled]="running"
                                         [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
                                         (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)">
                                     </th>
@@ -198,6 +199,7 @@
                                     <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
                                     <small style="margin-right: 5px;">Right</small>
                                     <input type="number" min="0" step="1" size="2"
+                                        [disabled]="running"
                                         [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
                                         (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)">
                                     </th>
@@ -208,12 +210,12 @@
                                             <!-- <input type="text" size="2"
                                             [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
                                             (change)="setBlockGate('left', columnIndex, qubitIndex, $event)"> -->
-                                            <select [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name" 
+                                            <select [disabled]="running"
                                             (ngModelChange)="setBlockGate('left', columnIndex, qubitIndex, $event)">
                                                 <option selectedGate="gateRX">RX</option>
                                                 <option selectedGate="gateRZ">RZ</option>
                                                 <option selectedGate="gateX">X</option>
-                                                <option selectedGate="gateI">Identity</option>
+                                                <option selectedGate="gateI">I</option>
                                                 <option selectedGate="gateRY">RY</option>
                                                 <option selectedGate="gateZ">Z</option>
                                                 <option selectedGate="gateH">H</option>
@@ -232,12 +234,12 @@
                                         <!-- <input type="text" size="2"
                                         [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
                                         (change)="setBlockGate('right', columnIndex, qubitIndex, $event)"> -->
-                                        <select [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name" 
+                                        <select [disabled]="running"
                                         (ngModelChange)="setBlockGate('right', columnIndex, qubitIndex, $event)">
                                             <option selectedGate="gateRX">RX</option>
                                             <option selectedGate="gateRZ">RZ</option>
                                             <option selectedGate="gateX">X</option>
-                                            <option selectedGate="gateI">Identity</option>
+                                            <option selectedGate="gateI">I</option>
                                             <option selectedGate="gateRY">RY</option>
                                             <option selectedGate="gateZ">Z</option>
                                             <option selectedGate="gateH">H</option>
@@ -334,8 +336,8 @@
 
                                             <div style="display: flex; gap: 8px;">
                                                 <label>falls of the </label>
-                                                <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><label>best fitness</label>
-                                                <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><label>mean fitness</label>
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><label>best fitness</label>
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><label>mean fitness</label>
                                             </div>
                                         </div>
 

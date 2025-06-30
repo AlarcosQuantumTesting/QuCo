@@ -971,7 +971,7 @@ ol.list-instructions {
 
 
 .btn-reset {
-    padding-bottom: 10px;
+    /* padding-bottom: 10px; */
     padding-top: 3px;
     background: none;
     color: #0b555a;
@@ -979,6 +979,7 @@ ol.list-instructions {
     font-size: 18px;
     border: none;
   }
+
 
 .btn-reset:hover {
     background: none;

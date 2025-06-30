@@ -44,6 +44,9 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit () {
 
+    localStorage.setItem('isBlocks', "false");
+    localStorage.setItem('isGenetic', "true");
+
     this.selectedRemoteFitnessers = JSON.parse(localStorage.getItem('selectedRemoteFitnessers') || '[]');
 
     this.loadStrategies();
@@ -103,8 +106,8 @@ export class ElongingComponent extends EvolutionaryComponent {
         config.qubits = conf.qubits;
         config.populationSize = conf.populationSize;
         config.maxPopulationSize = conf.maxPopulationSize;
-        config.minNumberOfColumns = conf.minNumberOfColumns;
-        config.maxNumberOfColumns = conf.maxNumberOfColumns;
+        config.minNumberOfColumns = 4;
+        config.maxNumberOfColumns = 20;
         config.deleteFiles = conf.deleteFiles;
         config.shots = conf.shots;
         config.outputs = conf.outputs;
