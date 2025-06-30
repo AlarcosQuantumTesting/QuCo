@@ -28,9 +28,9 @@ td {
   font-weight: bold;
 }
 
-.conflict {
+/* .conflict {
   background-color: red !important;
-}
+} */
 
 .header {
   background-color: #ddd;
@@ -50,4 +50,167 @@ td {
 input[type="text"] {
   width: 100%;
   max-width: 400px; /* Ajusta según prefieras */
+}
+
+
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.mensaje-temporal {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s;
+    opacity: 0.9;
+    z-index: 9999;
+}
+
+div.titulo {
+    display: flex;
+    margin: 0;
+    margin-top: -20px;
+}
+
+h1 {
+    display: inline-block;
+    background-color: #008f99;
+    color: white;
+    font-family: 'Georgia', serif;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    position: relative;
+    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #0b555a;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 23px;
+}
+
+h3 {
+    color: #14645b;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+.qubits-configuration {
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.controls-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.controls-inline label {
+  margin-right: 0.25rem;
+  font-weight: 500;
+}
+
+.controls-inline input,
+.controls-inline select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* .controls-inline button {
+    background-color: #286c98;
+    color: white;
+    border: none;
+    padding: 2px 15px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+button:hover {
+    background-color: #2980b9;
+} */
+
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.controls-inline button[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: rgb(111, 21, 21);
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.qubits-table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+  /* width: 100%; */
+  text-align: center;
+}
+
+.qubits-table th,
+.qubits-table td {
+  border: 1px solid #ccc;
+  padding: 3px;
+}
+
+.header {
+  /* background-color: #f0f0f0; */
+  background-color: #4377611c;
+}
+
+.x-cell {
+  background-color: #0b555a;
+  color: white;
+  font-weight: bold;
+}
+
+.conflict {
+  background-color: #c21717;
 }

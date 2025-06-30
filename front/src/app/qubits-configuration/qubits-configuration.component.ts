@@ -13,6 +13,8 @@ export class QubitsConfigurationComponent {
   qubitsConfiguration : QubitsConfiguration = new QubitsConfiguration();
   error? : any
 
+  mensajeTemporal: string = '';
+
   constructor(private qubitsConfigurationService: QubitsConfigurationService) { 
     this.error = undefined
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(

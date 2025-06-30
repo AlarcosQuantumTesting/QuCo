@@ -1,5 +1,66 @@
-<div class="qubits-configuration">
-  <h2>Qubits configuration</h2>
+<body>
+    <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+      {{ mensajeTemporal }}
+    </div>
+
+    <div class="titulo">
+      <h1>Qubits configuration</h1>
+    </div>
+
+    <div class="qubits-configuration">
+
+      <div class="controls-inline">
+        <label>Existing configurations:</label>
+        <select [(ngModel)]="selectedQubitsConfigurationName" (ngModelChange)="onQubitsConfigurationChange($event)">
+          <option [ngValue]="null" disabled selected>Select a configuration</option>
+          <option *ngFor="let cfgName of existingConfigurationNames" [ngValue]="cfgName">{{ cfgName }}</option>
+        </select>
+
+        <label for="name">Name:</label>
+        <input id="name" type="text" [(ngModel)]="qubitsConfiguration.name"/>
+
+        <label for="qubits">Qubits:</label>
+        <input id="qubits" type="number" min="2" max="200" [(ngModel)]="qubitsConfiguration.qubits" (change)="qubitsConfiguration.updateQubits()" />
+
+        <button  class="btn primary" (click)="randomize()">Randomize</button>
+        <button (click)="saveQubitsConf()" [disabled]="!qubitsConfiguration.name">Save</button>
+      </div>
+
+      <div *ngIf="error" class="error">{{ error }}</div>
+
+      <table class="qubits-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th [attr.colspan]="qubitsConfiguration.qubits" class="header">
+              <small>Physical qubit</small>
+            </th>
+          </tr>
+          <tr>
+            <th></th>
+            <th *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" class="header">
+              q<sub>{{ colIndex }}</sub>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
+            <th class="header">q<sub>{{ rowIndex }}</sub></th>
+            <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
+                (click)="moveX(rowIndex, colIndex)"
+                [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
+                [class.conflict]="isConflict(colIndex)">
+              <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+</body>
+
+<!-- <div class="qubits-configuration">
+ <h2>Qubits configuration</h2>
 
   <div class="controls-container">
     Existing configurations: 
@@ -52,4 +113,4 @@
     </tbody>
   </table>
   
-</div>
+</div> -->
