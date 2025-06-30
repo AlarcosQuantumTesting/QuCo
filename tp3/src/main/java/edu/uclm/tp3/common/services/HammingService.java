@@ -1,7 +1,6 @@
 package edu.uclm.tp3.common.services;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,12 +30,7 @@ public class HammingService {
 
 
 		List<Pair> pairs = expectedFrequencies.getPairs();
-		/*pairs.sort(new Comparator<Pair>() {
-			@Override
-			public int compare(Pair o1, Pair o2) {
-				return o1.compareTo(o2);
-			}
-		});*/
+		int numberOfPairs = pairs.size();
 
 		List<MixedCombination> ternas = new ArrayList<>();
 		for (int i = 0; i < pairs.size(); i++) {
@@ -68,12 +62,18 @@ public class HammingService {
 
 		this.sort(ternas);
 
-		List<QCircuit> qCircuits = new ArrayList<>();
+		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 		StringBuilder code = new StringBuilder();
+		List<Integer> values = new ArrayList<>();
 		for (MixedCombination terna : ternas) {
-			qCircuits.add(terna.getCircuit());
+			QCircuit circuit = terna.getCircuit();
+			Map<String, Object> cleanCircuit = circuit.clean(qubits, functionPrefix);
+			partialCircuits.add(cleanCircuit);
 			code.append(terna.getCode());
+			values.add(terna.values.size());
 		}
+
+		String diceCircuit = this.getDice(numberOfPairs);
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("#QUBITS#", qubits);
@@ -84,8 +84,18 @@ public class HammingService {
 		result.put("#INITIALIZE#", code);
 		result.put("#EXPECTED#", sbExpected.toString());
 		result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, qubits)");
-		result.put("QUIRK", qCircuits);
+		result.put("QUIRK", partialCircuits);
 		return result;
+	}
+
+	private String getDice(int functions) {
+		int bits = Integer.SIZE - Integer.numberOfLeadingZeros(functions);
+		StringBuilder sb = new StringBuilder("def getDice() :\n");
+		sb.append("\tU = QuantumCircuit(" + bits + ")\n");
+		sb.append("\tfor i in range (" + bits + ") :\n");
+		sb.append("\t\tU.h(i)\n");
+		sb.append("\treturn U\n");
+		return sb.toString();
 	}
 
 	private boolean simplify(List<MixedCombination> ternas) {

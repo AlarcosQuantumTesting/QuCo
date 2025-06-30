@@ -87,7 +87,7 @@ public class MixedCombination {
             if (i<this.values.size()-1)
                 sb.append("_");
         }
-        sb.append("() :\n");
+        sb.append("() : # " + this.values.size() + " values\n");
         sb.append("\tU = QuantumCircuit(" + this.qubits + ")\n");
         for (int i=0; i<unified.length(); i++)
             if (unified.charAt(i)=='1')

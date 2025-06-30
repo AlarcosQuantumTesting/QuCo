@@ -1712,5 +1712,25 @@ export class DeterministicComponent extends GroverStyle {
     return false;
   }
 
+  // Lo meto para paginación de la tabla
+  pageIndex = 0;
 
+  get pageCount(): number {
+    return Math.ceil(this.expectedFrequencies.rows / this.maxRows);
+  }
+
+  get currentOffset(): number {
+    return this.pageIndex * this.maxRows;
+  }
+
+  createArray(length: number): number[] {
+    return Array.from({ length }, (_, i) => i);
+  }  
+
+  pageInput = 1;
+
+  goToPage(): void {
+    const target = Math.max(1, Math.min(this.pageInput, this.pageCount));
+    this.pageIndex = target - 1;
+  }
 }

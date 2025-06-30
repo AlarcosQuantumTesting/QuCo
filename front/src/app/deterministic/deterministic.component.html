@@ -47,7 +47,7 @@
                   <option value="grover">Grover</option>
                   <option value="grenoble">Grenoble</option>
                   <option value="originalGR">Original Grover & Rudolph</option>
-                  <option value="hamming">Hamming</option>
+                  <option value="hamming">Hamming (this algorithm is under development and test)</option>
                 </select>              
               </div>
               
@@ -69,38 +69,6 @@
   <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative;">
     <div style="display: flex; align-items: center;">
       <h2 *ngIf="mostrarTabla" style="margin-top: 10px;">Table</h2>
-      <!-- <div style="position: relative;">
-        <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
-          <i class="fa fa-edit"></i>
-        </button>
-
-        <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute;margin-left: 10px; z-index: 100;">    
-          <div *ngIf="isGroverOption()">
-              <p class="radioTitle">Use:</p>
-              <label class="custom-radio">
-              <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">MCX
-              </label>
-              <label class="custom-radio">
-              <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">H-MCZ-H
-              </label>
-          </div>
-
-          <div>
-            <p class="radioTitle">Available templates:</p>
-            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGroverOption()">
-              <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
-                {{ template.fileName }}
-              </option>
-            </select> 
-        
-            <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGroverOption()">
-              <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
-                {{ template.fileName }}
-              </option>
-            </select> 
-          </div>
-        </div>
-      </div> -->
     </div>
   </div>
 
@@ -109,7 +77,6 @@
         <div class="table-container" *ngIf="mostrarTabla">
           <table border="1">
             <tr>
-
               <th colspan="5" class="config-cell">
                 <div class="config-container">
                   <div class="config-item checkbox" style="margin-bottom: 5px;">
@@ -164,6 +131,20 @@
                 <small>
                   ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
                 </small>
+                <!-- Paginación -->
+                <div style="text-align: center; margin: 1em 0;">
+                  <button (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0">Anterior</button>
+                  <span>Página {{ pageIndex + 1 }} de {{ pageCount }}</span>
+                  <button (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">Siguiente</button>
+                </div>
+                <div style="text-align: center; margin-top: 0.5em;">
+                  <label>
+                    Ir a página:
+                    <input type="number" [min]="1" [max]="pageCount" [(ngModel)]="pageInput">
+                  </label>
+                  <button (click)="goToPage()">Ir</button>
+                </div>
+                <!-- Fin de paginación -->
               </th>
               <th colspan="3">
                 <div class="header-with-button">
@@ -250,30 +231,34 @@
                 </div>
 
                 <div class="prob-controls">
-                  
                 </div>
-              </th>
-              
+              </th> 
             </tr>
-            <tr *ngFor="let i of [].constructor(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index" align="center"
-            [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(rowIndex) === 1"
-            [class.grover-row]="isGroverOption()" (click)="changeRowValue(rowIndex, $event)">
+            <!-- La tr de aquí abajo se ha cambiado para la paginación -->
+            <tr *ngFor="let i of createArray(maxRows); let rowIndex = index" 
+                align="center"
+                [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(currentOffset + rowIndex) === 1"
+                [class.grover-row]="isGroverOption()"
+                (click)="changeRowValue(currentOffset + rowIndex, $event)"> 
               <td>
-                {{ rowIndex }}
-                <sub>{{ rowIndex.toString(2).padStart(qubits, '0') }}</sub>
+                {{ currentOffset + rowIndex }}
+                <sub>{{ (currentOffset + rowIndex).toString(2).padStart(qubits, '0') }}</sub>
               </td>
               <td>
-                <input *ngIf="!isGroverOption()" type="number" min="0" step="1" [ngModel]="expectedFrequencies.getFreq(rowIndex)" (change)="setFreq($event, rowIndex)">
-                <label class="label-number" *ngIf="isGroverOption()"> {{expectedFrequencies.getFreq(rowIndex)}} </label>
+                <input *ngIf="!isGroverOption()" type="number" min="0" step="1"
+                      [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
+                      (change)="setFreq($event, currentOffset + rowIndex)">
+                <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset + rowIndex) }} </label>
               </td>
               <td *ngIf="!isGroverOption()">
-                <span>{{ expectedFrequencies.getRelativeFreq(rowIndex, 2) }}%</span>
+                <span>{{ expectedFrequencies.getRelativeFreq(currentOffset + rowIndex, 2) }}%</span>
               </td>
               <td *ngIf="isGroverOption()">
-                <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 1">true</span>
-                <span *ngIf="expectedFrequencies.getFreq(rowIndex) === 0">false</span>
+                <span *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
+                <span *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
               </td>
             </tr>
+
           </table>
         </div>
     </div>
