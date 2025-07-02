@@ -8,6 +8,8 @@ import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
 import { BlockCircuit } from './BlockCircuit';
+import { Backend } from '../deterministic/Backend';
+import { TranspileService } from '../transpile.service';
 
 Chart.register(...registerables)
 
@@ -28,9 +30,16 @@ export class BlocksComponent extends EvolutionaryComponent {
   isNone: boolean = true;
   isRandom: boolean = false;
   selectedOptionFreq: string = 'none';
-  selectedGate: String = 'X';
+  selectedGate: String = 'gateH';
 
-  constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService) {
+  modalTranspile: boolean = false;
+  transpiledCode: string = '';
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
+  circuitName: string = '';
+
+  constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
+    public transpileService: TranspileService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
     this.pc.inputConfiguration.maxNumberOfColumns = 3
@@ -61,6 +70,14 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
 
+
+     this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
+    });
+
+
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.templateSelected = localStorage.getItem('templateSelectedBlocks') === 'true' || false;
     if (this.templateSelected) {
@@ -375,6 +392,45 @@ export class BlocksComponent extends EvolutionaryComponent {
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  transpileCodigo() {
+    this.modalTranspile = true;
+  }
+  
+  selectBackend(backend: Backend) {
+    this.selectedBackends.push(backend);
+    this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+  
+  deselectBackend(backend: Backend) {
+    this.availableBackends.push(backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+  
+  transpile() {
+    try{
+      const backendsToTranspile = this.selectedBackends.map(b => b.name);
+      this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
+        this.transpiledCode = result;
+      });
+      this.mensajeTemporal = 'The code will be transpiled.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }
+      , 2000);
+    } catch (error) {
+      console.error('Error during transpilation:', error);
+      this.mensajeTemporal = 'Error during transpilation. Please try again.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+    }
+      
   }
 
 }

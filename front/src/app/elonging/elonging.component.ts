@@ -7,6 +7,8 @@ import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
 import { CanComponentDeactivate } from '../CanComponentDeactivate';
+import { Backend } from '../deterministic/Backend';
+import { TranspileService } from '../transpile.service';
 
 
 
@@ -21,7 +23,13 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   message: string | null = null;
 
-  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService) {
+  modalTranspile: boolean = false;
+  transpiledCode: string = '';
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
+
+  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
+     public transpileService: TranspileService) {
     super(evolutionaryService, "elonging")
   }
 
@@ -46,6 +54,14 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     localStorage.setItem('isBlocks', "false");
     localStorage.setItem('isGenetic', "true");
+
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
+    });
+
+
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.selectedRemoteFitnessers = JSON.parse(localStorage.getItem('selectedRemoteFitnessers') || '[]');
 
@@ -180,6 +196,8 @@ export class ElongingComponent extends EvolutionaryComponent {
   templateSelected: boolean = false;
   generateClicked: boolean = false;
   //qucoConfiguration: any;
+
+  circuitName: string = '';
   
 
   override generateInitialPopulation() {
@@ -457,5 +475,45 @@ export class ElongingComponent extends EvolutionaryComponent {
       console.error('Error al copiar el código:', err);
     });
   }
+
+  transpileCodigo() {
+      this.modalTranspile = true;
+    }
+  
+    selectBackend(backend: Backend) {
+      this.selectedBackends.push(backend);
+      this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+      localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+      localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+    }
+  
+    deselectBackend(backend: Backend) {
+      this.availableBackends.push(backend);
+      this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+      localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+      localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+    }
+  
+    transpile() {
+      try{
+        const backendsToTranspile = this.selectedBackends.map(b => b.name);
+        this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
+          this.transpiledCode = result;
+        });
+        this.mensajeTemporal = 'The code will be transpiled.';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }
+        , 2000);
+      } catch (error) {
+        console.error('Error during transpilation:', error);
+        this.mensajeTemporal = 'Error during transpilation. Please try again.';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+      }
+      
+    }
+  
 
 }
