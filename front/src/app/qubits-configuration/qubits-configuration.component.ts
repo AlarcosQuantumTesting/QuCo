@@ -228,4 +228,9 @@ export class QubitsConfigurationComponent {
     this.searchQuery = '';
   }
 
+  canEdit(): boolean {
+  return this.editingConfig || !this.isConfigSelected;
+  }
+
+
 }

@@ -493,3 +493,7 @@ p {
 .edit-button-container {
   position: relative;
 }
+
+.noteditable :hover{
+  cursor: not-allowed;
+}

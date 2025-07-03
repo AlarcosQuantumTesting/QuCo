@@ -130,13 +130,14 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
+                  <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index" [class.noteditable]="!canEdit()">
                     <th class="header">q<sub>{{ rowIndex }}</sub></th>
                     <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
-                        (click)="moveX(rowIndex, colIndex)"
+                        (click)="canEdit() && moveX(rowIndex, colIndex)"
                         [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
-                        [class.conflict]="isConflict(colIndex)">
-                      <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
+                        [class.conflict]="isConflict(colIndex)"
+                        [class.noteditable]="!canEdit()">
+                      <span [class.noteditable]="!canEdit()" *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
                     </td>
                   </tr>
                 </tbody>
