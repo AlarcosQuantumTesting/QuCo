@@ -87,7 +87,7 @@
                 [disabled]="!qubitsConfiguration.name || qubitsConfiguration.qubits < 2 || qubitsConfiguration.qubits > 200 || isConflictMatrix()"
                 (ngModelChange)="onNameChange(qubitsConfiguration.name)"
                 (click)="saveQubitsConf()">
-                  Create
+                  Save
               </button>
               <button 
                 class="btn-confirm" 
@@ -113,34 +113,35 @@
                 <span *ngIf="isConfigSelected && !editingConfig">{{ qubitsConfiguration.qubits }}</span>
               </div>
             </div>
-
-            <table class="qubits-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th [attr.colspan]="qubitsConfiguration.qubits" class="header">
-                    <small>Physical qubit</small>
-                  </th>
-                </tr>
-                <tr>
-                  <th></th>
-                  <th *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" class="header">
-                    q<sub>{{ colIndex }}</sub>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
-                  <th class="header">q<sub>{{ rowIndex }}</sub></th>
-                  <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
-                      (click)="moveX(rowIndex, colIndex)"
-                      [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
-                      [class.conflict]="isConflict(colIndex)">
-                    <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="qubits-table-container">
+              <table class="qubits-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th [attr.colspan]="qubitsConfiguration.qubits" class="header">
+                      <small>Physical qubit</small>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" class="header">
+                      q<sub>{{ colIndex }}</sub>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
+                    <th class="header">q<sub>{{ rowIndex }}</sub></th>
+                    <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
+                        (click)="moveX(rowIndex, colIndex)"
+                        [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
+                        [class.conflict]="isConflict(colIndex)">
+                      <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div *ngIf="error" class="error">{{ error }}</div>        
     </div>

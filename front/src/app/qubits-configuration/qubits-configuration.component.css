@@ -185,12 +185,25 @@ button:hover {
   margin-top: 0.5rem;
 }
 
+.qubits-table-container {
+  max-height: 600px;
+  max-width: 100%;
+  overflow: auto;
+  margin-top: 15px;
+}
+
 .qubits-table {
   border-collapse: collapse;
-  margin-top: 1rem;
-  /* width: 100%; */
   text-align: center;
+  margin-top: 15px;
 }
+
+
+/* .qubits-table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+  text-align: center;
+} */
 
 .qubits-table th,
 .qubits-table td {
