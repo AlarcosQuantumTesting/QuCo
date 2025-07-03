@@ -7,7 +7,145 @@
       <h1>Qubits configuration</h1>
     </div>
 
-    <div class="qubits-configuration">
+    <div class="container search-container">
+        <div class="form-row">
+            <div class="section buildText">
+                <p>
+                    In this section you can see all the qubits configurations stored in the system.
+                    
+                    You can also create your own configurations and save them for later use.
+                    <br>
+                    You can select a qubits configuration from the list and its specifications will be shown below.
+                </p>
+            </div>
+            <div class="section inputsContainer">
+                <div class="input-group">
+                    <label>Existing configurations:</label>
+
+                    <input type="text"
+                        [(ngModel)]="searchQuery"
+                        (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)"
+                        (focus)="onFocusInput()"
+                        placeholder="Search for a configuration..."
+                        list="configList">
+            
+                    <datalist id="configList">
+                        <option class="configOpt" *ngFor="let cfgName of existingConfigurationNames" [ngValue]="cfgName">{{ cfgName }}</option>
+                    </datalist>
+
+                    <div>
+                        <button class="btn-search" style="margin-top: 20px;" (click)="searchConfig()">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button  class="btn primary" (click)="randomize()">Randomize</button>
+                    <button  class="btn primary" (click)="newConfig()">New configuration</button>
+                    <!-- <button (click)="saveQubitsConf()" [disabled]="!qubitsConfiguration.name">Save</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="template-details">
+        <!-- <div style="display: flex; align-items: center; justify-content: center;">
+            <h2 *ngIf="!editingConfig" style="margin-top: 10px;">Configuration</h2>
+            <div style="position: relative;">
+                <button *ngIf="isConfigSelected && !editingConfig" class="editTemp-button" title="Edit template" (click)="editConfiguration()">
+                  <i class="fa fa-edit"></i>
+                </button>
+            </div>
+        </div> -->
+        <div class="template-header">
+            <h2 class="config-title" style="margin-top: 25px;">
+            Configuration
+            <div *ngIf="isConfigSelected && !editingConfig" class="edit-button-container">
+              <button class="editTemp-button" title="Edit template" (click)="editConfiguration()">
+                <i class="fa fa-edit"></i>
+              </button>
+            </div>
+          </h2>
+
+            
+          <div class="template-buttons">
+              <button *ngIf="editingConfig && isConfigSelected" class="btn-cancel" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
+              <!-- <button 
+                class="btn-confirm" 
+                title="Save or Create template"
+                [disabled]="!qubitsConfiguration.name || qubitsConfiguration.qubits < 2 || qubitsConfiguration.qubits > 200"
+                (ngModelChange)="onNameChange(qubitsConfiguration.name)"
+                (click)="configExists() ? updateConfig() : saveQubitsConf()">
+                {{ configExists() ? 'Update' : 'Create' }}
+              </button> -->
+              <button 
+                class="btn-confirm" 
+                title="Save configuration"
+                *ngIf="!configExists() || !isConfigSelected"
+                [disabled]="!qubitsConfiguration.name || qubitsConfiguration.qubits < 2 || qubitsConfiguration.qubits > 200 || isConflictMatrix()"
+                (ngModelChange)="onNameChange(qubitsConfiguration.name)"
+                (click)="saveQubitsConf()">
+                  Create
+              </button>
+              <button 
+                class="btn-confirm" 
+                title="Update configuration"
+                *ngIf="configExists() && editingConfig && isConfigSelected"
+                [disabled]="!qubitsConfiguration.name || qubitsConfiguration.qubits < 2 || qubitsConfiguration.qubits > 200 || isConflictMatrix()"
+                (ngModelChange)="onNameChange(qubitsConfiguration.name)"
+                (click)="updateConfig()">
+                  Update
+              </button>
+            </div>
+        </div>
+        <div class="template-info">
+            <div class="name-description">
+              <div class="info-block">
+                <label for="name">Name:</label>
+                <input *ngIf="!isConfigSelected || editingConfig" id="name" type="text" [(ngModel)]="qubitsConfiguration.name"  placeholder="Write a configuration name..."/>
+                <span *ngIf="isConfigSelected && !editingConfig">{{ qubitsConfiguration.name }}</span>
+              </div>
+              <div class="info-block">
+                <label for="qubits">Qubits:</label>
+                <input *ngIf="!isConfigSelected || editingConfig" id="qubits" type="number" min="2" max="200" [(ngModel)]="qubitsConfiguration.qubits" (change)="qubitsConfiguration.updateQubits()" />
+                <span *ngIf="isConfigSelected && !editingConfig">{{ qubitsConfiguration.qubits }}</span>
+              </div>
+            </div>
+
+            <table class="qubits-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th [attr.colspan]="qubitsConfiguration.qubits" class="header">
+                    <small>Physical qubit</small>
+                  </th>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" class="header">
+                    q<sub>{{ colIndex }}</sub>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of [].constructor(qubitsConfiguration.qubits); let rowIndex = index">
+                  <th class="header">q<sub>{{ rowIndex }}</sub></th>
+                  <td *ngFor="let col of [].constructor(qubitsConfiguration.qubits); let colIndex = index" 
+                      (click)="moveX(rowIndex, colIndex)"
+                      [class.x-cell]="qubitsConfiguration.matrix[rowIndex] === colIndex"
+                      [class.conflict]="isConflict(colIndex)">
+                    <span *ngIf="qubitsConfiguration.matrix[rowIndex] === colIndex">X</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="error" class="error">{{ error }}</div>        
+    </div>
+
+    <!-- <div class="qubits-configuration">
 
       <div class="controls-inline">
         <label>Existing configurations:</label>
@@ -17,10 +155,12 @@
         </select>
 
         <label for="name">Name:</label>
-        <input id="name" type="text" [(ngModel)]="qubitsConfiguration.name"/>
+        <input *ngIf="!isConfigSelected" id="name" type="text" [(ngModel)]="qubitsConfiguration.name"  placeholder="Write a configuration name..."/>
+        <span *ngIf="isConfigSelected">{{ qubitsConfiguration.name }}</span>
 
         <label for="qubits">Qubits:</label>
-        <input id="qubits" type="number" min="2" max="200" [(ngModel)]="qubitsConfiguration.qubits" (change)="qubitsConfiguration.updateQubits()" />
+        <input *ngIf="!isConfigSelected" id="qubits" type="number" min="2" max="200" [(ngModel)]="qubitsConfiguration.qubits" (change)="qubitsConfiguration.updateQubits()" />
+        <span *ngIf="isConfigSelected">{{ qubitsConfiguration.qubits }}</span>
 
         <button  class="btn primary" (click)="randomize()">Randomize</button>
         <button (click)="saveQubitsConf()" [disabled]="!qubitsConfiguration.name">Save</button>
@@ -55,7 +195,7 @@
           </tr>
         </tbody>
       </table>
-    </div>
+    </div> -->
 
 </body>
 
