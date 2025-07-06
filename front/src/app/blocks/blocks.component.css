@@ -1412,3 +1412,8 @@ input[type="checkbox"] {
   .config-item.buttons button:hover {
     background-color: #005f99;
   }
+
+
+.solutionFound:hover {
+  cursor: pointer;
+}

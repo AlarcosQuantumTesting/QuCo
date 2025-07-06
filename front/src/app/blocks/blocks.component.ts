@@ -10,6 +10,7 @@ import { NotificationService } from '../notification.service';
 import { BlockCircuit } from './BlockCircuit';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { BlockColumn } from './BlockColumn';
 
 Chart.register(...registerables)
 
@@ -30,13 +31,16 @@ export class BlocksComponent extends EvolutionaryComponent {
   isNone: boolean = true;
   isRandom: boolean = false;
   selectedOptionFreq: string = 'none';
-  selectedGate: String = 'gateH';
+  selectedGate: String = 'H';
 
   modalTranspile: boolean = false;
   transpiledCode: string = '';
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
   circuitName: string = '';
+  availableGates: string[] = ['X', 'RX', 'RZ', 'Identity', 'RY', 'Z', 'H', 'S', 'Y', 'P', 'T', 'U', 'TDG', 'SDG'];
+  startingColumns : BlockColumn[] = [];
+
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
     public transpileService: TranspileService) {
@@ -68,12 +72,22 @@ export class BlocksComponent extends EvolutionaryComponent {
       //console.log("Mensaje SSE:", msg);
     });
 
+    //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits, this.pc.inputConfiguration.blockCircuit?.numberOfStartColumns || 2);
     this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
 
 
-     this.transpileService.getBackends().subscribe(backends => {
+
+    this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
     });
+
+    for (let i = 0; i < this.pc.inputConfiguration.blockCircuit.startingColumns.length; i++) {
+      for (let j = 0; j < this.pc.inputConfiguration.qubits; j++) {
+        if (!this.pc.inputConfiguration.blockCircuit.startingColumns[i].gates[j]) {
+          this.pc.inputConfiguration.blockCircuit.startingColumns[i].gates[j] = new Gate("H", false, 1);
+        }
+      }
+    }
 
 
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
@@ -136,8 +150,10 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   setGate(qubitIndex : number, columnIndex : number, e : any) {
     let gate = this.findGate(e)
+    console.log("Setting gate", gate, "for qubit", qubitIndex, "in column", columnIndex)
     if (gate) 
-      this.pc.inputConfiguration.blockCircuit.setStartGate(qubitIndex, columnIndex, gate)
+      //this.pc.inputConfiguration.blockCircuit.setStartGate(qubitIndex, columnIndex, gate)
+      this.pc.inputConfiguration.blockCircuit.startingColumns[columnIndex].gates[qubitIndex] = gate
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
@@ -430,7 +446,42 @@ export class BlocksComponent extends EvolutionaryComponent {
         this.mensajeTemporal = '';
       }, 2000);
     }
-      
   }
+
+  deleteLocal() {
+    localStorage.removeItem("qucoConfigurationBlocks");
+    this.reload();
+  }
+
+  updateColumnsFromInput() {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+
+    // Asegúrate de tener acceso a qubits y número de columnas deseado
+    const qubits = blockCircuit.qubits;
+    const targetColumns = blockCircuit.numberOfStartColumns;
+
+    // Si hay menos columnas de las que se quiere, añade nuevas
+    while (blockCircuit.startingColumns.length < targetColumns) {
+      const index = blockCircuit.startingColumns.length;
+      const newColumn = new BlockColumn(qubits);
+
+      // Asigna puertas según la posición (opcionalmente puedes personalizar)
+      if (index %2 === 0) newColumn.setGates(new Array(qubits).fill("X"));
+      else if (index === 1) newColumn.setGates(new Array(qubits).fill("H"));
+      else newColumn.setGates(new Array(qubits).fill("H"));
+
+      blockCircuit.startingColumns.push(newColumn);
+    }
+
+    // Si hay más columnas de las que se quiere, elimina del final
+    while (blockCircuit.startingColumns.length > targetColumns) {
+      blockCircuit.startingColumns.pop();
+    }
+
+    // Guarda en localStorage (opcional)
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+  }
+
+
 
 }
