@@ -134,87 +134,91 @@
                             <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
-                            <div class="table-wrapper">
-                                <table class="styled-table">
+                            <div class="table-scroll-wrapper">
+                                <div class="table-wrapper">
+                                    <table class="styled-table">
+                                        <tr>
+                                            <th style="background-color: #0b555a; color: white;" 
+                                            [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                                            Circuit view
+                                            </th>
+                                        </tr>
+                                        <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
+                                            <th><strong>q<sub>{{ qubitIndex }}</sub></strong></th>
+                                            <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
+                                                <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
+                                                    <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
+                                                            (change)="setGate(qubitIndex, colIndex, $event)">
+                                                        <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
+                                                    </select>
+
+                                                </ng-container>
+                                            </td>
+                                            <ng-container *ngIf="qubitIndex == 0">
+                                                <th *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfBlocks)" class="block-header"
+                                                    [rowSpan]="pc.inputConfiguration.qubits">
+                                                    Block
+                                                </th>
+                                            </ng-container>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="table-scroll-wrapper">
+                                <div class="table-wrapper">
+                                    <table class="styled-table">
                                     <tr>
-                                        <th style="background-color: #0b555a; color: white;" 
-                                        [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
-                                        Circuit view
+                                        <th style="background-color: #0b555a; color: white;"
+                                        [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns + pc.inputConfiguration.blockCircuit.block.numberOfRightColumns + 1)">
+                                        Block description
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
+                                        <small style="margin-right: 5px;">Left</small>
+                                        <!-- <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
+                                            (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)"> -->
+                                        <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
+                                            (change)="updateColumnsFromInputLeft('left')">
+                                        </th>
+                                        <th [rowSpan]="pc.inputConfiguration.qubits + 1" class="block-header-center">U</th>
+                                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
+                                        <small style="margin-right: 5px;">Right</small>
+                                        <!-- <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
+                                            (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)"> -->
+                                        <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
+                                            (change)="updateColumnsFromInputRight('right')">
                                         </th>
                                     </tr>
                                     <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                                        <th><strong>q<sub>{{ qubitIndex }}</sub></strong></th>
-                                        <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
-                                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
-                                                <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
-                                                        (change)="setGate(qubitIndex, colIndex, $event)">
+                                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
+                                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
+                                                <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
+                                                        (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
                                                     <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
                                                 </select>
-
                                             </ng-container>
                                         </td>
-                                        <ng-container *ngIf="qubitIndex == 0">
-                                            <th *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfBlocks)" class="block-header"
-                                                [rowSpan]="pc.inputConfiguration.qubits">
-                                                Block
-                                            </th>
+                                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
+                                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
+                                                <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
+                                                        (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
+                                                    <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
+                                                </select>
                                         </ng-container>
+                                        </td>
                                     </tr>
-                                </table>
-                            </div>
-
-                            <div class="table-wrapper">
-                                <table class="styled-table">
-                                <tr>
-                                    <th style="background-color: #0b555a; color: white;"
-                                    [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns + pc.inputConfiguration.blockCircuit.block.numberOfRightColumns + 1)">
-                                    Block description
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
-                                    <small style="margin-right: 5px;">Left</small>
-                                    <!-- <input type="number" min="0" step="1" size="2"
-                                        [disabled]="running"
-                                        [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
-                                        (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)"> -->
-                                    <input type="number" min="0" step="1" size="2"
-                                        [disabled]="running"
-                                        [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
-                                        (change)="updateColumnsFromInputLeft('left')">
-                                    </th>
-                                    <th [rowSpan]="pc.inputConfiguration.qubits + 1" class="block-header-center">U</th>
-                                    <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
-                                    <small style="margin-right: 5px;">Right</small>
-                                    <!-- <input type="number" min="0" step="1" size="2"
-                                        [disabled]="running"
-                                        [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
-                                        (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)"> -->
-                                    <input type="number" min="0" step="1" size="2"
-                                        [disabled]="running"
-                                        [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
-                                        (change)="updateColumnsFromInputRight('right')">
-                                    </th>
-                                </tr>
-                                <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                                    <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
-                                        <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
-                                            <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
-                                                    (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
-                                                <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
-                                            </select>
-                                        </ng-container>
-                                    </td>
-                                    <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
-                                        <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
-                                            <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
-                                                    (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
-                                                <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
-                                            </select>
-                                    </ng-container>
-                                    </td>
-                                </tr>
-                                </table>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

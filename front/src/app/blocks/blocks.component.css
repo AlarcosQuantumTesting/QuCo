@@ -1153,6 +1153,21 @@ input[type="checkbox"] {
   flex-wrap: wrap;
 }
 
+.table-scroll-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px; /* o el que necesites */
+  border-radius: 5px;
+}
+
+/* Opcional: para que las tablas grandes no se expandan más allá del contenedor */
+.table-wrapper table {
+  width: 100%;
+  min-width: max-content;
+}
+
+
 .table-wrapper {
   overflow-x: auto;
   max-width: 100%;
@@ -1213,6 +1228,7 @@ input[type="checkbox"] {
   margin: 10px 0;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 80%;
 }
 
 .inline-config-row input {
