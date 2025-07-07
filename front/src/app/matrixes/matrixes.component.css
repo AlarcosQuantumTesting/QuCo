@@ -2389,3 +2389,13 @@ input[disabled], textarea[disabled], select[disabled] {
     color: #333;
     text-align: center;
 }
+
+.modal-body {
+  padding: 1rem 1.5rem;
+}
+
+.modal-message {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}

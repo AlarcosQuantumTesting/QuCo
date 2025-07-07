@@ -109,6 +109,7 @@ export class DeterministicComponent extends GroverStyle {
   isLoadingQiskitCode = false;
   mostrarModalTree: boolean = false;
   modalTranspile: boolean = false;
+  modalError: boolean = false;
 
   expressionToDelete: any = null;
   deleteIndex: number = -1;
@@ -459,10 +460,12 @@ export class DeterministicComponent extends GroverStyle {
         this.running = false;
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
-        this.mensajeTemporal = 'Error generating code';
+        /*this.mensajeTemporal = 'Error generating code';
         setTimeout(() => {
             this.mensajeTemporal = '';
-        }, 2000);
+        }, 2000);*/
+
+        this.modalError = true;
       }
     );
   }
