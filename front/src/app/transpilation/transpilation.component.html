@@ -1,13 +1,122 @@
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
 
+<body>
+    <!-- <button class="help-button" (click)="toggleHelp()">
+        ❔
+    </button> -->
+
+    <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+    <div class="titulo">
+        <h1>Transpilation</h1>
+    </div>
+
+    <div class="container search-container">
+        <div class="form-row">
+            <div class="section buildText">
+                <p>
+                    In this section you can see all the transpilations stored in the system.
+                    <br>
+                    You can select a transpilation from the list and its specifications will be shown below.
+                </p>
+            </div>
+            <div class="section inputsContainer">
+                <div class="input-group">
+                    <label>Transpilations stored:</label>
+                    <input type="text"
+                        [(ngModel)]="searchQuery"
+                        (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)"
+                        (focus)="onFocusInput()"
+                        placeholder="Search for a transpilation.."
+                        list="transpilationsList">
+            
+                    <datalist id="transpilationsList">
+                        <option class="transpilationOpt" *ngFor="let transpilation of transpilationWorks" [value]="transpilation.name"></option>
+                    </datalist>
+
+                    <div>
+                        <button class="btn-search" style="margin-top: 20px;" (click)="searchTranspilation()">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+            
+                </div>
+
+                <div class="buttons-container">
+                    <!-- <button class="btn btn-primary" (click)="create()">New template</button> -->
+                    <button class="btn btn-primary" (click)="showAll()">Show all</button>
+                    <!-- &nbsp;
+                    <button (click)="save()" [disabled]="isInvalid" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="transpilationSelected" class="template-details">
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <h2 style="margin-top: 10px;">Transpilation</h2>
+        </div>
+
+        <div class="template-info">
+            <div class="name-description">
+                <div class="info-block">
+                    <label><strong>Name:</strong></label>
+                    <span>{{ transpilationSelected.name }}</span>
+                </div>
+                <div class="info-block">
+                    <label><strong>Started at:</strong></label>
+                    <span>{{ transpilationSelected.creationDateTime }}</span>
+                </div>
+                <div class="info-block">
+                    <label><strong>Id:</strong></label>
+                    <span>{{ transpilationSelected.id }}</span>
+                </div>
+
+                <div class="info-block">
+                    <div *ngIf="transpilationSelected.statusLines?.length">
+                        <label for="backendSelect">Backend:</label>
+                        <select id="backendSelect" 
+                            [value]="selectedBackend" 
+                            (change)="onBackendChange($event)" 
+                            name="backend">
+
+                            <option *ngFor="let statusLine of transpilationSelected.statusLines" 
+                                    [value]="statusLine.id" 
+                                    [disabled]="!statusLine.finished" (click)="getTranspiledCode(statusLine.id)">
+                                {{ statusLine.backend }} 
+                                {{ statusLine.finished ? (statusLine.hasErrors ? '❌' : '✅') : '⏳' }}
+                            </option>
+                        </select>
+                        <div>
+                        <button class="btn-search" style="margin-top: 20px;" (click)="getTranspiledCode(transpilationSelected.statusLine.id)">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <textarea class="template-code"rows="10" cols="100" [ngModel]="transpiledCode" 
+                placeholder="Transpiled code will appear here"></textarea>
+        </div>
+    </div>
+
+</body>
 
 
 <table border ="1" class="table table-striped">
-    <caption>
+    <!-- <caption>
         Transpilation Works 
         <a (click)="getTranspilationWorks()" class="btn btn-primary" style="color: blue;">
             Reload
         </a>
-    </caption>
+    </caption> -->
     <thead>
         <tr>
             <th>Id</th>
