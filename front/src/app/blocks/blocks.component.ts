@@ -111,6 +111,8 @@ export class BlocksComponent extends EvolutionaryComponent {
         }
       } else {
         console.log('No hay plantilla guardada en localStorage');
+        this.templateSelected = false;
+        this.validarDatos();
       }
     } else {
       console.log('No hay plantilla seleccionada');
@@ -158,8 +160,21 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
+  /*setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
+    let gate = this.findGate(e)
+    if (gate) {
+      if (side=="left")
+        this.pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex] = gate
+      else
+        this.pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex] = gate
+    }
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+  }*/
+
   setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
     let gate = this.findGate(e)
+    console.log("Setting gate", gate, "for qubit", qubitIndex, "in column", columnIndex)
     if (gate) {
       if (side=="left")
         this.pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex] = gate
@@ -482,6 +497,31 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
   }
 
+  updateColumnsFromInputLeft(side: string) {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+    let originalLength
+    console.log("Updating left columns from input")
+    originalLength = blockCircuit.block.numberOfLeftColumns
+    if (blockCircuit.block.numberOfLeftColumns>blockCircuit.block.leftColumns.length)
+      blockCircuit.block.leftColumns.push(new BlockColumn(blockCircuit.qubits, originalLength))
+    else
+      blockCircuit.block.leftColumns.splice(blockCircuit.block.leftColumns.length-1, 1)
 
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+        
+  }
+
+  updateColumnsFromInputRight(side: string) {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+    let originalLength
+    console.log("Updating right columns from input")
+    originalLength = blockCircuit.block.numberOfRightColumns
+    if (blockCircuit.block.numberOfRightColumns>blockCircuit.block.rightColumns.length)
+      blockCircuit.block.rightColumns.push(new BlockColumn(blockCircuit.qubits, originalLength))
+    else
+      blockCircuit.block.rightColumns.splice(blockCircuit.block.rightColumns.length-1, 1)
+        
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+  }
 
 }

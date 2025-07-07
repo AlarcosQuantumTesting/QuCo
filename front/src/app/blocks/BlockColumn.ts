@@ -5,11 +5,17 @@ export class BlockColumn {
 
     constructor(qubits : number, index? : number) {
          for (let i=0; i<qubits; i++)
-            if (!index || index%2==1)
+            /*if (!index || index%2==1)
                 this.gates.push(new Gate("X", false, 1))
             else
                 this.gates.push(new Gate("H", false, 1))
-        this.setGates(new Array(qubits).fill("H"))
+        this.setGates(new Array(qubits).fill("H"))*/
+            if (typeof index === "number" && index % 2 === 0)
+                this.gates.push(new Gate("X", false, 1))
+            else
+                this.gates.push(new Gate("H", false, 1))
+            //this.setGates(new Array(qubits).fill("H"))
+
         /*console.log("Creating BlockColumn with " + qubits + " qubits and index " + index)
         for (let i=0; i<qubits; i++)
             //if (!index || index%2===1)
