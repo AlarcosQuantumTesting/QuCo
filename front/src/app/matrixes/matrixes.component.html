@@ -488,7 +488,7 @@
     cdkDrag
     cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
         <!-- Botón para cerrar el modal -->
-        <div class="modal-header">
+        <div class="modal-header" cdkDragHandle>
             <h2 class="title-modal">Qiskit Code</h2>
             <div class="enlaces-modal">
                 <a (click)="addHadamardGates()" [class.disabled]="isDisabled"><i class="fas fa-plus-circle"></i> Start with Hadamard gates</a>

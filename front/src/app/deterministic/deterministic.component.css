@@ -1107,6 +1107,11 @@ th, td {
   box-sizing: border-box;
 }
 
+
+.code-output {
+  margin: 20px;
+}
+
 p.text-instructions {
   text-align: left;
   justify-content: center;

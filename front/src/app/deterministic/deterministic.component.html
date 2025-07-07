@@ -520,7 +520,7 @@
   </div>
 </div>
 
-<div class="modal ejemplos" *ngIf="mostrarModal">
+<div class="modal instrucciones" *ngIf="mostrarModal">
   <div class="modal-content" *ngIf="isLoadingQiskitCode">
       <div *ngIf="isLoadingQiskitCode" class="spinner-container">
           <div class="spinner"></div>
@@ -531,7 +531,7 @@
     cdkDrag
     cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
       <!-- Botón para cerrar el modal -->
-      <div class="modal-header">
+      <div class="modal-header" cdkDragHandle>
           <h2 class="title-modal">Qiskit Code</h2>
           <div class="enlaces-modal" *ngIf="quirkCodes.length>0">
             <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()"><i class="fas fa-project-diagram"></i> Show tree</a>
@@ -553,11 +553,9 @@
       </div>
 
       <!-- Contenido del modal -->
-      <div class="intructions-content">
           <div class="code-output">
               <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
           </div>
-      </div>
 
       <!-- Botón para copiar el código -->
       <div class="modal-footer">
