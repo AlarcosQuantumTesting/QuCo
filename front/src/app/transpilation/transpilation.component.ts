@@ -18,6 +18,9 @@ export class TranspilationComponent {
   transpilationFiltered: any[] = [];
   selectedBackend: string | null = null;
   selectedStatusLine: any = null;
+  selectedStatusLineId: string = "";
+  modalDelete: boolean = false;
+  mostrarTabla: boolean = false;
 
 
   constructor(private service: TranspilationService) { 
@@ -133,26 +136,33 @@ export class TranspilationComponent {
 
     if (match) {
       this.transpilationSelected = match;
+      this.mostrarTabla = false;
     } else {
       console.warn('No se encontró ninguna transpilación con ese nombre.');
     }
   }
 
   onBackendChange(id: Event) {
-    this.service.getTranspiledCode(id).subscribe({
-      next: (data) => {
-        this.transpiledCode = data.code;
-      },
-      error: (err) => {
-        console.error("Error fetching transpilation works:", err);
-      }
-    });
+    this.getTranspiledCode(id);
+  
   }
 
+  deleteModal() {
+    if (this.transpilationSelected) {
+      this.modalDelete = true;
+    }
+  }
 
+  confirmDelete(id: any) {
+    if (this.transpilationSelected) {
+      this.cancelTranspilation(id);
+    }
+  }
 
   showAll() {
     this.transpilationSelected = null;
     this.transpilationFiltered = [...this.transpilationWorks];
+    this.mostrarTabla = true;
+    this.searchQuery = '';
   }
 }
