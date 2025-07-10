@@ -32,24 +32,26 @@ public class QGroverer {
 
         double expectedElementProbability = 1.0/sRows.size();
 
-        List<QGroverOracle> groverOracles = new ArrayList<>();
+        List<QCircuitGate> groverOracles = new ArrayList<>();
         for (int i = 0; i < sRows.size(); i++) {
             int index = toDecimal(sRows.get(i));
             expected.add(1.0*index);
             expected.add(expectedElementProbability);
-            QGroverOracle oracle = new QGroverOracle(sRows.get(i), useMCX);
-            groverOracles.add(oracle);
+            //QGroverOracle oracle = new QGroverOracle(sRows.get(i), useMCX);
+            //groverOracles.add(oracle);
         }
 
-        QGroverDiffuser difussor = new QGroverDiffuser(qubits, useMCX);
+        //QGroverDiffuser difussor = new QGroverDiffuser(qubits, useMCX);
+        QCircuitGate difussor = new QCircuitGate();
 
         if (!inParallel) {
             int nOptimal = getOptimal(sRows, qubits);
-            return buildGroverCircuit(qubits, groverOracles, difussor, nOptimal);
+            //return buildGroverCircuit(qubits, groverOracles, difussor, nOptimal);
         } else { 
             int nOptimal = (int) Math.floor(Math.PI / 4 * Math.sqrt(Math.pow(2, qubits)));
-            return buildGroverCircuitIParallel(qubits, sRows.size(), groverOracles, difussor, nOptimal);
+            //return buildGroverCircuitIParallel(qubits, sRows.size(), groverOracles, difussor, nOptimal);
         }
+        return null;
     }
 
     private static int toDecimal(List<Integer> row) {
@@ -60,7 +62,7 @@ public class QGroverer {
         return decimal;
     }
 
-    private static QCircuit buildGroverCircuitIParallel(int qubits, int values, List<QGroverOracle> groverOracles, QGroverDiffuser difussor, int nOptimal) {
+    private static QCircuit buildGroverCircuitIParallel(int qubits, int values, List<QCircuitGate> groverOracles, QCircuitGate difussor, int nOptimal) {
         List<QCircuit> circuits = new ArrayList<>();
 
         int ones = 0;
@@ -68,8 +70,8 @@ public class QGroverer {
         QColumn column0 = new QColumn();
         QColumn barrier = new QColumn();
         for (int i = 0; i < qubits*values; i++) { 
-            column0.addGate("H");
-            barrier.addGate("…");
+           // column0.addGate("H");
+            //barrier.addGate("…");
         }                
         resultCircuit.addColumn(column0);
         resultCircuit.addColumn(barrier);
@@ -80,10 +82,10 @@ public class QGroverer {
             for (int j=0; j<oracleColumns.size(); j++) {
                 QColumn oracleColumn = oracleColumns.get(j);
                 QColumn column = new QColumn();
-                for (int k = 0; k < ones; k++)
+                /*for (int k = 0; k < ones; k++)
                     column.addGate("1");
                 for (int k=0; k<qubits; k++)
-                    column.addGate("" + oracleColumn.getGates().get(k));
+                    column.addGate("" + oracleColumn.getGates().get(k));*/
                 circuit.addColumn(column);
             }
 
@@ -93,10 +95,10 @@ public class QGroverer {
             for (int j=0; j<difussorColumns.size(); j++) {
                 QColumn difussorColumn = difussorColumns.get(j);
                 QColumn column = new QColumn();
-                for (int k = 0; k < ones; k++)
+                /*for (int k = 0; k < ones; k++)
                     column.addGate("1");
                 for (int k=0; k<qubits; k++)
-                    column.addGate("" + difussorColumn.getGates().get(k));
+                    column.addGate("" + difussorColumn.getGates().get(k));*/
                 circuit.addColumn(column);
             }
             circuit.addColumn(barrier);
@@ -112,32 +114,6 @@ public class QGroverer {
         }
 
         return resultCircuit;
-    }
-
-    private static QCircuit buildGroverCircuit(int qubits, List<QGroverOracle> groverOracles, QGroverDiffuser difussor, int nOptimal) {
-        QCircuit circuit = new QCircuit();
-        QColumn column0 = new QColumn();
-        QColumn barrier = new QColumn();
-        for (int i = 0; i < qubits; i++) {
-            column0.addGate("H");
-            barrier.addGate("…");
-        }
-
-        circuit.addColumn(column0);
-        circuit.addColumn(barrier);
-
-        List<QColumn> oracleColumns = new ArrayList<>();
-        for (int i = 0; i < groverOracles.size(); i++)
-            oracleColumns.addAll(groverOracles.get(i).getColumns());
-
-        List<QColumn> difussorColumns = new ArrayList<>();
-        difussorColumns.addAll(difussor.getColumns());
-
-        for (int i = 0; i < nOptimal; i++) {
-            circuit.addColumns(oracleColumns);
-            circuit.addColumns(difussorColumns);
-        }
-        return circuit;
     }
 
     private static int getOptimal(List<List<Integer>> sRows, int qubits) {

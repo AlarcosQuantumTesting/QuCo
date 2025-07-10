@@ -111,76 +111,76 @@ public class UnifierSolver {
 		QCircuit circuit = new QCircuit();
 		circuit.setName(node.name);
 		if (node.getDepth()==2) {
-			if (node.leftProbability!=0 && node.rightProbability!=0) {
-				QRY ry0 = this.getQRY(node);
+			/*if (node.leftProbability!=0 && node.rightProbability!=0) {
+				QMatrixGate ry0 = this.getQMatrixGate(node);
 				ry0.name = node.name + "-0";
 				circuit.addColumn(ry0);
 				generalCircuit.addGate(ry0);
 				circuit.addColumn("X");
 				
 				BinaryTree leftChild = node.leftChild;
-				QRY ryLeft = this.getQRY(leftChild);
+				QMatrixGate ryLeft = this.getQMatrixGate(leftChild);
 				circuit.addColumn("•", ryLeft);
 				generalCircuit.addGate(ryLeft);
 				circuit.addColumn("X");
 
 				BinaryTree rightChild = node.rightChild;
 				if (rightChild!=null) {  // ¿Seguro? XXX
-					QRY ryRight = this.getQRY(rightChild);
+					QMatrixGate ryRight = this.getQMatrixGate(rightChild);
 					circuit.addColumn("•", ryRight);
 					generalCircuit.addGate(ryRight);
 				}
 			} else if (node.rightProbability==0) {
-				QRY ry0 = this.getQRY(node);
+				QMatrixGate ry0 = this.getQMatrixGate(node);
 				ry0.name = node.name + "-0";
 				circuit.addColumn(ry0);
 				generalCircuit.addGate(ry0);
 
 				BinaryTree leftChild = node.leftChild;
 				if (leftChild!=null) { // ¿Seguro? XXX
-					QRY ryLeft = this.getQRY(leftChild);
+					QMatrixGate ryLeft = this.getQMatrixGate(leftChild);
 					circuit.addColumn("1", ryLeft);
 					generalCircuit.addGate(ryLeft);
 				}
 			} else if (node.leftProbability==0) {
-				QRY ry0 = this.getQRY(node);
+				QMatrixGate ry0 = this.getQMatrixGate(node);
 				ry0.name = node.name + "-0";
 				circuit.addColumn(ry0);
 				generalCircuit.addGate(ry0);
 
 				BinaryTree rightChild = node.rightChild;
-				QRY ryRight = this.getQRY(rightChild);
+				QMatrixGate ryRight = this.getQMatrixGate(rightChild);
 				circuit.addColumn("1", ryRight);
 				generalCircuit.addGate(ryRight);
 			}
 		} else {
-			QRY ry0 = this.getQRY(node);
+			QMatrixGate ry0 = this.getQMatrixGate(node);
 			ry0.name = node.name + "-0";
 			circuit.addColumn(ry0);
 			generalCircuit.addGate(ry0);
 
 			if (node.rightProbability==0) {
 				BinaryTree leftChild = node.leftChild;
-				circuit.addColumn("1", "~"  + leftChild.name);
+				circuit.addColumn("1", leftChild.name);
 			} else if (node.leftProbability==0) {
 				BinaryTree rightChild = node.rightChild;
-				circuit.addColumn("1", "~"  + rightChild.name);
+				circuit.addColumn("1", rightChild.name);
 			} else {
 				circuit.addColumn("X");
 				BinaryTree leftChild = node.leftChild;
-				circuit.addColumn("•", "~"  + leftChild.name);
+				circuit.addColumn("•", leftChild.name);
 
 				circuit.addColumn("X");
 				BinaryTree rightChild = node.rightChild;
-				circuit.addColumn("•", "~"  + rightChild.name);
-			}
+				circuit.addColumn("•", rightChild.name);
+			}*/
 		}
-		generalCircuit.addGate(circuit);
+		//generalCircuit.addGate(circuit);
 		return circuit;
 	}
 
-	private QRY getQRY(BinaryTree node) {
-		QRY qry = new QRY();
+	private QMatrixGate getQMatrixGate(BinaryTree node) {
+		QMatrixGate qry = new QMatrixGate();
 		qry.setName(node.name);
 		qry.setTheta(node.leftAngle);
 		return qry;

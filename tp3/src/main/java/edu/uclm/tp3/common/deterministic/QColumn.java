@@ -7,40 +7,82 @@ import org.json.JSONArray;
 
 public class QColumn {
 
-    private List<Object> gateIds = new ArrayList<>();
+    private List<QGate> gates;
 
-    public void addGate(String gateId) {
-        if (gateId.equals("1"))
-            this.gateIds.add(1);
-        else
-            this.gateIds.add(gateId);
+    public QColumn() {
+        this.gates = new ArrayList<>();
+    }
+
+    public void addGate(QGate gate) {
+        this.gates.add(gate);
+    }
+
+    public void addStdGate(String gateName) {
+        QStdGate gate = new QStdGate();
+        gate.setName(gateName);
+        this.addGate(gate);
+    }
+
+    public void setStdGate(int index, String gateName) {
+        QStdGate gate = new QStdGate();
+        gate.setName(gateName);
+        this.gates.set(index, gate);
+    }
+
+    public void addMatrixGate(String gateName) {
+        QMatrixGate gate = new QMatrixGate();
+        gate.setName(gateName);
+        this.addGate(gate);
+    }
+
+    public void setMatrixGate(int index, String gateName) {
+        QMatrixGate gate = new QMatrixGate();
+        gate.setName(gateName);
+        this.gates.set(index, gate);
+    }
+
+    public void addCircuitGate(QCircuitGate gate) {
+        this.gates.add(gate);
     }
 
     public JSONArray toJsonArray() {
-        JSONArray jsonArray = new JSONArray();
-        for (Object gateId : this.gateIds) {
-            jsonArray.put(gateId);
-        }
-        return jsonArray;
+        JSONArray jsa = new JSONArray();
+        for (QGate gate : this.gates)
+            jsa.put(gate.getId());
+        return jsa;
     }
 
-    public List<Object> getGates() {
-        return gateIds;
-    }
-
-    public boolean isEmpty() {
-        return this.gateIds.isEmpty();
-    }
-
-    public void setGate(int i, String gateId) {
-       this.gateIds.set(i, gateId);
+    public List<QGate> getGates() {
+        return gates;
     }
 
     public int size() {
-        return this.gateIds.size();
+        return this.gates.size();
     }
-    
-    public String get(int index) {
-        return this.gateIds.get(index).toString();
+
+    public boolean isControlColumn() {
+        return this.gates.stream().anyMatch(gate -> gate instanceof QStdGate && ((QStdGate) gate).isControlGate());
+    }
+
+    public static QColumn merge(List<QColumn> columns, int qubits) {
+        QColumn mergedColumn = new QColumn();
+        int startQubit = 0, endQubit = 0;
+        for (int i=0; i < columns.size(); i++) {
+            QColumn column = columns.get(i);
+            if (column == null || column.getGates() == null || column.getGates().isEmpty())
+                continue;
+            for (int j=startQubit; j<endQubit; j++)
+                mergedColumn.addStdGate("1"); // Add empty gates for qubits before the first gate
+
+            for (int j=0; j < column.getGates().size(); j++) {
+                QGate gate = column.getGates().get(j);
+                mergedColumn.addGate(gate);
+                startQubit = startQubit + qubits;
+                endQubit = startQubit + qubits - 1;
+            }
+         
+        }
+
+        return mergedColumn;
     }
 }
