@@ -21,6 +21,7 @@ export class TranspilationComponent {
   selectedStatusLineId: string = "";
   modalDelete: boolean = false;
   mostrarTabla: boolean = false;
+  modalCodigo: boolean = false;
 
 
   constructor(private service: TranspilationService) { 
@@ -40,6 +41,8 @@ export class TranspilationComponent {
         if (data.length > 0) {
           this.transpilationSelected = data[0];
           this.searchQuery = data[0].name;
+          this.selectedBackend = this.transpilationSelected.statusLines[0].id;
+          this.onBackendChange(this.transpilationSelected.statusLines[0].id);
         }
       },
       error: (err) => {
@@ -55,6 +58,8 @@ export class TranspilationComponent {
 
     this.service.cancelTranspilation(id).subscribe({
       next: (data) => {
+        this.transpilationSelected = null;
+        this.searchQuery = '';
        this.getTranspilationWorks(); // Refresh the list after cancellation
       },
       error: (err) => {
@@ -142,9 +147,15 @@ export class TranspilationComponent {
     }
   }
 
-  onBackendChange(id: Event) {
-    this.getTranspiledCode(id);
-  
+  onBackendChange(id: string) {
+    if (id) {
+      this.getTranspiledCode(id);
+    }
+  }
+
+  seleccionarTranspilation(transpilation: any) {
+    this.transpilationSelected = transpilation;
+    this.deleteModal();
   }
 
   deleteModal() {
@@ -164,5 +175,20 @@ export class TranspilationComponent {
     this.transpilationFiltered = [...this.transpilationWorks];
     this.mostrarTabla = true;
     this.searchQuery = '';
+  }
+
+  showModalCode(id: any) {
+    this.modalCodigo = true;
+    this.getTranspiledCode(id);
+  }
+
+  copiarCodigo() {
+    const codigo = this.transpiledCode?.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      console.log('Código copiado al portapapeles');
+      alert('Code copied to clipboard');
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
+    });
   }
 }

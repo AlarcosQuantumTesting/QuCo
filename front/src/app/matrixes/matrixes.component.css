@@ -852,12 +852,16 @@ td {
     text-align: center;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #4377611c;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+ 
 tr:hover {
-    background-color: #e8f3ed;
+    background-color: #0b555a4b;
     transition: 0.3s;
 }
 

@@ -267,6 +267,7 @@ label {
     display: flex;
     justify-content: space-between;
     width: 100%;
+    align-items: center;
   }
   
   .info-block {
@@ -740,15 +741,125 @@ td {
     text-align: center;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #4377611c;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+
 tr:hover {
-    background-color: #e8f3ed;
+    background-color: #0b555a4b;
     transition: 0.3s;
 }
 
 th, td {
     border-radius: 3px;
+}
+
+.code-output {
+  margin: 20px;
+}
+
+.modal-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 100;
+}
+
+.copy-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.copy-btn:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+
+.modal.instrucciones {
+    position: fixed;
+    z-index: 1000;
+    background-color: transparent;
+    pointer-events: none;
+}
+  
+.modal-content.instrucciones {
+    pointer-events: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 600px;
+    max-width: none;
+    max-height: none;
+    overflow-y: auto;
+    position: relative;
+
+    resize: both;
+    overflow: auto;
+
+    min-width: 300px;
+    min-height: 200px;
+    border: 1px solid #ccc;
+}
+
+
+.modal.ejemplos {
+  position: fixed;
+  z-index: 1000;
+  background-color: transparent;
+  pointer-events: none; /* Permite hacer clic fuera del modal */
+}
+
+.modal-content.ejemplos {
+  pointer-events: auto; /* Solo el contenido del modal es interactivo */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 60%;
+  height: 80%;
+  /* max-height: 90vh; */
+  max-width: none;
+  max-height: 100vh;
+  overflow-y: auto;
+  position: relative;
+
+  /* 🪟 Estilo de ventana emergente */
+  resize: both;
+  overflow: auto;
+
+  min-width: 300px;
+  min-height: 200px;
+
+  /* Opcional: borde para dar sensación de "ventana" */
+  border: 1px solid #ccc;
+}
+
+
+.apply-button {
+    background-color: #10989c;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.apply-button:hover {
+    background-color: #267375;
+    transform: scale(1.05);
 }
