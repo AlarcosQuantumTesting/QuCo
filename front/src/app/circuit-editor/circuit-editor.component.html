@@ -1,3 +1,188 @@
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+</head>
+
+<body>
+    <!-- <button class="help-button" (click)="toggleHelp()">
+        ❔
+    </button> -->
+
+    <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+    <div class="titulo">
+        <h1>Circuits editor</h1>
+    </div>
+
+    <div class="container search-container">
+        <div class="form-row">
+            <div class="section buildText">
+                <p>
+                    In this section you can see all the transpilations stored in the system.
+                    <br>
+                    You can select a transpilation from the list and its specifications will be shown below.
+                </p>
+            </div>
+            <div class="section inputsContainer">
+                <div class="input-group">
+                    <label>Existing qubits configurations: </label>
+                    <input type="text"
+                        [(ngModel)]="searchQuery"
+                        (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)"
+                        (focus)="onFocusInput()"
+                        placeholder="Search for a configuration..."
+                        list="configurationsList">
+            
+                    <datalist id="configurationsList">
+                        <option class="configurationOpt" *ngFor="let cfgName of existingConfigurationNames" [ngValue]="cfgName">{{cfgName}}</option>
+                    </datalist>
+
+                    <div>
+                        <button class="btn-search" (click)="searchConfiguration()">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+            
+                </div>
+
+                <div class="input-group">
+                  <label>Available templates:</label>
+                  <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" [disabled]="selectedQubitsConfigurationName==null">
+                      <option *ngFor="let template of manager.templates" [ngValue]="template">
+                          {{ template.fileName }}
+                      </option>
+                  </select>
+                  <div>
+                    <button class="btn-search" title="See code" (click)="showModalCode()" [disabled]="selectedQubitsConfigurationName==null"><i class="fa fa-code"></i></button>
+                  </div>
+                  
+                </div>
+
+                <!-- <div class="buttons-container">
+                    <button class="btn btn-primary" (click)="showAll()">Show all</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container matrix-container">
+            <div class="info1">
+               
+            </div>
+            <div class="container matrix-container">
+                <div class="form-row">
+                    <div class="section qubitsContainer">
+                        
+                            <div class="form-group">
+                                <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                                    Gates
+                                </label>
+                                 <div *ngIf="customizedGates.length > 0">
+                                  <span *ngFor="let cg of customizedGates">
+                                    <button (click)="selectGate(cg)"
+                                      [ngClass]="{'selected-gate': selectedGate === cg}">
+                                      {{ cg.name }}
+                                    </button>
+                                    &nbsp;
+                                  </span>
+                                  
+                                  <button (click)="selectMeasurementGate()">M 📐</button>
+                                  &nbsp;
+                                  <button (click)="createCustomizedGate()">Create customized gate</button>
+                                </div>
+                                
+                        </div>
+                    </div>
+
+                    <div class="inline-config-row">
+                        <div style="gap: 10px; margin: 10px;">
+                              
+                        </div>
+                        <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                            
+
+                            <div class="table-scroll-wrapper">
+                                <div class="table-wrapper">
+                                    <table border="1" *ngIf="qubitsConfiguration">
+                                      <thead>
+                                        <tr>
+                                          <th></th>
+                                          <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
+                                            {{ i }}
+                                            <sub title="Measure all" (click)="measureColumn(i)">📐</sub>
+                                          </th>
+                                          <th></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
+                                          <th>q<sub>{{ i }}</sub></th>
+                                          <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
+                                            
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
+                                                [attr.rowspan]="circuit!.qubits[i].gates[j].qubits" (click)="removeGate(i, j)">
+                                              <button>{{ circuit!.qubits[i].gates[j].name }}</button> 
+                                            </td>
+
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGate(i, j)"></td>
+                                          </ng-container>
+                                          <td>
+                                            {{ getPhysicalQubit(i) }}
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Modales -->
+
+    <div class="modal instrucciones" *ngIf="modalCodigo">
+        <div class="modal-content ejemplos"
+        cdkDrag
+        cdkDragRootElement="modal-content">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Qiskit Code</h2>
+
+                <button class="close"><i class="close-i" (click)="modalCodigo = false">&times;</i></button>
+            </div>
+
+            <div class="code-output">
+                <!-- <small id="codeArea"> -->
+                    <pre>
+                    {{ code }}
+                    </pre>
+                <!-- </small> -->
+            </div>
+
+            <div class="modal-footer">
+                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
 <div>
   <u (click)="seeOrHideInstructions()" style="color: blue;">See or hide instructions</u>
   <div *ngIf="showInstructions">
