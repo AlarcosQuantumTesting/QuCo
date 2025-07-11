@@ -80,7 +80,7 @@
                         
                             <div class="form-group">
                                 <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
-                                    Gates
+                                    Gates <button (click)="createCustomizedGate()">Create customized gate</button>
                                 </label>
                                  <div *ngIf="customizedGates.length > 0">
                                   <span *ngFor="let cg of customizedGates">
@@ -92,8 +92,8 @@
                                   </span>
                                   
                                   <button (click)="selectMeasurementGate()">M 📐</button>
-                                  &nbsp;
-                                  <button (click)="createCustomizedGate()">Create customized gate</button>
+                                  <!-- &nbsp;
+                                  <button (click)="createCustomizedGate()">Create customized gate</button> -->
                                 </div>
                                 
                         </div>
@@ -101,7 +101,11 @@
 
                     <div class="inline-config-row">
                         <div style="gap: 10px; margin: 10px;">
-                              
+                              <label>Existing circuits: </label>
+                              <select [(ngModel)]="selectedCircuitName" (ngModelChange)="onCircuitChange($event)" [disabled]="selectedQubitsConfigurationName==null">
+                                <option [ngValue]="null" disabled selected>Select a circuit</option>
+                                <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
+                              </select>    
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
                             
