@@ -9,6 +9,7 @@ import org.json.JSONObject;
 public class QCircuitGate extends QGate {
 
     private List<QColumn> columns;
+    private int qubits;
 
     public QCircuitGate() {
         super();
@@ -17,8 +18,8 @@ public class QCircuitGate extends QGate {
 
     public void addColumnWithCircuitGate(QCircuitGate gate) {
         QColumn column = new QColumn();
-        column.addCircuitGate(gate);
-        this.columns.add(column);
+        column.addGate(gate);
+        this.addColumn(column);
     }
 
     public void addColumn(QColumn column) {
@@ -27,7 +28,7 @@ public class QCircuitGate extends QGate {
 
     public void addColumns(QColumn... columns) {
         for (QColumn column : columns)
-            this.columns.add(column);
+            this.addColumn(column);
     }
 
     @Override
@@ -54,5 +55,18 @@ public class QCircuitGate extends QGate {
         if (name == null)
             return null;
         return "~" + name;
+    }
+
+    @Override
+    public int getQubits() {
+        return this.qubits;
+    }
+
+    public void setColumns(List<QColumn> columnList) {
+        this.columns = columnList;
+    }
+
+    public void setQubits(int qubits) {
+        this.qubits = qubits;
     }
 }

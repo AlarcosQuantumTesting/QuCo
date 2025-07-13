@@ -17,7 +17,7 @@ public class QCircuit {
 
     @Override
     public String toString() {
-        return "circuit=" + this.toJson().toString();
+        return this.toJson().toString();
     }
 
     public void sortGates() {
@@ -65,25 +65,19 @@ public class QCircuit {
         this.gates.add(gate);
     }
 
-    public void addColumnWithCircuitGate(QCircuitGate gate) {
+    public void addColumnWithGate(QGate gate) {
         QColumn column = new QColumn();
-        column.addCircuitGate(gate);
-        this.columns.add(column);
+        column.addGate(gate);
+        this.addColumn(column);
     }
 
     public void insertColumn(QColumn column, int index) {
         this.columns.add(index, column);
     }
 
-    public void setColumnAtQubit(int startQubit, QColumn column) {
-        for (int i=this.qubits; i<startQubit; i++) 
-            column.addStdGate("1");
-        this.addColumn(column);
-    }
-
-    public void insertColumnWithCircuitGate(int index, QCircuitGate gate) {
+    public void insertColumnWithGate(int index, QGate gate) {
         QColumn column = new QColumn();
-        column.addCircuitGate(gate);
+        column.addGate(gate);
         if (column.size()>this.qubits)
             this.qubits = column.size();
         this.columns.add(index, column);
@@ -103,8 +97,9 @@ public class QCircuit {
         hGate.setName("InitialH");
         QColumn h = new QColumn();
         for (int i=0; i<qubits; i++)
-            h.addStdGate("H");
+            h.addGate(new QStdGate("H"));
         hGate.addColumn(h);
+        hGate.setQubits(qubits);
         return hGate;
     }
 
@@ -147,4 +142,69 @@ public class QCircuit {
     public int getQubits() {
         return qubits;
     }
+
+    public void setQubits(int qubits) {
+        this.qubits = qubits;
+    }
+
+    public void setColumns(List<QColumn> columns) {
+        this.columns = columns;
+    }
+
+    public void setGates(List<QGate> gates) {
+        this.gates = gates;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static QCircuit build(Map<String, Object> circuitMap) {
+        QCircuit qc = new QCircuit();
+
+        // Procesar columnas
+        if (circuitMap.containsKey("cols")) {
+            List<List<Object>> cols = (List<List<Object>>) circuitMap.get("cols");
+            for (List<Object> colList : cols) {
+                QColumn column = new QColumn();
+                for (Object gateObj : colList) {
+                    String gateName = String.valueOf(gateObj);
+                    column.addGate(new QStdGate(gateName));
+                }
+                qc.addColumn(column);
+            }
+        }
+
+        // Procesar gates definidos
+        if (circuitMap.containsKey("gates")) {
+            List<Map<String, Object>> gates = (List<Map<String, Object>>) circuitMap.get("gates");
+            for (Map<String, Object> gateMap : gates) {
+                String name = (String) gateMap.get("name");
+                Map<String, Object> subCircuitMap = (Map<String, Object>) gateMap.get("circuit");
+
+                QCircuitGate circuitGate = new QCircuitGate();
+                circuitGate.setName(name);
+
+                if (subCircuitMap != null) {
+                    QCircuit subCircuit = build(subCircuitMap); // Recursivo
+                    circuitGate.setColumns(subCircuit.getColumns());
+                }
+
+                qc.addGate(circuitGate);
+            }
+        }
+
+        // Calcular qubits (máx número de filas en columnas)
+        int qubits = 0;
+        for (QColumn col : qc.getColumns()) {
+            if (col.size() > qubits) {
+                qubits = col.size();
+            }
+        }
+        qc.setColumns(qc.getColumns());
+        qc.setGates(qc.getGates());
+        qc.setName((String) circuitMap.get("name"));
+        qc.qubits = qubits;
+
+        return qc;
+    }
+
+
 }

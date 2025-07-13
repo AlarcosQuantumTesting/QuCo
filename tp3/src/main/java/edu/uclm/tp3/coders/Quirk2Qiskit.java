@@ -11,30 +11,41 @@ import edu.uclm.tp3.common.deterministic.QStdGate;
 
 public class Quirk2Qiskit {
 
-    public static StringBuilder getCode(QCircuit circuit) throws Exception {
+    public static StringBuilder getGatesDeclaration(List<QCircuit> circuits) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        QCircuit circuit0 = circuits.get(0);
+        sb.append(getGatesDeclaration(circuit0));
+
+        for (int i=1; i<circuits.size(); i++) {
+            QCircuit circuit = circuits.get(i);
+            sb.append(getGatesDeclaration(circuit, "InitialH", "Diffuser"));
+        }
+        return sb;
+    }
+
+    public static StringBuilder getGatesDeclaration(QCircuit circuit, String... excludedGates) throws Exception {
         StringBuilder sb = new StringBuilder();
         List<QGate> gates = circuit.getGates();
         for (int i=0; i<gates.size(); i++) {
             QGate gate = gates.get(i);
+            boolean excluded = false;
+            for (int j=0; j<excludedGates.length; j++) 
+                if (gate.getName().equals(excludedGates[j])) {
+                    excluded = true;
+                    break;
+                }
+            if (excluded)
+                continue;
             if (!(gate instanceof QStdGate))
                 sb.append(getFunctionCode(gate));
         }
         sb.append("\n\n");
-
-        sb.append("def getCircuit():\n");
-        sb.append("\tU = QuantumCircuit(qubits)\n");
-        sb.append("\t# gates\n");
-        for (int i=0; i<circuit.getColumns().size(); i++) {
-            QColumn column = circuit.getColumns().get(i);
-            sb.append(getCode(column));
-        }
-        sb.append("\treturn U\n\n");
         return sb;
     }
 
     private static StringBuilder getFunctionCode(QGate gate) throws Exception {
         StringBuilder sb = new StringBuilder("def get" + gate.getName() + "() :\n");
-        sb.append("\tU = QuantumCircuit(qubits)\n");
+        sb.append("\tU = QuantumCircuit(" + gate.getQubits() + ")\n");
         if (gate instanceof QCircuitGate) {
             QCircuitGate cg = (QCircuitGate) gate;
             sb.append(getFunctionCode(cg));
@@ -104,6 +115,7 @@ public class Quirk2Qiskit {
         if (column.isControlColumn())
             return getControlledCode(column);
 
+        int startQubit = 0, endQubit = 0;
         StringBuilder sb = new StringBuilder();
         for (int i=0; i<column.getGates().size(); i++) {
             QGate gate = column.getGates().get(i);
@@ -112,7 +124,9 @@ public class Quirk2Qiskit {
                 if (!gateName.equals("1"))
                     sb.append(getCode(gateName, i));
             } else {
-                sb.append("\tU.append(get" + gateName + "(), range(qubits))\n");
+                endQubit = endQubit + gate.getQubits();
+                sb.append("\tU.append(get" + gateName + "(), range(" + startQubit + ", " + endQubit + "))\n");
+                startQubit = endQubit;
             } 
         }
         return sb;

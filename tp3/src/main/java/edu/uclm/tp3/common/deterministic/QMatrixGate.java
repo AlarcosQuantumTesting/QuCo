@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 public class QMatrixGate extends QGate {
 
-    private double theta;
+    private double theta = Math.PI; // Valor por defecto
     private double[][] matrix = new double[2][2];
 
     public void setTheta(double leftAngle) {
@@ -36,4 +36,16 @@ public class QMatrixGate extends QGate {
         return "~" + name;
     }
 
+    @Override
+    public int getQubits() {
+        return 2;
+    }
+
+    public void setControl(boolean control) {
+        this.control = control;
+    }
+
+    public void setMatrix(double[][] matrix) {
+        this.matrix = matrix;
+    }
 }

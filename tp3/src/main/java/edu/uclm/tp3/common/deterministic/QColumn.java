@@ -2,6 +2,7 @@ package edu.uclm.tp3.common.deterministic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 
@@ -17,31 +18,31 @@ public class QColumn {
         this.gates.add(gate);
     }
 
-    public void addStdGate(String gateName) {
-        QStdGate gate = new QStdGate();
-        gate.setName(gateName);
+    public void setGate(int qubit, QGate gate) {
+        this.gates.set(qubit, gate);
+    }
+
+    public void appendGate(QGate gate) {
         this.addGate(gate);
+        for (int i = 1; i < gate.getQubits(); i++) {
+            QStdGate emptyGate = new QStdGate("1");
+            this.addGate(emptyGate);
+        }
     }
 
-    public void setStdGate(int index, String gateName) {
-        QStdGate gate = new QStdGate();
-        gate.setName(gateName);
-        this.gates.set(index, gate);
-    }
-
-    public void addMatrixGate(String gateName) {
+    public void setMatrixGate(int qubit, String gateName) {
         QMatrixGate gate = new QMatrixGate();
         gate.setName(gateName);
-        this.addGate(gate);
+        if (qubit >= this.gates.size()) {
+            for (int i = this.gates.size(); i <= qubit; i++) {
+                QStdGate gate1 = new QStdGate("1");
+                this.gates.add(gate1); 
+            }
+        }
+        this.gates.set(qubit, gate);
     }
 
-    public void setMatrixGate(int index, String gateName) {
-        QMatrixGate gate = new QMatrixGate();
-        gate.setName(gateName);
-        this.gates.set(index, gate);
-    }
-
-    public void addCircuitGate(QCircuitGate gate) {
+    public void addGate(QCircuitGate gate) {
         this.gates.add(gate);
     }
 
@@ -72,7 +73,7 @@ public class QColumn {
             if (column == null || column.getGates() == null || column.getGates().isEmpty())
                 continue;
             for (int j=startQubit; j<endQubit; j++)
-                mergedColumn.addStdGate("1"); // Add empty gates for qubits before the first gate
+                mergedColumn.addGate(new QStdGate("1")); // Add empty gates for qubits before the first gate
 
             for (int j=0; j < column.getGates().size(); j++) {
                 QGate gate = column.getGates().get(j);
@@ -85,4 +86,21 @@ public class QColumn {
 
         return mergedColumn;
     }
+
+    public void setGates(List<QGate> gates) {
+        this.gates = gates;
+    }
+
+    public static QColumn build(Map<String, Object> colMap) {
+        QColumn column = new QColumn();
+        List<Map<String, Object>> gatesList = (List<Map<String, Object>>) colMap.get("gates");
+        if (gatesList != null) {
+            for (Map<String, Object> gateMap : gatesList) {
+                QGate gate = QGate.build(gateMap);
+                column.addGate(gate);
+            }
+        }
+        return column;
+    }
+
 }
