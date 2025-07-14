@@ -75,28 +75,36 @@
                
             </div>
             <div class="container matrix-container">
-                <div class="form-row">
+              <div class="form-row">
                     <div class="section qubitsContainer">
-                        
-                            <div class="form-group">
-                                <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
-                                    Gates <button (click)="createCustomizedGate()">Create customized gate</button>
-                                </label>
-                                 <div *ngIf="customizedGates.length > 0">
-                                  <span *ngFor="let cg of customizedGates">
-                                    <button (click)="selectGate(cg)"
-                                      [ngClass]="{'selected-gate': selectedGate === cg}">
-                                      {{ cg.name }}
-                                    </button>
-                                    &nbsp;
-                                  </span>
-                                  
-                                  <button (click)="selectMeasurementGate()">M 📐</button>
-                                  <!-- &nbsp;
-                                  <button (click)="createCustomizedGate()">Create customized gate</button> -->
-                                </div>
-                                
+                      <div class="form-group">
+                        <!-- <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                          Gates <button (click)="createCustomizedGate()">Create customized gate</button>
+                        </label> -->
+                        <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
+                          <div style="width: 100%; position: absolute; text-align: center;">
+                            <label style="font-size: 16px; font-weight: bold;">Gates</label>
+                          </div>
+
+                          <div class="template-buttons">
+                            <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
+                          </div>
                         </div>
+
+                        <div *ngIf="customizedGates.length > 0" class="gates-container">
+                          <span *ngFor="let cg of customizedGates">
+                            <button (click)="selectGate(cg)"
+                              [ngClass]="{'selected-gate': selectedGate === cg}">
+                              {{ cg.name }}
+                            </button>
+                          </span>
+                                
+                          <button (click)="selectMeasurementGate()">M 📐</button>
+                            <!-- &nbsp;
+                                  <button (click)="createCustomizedGate()">Create customized gate</button> -->
+                        </div>
+                                
+                      </div>
                     </div>
 
                     <div class="inline-config-row">
@@ -120,7 +128,12 @@
                                             {{ i }}
                                             <sub title="Measure all" (click)="measureColumn(i)">📐</sub>
                                           </th>
-                                          <th></th>
+                                          <th>
+                                            <div class="buttons-column-container">
+                                              <button title="Add column" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i class="fas fa-plus"></i></button>
+                                              <button title="Remove last column" class="remove-column-btn" (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i class="fas fa-minus"></i></button>
+                                            </div>
+                                          </th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -171,6 +184,78 @@
 
             <div class="modal-footer">
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalCrear">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                    <h2 class="title-modal">New gate</h2>
+                    <!-- <button title="Template instructions" (click)="abrirInstucciones()" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                        <i class="fa fa-info-circle"></i>
+                    </button> -->
+                </div>
+                <button class="close"><i class="close-i" (click)="cancel()">&times;</i></button>
+            </div>
+        
+            <div class="template-info-modal">
+                
+                <div class="name-description-modal">
+                    <div class="info-block">
+                        <label for="gateName">Name:</label>
+                        <div class="input-wrapper-modal">
+                        <input id="gateName"  placeholder="Gate name..."
+                            type="text" 
+                            [(ngModel)]="selectedGate!.name"
+                            (input)="gateExists()"
+                            (focus)="gateExists()"/>
+                        <span *ngIf="gateExists()" class="error-text">
+                            The gate already exists
+                        </span>
+                        </div>
+                    </div>
+
+                    <div class="info-block">
+                        <label for="gateQubits">Qubits:</label>
+                        <input id="gateQubits"
+                            type="number"
+                            [(ngModel)]="selectedGate!.qubits"
+                            placeholder="Number of qubits" 
+                            min="1"
+                            (input)="gateQubitsInput()"
+                            (focus)="gateQubitsInput()"/>
+                    </div>
+
+                    
+                </div>
+
+                <div class="info-block" style="justify-content: left; width: 93%; margin-bottom: 10px">
+                  <label for="templateDesc" >Description:</label>
+                  <input id="templateDesc" placeholder="This gate..."
+                    type="text"
+                    [(ngModel)]="selectedGate!.description" 
+                    (input)="gateDescriptionInput()"
+                    (focus)="gateDescriptionInput()"/>
+                  </div>
+
+                <label style="justify-content: left; width: 93%; margin-bottom: 10px">
+                    <strong>Code:</strong>
+                </label>
+                <textarea class="template-code-create" placeholder="Function code of this gate..."
+                    [(ngModel)]="selectedGate!.code"
+                    (input)="codeInput()"
+                    (focus)="codeInput()">
+                </textarea>
+                <div class="create-actions">
+                    <button (click)="addCustomizedGate()" class="save-btn"
+                      [disabled]="!selectedGate || selectedGate.name?.trim()?.length==0 || selectedGate.description?.trim()?.length==0 || 
+                      selectedGate.code?.trim()?.length==0 || selectedGate.qubits <=0 || gateExists()">Save</button>
+                    <button (click)="cancel()" class="cancel-btn">Cancel</button>
+                    <!-- <button (click)="deleteFromServer()">Delete</button> -->
+                </div>
             </div>
         </div>
     </div>

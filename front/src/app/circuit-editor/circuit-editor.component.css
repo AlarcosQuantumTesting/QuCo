@@ -900,8 +900,8 @@ ol.list-instructions {
 
 
 .qubitsContainer {
-    width: 40%;
-    max-width: 40%;
+    width: 30%;
+    max-width: 30%;
     align-items: center;
     overflow-x: auto;
     white-space: nowrap;
@@ -947,10 +947,10 @@ ol.list-instructions {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 10px 0;
+  /*margin: 10px 0;*/
   flex-wrap: wrap;
   justify-content: center;
-  max-width: 80%;
+  width: 80%;
 }
 
 .inline-config-row input {
@@ -968,3 +968,64 @@ ol.list-instructions {
     border-radius: 4px;
     box-sizing: border-box;
 } 
+
+.form-group {
+  width: 100%;
+  height: 100%;
+}
+
+.gates-container {
+  align-items: center;
+  align-self: center;
+  margin-top: 20px;
+}
+
+.btn-toggle-createExp {
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #007b7f;
+    color: white;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  .btn-toggle-createExp:hover {
+    background-color: #2d5f7a;
+    border-color: #2e607a;
+    transform: scale(1.05);
+}
+  
+  .btn-toggle-createExp i {
+    font-size: 16px;
+  }
+
+.buttons-column-container {
+  display: flex;
+  gap: 5px;
+}
+
+.add-column-btn {
+  padding: 5px;
+  background-color: #008b95;
+}
+
+.add-column-btn:hover{
+  background-color: #0f5d63;
+  transform: scale(1.05);
+}
+
+.remove-column-btn {
+  padding: 5px;
+  background-color: #a04000;
+}
+
+.remove-column-btn:hover{
+  background-color: #78370b;
+  transform: scale(1.05);
+}

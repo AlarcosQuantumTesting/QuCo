@@ -39,6 +39,7 @@ export class CircuitEditorComponent {
   mensajeTemporal: string = '';
   searchQuery: string = "";
   modalCodigo: boolean = false;
+  mostrarModalCrear: boolean = false;
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, private circuitsService : EdCircuitsService) {
     this.qiskitService.getCustomizedGates().subscribe(
@@ -280,6 +281,8 @@ export class CircuitEditorComponent {
   createCustomizedGate() {
     this.selectedGate = new EdGate('', 1);
     this.creatingNewGate = true;
+
+    this.mostrarModalCrear = true;
   }
 
   addCustomizedGate() {
@@ -312,6 +315,7 @@ export class CircuitEditorComponent {
   
   cancel() {
     this.selectedGate = undefined;
+    this.mostrarModalCrear = false;
   }
 
   removeGate(qubit: number, column: number) {
@@ -429,6 +433,37 @@ export class CircuitEditorComponent {
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  gateExists(): boolean {
+    for (let i=0; i < this.customizedGates.length; i++) {
+      if (this.selectedGate!.name === this.customizedGates[i].name){
+        return true;
+      }
+    }
+    return false;
+    
+  }
+
+  gateQubitsInput(): boolean {
+    if (this.selectedGate!.qubits <= 0){
+      return true;
+    }
+    return false;
+  }
+
+  gateDescriptionInput(): boolean {
+    if (this.selectedGate!.description?.trim() === ''){
+      return true;
+    }
+    return false;
+  }
+
+  codeInput() {
+    if (this.selectedGate!.code?.trim() === ''){
+      return true;
+    }
+    return false;
   }
 
 }
