@@ -5,8 +5,6 @@
 
 input {
   width: 60px;
-  text-align: center;
-  margin-bottom: 10px;
 }
 
 table {
@@ -28,9 +26,9 @@ td {
   font-weight: bold;
 }
 
-.conflict {
+/* .conflict {
   background-color: red !important;
-}
+} */
 
 .header {
   background-color: #ddd;
@@ -50,4 +48,452 @@ td {
 input[type="text"] {
   width: 100%;
   max-width: 400px; /* Ajusta según prefieras */
+}
+
+
+  body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.mensaje-temporal {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s;
+    opacity: 0.9;
+    z-index: 9999;
+}
+
+div.titulo {
+    display: flex;
+    margin: 0;
+    margin-top: -20px;
+}
+
+h1 {
+    display: inline-block;
+    background-color: #008f99;
+    color: white;
+    font-family: 'Georgia', serif;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    position: relative;
+    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #0b555a;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 23px;
+}
+
+h3 {
+    color: #14645b;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+.qubits-configuration {
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.controls-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.controls-inline label {
+  margin-right: 0.25rem;
+  font-weight: 500;
+}
+
+.controls-inline input,
+.controls-inline select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* .controls-inline button {
+    background-color: #286c98;
+    color: white;
+    border: none;
+    padding: 2px 15px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+button:hover {
+    background-color: #2980b9;
+} */
+
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.controls-inline button[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: rgb(111, 21, 21);
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.qubits-table-container {
+  max-height: 600px;
+  max-width: 100%;
+  overflow: auto;
+  margin-top: 15px;
+}
+
+.qubits-table {
+  border-collapse: collapse;
+  text-align: center;
+  margin-top: 15px;
+}
+
+
+/* .qubits-table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+  text-align: center;
+} */
+
+.qubits-table th,
+.qubits-table td {
+  border: 1px solid #ccc;
+  padding: 3px;
+}
+
+.header {
+  /* background-color: #f0f0f0; */
+  background-color: #4377611c;
+}
+
+.x-cell {
+  background-color: #0b555a;
+  color: white;
+  font-weight: bold;
+}
+
+.conflict {
+  background-color: #c21717;
+}
+
+
+.buttons-container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    gap: 10px;
+}
+
+.section {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+.container {
+    max-width: 100%;
+    margin: auto;
+    padding: 20px;
+}
+
+.container.search-container {
+    background-color: #e7eeed;
+    border-radius: 12px;
+    margin-top: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.buildText {
+    width: 30%;
+    text-align: left;
+    border-right: 3px dashed #197a81;
+}
+
+.input-group {
+    position: relative;
+  }
+
+  
+
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 230px;
+}
+
+
+
+.btn {
+    background-color: #0b555a;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #149099;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background: #b0c4de;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+.form-row {
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos */
+    gap: 10px; /* Espacio entre elementos */
+}
+
+label {
+    font-size: 15px;
+}
+
+.form-row label {
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.form-row input {
+    /* width: 80px; */
+    width: 100%;
+}
+
+.form-row button {
+    margin-left: auto; /* Empuja el botón hacia la derecha */
+}
+
+p {
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: center;
+    background-color: none;
+}
+
+.inputsContainer {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-search {
+    background-color: #4c9696;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+    margin-left: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo para el botón al pasar el ratón */
+  .btn-search:hover {
+    /* background-color: #0056b3; */
+    background-color: #386161;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+  }
+
+    .editTemp-button {
+    color: #0b555a;
+    background: none;
+    border: none;
+    margin-left: 0px;
+    font-size: 18px;
+}
+
+.editTemp-button:hover {
+    background: none;
+}
+
+.fa-edit:hover {
+    color: #0f3436;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+
+.template-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+  }
+  
+  .name-description {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .info-block {
+    display: flex;
+    align-items: baseline;
+    /* flex-direction: column; */
+  }
+  
+  .info-block label {
+    font-weight: bold;
+    margin-right: 5px;
+    display: inline;
+  }
+  
+  .info-block span {
+    display: inline;
+  }
+
+  .info-block input {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    min-width: 200px;
+  }
+
+
+  .template-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .template-header h2 {
+    grid-column: 2; /* centrado en la columna del medio */
+    text-align: center;
+    margin: 0;
+  }
+  
+  .template-buttons {
+    display: flex;
+    justify-content: flex-end;
+    grid-column: 3;
+  }
+  
+  .btn-confirm,
+  .btn-cancel {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 70px;
+    margin-top: 5px;
+    margin-left: 10px;
+  }
+
+  .btn-cancel {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn-cancel:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+
+  .btn-confirm {
+    background-color: #008b95;
+    color: white;
+  }
+  
+  .btn-confirm:hover {
+    background-color: #0f5d63;
+    transform: scale(1.05);
+  }
+  
+  .btn-confirm:disabled {
+      background-color: #8f929073;
+      cursor: not-allowed;
+      transform: none;
+  }
+
+  .config-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-button-container {
+  position: relative;
+}
+
+.noteditable :hover{
+  cursor: not-allowed;
 }

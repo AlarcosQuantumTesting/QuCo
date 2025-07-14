@@ -135,6 +135,8 @@ export class MatrixesComponent implements AfterViewInit  {
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
 
+  modalError: boolean = false;
+
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService) {}
@@ -503,7 +505,18 @@ export class MatrixesComponent implements AfterViewInit  {
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
+        //this.isLoadingQiskitCode = false;
+
+        this.error   = err.error?.message || err.message;
+        
         this.isLoadingQiskitCode = false;
+        this.mostrarModal = false;
+        /*this.mensajeTemporal = 'Error generating code';
+        setTimeout(() => {
+            this.mensajeTemporal = '';
+        }, 2000);*/
+
+        this.modalError = true;
       },
       complete: () => {
         this.isLoadingQiskitCode = false; // ← finaliza carga

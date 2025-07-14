@@ -256,15 +256,14 @@ button:hover {
     margin-right: 10px;
 }
 
-/* Inserta el separador */
-.form-row > *:not(:last-child)::after {
+/* .form-row > *:not(:last-child)::after {
     content: "";
     position: absolute;
     right: 0;
     width: 3px;
     height: 85%;
     border-right: 3px dashed #197a81;   
-}
+} */
 
 .form-row label {
     white-space: nowrap; /* Evita que el texto se divida en varias líneas */
@@ -279,49 +278,42 @@ button:hover {
     margin-left: auto; /* Empuja el botón hacia la derecha */
 }
 
-.section {
+/* .section {
     padding-left: 15px;
     padding-right: 15px;
-}
-
-.qubitsContainer {
-    width: 32%;
-    align-items: center;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 4px;
-
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
+} */
 
 .parameterizationContainer {
-    width: 36%;
+    width: 40%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    border-right: 3px dashed #197a81;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .strategiesContainer {
-    width: 36%;
+    width: 40%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    border-right: 3px dashed #197a81;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .gatesContainer {
-    width: 32%;
+    width: 40%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
 .form-group {
     margin-bottom: 15px;
     margin: 15px;
+    width: 90%;
 }
 
 
@@ -860,6 +852,37 @@ ol.list-instructions {
     font-size: 15px;
 }
 
+.modal.ejemplos {
+  position: fixed;
+  z-index: 1000;
+  background-color: transparent;
+  pointer-events: none; /* Permite hacer clic fuera del modal */
+}
+
+.modal-content.ejemplos {
+  pointer-events: auto; /* Solo el contenido del modal es interactivo */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 60%;
+  height: 80%;
+  /* max-height: 90vh; */
+  max-width: none;
+  max-height: 100vh;
+  overflow-y: auto;
+  position: relative;
+
+  /* 🪟 Estilo de ventana emergente */
+  resize: both;
+  overflow: auto;
+
+  min-width: 300px;
+  min-height: 200px;
+
+  /* Opcional: borde para dar sensación de "ventana" */
+  border: 1px solid #ccc;
+}
+
 .btn-cancel {
     background-color: #dc3545;
     color: white;
@@ -948,7 +971,7 @@ ol.list-instructions {
 
 
 .btn-reset {
-    padding-bottom: 10px;
+    /* padding-bottom: 10px; */
     padding-top: 3px;
     background: none;
     color: #0b555a;
@@ -956,6 +979,7 @@ ol.list-instructions {
     font-size: 18px;
     border: none;
   }
+
 
 .btn-reset:hover {
     background: none;
@@ -1129,6 +1153,21 @@ input[type="checkbox"] {
   flex-wrap: wrap;
 }
 
+.table-scroll-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px; /* o el que necesites */
+  border-radius: 5px;
+}
+
+/* Opcional: para que las tablas grandes no se expandan más allá del contenedor */
+.table-wrapper table {
+  width: 100%;
+  min-width: max-content;
+}
+
+
 .table-wrapper {
   overflow-x: auto;
   max-width: 100%;
@@ -1180,4 +1219,217 @@ input[type="checkbox"] {
   background-color: antiquewhite;
   font-weight: bold;
   vertical-align: middle;
+}
+
+.inline-config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 80%;
+}
+
+.inline-config-row input {
+  width: 60px;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.inline-config-row input[type='number']{
+    width: 60px;
+    padding: 5px;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+} 
+
+.qubitsContainer {
+    width: 40%;
+    max-width: 40%;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-right: 3px dashed #197a81;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+
+
+.transpile-code-btn {
+  background-color: #10989c;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.transpile-code-btn:hover {
+  background-color: #267375;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.transpile-code-btn:disabled {
+  background-color: #7e838482;
+  cursor: not-allowed;
+}
+
+
+.form-row-backends {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px
+}
+
+.form-row-backends h4 {
+  margin: 0px;
+  width: 100%;
+  height: 25px;
+  background-color: #0b555a;
+  color: white;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  align-items: center;
+  padding: 0px;
+}
+
+
+.contenedorBackends {
+  background-color: #d8e2ea;
+  border-radius: 8px;
+  max-width: 49%;
+  min-width: 49%;
+  width: 49%;
+  height: 300px;
+  max-height: 300px;
+  padding: 0px;
+}
+
+.listaBackends {
+  height: 250px;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-block-start: 0px;
+  width: 98%;
+}
+
+.list-group-item {
+  padding: 8px;
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #0b555a;
+  margin-right: 8px;
+  width: 93%;
+}
+
+.apply-button {
+    background-color: #10989c;
+}
+
+.apply-button:hover {
+    background-color: #267375;
+    transform: scale(1.05);
+}
+
+.deselect-button {
+    background-color: #dc3545;
+}
+
+.deselect-button:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+  .config-cell {
+    color: white;
+    font-size: 14px;
+  }
+
+  .config-cell label {
+    color: white;
+  }
+  
+  .config-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 5px
+  }
+  
+  .config-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .config-item input[type="number"],
+  .config-item input[type="text"] {
+    padding: 2px;
+    border-radius: 4px;
+    width: 100px;
+  }
+  
+  .config-item.checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .config-item.checkbox {
+    gap: 10px;
+  }
+
+  .config-inputs-container {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
+  .config-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .config-item.buttons button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    background-color: #007acc;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .config-item.buttons button:hover {
+    background-color: #005f99;
+  }
+
+
+.solutionFound:hover {
+  cursor: pointer;
 }

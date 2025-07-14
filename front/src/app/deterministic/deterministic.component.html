@@ -491,7 +491,7 @@
 <div *ngIf="showDeleteModal" class="modal-delete">
   <div class="modal-content-delete">
       <div class="modal-header" style="background-color: rgb(201, 46, 46);">
-          <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
+          <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete expression</h2>
           <button class="close"><i class="close-i" (click)="showDeleteModal = false">&times;</i></button>
       </div>
       <div class="modal-message-delete">
@@ -505,7 +505,7 @@
   </div>
 </div>
 
-<div class="modal ejemplos" *ngIf="mostrarModal">
+<div class="modal instrucciones" *ngIf="mostrarModal">
   <div class="modal-content" *ngIf="isLoadingQiskitCode">
       <div *ngIf="isLoadingQiskitCode" class="spinner-container">
           <div class="spinner"></div>
@@ -516,7 +516,7 @@
     cdkDrag
     cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
       <!-- Botón para cerrar el modal -->
-      <div class="modal-header">
+      <div class="modal-header" cdkDragHandle>
           <h2 class="title-modal">Qiskit Code</h2>
           <div class="enlaces-modal" *ngIf="quirkCodes.length>0">
             <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()"><i class="fas fa-project-diagram"></i> Show tree</a>
@@ -538,11 +538,9 @@
       </div>
 
       <!-- Contenido del modal -->
-      <div class="intructions-content">
           <div class="code-output">
               <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
           </div>
-      </div>
 
       <!-- Botón para copiar el código -->
       <div class="modal-footer">
@@ -608,9 +606,12 @@
   </div>
 </div>
 
-<div class="modal" *ngIf="modalTranspile">
-  <div class="modal-content">
-      <div class="modal-header">
+<div class="modal instrucciones" *ngIf="modalTranspile">
+  <div class="modal-content instrucciones"
+    cdkDrag
+    cdkDragRootElement="modal-content"
+    style="min-width: 950px;">
+      <div class="modal-header" cdkDragHandle>
           <h2 class="title-modal">Transpile Code</h2>
           <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
       </div>
@@ -663,5 +664,27 @@
   </div>
 </div>
 
+
+<div *ngIf="modalError" class="modal-delete">
+  <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+          <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Error generating Qiskit code</h2>
+          <button class="close"><i class="close-i" (click)="modalError = false">&times;</i></button>
+      </div>
+      <div class="expressionsContainer">
+          <div class="modal-body">
+            <p class="modal-message">
+              Error generating Qiskit code. Please ensure at least one element is selected.
+            </p>
+          </div>
+
+          <div class="help-actions">
+              <!-- <button class="btn-cancel" (click)="modalError = false">Close</button> -->
+               <button class="btn-confirm" (click)="modalError = false">Got it!</button>
+          </div>
+      </div>
+      
+  </div>
+</div>
 
 </body>
