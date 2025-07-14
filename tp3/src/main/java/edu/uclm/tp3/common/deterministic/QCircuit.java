@@ -3,6 +3,7 @@ package edu.uclm.tp3.common.deterministic;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -116,4 +117,28 @@ public class QCircuit extends QGate {
             this.addColumn(newColumn);
         }
     }
+
+    public Map<String, Object> clean(int qubits, String splitIndex) {
+		this.sortGates();
+		QColumn column0 = new QColumn();
+		if (splitIndex==null)
+			column0.addGate("~0");
+		else
+			column0.addGate("~" + splitIndex + "0");
+
+		this.insertColumn(column0, 0);
+
+		QColumn column1 = new QColumn();
+		for (int i=0; i<qubits; i++)
+			column1.addGate("H");
+		
+        this.insertColumn(column1, 0);
+
+		JSONObject jso = this.toJson();
+		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
+		jso.remove("circuit");
+		jso.put("cols", jsaCols);
+
+		return jso.toMap();
+	}
 }

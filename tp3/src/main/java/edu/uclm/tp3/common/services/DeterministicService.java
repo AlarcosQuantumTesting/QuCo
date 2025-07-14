@@ -131,7 +131,7 @@ public class DeterministicService {
 		Map<String, Object> result = solver.solve(shots);
 
 		QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
-		Map<String, Object> cleanCircuit =clean(quirkCircuit, qubits, null);
+		Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, null);
 
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
@@ -187,7 +187,7 @@ public class DeterministicService {
 			Map<String, Object> partialResult = solver.solve(shots);
 
 			QCircuit quirkCircuit = (QCircuit) partialResult.get("QUIRK");
-			Map<String, Object> cleanCircuit = clean(quirkCircuit, qubits, splitIndex.toString());
+			Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, splitIndex.toString());
 
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();
@@ -313,26 +313,5 @@ public class DeterministicService {
 		return templates;
 	}
 
-    public Map<String, Object> clean(QCircuit circuit, int qubits, String splitIndex) {
-		circuit.sortGates();
-		QColumn column0 = new QColumn();
-		if (splitIndex==null)
-			column0.addGate("~0");
-		else
-			column0.addGate("~" + splitIndex + "0");
 
-			circuit.insertColumn(column0, 0);
-
-		QColumn column1 = new QColumn();
-		for (int i=0; i<qubits; i++)
-			column1.addGate("H");
-			circuit.insertColumn(column1, 0);
-
-		JSONObject jso = circuit.toJson();
-		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
-		jso.remove("circuit");
-		jso.put("cols", jsaCols);
-
-		return jso.toMap();
-	}
 }
