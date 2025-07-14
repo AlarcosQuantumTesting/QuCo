@@ -36,7 +36,7 @@ import edu.uclm.tp3.dao.BinaryTreeDao;
 import edu.uclm.tp3.dao.BinaryTreeEntity;
 
 @Service
-public class DeterministicService {
+public class GreenobleService {
 
 	@Autowired
 	private BinaryTreeDao btDao;

@@ -13,7 +13,7 @@
   <div class="titulo">
       <h1>Algorithms
         <br>
-        <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
+        <small style="font-size: 14px;">Grover, Grover and Rudolph, Greenoble</small>
       </h1>
   </div>
 
@@ -45,9 +45,9 @@
                 </div>
                 <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event)">
                   <option value="grover">Grover</option>
-                  <option value="grenoble">Grenoble</option>
+                  <option value="grenoble">Greenoble</option>
                   <option value="originalGR">Original Grover & Rudolph</option>
-                  <option value="hamming">Hamming (this algorithm is under development and test)</option>
+                  <!--<option value="hamming">Hamming (this algorithm is under development and test)</option>-->
                 </select>              
               </div>
               
@@ -133,9 +133,9 @@
                 </small>
                 <!-- Paginación -->
                 <div style="text-align: center; margin: 1em 0;">
-                  <button (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0">Anterior</button>
-                  <span>Página {{ pageIndex + 1 }} de {{ pageCount }}</span>
-                  <button (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">Siguiente</button>
+                  <button (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0">Previous</button>
+                  <span>Page {{ pageIndex + 1 }} of {{ pageCount }}</span>
+                  <button (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">Next</button>
                 </div>
                 <div style="text-align: center; margin-top: 0.5em;">
                   <label>

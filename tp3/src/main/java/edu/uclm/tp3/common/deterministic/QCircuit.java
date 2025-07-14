@@ -120,8 +120,7 @@ public class QCircuit {
         this.insertColumn(column1, 0); */
 
 		JSONObject jso = this.toJson();
-		JSONArray jsaCols = jso.getJSONObject("circuit").getJSONArray("cols");
-		jso.remove("circuit");
+		JSONArray jsaCols = jso.getJSONArray("cols");
 		jso.put("cols", jsaCols);
 
 		return jso.toMap();
