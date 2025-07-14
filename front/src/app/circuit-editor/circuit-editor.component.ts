@@ -40,6 +40,8 @@ export class CircuitEditorComponent {
   searchQuery: string = "";
   modalCodigo: boolean = false;
   mostrarModalCrear: boolean = false;
+  gateMselected: boolean = false;
+  gatesModal: boolean = false;
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, private circuitsService : EdCircuitsService) {
     this.qiskitService.getCustomizedGates().subscribe(
@@ -263,6 +265,7 @@ export class CircuitEditorComponent {
   }
 
   selectGate(gate: EdGate) {
+    this.gateMselected = false;
     if (this.selectedGate === gate) {
       this.selectedGate = undefined; // Deseleccionar si ya estaba seleccionada
     } else {
@@ -273,9 +276,16 @@ export class CircuitEditorComponent {
   selectMeasurementGate() {
     if (!this.circuit)
       return;
-    this.selectedGate = new EdGate('M', 1);
-    this.selectedGate.description = 'Measure this qubit';
-    this.selectedGate.code = 'circuit.measure(' + this.circuit.qubits.length + ', ' + this.circuit.qubits.length + ')';
+    if (this.gateMselected) {
+      this.gateMselected = false;
+      this.selectedGate = undefined;
+    } else {
+      this.selectedGate = new EdGate('M', 1);
+      this.gateMselected = true;
+      this.selectedGate.description = 'Measure this qubit';
+      this.selectedGate.code = 'circuit.measure(' + this.circuit.qubits.length + ', ' + this.circuit.qubits.length + ')';
+    }
+    
   }
 
   createCustomizedGate() {

@@ -31,14 +31,33 @@ button:hover {
 /* Estilos de la tabla */
 table {
   border-collapse: collapse;
+  background-color: #ffffff;
 }
 
 td, th {
   border: 1px solid black;
   padding: 5px;
   text-align: center;
-  vertical-align: middle; /* Asegura alineación vertical en rowspan */
+  vertical-align: middle;
 }
+
+th {
+    background-color: #0b555a;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #757575;
+}
+
+td {
+    padding: 3px;
+    border: 1px solid #757575;
+    text-align: center;
+}
+
+.physicalQubits {
+  background-color: #095b614a;
+}
+
 
 /* Ocultar celdas con "I" */
 td[data-gate="I"] {
@@ -956,7 +975,7 @@ ol.list-instructions {
 .inline-config-row input {
   width: 60px;
   padding: 2px 4px;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .inline-config-row input[type='number']{
@@ -1028,4 +1047,70 @@ ol.list-instructions {
 .remove-column-btn:hover{
   background-color: #78370b;
   transform: scale(1.05);
+}
+
+.gate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.gate-btn {
+  background-color: #008b955d;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.gate-btn:hover {
+  background-color: #008b95aa;
+  transform: scale(1.05);
+}
+
+.measurement-btn {
+  background-color: #008b955d;
+  color: white;
+}
+
+.measurement-btn:hover {
+  background-color: #008b95aa;
+  transform: scale(1.05);
+}
+
+.save-circuit-btn {
+    background: #007b7f;
+    padding: 6px;
+}
+
+.save-circuit-btn:hover {
+    background-color: #2d5f7a;
+    transform: scale(1.05);
+}
+
+.save-circuit-btn:disabled {
+    background-color: #9b9d9ead;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+.measureFill-btn:hover {
+  cursor: pointer;
+}
+
+.gate-circuit-btn {
+   background: #049ca2;
+    padding: 6px;
+}
+
+.gate-circuit-btn:hover {
+   background: #912703;
 }

@@ -21,14 +21,14 @@
         <div class="form-row">
             <div class="section buildText">
                 <p>
-                    In this section you can see all the transpilations stored in the system.
+                    In this section you can see all the configurations stored in the system.
                     <br>
-                    You can select a transpilation from the list and its specifications will be shown below.
+                    You can select a configuration from the list and edit the circuit.
                 </p>
             </div>
             <div class="section inputsContainer">
                 <div class="input-group">
-                    <label>Existing qubits configurations: </label>
+                    <label>Existing configurations: </label>
                     <input type="text"
                         [(ngModel)]="searchQuery"
                         (input)="onSearchInput()"
@@ -82,35 +82,49 @@
                           Gates <button (click)="createCustomizedGate()">Create customized gate</button>
                         </label> -->
                         <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
+                          <div class="template-buttons">
+                            <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
+                          </div>
                           <div style="width: 100%; position: absolute; text-align: center;">
                             <label style="font-size: 16px; font-weight: bold;">Gates</label>
                           </div>
 
                           <div class="template-buttons">
-                            <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
+                            <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp"><i class="fa fa-edit"></i></button>
                           </div>
                         </div>
 
                         <div *ngIf="customizedGates.length > 0" class="gates-container">
-                          <span *ngFor="let cg of customizedGates">
-                            <button (click)="selectGate(cg)"
-                              [ngClass]="{'selected-gate': selectedGate === cg}">
+                          <div class="gate-buttons">
+                            <button
+                              *ngFor="let cg of customizedGates"
+                              (click)="selectGate(cg)"
+                              [ngClass]="{'selected-gate': selectedGate === cg}"
+                              class="gate-btn"
+                            >
                               {{ cg.name }}
                             </button>
-                          </span>
-                                
-                          <button (click)="selectMeasurementGate()">M 📐</button>
-                            <!-- &nbsp;
-                                  <button (click)="createCustomizedGate()">Create customized gate</button> -->
+
+                            <button (click)="selectMeasurementGate()" class="gate-btn measurement-btn" [ngClass]="{'selected-gate': gateMselected}">
+                            M <i class="fas fa-ruler"></i> 
+                            </button>
+                          </div>
                         </div>
-                                
                       </div>
                     </div>
 
                     <div class="inline-config-row">
-                        <div style="gap: 10px; margin: 10px;">
+                      <div class="input-group" *ngIf="circuit">
+                        <label>Circuit name: </label>
+                        <input style="min-width: 230px; padding: 8px;" type="text" [(ngModel)]="circuit.name" placeholder="Circuit name...">
+                        <button title="Save circuit" class="save-circuit-btn" (click)="saveCircuit(circuit)"
+                        [disabled]="circuit.name.trim() === ''"
+                        >Save</button>
+                      </div>
+                        <div class="input-group" style="gap: 10px; margin: 10px;">
                               <label>Existing circuits: </label>
-                              <select [(ngModel)]="selectedCircuitName" (ngModelChange)="onCircuitChange($event)" [disabled]="selectedQubitsConfigurationName==null">
+                              <select [(ngModel)]="selectedCircuitName" (ngModelChange)="onCircuitChange($event)" 
+                              [disabled]="selectedQubitsConfigurationName==null">
                                 <option [ngValue]="null" disabled selected>Select a circuit</option>
                                 <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
                               </select>    
@@ -120,13 +134,14 @@
 
                             <div class="table-scroll-wrapper">
                                 <div class="table-wrapper">
-                                    <table border="1" *ngIf="qubitsConfiguration">
+                                    <table *ngIf="qubitsConfiguration">
                                       <thead>
                                         <tr>
                                           <th></th>
                                           <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
                                             {{ i }}
-                                            <sub title="Measure all" (click)="measureColumn(i)">📐</sub>
+                                            <!-- <sub title="Measure all" (click)="measureColumn(i)">📐</sub> -->
+                                             <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i class="fas fa-ruler"></i></sub>
                                           </th>
                                           <th>
                                             <div class="buttons-column-container">
@@ -143,12 +158,12 @@
                                             
                                             <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
                                                 [attr.rowspan]="circuit!.qubits[i].gates[j].qubits" (click)="removeGate(i, j)">
-                                              <button>{{ circuit!.qubits[i].gates[j].name }}</button> 
+                                              <button title="Remove gate" class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button> 
                                             </td>
 
                                             <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGate(i, j)"></td>
                                           </ng-container>
-                                          <td>
+                                          <td class="physicalQubits">
                                             {{ getPhysicalQubit(i) }}
                                           </td>
                                         </tr>
