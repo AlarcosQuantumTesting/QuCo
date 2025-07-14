@@ -7,6 +7,10 @@ import { Gate } from '../common/Gate';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
+import { BlockCircuit } from './BlockCircuit';
+import { Backend } from '../deterministic/Backend';
+import { TranspileService } from '../transpile.service';
+import { BlockColumn } from './BlockColumn';
 
 Chart.register(...registerables)
 
@@ -27,8 +31,19 @@ export class BlocksComponent extends EvolutionaryComponent {
   isNone: boolean = true;
   isRandom: boolean = false;
   selectedOptionFreq: string = 'none';
+  selectedGate: String = 'H';
 
-  constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService) {
+  modalTranspile: boolean = false;
+  transpiledCode: string = '';
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
+  circuitName: string = '';
+  availableGates: string[] = ['X', 'RX', 'RZ', 'Identity', 'RY', 'Z', 'H', 'S', 'Y', 'P', 'T', 'U', 'TDG', 'SDG'];
+  startingColumns : BlockColumn[] = [];
+
+
+  constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
+    public transpileService: TranspileService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
     this.pc.inputConfiguration.maxNumberOfColumns = 3
@@ -57,6 +72,26 @@ export class BlocksComponent extends EvolutionaryComponent {
       //console.log("Mensaje SSE:", msg);
     });
 
+    //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits, this.pc.inputConfiguration.blockCircuit?.numberOfStartColumns || 2);
+    this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
+
+
+
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
+    });
+
+    for (let i = 0; i < this.pc.inputConfiguration.blockCircuit.startingColumns.length; i++) {
+      for (let j = 0; j < this.pc.inputConfiguration.qubits; j++) {
+        if (!this.pc.inputConfiguration.blockCircuit.startingColumns[i].gates[j]) {
+          this.pc.inputConfiguration.blockCircuit.startingColumns[i].gates[j] = new Gate("H", false, 1);
+        }
+      }
+    }
+
+
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.templateSelected = localStorage.getItem('templateSelectedBlocks') === 'true' || false;
     if (this.templateSelected) {
@@ -76,11 +111,21 @@ export class BlocksComponent extends EvolutionaryComponent {
         }
       } else {
         console.log('No hay plantilla guardada en localStorage');
+        this.templateSelected = false;
+        this.validarDatos();
       }
     } else {
       console.log('No hay plantilla seleccionada');
     }
 
+
+    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '{}') : 50;
+    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '{}') : 50;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '{}') : 20;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '{}') : 20;
+
+    localStorage.setItem('isBlocks', "true");
+    localStorage.setItem('isGenetic', "false");
 
   }
 
@@ -88,6 +133,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     let qubits = parseInt((document.getElementById("numberOfQubits") as HTMLInputElement).value)
     this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits)
     this.pc.inputConfiguration.qubits = qubits
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   private findGate(e : any) : Gate | undefined {
@@ -106,11 +152,15 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   setGate(qubitIndex : number, columnIndex : number, e : any) {
     let gate = this.findGate(e)
+    console.log("Setting gate", gate, "for qubit", qubitIndex, "in column", columnIndex)
     if (gate) 
-      this.pc.inputConfiguration.blockCircuit.setStartGate(qubitIndex, columnIndex, gate)
+      //this.pc.inputConfiguration.blockCircuit.setStartGate(qubitIndex, columnIndex, gate)
+      this.pc.inputConfiguration.blockCircuit.startingColumns[columnIndex].gates[qubitIndex] = gate
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
-  setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
+  /*setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
     let gate = this.findGate(e)
     if (gate) {
       if (side=="left")
@@ -118,10 +168,27 @@ export class BlocksComponent extends EvolutionaryComponent {
       else
         this.pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex] = gate
     }
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+  }*/
+
+  setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
+    let gate = this.findGate(e)
+    console.log("Setting gate", gate, "for qubit", qubitIndex, "in column", columnIndex)
+    if (gate) {
+      if (side=="left")
+        this.pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex] = gate
+      else
+        this.pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex] = gate
+    }
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   updateNumberOfBlocks() {
     this.pc.inputConfiguration.blockCircuit.updateNumberOfBlocks(this.pc.inputConfiguration.outputs.filter(output => output).length)
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
   override generateInitialPopulation() {
@@ -189,6 +256,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('probOf2QubitGatesBlocks', JSON.stringify(this.pc.probOf2QubitGates));
     localStorage.setItem('probOf3QubitGatesBlocks', JSON.stringify(this.pc.probOf3QubitGates));
     localStorage.setItem('probOfNQubitGatesBlocks', JSON.stringify(this.pc.probOfNQubitGates));
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
 
     this.updateOutputs();
     this.resetMatrix();
@@ -242,7 +310,41 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
+
+    if (this.validarInputPopSizeInit()) return true;
+    if (this.validarInputPopSizeMax()) return true;
+    if (this.validarInputError()) return true;
+    if (this.validarDatosInputThreshold()) return true;
+    if (this.validarDatosInputFitnessPercentage()) return true;
+    if (this.validarStartingColumns()) return true;
+    if (this.validarProbabilities()) return true;
+
     
+    return false;
+  }
+
+  validarInputPopSize() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.populationSize == null || config.populationSize < 2 || config.populationSize % 2 !== 0) return true;
+    if (config.maxPopulationSize == null || config.maxPopulationSize < 2 || config.maxPopulationSize % 2 !== 0) return true;
+    if (config.populationSize > config.maxPopulationSize) return true;
+    return false;
+  }
+
+  validarStartingColumns() : boolean {
+    const config = this.pc.inputConfiguration;
+    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;
+    if (config.minNumberOfColumns > config.maxNumberOfColumns) return true;
+    return false;
+  }
+
+  validarProbabilities() : boolean {
+    const config = this.pc;
+    if (config.probOf1QubitGates == null || config.probOf1QubitGates < 0 || config.probOf1QubitGates > 100) return true;
+    if (config.probOf2QubitGates == null || config.probOf2QubitGates < 0 || config.probOf2QubitGates > 100) return true;
+    if (config.probOf3QubitGates == null || config.probOf3QubitGates < 0 || config.probOf3QubitGates > 100) return true;
+    if (config.probOfNQubitGates == null || config.probOfNQubitGates < 0 || config.probOfNQubitGates > 100) return true;
     return false;
   }
 
@@ -321,6 +423,105 @@ export class BlocksComponent extends EvolutionaryComponent {
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  transpileCodigo() {
+    this.modalTranspile = true;
+  }
+  
+  selectBackend(backend: Backend) {
+    this.selectedBackends.push(backend);
+    this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+  
+  deselectBackend(backend: Backend) {
+    this.availableBackends.push(backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
+  
+  transpile() {
+    try{
+      const backendsToTranspile = this.selectedBackends.map(b => b.name);
+      this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
+        this.transpiledCode = result;
+      });
+      this.mensajeTemporal = 'The code will be transpiled.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }
+      , 2000);
+    } catch (error) {
+      console.error('Error during transpilation:', error);
+      this.mensajeTemporal = 'Error during transpilation. Please try again.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+    }
+  }
+
+  deleteLocal() {
+    localStorage.removeItem("qucoConfigurationBlocks");
+    this.reload();
+  }
+
+  updateColumnsFromInput() {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+
+    // Asegúrate de tener acceso a qubits y número de columnas deseado
+    const qubits = blockCircuit.qubits;
+    const targetColumns = blockCircuit.numberOfStartColumns;
+
+    // Si hay menos columnas de las que se quiere, añade nuevas
+    while (blockCircuit.startingColumns.length < targetColumns) {
+      const index = blockCircuit.startingColumns.length;
+      const newColumn = new BlockColumn(qubits);
+
+      // Asigna puertas según la posición (opcionalmente puedes personalizar)
+      if (index %2 === 0) newColumn.setGates(new Array(qubits).fill("X"));
+      else if (index === 1) newColumn.setGates(new Array(qubits).fill("H"));
+      else newColumn.setGates(new Array(qubits).fill("H"));
+
+      blockCircuit.startingColumns.push(newColumn);
+    }
+
+    // Si hay más columnas de las que se quiere, elimina del final
+    while (blockCircuit.startingColumns.length > targetColumns) {
+      blockCircuit.startingColumns.pop();
+    }
+
+    // Guarda en localStorage (opcional)
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+  }
+
+  updateColumnsFromInputLeft(side: string) {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+    let originalLength
+    console.log("Updating left columns from input")
+    originalLength = blockCircuit.block.numberOfLeftColumns
+    if (blockCircuit.block.numberOfLeftColumns>blockCircuit.block.leftColumns.length)
+      blockCircuit.block.leftColumns.push(new BlockColumn(blockCircuit.qubits, originalLength))
+    else
+      blockCircuit.block.leftColumns.splice(blockCircuit.block.leftColumns.length-1, 1)
+
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+        
+  }
+
+  updateColumnsFromInputRight(side: string) {
+    const blockCircuit = this.pc.inputConfiguration.blockCircuit;
+    let originalLength
+    console.log("Updating right columns from input")
+    originalLength = blockCircuit.block.numberOfRightColumns
+    if (blockCircuit.block.numberOfRightColumns>blockCircuit.block.rightColumns.length)
+      blockCircuit.block.rightColumns.push(new BlockColumn(blockCircuit.qubits, originalLength))
+    else
+      blockCircuit.block.rightColumns.splice(blockCircuit.block.rightColumns.length-1, 1)
+        
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
   }
 
 }

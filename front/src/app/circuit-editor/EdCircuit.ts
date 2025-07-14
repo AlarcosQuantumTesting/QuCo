@@ -69,7 +69,7 @@ export class EdGate {
 
     constructor(name: string, qubits: number) {
         if (!name) 
-            name = "XXX"
+            name = "XX"
         this.name = name;
         this.code = "def " + name + "() : \n"
             + "\tU = QuantumCircuit(" + qubits + ")\n" +

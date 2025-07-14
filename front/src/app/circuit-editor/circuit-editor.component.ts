@@ -36,6 +36,11 @@ export class CircuitEditorComponent {
 
   customizedGates : EdGate[] = [];
 
+  mensajeTemporal: string = '';
+  searchQuery: string = "";
+  modalCodigo: boolean = false;
+  mostrarModalCrear: boolean = false;
+
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, private circuitsService : EdCircuitsService) {
     this.qiskitService.getCustomizedGates().subscribe(
       gates => {
@@ -59,6 +64,21 @@ export class CircuitEditorComponent {
         circuits => {
           this.circuitNames = circuits  
         })
+  }
+
+  ngOnInit() {
+    this.manager.selectedTemplate = this.manager.templates[0];
+    this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
+        qubitsConfiguration => {
+          this.selectedQubitsConfigurationName = qubitsConfiguration[0];
+          
+          if (this.selectedQubitsConfigurationName) {
+            this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName);
+            this.searchQuery = this.selectedQubitsConfigurationName;
+          }
+            
+      })
+    
   }
 
   measureColumn(column : number)  {
@@ -261,6 +281,8 @@ export class CircuitEditorComponent {
   createCustomizedGate() {
     this.selectedGate = new EdGate('', 1);
     this.creatingNewGate = true;
+
+    this.mostrarModalCrear = true;
   }
 
   addCustomizedGate() {
@@ -293,6 +315,7 @@ export class CircuitEditorComponent {
   
   cancel() {
     this.selectedGate = undefined;
+    this.mostrarModalCrear = false;
   }
 
   removeGate(qubit: number, column: number) {
@@ -327,4 +350,120 @@ export class CircuitEditorComponent {
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
   }
+
+
+  onSearchInput() {
+    // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      this.selectCOnfigIfMatch();
+    }
+  }
+
+  onFocusInput() {
+    
+  }
+
+  selectCOnfigIfMatch() {
+    this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(configNames => {
+      // Assuming configNames is an array of strings, adjust if it's an array of objects
+      const match = configNames.find(name => name.toLowerCase() === this.searchQuery.toLowerCase());
+      if (match) {
+        // If you want to set selectedTemplate, you may need to fetch the actual template object
+        // Here, just storing the name as an example
+        this.qubitsConfiguration = new QubitsConfiguration()
+
+        if (!this.circuit) {
+          this.circuit = new EdCircuit()
+          this.circuit.columns = 10
+          this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+        } else {
+          this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+        }
+        //console.log('Template seleccionado:', match);
+      }
+    });
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+  }
+
+  searchTemplate() {
+    const match = this.manager.templates.find(
+      template => template.fileName.toLowerCase() === this.searchQuery.trim().toLowerCase()
+    );
+  
+    if (match) {
+      this.manager.selectedTemplate = match;
+      /*console.log('Template seleccionado:', match);
+      console.log('Nombre del template:', this.nameTemplate);*/
+      //this.editingTemplate = false;
+      // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
+    } else {
+      console.warn('No se encontró ningún template con ese nombre.');
+    }
+  }
+
+  searchConfiguration() {
+    this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(configNames => {
+      // Assuming configNames is an array of strings, adjust if it's an array of objects
+      const match = configNames.find(name => name.toLowerCase() === this.searchQuery.toLowerCase());
+      if (match) {
+        this.selectedQubitsConfigurationName = match;
+        this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName);
+      } else {
+        console.warn('No se encontró ninguna configuracion con ese nombre.');
+      }
+    });
+  }
+
+  showModalCode() {
+    this.modalCodigo = true;
+    this.generateCode();
+  }
+
+  copiarCodigo() {
+    const codigo = this.code?.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      console.log('Código copiado al portapapeles');
+      alert('Code copied to clipboard');
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
+    });
+  }
+
+  gateExists(): boolean {
+    for (let i=0; i < this.customizedGates.length; i++) {
+      if (this.selectedGate!.name === this.customizedGates[i].name){
+        return true;
+      }
+    }
+    return false;
+    
+  }
+
+  gateQubitsInput(): boolean {
+    if (this.selectedGate!.qubits <= 0){
+      return true;
+    }
+    return false;
+  }
+
+  gateDescriptionInput(): boolean {
+    if (this.selectedGate!.description?.trim() === ''){
+      return true;
+    }
+    return false;
+  }
+
+  codeInput() {
+    if (this.selectedGate!.code?.trim() === ''){
+      return true;
+    }
+    return false;
+  }
+
 }
