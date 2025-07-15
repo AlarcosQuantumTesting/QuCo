@@ -42,6 +42,10 @@ export class CircuitEditorComponent {
   mostrarModalCrear: boolean = false;
   gateMselected: boolean = false;
   gatesModal: boolean = false;
+  showDeleteModal: boolean = false;
+  deleteIndex: number = 0;
+  gateToDelete?: EdGate;
+  modalCodigoGate: boolean = false;
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, private circuitsService : EdCircuitsService) {
     this.qiskitService.getCustomizedGates().subscribe(
@@ -299,7 +303,13 @@ export class CircuitEditorComponent {
     this.creatingNewGate = false;
     this.qiskitService.saveGate(this.selectedGate!).subscribe(
         ok=> {
-          this.customizedGates.push(this.selectedGate!)
+          this.customizedGates.push(this.selectedGate!);
+          this.mensajeTemporal = 'Gate created successfully';
+          this.selectedGate = undefined;
+          this.mostrarModalCrear = false;
+          setTimeout(() => {
+            this.mensajeTemporal = '';
+          }, 2000);
         },
         error => {
           this.error = error.error.message
@@ -308,14 +318,22 @@ export class CircuitEditorComponent {
   }
 
   deleteFromServer() {
-    let option = confirm("Are you sure you want to delete this gate?");
+    /*let option = confirm("Are you sure you want to delete this gate?");
     if (!option || !this.selectedGate)
-      return;
+      return;*/
+    if (!this.selectedGate)
+      return
     this.creatingNewGate = false;
     this.qiskitService.deleteFromServer(this.selectedGate!).subscribe(
         ok=> {
           this.customizedGates = this.customizedGates.filter(g => g.name !== this.selectedGate!.name);
           this.selectedGate = undefined;
+          this.gateToDelete = undefined;
+          this.showDeleteModal = false;
+          this.mensajeTemporal = 'Gate deleted successfully';
+          setTimeout(() => {
+            this.mensajeTemporal = '';
+          }, 2000);
         },
         error => {
           this.error = error.error.message
@@ -445,6 +463,15 @@ export class CircuitEditorComponent {
     });
   }
 
+  copiarCodigoGate() {
+    const codigo = this.selectedGate?.code.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      alert('Code copied to clipboard');
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
+    });
+  }
+
   gateExists(): boolean {
     for (let i=0; i < this.customizedGates.length; i++) {
       if (this.selectedGate!.name === this.customizedGates[i].name){
@@ -474,6 +501,27 @@ export class CircuitEditorComponent {
       return true;
     }
     return false;
+  }
+
+  openDeleteModal(gate: any, index: number) {
+    this.gateToDelete = gate;
+    this.deleteIndex = index;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete() {
+    this.deleteFromServer();
+    this.selectedGate = this.gateToDelete;
+  }
+
+  cancelDelete() {
+    this.gateToDelete = undefined;
+    this.showDeleteModal = false;
+  }
+
+  codeShowGates(gate: any) {
+    this.selectedGate = gate;
+    this.modalCodigoGate = true;
   }
 
 }

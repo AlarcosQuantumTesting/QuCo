@@ -56,6 +56,7 @@ td {
 
 .physicalQubits {
   background-color: #095b614a;
+  /* color: white; */
 }
 
 
@@ -386,8 +387,10 @@ label {
 }
 
 .fa-edit:hover {
-    color: #0f3436;
-    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.fa-plus:hover {
     cursor: pointer;
 }
 
@@ -1113,4 +1116,206 @@ ol.list-instructions {
 
 .gate-circuit-btn:hover {
    background: #912703;
+}
+
+.expressions-table {
+  border-collapse: collapse;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border: none;
+  text-align: center;
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.expressions-table td {
+  background-color: #4377611c;
+}
+
+.expressions-table td:hover {
+  background-color: #4377611c;
+  cursor: default;
+}
+
+.table-container-expressions {
+  margin: 20px;
+}
+
+.btn-createExp-edit:hover {
+  /* background: none; */
+  background-color: #1a7c83;
+  transform: scale(1.05);
+}
+
+.update-btn {
+  background-color: #149099;
+  border-radius: 20%;
+  padding: 10px;
+}
+
+.update-btn:hover {
+  background-color: #0b555a;
+  transform: scale(1.05);
+}
+
+.delete-expression-btn {
+  background-color: rgb(219, 67, 67);
+  border-radius: 20%;
+  padding: 10px;
+}
+
+.delete-expression-btn:hover {
+  background-color: rgb(139, 70, 70);
+  transform: scale(1.05);
+}
+
+.modal-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .btn-delete-modal {
+    background-color: #dc3545;
+    color: white;
+  }
+
+.btn-delete-modal:hover {
+  background-color: #881520;
+  transform: scale(1.05);
+}
+
+.btn-cancel-delete-modal {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-cancel-delete-modal:hover {
+  background-color: #414549;
+  transform: scale(1.05);
+}
+
+.modal-delete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  border-radius: 15px;
+}
+
+/* Caja del contenido del modal */
+.modal-content-delete {
+  background-color: white;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 90vw; /* Para evitar que se desborde en pantallas pequeñas */
+  max-height: 90vh;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+}
+
+/* Encabezado del modal */
+.modal-header-delete {
+  width: 100%;
+  background-color: #a1241b;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-weight: bold;
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-message-delete {
+  padding: 20px;
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+}
+
+
+.btn-createExp-edit {
+  /* background: none;
+  padding: 7px; */
+
+  background-color: #0b555a;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 8px 10px;
+}
+
+.btn-createExp-edit:hover {
+  /* background: none; */
+  background-color: #1a7c83;
+  transform: scale(1.05);
+}
+
+
+.btn-confirm,
+.btn-cancel {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-width: 100px;
+  margin-top: 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+i:hover {
+  cursor: pointer;
+}
+
+.instructions {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.instructions p {
+  text-align: justify;
+}
+
+.instructions code {
+  background-color: #eee;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.instructions h4 {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #0b555a;
+}
+
+.instructions ul,
+.instructions ol {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.instructions li {
+  margin-bottom: 6px;
 }
