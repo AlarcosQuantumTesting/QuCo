@@ -174,6 +174,7 @@ export class DeterministicComponent extends GroverStyle {
     const savedUserExpressions = localStorage.getItem('processedExpressionsDeterministic');
 
     if (savedQubits) {
+      this.qubits = Number(savedQubits);
         this.buildMatrixActions();
         setTimeout(() => {
 
@@ -826,6 +827,8 @@ export class DeterministicComponent extends GroverStyle {
     this.numberOfQubits = this.qubits;
     this.userExpressions = [];
     this.mostrarTabla = true;
+    this.pageInput = 1;
+    this.pageIndex = 1;
     this.reset();
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrixDeterministic');

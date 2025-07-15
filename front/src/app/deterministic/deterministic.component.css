@@ -1703,3 +1703,23 @@ input[disabled], textarea[disabled], select[disabled] {
   font-size: 1rem;
   color: #333;
 }
+
+.paginador-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  color: inherit; /* opcional: mantiene el color del texto del contenedor */
+  padding: 3px;
+}
+
+.paginador-btn:hover {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+.numPaginador {
+  font-size: 12px;
+}
