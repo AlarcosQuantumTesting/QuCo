@@ -295,6 +295,7 @@ export class CircuitEditorComponent {
   createCustomizedGate() {
     this.selectedGate = new EdGate('', 1);
     this.creatingNewGate = true;
+    this.selectedGate = undefined;
 
     this.mostrarModalCrear = true;
   }
