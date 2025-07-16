@@ -1,5 +1,5 @@
 {
-	"environment" : "Mac de Maco",
+	"environment" : "Mac de Patri",
 	"DEBUG" : true,
 	"environments" : [
 		{

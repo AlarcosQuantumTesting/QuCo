@@ -313,10 +313,9 @@
               </table>
           </div>
 
-          <!-- Botón de cerrar -->
-          <div class="modal-footer">
+          <!-- <div class="modal-footer">
               <button (click)="mostrarModalCrear = true; gatesModal = false" class="btn-createExp-edit"><i title="Create a new gate" class="fa fa-plus edit-create-icon"></i></button>
-          </div>
+          </div> -->
       </div>
     </div>
 
@@ -327,7 +326,8 @@
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Qiskit Code</h2>
 
-                <button class="close"><i class="close-i" (click)="modalCodigoGate = false; selectedGate = undefined">&times;</i></button>
+                <!-- <button class="close"><i class="close-i" (click)="modalCodigoGate = false; selectedGate = undefined">&times;</i></button> -->
+                 <button class="close"><i class="close-i" (click)="modalCodigoGate = false">&times;</i></button>
             </div>
 
             <div class="code-output">
@@ -372,63 +372,63 @@
             </div>
 
             <div class="instructions">
-  <p>
-    Use the buttons to <strong>add or remove qubits and columns</strong>. Click on a cell to place a gate, or double-click to remove it.
-  </p>
+            <p>
+              Use the buttons to <strong>add or remove qubits and columns</strong>. Click on a cell to place a gate, or double-click to remove it.
+            </p>
 
-  <p>
-    Initially, there are no gates available, but you can create your own by clicking on the button with the icon <strong>"<i class="fa fa-plus"></i>"</strong>.
-  </p>
+            <p>
+              Initially, there are no gates available, but you can create your own by clicking on the button with the icon <strong>"<i class="fa fa-plus"></i>"</strong>.
+            </p>
 
-  <p>
-    <u>Example</u>: Suppose you want a circuit with <strong>10 qubits</strong> (from <code>q<sub>0</sub></code> to <code>q<sub>9</sub></code>),
-    and you want to <strong>filter prime numbers in blocks of 5 qubits</strong>. For instance, for the input <code>01011 10000</code>,
-    the first block (<code>01011</code>) is prime, so you want to highlight it.
-  </p>
+            <p>
+              <u>Example</u>: Suppose you want a circuit with <strong>10 qubits</strong> (from <code>q<sub>0</sub></code> to <code>q<sub>9</sub></code>),
+              and you want to <strong>filter prime numbers in blocks of 5 qubits</strong>. For instance, for the input <code>01011 10000</code>,
+              the first block (<code>01011</code>) is prime, so you want to highlight it.
+            </p>
 
-  <p>
-    You can create a customized gate to do this, which we'll call <code>PF5</code> (<i>Prime Filter 5</i>). This gate will act on 5 qubits.
-  </p>
+            <p>
+              You can create a customized gate to do this, which we'll call <code>PF5</code> (<i>Prime Filter 5</i>). This gate will act on 5 qubits.
+            </p>
 
-  <h4>To create the PF5 gate:</h4>
-  <ol>
-    <li>Click on the button with the icon <strong>"<i class="fa fa-plus"></i>"</strong> to create a customized gate</li>
-    <li>Fill the form with:
-      <ul>
-        <li><strong>Gate name:</strong> <code>PF5</code></li>
-        <li><strong>Number of qubits:</strong> <code>5</code></li>
-        <li><strong>Description:</strong> Filters prime numbers in blocks of 5 qubits</li>
-      </ul>
-    </li>
-    <li>To fill in the <strong>"Function code of this gate"</strong> field:
-      <ol>
-        <li>Duplicate this tab in your browser</li>
-        <li>Click on <strong>"Grover"</strong></li>
-        <li>Build a 5-qubit circuit</li>
-        <li>Follow the instructions (check the 5<sup>th</sup> expression example)</li>
-        <li>Click on <strong>"Qiskit code as a function"</strong></li>
-        <li>Copy the generated code</li>
-        <li>Paste the code into the "Function code" field. <strong>Important:</strong> rename the function to match the gate name (<code>PF5</code>)</li>
-        <li>Click <strong>Save</strong></li>
-      </ol>
-    </li>
-  </ol>
+            <h4>To create the PF5 gate:</h4>
+            <ol>
+              <li>Click on the button with the icon <strong>"<i class="fa fa-plus"></i>"</strong> to create a customized gate</li>
+              <li>Fill the form with:
+                <ul>
+                  <li><strong>Gate name:</strong> <code>PF5</code></li>
+                  <li><strong>Number of qubits:</strong> <code>5</code></li>
+                  <li><strong>Description:</strong> Filters prime numbers in blocks of 5 qubits</li>
+                </ul>
+              </li>
+              <li>To fill in the <strong>"Function code of this gate"</strong> field:
+                <ol>
+                  <li>Duplicate this tab in your browser</li>
+                  <li>Click on <strong>"Grover"</strong></li>
+                  <li>Build a 5-qubit circuit</li>
+                  <li>Follow the instructions (check the 5<sup>th</sup> expression example)</li>
+                  <li>Click on <strong>"Qiskit code as a function"</strong></li>
+                  <li>Copy the generated code</li>
+                  <li>Paste the code into the "Function code" field. <strong>Important:</strong> rename the function to match the gate name (<code>PF5</code>)</li>
+                  <li>Click <strong>Save</strong></li>
+                </ol>
+              </li>
+            </ol>
 
-  <h4>Using the gate in the circuit:</h4>
-  <p>
-    Set the number of qubits to <strong>10</strong>. The circuit editor (a table) will now have 10 rows. Click on the <code>PF5</code> gate to select it (its color will change), then click on <code>q<sub>0</sub></code> or <code>q<sub>5</sub></code> to place it.
-  </p>
+            <h4>Using the gate in the circuit:</h4>
+            <p>
+              Set the number of qubits to <strong>10</strong>. The circuit editor (a table) will now have 10 rows. Click on the <code>PF5</code> gate to select it (its color will change), then click on <code>q<sub>0</sub></code> or <code>q<sub>5</sub></code> to place it.
+            </p>
 
-  <p>
-    To add measurement gates to all qubits, use the <strong>"M <i class="fas fa-ruler"></i>"</strong> button on the last column of each qubit row.
-  </p>
+            <p>
+              To add measurement gates to all qubits, use the <strong>"M <i class="fas fa-ruler"></i>"</strong> button on the last column of each qubit row.
+            </p>
 
-  <p>
-    Once the circuit is built, you can press the button with the icon <strong>"<i class="fa fa-code"></i>"</strong> to obtain the Qiskit code.
-    <br>
-    <strong><em>Note:</em></strong> the generated code is based on a template and may need to be modified to fit your specific needs.
-  </p>
-</div>
+            <p>
+              Once the circuit is built, you can press the button with the icon <strong>"<i class="fa fa-code"></i>"</strong> to obtain the Qiskit code.
+              <br>
+              <strong><em>Note:</em></strong> the generated code is based on a template and may need to be modified to fit your specific needs.
+            </p>
+          </div>
 
         </div>
     </div>
