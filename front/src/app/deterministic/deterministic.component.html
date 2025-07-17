@@ -159,11 +159,11 @@
                         <button (click)="goToPage()">Ir</button>
                       </div> -->
                       <small>
-                        <button class="paginador-btn" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1" [disabled]="pageIndex === 0">
+                        <button class="paginador-btn"  *ngIf="pageCount > 1" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1" [disabled]="pageIndex === 0">
                           <i class="fas fa-chevron-left"></i>
                         </button>
 
-                        <input
+                        <input *ngIf="pageCount > 1"
                           class="inputPaginador"
                           type="number"
                           [min]="1"
@@ -173,9 +173,11 @@
                           (ngModelChange)="goToPage()"
                         />
 
-                        <span> / {{ pageCount }}</span>
+                        <span *ngIf="pageCount > 1"> / {{ pageCount }}</span>
 
-                        <button class="paginador-btn" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">
+                        <!-- <span *ngIf="pageCount <= 1">{{ pageCount }} / {{ pageCount }}</span> -->
+
+                        <button class="paginador-btn"  *ngIf="pageCount > 1" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">
                           <i class="fas fa-chevron-right"></i>
                         </button>
                       </small>

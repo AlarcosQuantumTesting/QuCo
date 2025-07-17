@@ -837,6 +837,7 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem('mostrarTabla', JSON.stringify(this.mostrarTabla));
     localStorage.setItem('selectedAlgorithm', this.selectedAlgorithm);
 
+    this.pageIndex = 0;
 
     
     //this.getEmptyMatrix();
