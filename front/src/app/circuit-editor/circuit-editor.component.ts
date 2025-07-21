@@ -8,6 +8,9 @@ import { QiskitService } from '../qiskit.service';
 import { QubitsConfigurationService } from '../qubits-configuration.service';
 import { EdCircuitsService } from '../ed-circuits.service';
 
+import { Backend } from '../deterministic/Backend';
+import { TranspileService } from '../transpile.service';
+
 @Component({
   selector: 'app-circuit-editor',
   templateUrl: './circuit-editor.component.html',
@@ -46,8 +49,15 @@ export class CircuitEditorComponent {
   deleteIndex: number = 0;
   gateToDelete?: EdGate;
   modalCodigoGate: boolean = false;
+  modalTranspile: boolean = false;
 
-  constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, private circuitsService : EdCircuitsService) {
+  circuitName: string = '';
+  transpiledCode: string = '';
+  availableBackends: Backend[] = [];
+  selectedBackends: Backend[] = [];
+
+  constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
+    private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
     this.qiskitService.getCustomizedGates().subscribe(
       gates => {
         for (let i=0; i<gates.length; i++) {
@@ -73,6 +83,15 @@ export class CircuitEditorComponent {
   }
 
   ngOnInit() {
+
+    this.transpileService.getBackends().subscribe(backends => {
+      this.availableBackends = backends;
+    });
+    
+    
+    this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
+    this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
+
     this.manager.selectedTemplate = this.manager.templates[0];
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
         qubitsConfiguration => {
@@ -525,5 +544,47 @@ export class CircuitEditorComponent {
     this.selectedGate = gate;
     this.modalCodigoGate = true;
   }
+
+  transpileCodigo() {
+    this.modalTranspile = true;
+  }
+
+  selectBackend(backend: Backend) {
+        this.selectedBackends.push(backend);
+        this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+        localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+        localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+      }
+    
+      deselectBackend(backend: Backend) {
+        this.availableBackends.push(backend);
+        this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+        localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+        localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+      }
+    
+      transpile() {
+        try{
+          const backendsToTranspile = this.selectedBackends.map(b => b.name);
+          if (this.code) {
+            this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
+              this.transpiledCode = result;
+            });
+          }
+          
+          this.mensajeTemporal = 'The code will be transpiled.';
+          setTimeout(() => {
+            this.mensajeTemporal = '';
+          }
+          , 2000);
+        } catch (error) {
+          console.error('Error during transpilation:', error);
+          this.mensajeTemporal = 'Error during transpilation. Please try again.';
+          setTimeout(() => {
+            this.mensajeTemporal = '';
+          }, 2000);
+        }
+        
+      }
 
 }
