@@ -940,7 +940,6 @@ export class DeterministicComponent extends GroverStyle {
       this.inParallel = false;
     }
   }
-
   onAlgorithmChange(algorithm: string): void {
     this.selectedAlgorithm = algorithm;
     /*if(this.selectedAlgorithm === 'grover') {
@@ -960,6 +959,8 @@ export class DeterministicComponent extends GroverStyle {
     /*  this.isGrover = algorithm === 'grover';
     this.isGrenoble = algorithm === 'grenoble';
     this.isOriginalGR = algorithm === 'originalGR';*/
+    
+    //this.mostrarTabla = false;
 
     if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
@@ -981,6 +982,7 @@ export class DeterministicComponent extends GroverStyle {
       });
     }
 
+    localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     
   }
 
@@ -1315,7 +1317,11 @@ export class DeterministicComponent extends GroverStyle {
   copiarCodigo() {
     const codigo = this.qiskitCode ? this.qiskitCode.lines.join('\n') : '';
     navigator.clipboard.writeText(codigo).then(() => {
-      alert('Code copied to clipboard');
+      //alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
         }).catch(err => {
           console.error('Error copying code: ', err);
       });

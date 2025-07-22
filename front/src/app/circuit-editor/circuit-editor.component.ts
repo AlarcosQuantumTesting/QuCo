@@ -40,6 +40,7 @@ export class CircuitEditorComponent {
   customizedGates : EdGate[] = [];
 
   mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
   searchQuery: string = "";
   modalCodigo: boolean = false;
   mostrarModalCrear: boolean = false;
@@ -478,7 +479,10 @@ export class CircuitEditorComponent {
     const codigo = this.code?.toString() || '';
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
-      alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
@@ -487,7 +491,10 @@ export class CircuitEditorComponent {
   copiarCodigoGate() {
     const codigo = this.selectedGate?.code.toString() || '';
     navigator.clipboard.writeText(codigo).then(() => {
-      alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });

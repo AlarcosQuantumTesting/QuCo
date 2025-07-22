@@ -23,6 +23,7 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   message: string | null = null;
   mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
   notBuilt: boolean = true;
   templateSelected: boolean = false;
   generateClicked: boolean = false;
@@ -419,7 +420,10 @@ export class BlocksComponent extends EvolutionaryComponent {
     const codigo = this.code?.toString() || '';
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
-      alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });

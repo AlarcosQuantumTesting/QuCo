@@ -6,9 +6,14 @@
 
 <body>
   
-<div class="mensaje-temporal" *ngIf="mensajeTemporal">
-      {{ mensajeTemporal }}
+  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+  <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
+    {{ mensajeTemporal2 }}
   </div>
+
 
   <div class="titulo">
       <h1>Algorithms
@@ -242,10 +247,10 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
+                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(); copiarCodigo()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true); copiarCodigo()">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>

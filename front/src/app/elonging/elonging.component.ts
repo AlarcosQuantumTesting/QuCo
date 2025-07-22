@@ -185,6 +185,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   };
 
   mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
   tooltipGenerationVisible: boolean = false;
   modalStrategyDetails: boolean = false;
   selectedOptionFreq: string = 'none';
@@ -470,7 +471,10 @@ export class ElongingComponent extends EvolutionaryComponent {
     const codigo = this.code?.toString() || '';
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
-      alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });

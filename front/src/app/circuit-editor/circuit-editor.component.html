@@ -13,6 +13,10 @@
         {{ mensajeTemporal }}
     </div>
 
+    <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
+      {{ mensajeTemporal2 }}
+    </div>
+
     <div class="titulo">
         <h1>Circuits editor</h1>
     </div>
@@ -57,7 +61,7 @@
                       </option>
                   </select>
                   <div>
-                    <button class="btn-search" title="See code" (click)="showModalCode()" [disabled]="selectedQubitsConfigurationName==null"><i class="fa fa-code"></i></button>
+                    <button class="btn-search" title="See code" (click)="showModalCode(); copiarCodigo()" [disabled]="selectedQubitsConfigurationName==null"><i class="fa fa-code"></i></button>
                   </div>
                   
                 </div>
@@ -304,7 +308,7 @@
                           <td>{{ cg.qubits }}</td>
                           <td>{{ cg.description }}</td>
                           <td>
-                            <button class= "update-btn" title="See code" (click)="codeShowGates(cg)" style="margin-right: 10px;"><i class="fa fa-code"></i></button>
+                            <button class= "update-btn" title="See code" (click)="codeShowGates(cg); ; copiarCodigoGate()" style="margin-right: 10px;"><i class="fa fa-code"></i></button>
                             <button class="delete-expression-btn" title="Delete gate" (click)="openDeleteModal(cg, i)">
                               <i class="fas fa-trash"></i> 
                             </button>
