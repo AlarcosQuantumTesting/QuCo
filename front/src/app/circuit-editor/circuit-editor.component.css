@@ -1382,10 +1382,9 @@ i:hover {
   height: 250px;
   max-height: 250px;
   overflow-y: auto;
-  margin-left: 10px;
-  margin-right: 10px;
+  padding-inline-start: 10px;
   margin-block-start: 0px;
-  width: 98%;
+  /* width: 98%; */
 }
 
 .list-group-item {
