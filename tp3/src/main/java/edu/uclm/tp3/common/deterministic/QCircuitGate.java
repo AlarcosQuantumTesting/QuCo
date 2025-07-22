@@ -16,10 +16,18 @@ public class QCircuitGate extends QGate {
         this.columns = new ArrayList<>();
     }
 
-    public void addColumnWithCircuitGate(QCircuitGate gate) {
+    public QGate addColumn(QGate gate) {
         QColumn column = new QColumn();
         column.addGate(gate);
         this.addColumn(column);
+        return this;
+    }
+
+    public void addColumn(String gateName, QGate otherGate) {
+        QColumn column = new QColumn();
+        column.addGate(new QStdGate(gateName));
+        column.addGate(otherGate);
+        this.columns.add(column);
     }
 
     public void addColumn(QColumn column) {

@@ -244,12 +244,12 @@ public class GroverService {
         for (int i=0; i<optimal; i++) {
             for (int j=0; j<oracles.size(); j++) {
                 QCircuitGate oracle = oracles.get(j);
-                zeroGate.addColumnWithCircuitGate(oracle);
+                zeroGate.addColumn(oracle);
             }
-            zeroGate.addColumnWithCircuitGate(diffuser);
+            zeroGate.addColumn(diffuser);
         }
         quirkCircuit.addGate(zeroGate);
-        quirkCircuit.addColumnWithGate(zeroGate);
+        quirkCircuit.addColumn(zeroGate);
         quirkCircuit.setQubits(qubits);
         return quirkCircuit;
     }

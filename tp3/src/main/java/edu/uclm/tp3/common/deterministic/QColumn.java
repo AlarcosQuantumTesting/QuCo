@@ -14,8 +14,9 @@ public class QColumn {
         this.gates = new ArrayList<>();
     }
 
-    public void addGate(QGate gate) {
+    public QColumn addGate(QGate gate) {
         this.gates.add(gate);
+        return this;
     }
 
     public void setGate(int qubit, QGate gate) {

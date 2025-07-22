@@ -14,17 +14,17 @@ public class BinaryTree implements Serializable{
 
     private int qubits;
 	
-	String name;
+	public String name;
     int leftFreq;
     int rightFreq;
-    float leftProbability, rightProbability;
-    float leftAngle;
+    public float leftProbability, rightProbability;
+    public float leftAngle;
     
     BinaryTree parent;
-    BinaryTree leftChild;
-    BinaryTree rightChild;
+    public BinaryTree leftChild;
+    public BinaryTree rightChild;
 
-    int depth;
+    public int depth;
 
     private transient GRCircuit circuit;
     
@@ -310,7 +310,7 @@ public class BinaryTree implements Serializable{
     public int hashCode() {
         // 1. Iniciamos con los bits de leftAngle
         int result = Float.floatToIntBits(this.leftProbability);
-        result = 31 * result + Float.floatToIntBits(this.rightProbability);
+        //result = 31 * result + Float.floatToIntBits(this.rightProbability);
         // 3. Añadimos la profundidad (depth)
         result = 31 * result + this.depth;
         // 4. Incorporamos el hash recursivo del hijo izquierdo

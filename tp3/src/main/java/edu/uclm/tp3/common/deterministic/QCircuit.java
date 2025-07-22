@@ -65,7 +65,15 @@ public class QCircuit {
         this.gates.add(gate);
     }
 
-    public void addColumnWithGate(QGate gate) {
+    public void addGates(List<QGate> gates) {
+        for (QGate gate : gates) {
+            if (this.gates.stream().anyMatch(g -> g.getName().equals(gate.getName())))
+                continue;
+            this.gates.add(gate);
+        }
+    }
+
+    public void addColumn(QGate gate) {
         QColumn column = new QColumn();
         column.addGate(gate);
         this.addColumn(column);
@@ -105,8 +113,8 @@ public class QCircuit {
 
     public Map<String, Object> clean(int qubits, String splitIndex) {
 		this.sortGates();
-		/*QColumn column0 = new QColumn();
-		if (splitIndex==null)
+		QColumn column0 = new QColumn();
+		/*if (splitIndex==null)
 			column0.addGate("~0");
 		else
 			column0.addGate("~" + splitIndex + "0");

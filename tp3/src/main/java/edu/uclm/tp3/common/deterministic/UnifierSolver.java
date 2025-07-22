@@ -110,13 +110,15 @@ public class UnifierSolver {
 	private QCircuit buildQuirk(BinaryTree node, QCircuit generalCircuit) {
 		QCircuit circuit = new QCircuit();
 		circuit.setName(node.name);
-		if (node.getDepth()==2) {
-			/*if (node.leftProbability!=0 && node.rightProbability!=0) {
+		/*if (node.getDepth()==2) {
+			if (node.leftProbability!=0 && node.rightProbability!=0) {
 				QMatrixGate ry0 = this.getQMatrixGate(node);
 				ry0.name = node.name + "-0";
-				circuit.addColumn(ry0);
+				QColumn ry0Column = new QColumn().addGate(ry0);
+				circuit.addColumn(ry0Column);
 				generalCircuit.addGate(ry0);
-				circuit.addColumn("X");
+				QColumn x0Column = new QColumn().addGate(new QStdGate("X"));
+				circuit.addColumn(x0Column);
 				
 				BinaryTree leftChild = node.leftChild;
 				QMatrixGate ryLeft = this.getQMatrixGate(leftChild);
@@ -173,9 +175,9 @@ public class UnifierSolver {
 				circuit.addColumn("X");
 				BinaryTree rightChild = node.rightChild;
 				circuit.addColumn("•", rightChild.name);
-			}*/
+			}
 		}
-		//generalCircuit.addGate(circuit);
+		generalCircuit.addGate(circuit);*/
 		return circuit;
 	}
 

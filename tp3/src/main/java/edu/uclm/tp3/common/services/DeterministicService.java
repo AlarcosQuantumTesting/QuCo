@@ -117,23 +117,25 @@ public class DeterministicService {
 	
 	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String functionPrefix, boolean originalGR) throws Exception {
 		BinaryTree tree = this.buildTree(qubits, expectedFrequencies.getPairs(), functionPrefix, null);
-		
+
 		if (!originalGR && physicalAngle>0) {
 			double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
 			minProb = minProb * minProb;
 			tree.removeLowAngles(physicalAngle);
 		}
 
+		QCircuit quirkCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, functionPrefix, originalGR);
+		
 		int shots = expectedFrequencies.getShots();
 		UnifierSolver solver = new UnifierSolver(tree, functionPrefix, originalGR);
 		Map<String, Object> result = solver.solve(shots);
 
-		QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
+		//QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
 		Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, null);
 
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
-		result.put("#SHOTS#", shots);
+		result.put("#SHOTS#", "1024");
 		result.put("#CALCULUS#", "circuits[0].append(get" + functionPrefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])");
 		result.put("tree", tree.toMap());
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph" : "Grenoble");
@@ -197,7 +199,7 @@ public class DeterministicService {
 		result.put("QUIRK", partialCircuits);		
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
-		result.put("#SHOTS#", expectedFrequencies.getShots());
+		result.put("#SHOTS#", "1024");
 		result.put("partialCircuits", partialCircuits);
 
 		return result;
@@ -239,7 +241,7 @@ public class DeterministicService {
 
 		result.put("#QUBITS#", qubits*numberOfPairs);
 		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
-		result.put("#SHOTS#", shots);
+		result.put("#SHOTS#", "1024");
 		result.put("QUIRK", generalCircuit);
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph parallel" : "Grenoble parallel");
 

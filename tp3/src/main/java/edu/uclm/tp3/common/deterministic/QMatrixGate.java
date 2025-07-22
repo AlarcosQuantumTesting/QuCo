@@ -7,12 +7,13 @@ public class QMatrixGate extends QGate {
     private double theta = Math.PI; // Valor por defecto
     private double[][] matrix = new double[2][2];
 
-    public void setTheta(double leftAngle) {
+    public QGate setTheta(double leftAngle) {
         this.theta = leftAngle;
         this.matrix[0][0] = Math.cos(theta / 2);
         this.matrix[0][1] = -Math.sin(theta / 2);
         this.matrix[1][0] = Math.sin(theta / 2);
         this.matrix[1][1] = Math.cos(theta / 2);
+        return this;
     }
 
     @Override

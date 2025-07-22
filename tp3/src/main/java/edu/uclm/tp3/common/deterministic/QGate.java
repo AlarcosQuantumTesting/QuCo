@@ -9,9 +9,10 @@ public abstract class QGate {
     protected String name;
     protected boolean control;
 
-    public void setName(String name) {
+    public QGate setName(String name) {
         this.name = name;
         this.control = name.equals("•") || name.equals("\u2022");
+        return this;
     }
 
     public String getName() {
