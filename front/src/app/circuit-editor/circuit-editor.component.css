@@ -251,6 +251,8 @@ p {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    flex-direction: row; /* apila verticalmente en móviles */
 }
 
 
@@ -299,6 +301,9 @@ label {
 
 .input-group {
     position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   
