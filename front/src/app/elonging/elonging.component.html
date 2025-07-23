@@ -3,6 +3,10 @@
       {{ mensajeTemporal }}
     </div>
 
+    <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
+        {{ mensajeTemporal2 }}
+    </div>
+
     <div class="titulo">
       <h1>Genetic algorithm</h1>
     </div>
@@ -325,11 +329,11 @@
                         </th>
                         <th *ngFor="let individual of individuals; let individualIndex = index"
                             [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
-                            <span (click)="getCode(individual)" class="solutionFound" *ngIf="individual.selected[fitnesserIndex]">💃</span>
-                            <u (click)="isResultCode(individual, fitnesserIndex)" [class.solutionFound]="individual.selected[fitnesserIndex]">
+                            <span (click)="getCode(individual); copiarCodigo()" class="solutionFound" *ngIf="individual.selected[fitnesserIndex]">💃</span>
+                            <u (click)="isResultCode(individual, fitnesserIndex); copiarCodigo()" [class.solutionFound]="individual.selected[fitnesserIndex]">
                                 {{ individuals[individualIndex].index }}
                             </u>
-                            <span (click)="getCode(individual)" *ngIf="individual.selected[fitnesserIndex]" class="solutionFound">💃</span>
+                            <span (click)="getCode(individual); copiarCodigo()" *ngIf="individual.selected[fitnesserIndex]" class="solutionFound">💃</span>
                         </th>
                     </tr>
                     <tr *ngFor="let i of [].constructor(pc.inputConfiguration!.expectedFrequencies.length); let rowIndex = index" align="center">

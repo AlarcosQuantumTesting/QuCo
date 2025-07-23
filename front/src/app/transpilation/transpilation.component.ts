@@ -13,6 +13,7 @@ export class TranspilationComponent {
   svgCircuit? : any
 
   mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
   searchQuery: string = "";
   transpilationSelected: any = null;
   transpilationFiltered: any[] = [];
@@ -186,7 +187,10 @@ export class TranspilationComponent {
     const codigo = this.transpiledCode?.toString() || '';
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
-      alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });

@@ -6,9 +6,14 @@
 
 <body>
   
-<div class="mensaje-temporal" *ngIf="mensajeTemporal">
-      {{ mensajeTemporal }}
+  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+        {{ mensajeTemporal }}
+    </div>
+
+  <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
+    {{ mensajeTemporal2 }}
   </div>
+
 
   <div class="titulo">
       <h1>Algorithms
@@ -33,7 +38,7 @@
                       <small class="input-hint">[1 - 24]</small>
                   </div>
 
-                  <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs()" (change)="cambioInput = true; updateOutputs()" class="form-control">
+                  <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs(); mostrarTabla = false" (change)="cambioInput = true; updateOutputs()" class="form-control">
                   <span *ngIf="qubits !== null && (qubits < 1 || qubits > 24)" class="error-text">
                       Must be between 1 and 24
                   </span>
@@ -126,13 +131,13 @@
             </tr>
             <tr>
               <th rowspan="2">
-                Output
+                <!-- Output
                 <br>
                 <small>
                   ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
-                </small>
+                </small> -->
                 <!-- Paginación -->
-                <div style="text-align: center; margin: 1em 0;">
+                <!-- <div style="text-align: center; margin: 1em 0;">
                   <button (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0">Anterior</button>
                   <span>Página {{ pageIndex + 1 }} de {{ pageCount }}</span>
                   <button (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">Siguiente</button>
@@ -143,8 +148,57 @@
                     <input type="number" [min]="1" [max]="pageCount" [(ngModel)]="pageInput">
                   </label>
                   <button (click)="goToPage()">Ir</button>
-                </div>
+                </div> -->
                 <!-- Fin de paginación -->
+                 <div style="text-align: center;">
+                        <!-- <small>
+                          <button class="paginador-btn" (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0"><i class="fas fa-chevron-left"></i></button>
+                          <span class="numPaginador">{{ pageIndex + 1 }} / {{ pageCount }}</span>
+                          <button class="paginador-btn" (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1"><i class="fas fa-chevron-right"></i></button>
+                        </small>
+                        <div style="text-align: center; margin-top: 0.5em;">
+                        <label>
+                          Ir a página:
+                          <input type="number" [min]="1" [max]="pageCount" [(ngModel)]="pageInput">
+                        </label>
+                        <button (click)="goToPage()">Ir</button>
+                      </div> -->
+                      <small>
+                        <button class="paginador-btn"  *ngIf="pageCount > 1" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1" [disabled]="pageIndex === 0">
+                          <i class="fas fa-chevron-left"></i>
+                        </button>
+
+                        <input *ngIf="pageCount > 1"
+                          class="inputPaginador"
+                          type="number"
+                          [min]="1"
+                          [max]="pageCount"
+                          [(ngModel)]="pageInput"
+                          style="text-align: center;"
+                          (ngModelChange)="goToPage()"
+                        />
+
+                        <span *ngIf="pageCount > 1"> / {{ pageCount }}</span>
+
+                        <!-- <span *ngIf="pageCount <= 1">{{ pageCount }} / {{ pageCount }}</span> -->
+
+                        <button class="paginador-btn"  *ngIf="pageCount > 1" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">
+                          <i class="fas fa-chevron-right"></i>
+                        </button>
+                      </small>
+
+                      </div>
+                <div class="header-with-button">
+                  <div style="margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                      Output 
+                      <br>
+                    </div>
+                    <small style="margin-left: 5px;">
+                      ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
+                    </small>
+                  </div>
+                </div>
               </th>
               <th colspan="3">
                 <div class="header-with-button">
@@ -193,10 +247,10 @@
                   </div>
                   
                   <div class="actions-container">
-                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
+                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(); copiarCodigo()">
                       <i class="fa fa-code"></i>
                     </button>
-                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
+                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true); copiarCodigo()">
                       <i class="fa fa-code"></i>
                     </button>
                   </div>
