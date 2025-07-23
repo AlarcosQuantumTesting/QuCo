@@ -1273,3 +1273,40 @@ input[type="checkbox"] {
   .config-item.buttons button:hover {
     background-color: #005f99;
   }
+
+
+.mensaje-temporal2 {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #004d4f;
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: aparecerDesaparecer 2s ease-in-out forwards;
+  pointer-events: none; /* Para no bloquear la interacción */
+}
+
+@keyframes aparecerDesaparecer {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+}
