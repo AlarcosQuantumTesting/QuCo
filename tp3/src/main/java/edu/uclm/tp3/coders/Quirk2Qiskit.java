@@ -7,6 +7,8 @@ import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QCircuitGate;
 import edu.uclm.tp3.common.deterministic.QColumn;
 import edu.uclm.tp3.common.deterministic.QGate;
+import edu.uclm.tp3.common.deterministic.QGateReference;
+import edu.uclm.tp3.common.deterministic.QMatrixGate;
 import edu.uclm.tp3.common.deterministic.QStdGate;
 
 public class Quirk2Qiskit {
@@ -47,12 +49,19 @@ public class Quirk2Qiskit {
         StringBuilder sb = new StringBuilder("def get" + gate.getName() + "() :\n");
         sb.append("\tU = QuantumCircuit(" + gate.getQubits() + ")\n");
         if (gate instanceof QCircuitGate) {
-            QCircuitGate cg = (QCircuitGate) gate;
-            sb.append(getFunctionCode(cg));
-        } else {
-            System.out.println("EHHHHHHHHH");
+            QCircuitGate qcg = (QCircuitGate) gate;
+            sb.append(getFunctionCode(qcg));
+        } else if (gate instanceof QMatrixGate) {
+            QMatrixGate qmg = (QMatrixGate) gate;
+            sb.append(getFunctionCode(qmg));
         }
         sb.append("\treturn U\n\n");
+        return sb;
+    }
+
+    private static StringBuilder getFunctionCode(QMatrixGate gate) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\tU.ry(" + gate.getTheta() + ", 0)\n");
         return sb;
     }
 
@@ -105,9 +114,10 @@ public class Quirk2Qiskit {
                 sb.append("\tU.mcp(pi, " + controlQubits + ", " + controlledQubits + ")\n");
             else
                 sb.append("\tU.cz(" + controlQubits + ", " + controlledQubits + ")\n");
-        } else {
-            throw new Exception("mct gate not supported");
-        }
+        } else if (controlledGate instanceof QGateReference) {
+            sb.append("\tU.append(get" + controlledGate.getName() + "().control(1), [" + controlledQubits + "])\n");
+        } else 
+            throw new Exception("Unknown gate: " + controlledGate.getName());
         return sb;
     }
 
@@ -142,6 +152,7 @@ public class Quirk2Qiskit {
                 sb.append("\tU.x(" + qubitIndex + ")\n");
                 break;
             default:
+                sb.append("\tU." + gateName + "(" + qubitIndex + ")     # Ojo a esta puerta\n");
                 break;
         }
         return sb;

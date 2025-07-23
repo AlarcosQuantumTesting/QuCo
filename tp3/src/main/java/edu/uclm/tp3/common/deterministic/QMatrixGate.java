@@ -39,7 +39,7 @@ public class QMatrixGate extends QGate {
 
     @Override
     public int getQubits() {
-        return 2;
+        return 1;
     }
 
     public void setControl(boolean control) {
@@ -48,5 +48,21 @@ public class QMatrixGate extends QGate {
 
     public void setMatrix(double[][] matrix) {
         this.matrix = matrix;
+        this.theta = 2 * Math.atan2(matrix[1][0], matrix[0][0]);
+    }
+
+    public double getTheta() {
+        return theta;
+    }
+
+    public void setMatrix(String matrix) {
+        matrix = matrix.replace("{", "").replace("}", "");
+        String[] tokens = matrix.split(",");
+        double[][] values = new double[2][2];
+        values[0][0] = Double.parseDouble(tokens[0]);
+        values[0][1] = Double.parseDouble(tokens[1]);
+        values[1][0] = Double.parseDouble(tokens[2]);
+        values[1][1] = Double.parseDouble(tokens[3]);
+        this.setMatrix(values);
     }
 }
