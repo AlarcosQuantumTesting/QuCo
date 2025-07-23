@@ -454,6 +454,7 @@ export class DeterministicComponent extends GroverStyle {
           this.running   = false;
           this.isLoadingQiskitCode = false;
           this.mostrarModal = true;
+          this.copiarCodigo();
         })
       },
       err => {
