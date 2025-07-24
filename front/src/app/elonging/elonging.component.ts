@@ -9,6 +9,7 @@ import { NotificationService } from '../notification.service';
 import { CanComponentDeactivate } from '../CanComponentDeactivate';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { RemoteFitnesser } from '../ae/RemoteFitnesser';
 
 
 
@@ -50,7 +51,19 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
   }
 
+  rf : any;
+
   ngOnInit () {
+
+    
+
+    for (let i=0; i<this.remoteFitnessers.length; i++) {
+      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
+        this.rf = this.remoteFitnessers[i]
+        this.rf.selected = true
+        this.selectFitnesser(this.rf);
+      }
+    }
 
     localStorage.setItem('isBlocks', "false");
     localStorage.setItem('isGenetic', "true");
