@@ -181,10 +181,4 @@ public class UnifierSolver {
 		return circuit;
 	}
 
-	private QMatrixGate getQMatrixGate(BinaryTree node) {
-		QMatrixGate qry = new QMatrixGate();
-		qry.setName(node.name);
-		qry.setTheta(node.leftAngle);
-		return qry;
-	}
 }

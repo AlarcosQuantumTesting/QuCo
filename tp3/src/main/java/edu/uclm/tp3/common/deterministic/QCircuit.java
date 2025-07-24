@@ -100,12 +100,12 @@ public class QCircuit {
         return columns;
     }
 
-    public static QCircuitGate getH(int qubits) {
-        QCircuitGate hGate = new QCircuitGate();
+    public static QCircuitGate getH(int qubits, QCircuit quirkCircuit) {
+        QCircuitGate hGate = new QCircuitGate(quirkCircuit);
         hGate.setName("InitialH");
         QColumn h = new QColumn();
         for (int i=0; i<qubits; i++)
-            h.addGate(new QStdGate("H"));
+            h.addGate(new QStdGate("H", quirkCircuit));
         hGate.addColumn(h);
         hGate.setQubits(qubits);
         return hGate;
@@ -170,67 +170,70 @@ public class QCircuit {
             for (int i=0; i<jsaGates.length(); i++) {
                 JSONObject gate = jsaGates.getJSONObject(i);
                 if (gate.opt("matrix")!=null) {
-                    QMatrixGate qmg = buildQMatrixGate(gate);
+                    QMatrixGate qmg = buildQMatrixGate(gate, qc);
                     qc.addGate(qmg);
                 } else if (gate.opt("circuit")!=null) {
-                    QCircuitGate qcg = buildQCircuitGate(gate);
+                    QCircuitGate qcg = buildQCircuitGate(gate, qc);
                     qc.addGate(qcg);
                 }
             }
         }
 
-        JSONArray jsaCols = jsoCircuit.optJSONArray("cols");
-        if (jsaCols!=null) {
-            for (int i=0; i<jsaCols.length(); i++) {
-                JSONArray jsaCol = jsaCols.getJSONArray(i);
-                
-            }
-        }
+        qc.sortGates();
 
-        // Calcular qubits (máx número de filas en columnas)
-        int qubits = 0;
-        for (QColumn col : qc.getColumns()) {
-            if (col.size() > qubits) {
-                qubits = col.size();
+        for (int i=0; i<qc.getGates().size(); i++) {
+            QGate gate = qc.getGates().get(i);
+            if (gate instanceof QCircuitGate) {
+                QCircuitGate qcg = (QCircuitGate) gate;
+                qcg.calculateQubits();
             }
         }
-        qc.qubits = qubits;
 
         return qc;
     }
 
-    private static QCircuitGate buildQCircuitGate(JSONObject jsoGate) {
-        QCircuitGate gate = new QCircuitGate();
+    private static QCircuitGate buildQCircuitGate(JSONObject jsoGate, QCircuit quirkCircuit) {
+        QCircuitGate gate = new QCircuitGate(quirkCircuit);
         gate.setName(jsoGate.getString("name"));
         JSONObject jsoCircuit = jsoGate.getJSONObject("circuit");
         JSONArray jsaCols = jsoCircuit.getJSONArray("cols");
         for (int i=0; i<jsaCols.length(); i++) {
             JSONArray jsaCol = jsaCols.getJSONArray(i);
-            addColumn(gate, jsaCol);
+            addColumn(gate, jsaCol, quirkCircuit);
         }
         return gate;
     }
 
-    private static void addColumn(QCircuitGate gate, JSONArray jsaCol) {
+    private static void addColumn(QCircuitGate gate, JSONArray jsaCol, QCircuit quirkCircuit) {
         QColumn column = new QColumn();
         for (int i=0; i<jsaCol.length(); i++) {
             String gateId = jsaCol.get(i).toString();
             if (gateId.toString().startsWith("~")) {
                 String gateName = gateId.substring(1);
-                QGateReference qgr = new QGateReference(gateName);
+                QGateReference qgr = new QGateReference(gateName, quirkCircuit);
                 column.addGate(qgr);
             } else {
-                column.addGate(new QStdGate(gateId));
+                column.addGate(new QStdGate(gateId, quirkCircuit));
             }
         }
         gate.addColumn(column);
     }
 
-    private static QMatrixGate buildQMatrixGate(JSONObject jsoGate) {
-        QMatrixGate gate = new QMatrixGate();
+    private static QMatrixGate buildQMatrixGate(JSONObject jsoGate, QCircuit quirkCircuit) {
+        QMatrixGate gate = new QMatrixGate(quirkCircuit);
         gate.setName(jsoGate.getString("name"));
         gate.setMatrix(jsoGate.getString("matrix"));
         return gate;
+    }
+
+    public QGate findGate(QGate gate) {
+        int hashCode = gate.hashCode();
+        for (int i=0; i<this.gates.size(); i++) {
+            QGate existingGate = this.gates.get(i);
+            if (existingGate.hashCode()==hashCode)
+                return existingGate;
+        }
+        return null;
     }
 
 

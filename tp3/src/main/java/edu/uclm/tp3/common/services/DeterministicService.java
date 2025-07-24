@@ -131,7 +131,8 @@ public class DeterministicService {
 		Map<String, Object> result = solver.solve(shots);
 
 		//QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
-		Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, null);
+		//Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, null);
+		Map<String, Object> cleanCircuit = quirkCircuit.toJson().toMap();
 
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);

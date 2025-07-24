@@ -1,11 +1,17 @@
 package edu.uclm.tp3.common.deterministic;
 
+import java.util.Arrays;
+
 import org.json.JSONObject;
 
 public class QMatrixGate extends QGate {
 
     private double theta = Math.PI; // Valor por defecto
     private double[][] matrix = new double[2][2];
+
+    public QMatrixGate(QCircuit quirkCircuit) {
+        super(quirkCircuit);
+    }
 
     public QGate setTheta(double leftAngle) {
         this.theta = leftAngle;
@@ -21,7 +27,6 @@ public class QMatrixGate extends QGate {
         JSONObject jso = new JSONObject();
         jso.put("id", this.getId());
         jso.put("name", this.name);
-        //jso.put("theta", this.theta);
         jso.put("matrix", this.getMatrix());
         return jso;
     }
@@ -65,4 +70,20 @@ public class QMatrixGate extends QGate {
         values[1][1] = Double.parseDouble(tokens[3]);
         this.setMatrix(values);
     }
+
+    @Override
+    public int hashCode() {
+        int result = Double.hashCode(theta);
+        result = 31 * result + Arrays.deepHashCode(matrix);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        QMatrixGate other = (QMatrixGate) obj;
+        return Double.compare(theta, other.theta) == 0 &&
+            Arrays.deepEquals(matrix, other.matrix);
+    }    
 }

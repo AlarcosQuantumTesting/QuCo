@@ -2,7 +2,7 @@ package edu.uclm.tp3.common.deterministic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONArray;
 
@@ -14,6 +14,14 @@ public class QColumn {
         this.gates = new ArrayList<>();
     }
 
+    public void replace(QGate removedGate, QGate remainingGate) {
+        for (int i=0; i<this.gates.size(); i++) {
+            QGate gate = this.gates.get(i);
+            if (gate.getName().equals(removedGate.getName()))
+                this.gates.set(i, remainingGate);
+        }
+    }
+
     public QColumn addGate(QGate gate) {
         this.gates.add(gate);
         return this;
@@ -23,20 +31,20 @@ public class QColumn {
         this.gates.set(qubit, gate);
     }
 
-    public void appendGate(QGate gate) {
+    public void appendGate(QGate gate, QCircuit quirkCircuit) {
         this.addGate(gate);
         for (int i = 1; i < gate.getQubits(); i++) {
-            QStdGate emptyGate = new QStdGate("1");
+            QStdGate emptyGate = new QStdGate("1", quirkCircuit);
             this.addGate(emptyGate);
         }
     }
 
-    public void setMatrixGate(int qubit, String gateName) {
-        QMatrixGate gate = new QMatrixGate();
+    public void setMatrixGate(int qubit, String gateName, QCircuit quirkCircuit) {
+        QMatrixGate gate = new QMatrixGate(quirkCircuit);
         gate.setName(gateName);
         if (qubit >= this.gates.size()) {
             for (int i = this.gates.size(); i <= qubit; i++) {
-                QStdGate gate1 = new QStdGate("1");
+                QStdGate gate1 = new QStdGate("1", quirkCircuit);
                 this.gates.add(gate1); 
             }
         }
@@ -66,7 +74,7 @@ public class QColumn {
         return this.gates.stream().anyMatch(gate -> gate instanceof QStdGate && ((QStdGate) gate).isControlGate());
     }
 
-    public static QColumn merge(List<QColumn> columns, int qubits) {
+    public static QColumn merge(List<QColumn> columns, int qubits, QCircuit quirkCircuit) {
         QColumn mergedColumn = new QColumn();
         int startQubit = 0, endQubit = 0;
         for (int i=0; i < columns.size(); i++) {
@@ -74,7 +82,7 @@ public class QColumn {
             if (column == null || column.getGates() == null || column.getGates().isEmpty())
                 continue;
             for (int j=startQubit; j<endQubit; j++)
-                mergedColumn.addGate(new QStdGate("1")); // Add empty gates for qubits before the first gate
+                mergedColumn.addGate(new QStdGate("1", quirkCircuit)); // Add empty gates for qubits before the first gate
 
             for (int j=0; j < column.getGates().size(); j++) {
                 QGate gate = column.getGates().get(j);
@@ -92,16 +100,17 @@ public class QColumn {
         this.gates = gates;
     }
 
-    public static QColumn build(Map<String, Object> colMap) {
-        QColumn column = new QColumn();
-        List<Map<String, Object>> gatesList = (List<Map<String, Object>>) colMap.get("gates");
-        if (gatesList != null) {
-            for (Map<String, Object> gateMap : gatesList) {
-                QGate gate = QGate.build(gateMap);
-                column.addGate(gate);
-            }
-        }
-        return column;
+    @Override
+    public int hashCode() {
+        return Objects.hash(gates);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        QColumn other = (QColumn) obj;
+        return Objects.equals(gates, other.gates);
     }
 
 }

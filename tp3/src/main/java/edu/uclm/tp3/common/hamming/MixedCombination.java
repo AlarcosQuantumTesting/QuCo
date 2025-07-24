@@ -126,15 +126,15 @@ public class MixedCombination {
         if (first==-1)
             first = 0;
         for (int i=0; i<first; i++)
-            column.addGate(new QStdGate("1"));
+            column.addGate(new QStdGate("1", r));
 
         for (int i=first; i<unified.length(); i++) {
             if (unified.charAt(i)=='1')
-                column.addGate(new QStdGate("X"));
+                column.addGate(new QStdGate("X", r));
             else if (unified.charAt(i)=='-')
-                column.addGate(new QStdGate("H"));
+                column.addGate(new QStdGate("H", r));
             else
-                column.addGate(new QStdGate("1"));
+                column.addGate(new QStdGate("1", r));
         }
         r.addColumn(column);
         r.setName(sb.toString());

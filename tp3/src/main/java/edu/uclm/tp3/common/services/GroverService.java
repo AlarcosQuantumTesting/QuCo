@@ -25,7 +25,7 @@ public class GroverService {
         int optimal = (int) Math.floor((Math.PI/4) * Math.sqrt(N/M));
 
         QCircuit quirkCircuit = this.buildCircuit(qubits, expectedFrequencies, useMCX, optimal);
-        QCircuitGate initialH = QCircuit.getH(qubits);
+        QCircuitGate initialH = QCircuit.getH(qubits, quirkCircuit);
         quirkCircuit.addGate(initialH);
         quirkCircuit.insertColumnWithGate(0, initialH);
 
@@ -69,8 +69,8 @@ public class GroverService {
         this.splitCircuits(circuits, expectedFrequencies);
         
         List<Map<String, Object>> partialCircuits = new ArrayList<>();
-        QCircuitGate initialH = QCircuit.getH(qubits);
         for (QCircuit circuit : circuits) {
+            QCircuitGate initialH = QCircuit.getH(qubits, circuit);
             circuit.addGate(initialH);
             circuit.insertColumnWithGate(0, initialH);
             partialCircuits.add(circuit.toJson().toMap());
@@ -144,7 +144,7 @@ public class GroverService {
         List<QCircuit> circuits = buldCircuits(qubits, expectedFrequencies, useMCX, optimal);
 
         QCircuit parallelCircuit = this.parallelize(circuits, qubits);
-        QCircuitGate initialH = QCircuit.getH(qubits*circuits.size());
+        QCircuitGate initialH = QCircuit.getH(qubits*circuits.size(), parallelCircuit);
         parallelCircuit.addGate(initialH);
         parallelCircuit.insertColumnWithGate(0, initialH);
 
@@ -189,7 +189,7 @@ public class GroverService {
         
         for (int i=0; i<maxCols; i++) {
             List<QColumn> columns = this.getColumn(i, circuits);
-            QColumn column = QColumn.merge(columns, qubits);
+            QColumn column = QColumn.merge(columns, qubits, quirkCircuit);
             quirkCircuit.addColumn(column);
         }
 
@@ -225,19 +225,19 @@ public class GroverService {
     }
 
     private QCircuit buildCircuit(int qubits, FreqTable expectedFrequencies, boolean useMCX, int optimal) {
-        List<QCircuitGate> oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits, useMCX);
+        QCircuit quirkCircuit = new QCircuit();
+
+        List<QCircuitGate> oraclesAnddiffuser = this.buildGrover(expectedFrequencies, qubits, useMCX, quirkCircuit);
         QCircuitGate diffuser = oraclesAnddiffuser.remove(oraclesAnddiffuser.size() - 1);
         List<QCircuitGate> oracles = oraclesAnddiffuser;
         
-        QCircuit quirkCircuit = new QCircuit();
-
         for (int i=0; i<oracles.size(); i++) {
             QCircuitGate oracle = oracles.get(i);
             quirkCircuit.addGate(oracle);
         }
         quirkCircuit.addGate(diffuser);
 
-        QCircuitGate zeroGate = new QCircuitGate();
+        QCircuitGate zeroGate = new QCircuitGate(quirkCircuit);
         zeroGate.setName("0");
         zeroGate.setQubits(qubits);
         
@@ -254,7 +254,7 @@ public class GroverService {
         return quirkCircuit;
     }
 
-    private List<QCircuitGate> buildGrover(FreqTable expectedFrequencies, int qubits, boolean useMCX) {
+    private List<QCircuitGate> buildGrover(FreqTable expectedFrequencies, int qubits, boolean useMCX, QCircuit quirkCircuit) {
         List<Pair> pairs = expectedFrequencies.getPairs();
         List<QCircuitGate> oracles = new ArrayList<>();
         for (Pair pair : pairs) {
@@ -271,18 +271,18 @@ public class GroverService {
                     row.add(0);
                 }
             }
-            QCircuitGate oracle = this.buildOracle(row, useMCX);
+            QCircuitGate oracle = this.buildOracle(row, useMCX, quirkCircuit);
             oracle.setName("Oracle_" + index);
             oracles.add(oracle);
         }
-        QCircuitGate diffuser = this.buildDifusser(qubits, useMCX);
+        QCircuitGate diffuser = this.buildDifusser(qubits, useMCX, quirkCircuit);
         diffuser.setName("Diffuser");
         oracles.add(diffuser);
         return oracles;
     }
 
-    private QCircuitGate buildDifusser(int qubits, boolean useMCX) {
-        QCircuitGate difusser = new QCircuitGate();
+    private QCircuitGate buildDifusser(int qubits, boolean useMCX, QCircuit quirkCircuit) {
+        QCircuitGate difusser = new QCircuitGate(quirkCircuit);
         if (useMCX) {
             QColumn h0 = new QColumn();
             QColumn x0 = new QColumn();
@@ -292,17 +292,17 @@ public class GroverService {
             QColumn x1 = new QColumn();
             QColumn h1 = new QColumn();
             for (int i=0; i<qubits; i++) {
-                h0.addGate(new QStdGate("H"));
-                x0.addGate(new QStdGate("X"));
-                oneH0.addGate(new QStdGate("1"));
-                mcXOrZ.addGate(new QStdGate("•"));
-                oneH1.addGate(new QStdGate("1"));
-                x1.addGate(new QStdGate("X"));
-                h1.addGate(new QStdGate("H"));
+                h0.addGate(new QStdGate("H", quirkCircuit));
+                x0.addGate(new QStdGate("X", quirkCircuit));
+                oneH0.addGate(new QStdGate("1", quirkCircuit));
+                mcXOrZ.addGate(new QStdGate("•", quirkCircuit));
+                oneH1.addGate(new QStdGate("1", quirkCircuit));
+                x1.addGate(new QStdGate("X", quirkCircuit));
+                h1.addGate(new QStdGate("H", quirkCircuit));
             }
-            oneH0.setGate(qubits-1, new QStdGate("H"));
-            mcXOrZ.setGate(qubits-1, new QStdGate("X"));
-            oneH1.setGate(qubits-1, new QStdGate("H"));
+            oneH0.setGate(qubits-1, new QStdGate("H", quirkCircuit));
+            mcXOrZ.setGate(qubits-1, new QStdGate("X", quirkCircuit));
+            oneH1.setGate(qubits-1, new QStdGate("H", quirkCircuit));
             difusser.addColumns(h0, x0, oneH0, mcXOrZ, oneH1, x1, h1);
         } else {
             QColumn h0 = new QColumn();
@@ -311,64 +311,64 @@ public class GroverService {
             QColumn x1 = new QColumn();
             QColumn h1 = new QColumn();
             for (int i=0; i<qubits; i++) {
-                h0.addGate(new QStdGate("H"));
-                x0.addGate(new QStdGate("X"));
-                mcXOrZ.addGate(new QStdGate("•"));
-                x1.addGate(new QStdGate("X"));
-                h1.addGate(new QStdGate("H"));
+                h0.addGate(new QStdGate("H", quirkCircuit));
+                x0.addGate(new QStdGate("X", quirkCircuit));
+                mcXOrZ.addGate(new QStdGate("•", quirkCircuit));
+                x1.addGate(new QStdGate("X", quirkCircuit));
+                h1.addGate(new QStdGate("H", quirkCircuit));
             }
-            mcXOrZ.setGate(qubits-1, new QStdGate("Z"));
+            mcXOrZ.setGate(qubits-1, new QStdGate("Z", quirkCircuit));
             difusser.addColumns(h0, x0, mcXOrZ, x1, h1);
         }
         difusser.setQubits(qubits);
         return difusser;
     }
 
-    private QCircuitGate buildOracle(List<Integer> row, boolean useMCX) {
-        QCircuitGate oracle = new QCircuitGate();
-        QColumn encoding0 = this.encode(row);
+    private QCircuitGate buildOracle(List<Integer> row, boolean useMCX, QCircuit quirkCircuit) {
+        QCircuitGate oracle = new QCircuitGate(quirkCircuit);
+        QColumn encoding0 = this.encode(row, quirkCircuit);
         oracle.addColumn(encoding0);
         if (useMCX) {
-            QColumn h0 = this.buildH(row);
-            QColumn mcXOrZ = this.buildMCXOrMCH(row, new QStdGate("X"));
-            QColumn h1 = this.buildH(row);
+            QColumn h0 = this.buildH(row, quirkCircuit);
+            QColumn mcXOrZ = this.buildMCXOrMCH(row, new QStdGate("X", quirkCircuit), quirkCircuit);
+            QColumn h1 = this.buildH(row, quirkCircuit);
             oracle.addColumns(h0, mcXOrZ, h1);
             
         } else {
-            QColumn mcXOrZ = this.buildMCXOrMCH(row, new QStdGate("Z"));
+            QColumn mcXOrZ = this.buildMCXOrMCH(row, new QStdGate("Z", quirkCircuit), quirkCircuit);
             oracle.addColumn(mcXOrZ);
         }
-        QColumn encoding1 = this.encode(row);
+        QColumn encoding1 = this.encode(row, quirkCircuit);
         oracle.addColumn(encoding1);
         oracle.setQubits(encoding1.size());
         return oracle;
     }
 
-    private QColumn encode(List<Integer> row) {
+    private QColumn encode(List<Integer> row, QCircuit quirkCircuit) {
         QColumn column = new QColumn();
         for (int i=0; i<row.size(); i++) {
             Integer value = row.get(i);
             if (value==null || value==0)
-                column.addGate(new QStdGate("X"));
+                column.addGate(new QStdGate("X", quirkCircuit));
             else 
-                column.addGate(new QStdGate("1"));
+                column.addGate(new QStdGate("1", quirkCircuit));
         }
         return column;
     }
 
-    private QColumn buildH(List<Integer> row) {
+    private QColumn buildH(List<Integer> row, QCircuit quirkCircuit) {
         QColumn column = new QColumn();
         for (int i=0; i<row.size(); i++)
-            column.addGate(new QStdGate("1"));
-        column.setGate(row.size()-1, new QStdGate("H"));
+            column.addGate(new QStdGate("1", quirkCircuit));
+        column.setGate(row.size()-1, new QStdGate("H", quirkCircuit));
         return column;
     }
 
-    private QColumn buildMCXOrMCH(List<Integer> row, QStdGate gate) {
+    private QColumn buildMCXOrMCH(List<Integer> row, QStdGate gate, QCircuit quirkCircuit) {
         QColumn column = new QColumn();
         for (int i=0; i<row.size()-1; i++)
-            column.addGate(new QStdGate("•"));
-        column.appendGate(gate);
+            column.addGate(new QStdGate("•", quirkCircuit));
+        column.appendGate(gate, quirkCircuit);
         return column;
     }
 }
