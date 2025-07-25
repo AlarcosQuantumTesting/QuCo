@@ -47,7 +47,7 @@ public class Quirk2Qiskit {
 
     private static StringBuilder getFunctionCode(QGate gate) throws Exception {
         StringBuilder sb = new StringBuilder("def get" + gate.getName() + "() :\n");
-        sb.append("\tU = QuantumCircuit(" + gate.getQubits() + ")\n");
+        sb.append("\tU = QuantumCircuit(" + gate.getQubits() + ", name=\"" + gate.getName() + "\")\n");
         if (gate instanceof QCircuitGate) {
             QCircuitGate qcg = (QCircuitGate) gate;
             sb.append(getFunctionCode(qcg));
@@ -55,7 +55,7 @@ public class Quirk2Qiskit {
             QMatrixGate qmg = (QMatrixGate) gate;
             sb.append(getFunctionCode(qmg));
         }
-        sb.append("\treturn U\n\n");
+        sb.append("\treturn U.to_gate()\n\n");
         return sb;
     }
 
@@ -125,7 +125,7 @@ public class Quirk2Qiskit {
         if (column.isControlColumn())
             return getControlledCode(column);
 
-        int startQubit = 0, endQubit = 0;
+        int startQubit = 0;
         StringBuilder sb = new StringBuilder();
         for (int i=0; i<column.getGates().size(); i++) {
             QGate gate = column.getGates().get(i);
@@ -133,10 +133,10 @@ public class Quirk2Qiskit {
             if (gate instanceof QStdGate) {
                 if (!gateName.equals("1"))
                     sb.append(getCode(gateName, i));
+                startQubit = startQubit + 1;
             } else {
-                endQubit = endQubit + gate.getQubits();
-                sb.append("\tU.append(get" + gateName + "(), range(" + startQubit + ", " + endQubit + "))\n");
-                startQubit = endQubit;
+                sb.append("\tU.append(get" + gateName + "(), range(" + startQubit + ", " + (startQubit + gate.getQubits()) + "))\n");
+                startQubit = startQubit + gate.getQubits();
             } 
         }
         return sb;
