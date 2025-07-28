@@ -2,6 +2,8 @@ package edu.uclm.tp3.common.deterministic;
 
 public class QGateReference extends QGate {
 
+    private Object id;
+
     public QGateReference(String gateName, QCircuit quirkCircuit) {
         super(quirkCircuit);
         this.name = gateName;
@@ -9,7 +11,13 @@ public class QGateReference extends QGate {
 
     @Override
     public Object getId() {
-        return "~" + this.name;
+        if (this.id == null)
+            return "~" + this.name;
+        return this.id;
+    }
+
+    public void setId(Object id) {
+        this.id = id;
     }
 
     @Override

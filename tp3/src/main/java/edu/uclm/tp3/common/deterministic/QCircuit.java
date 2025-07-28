@@ -178,9 +178,7 @@ public class QCircuit {
                 }
             }
         }
-
         qc.sortGates();
-
         for (int i=0; i<qc.getGates().size(); i++) {
             QGate gate = qc.getGates().get(i);
             if (gate instanceof QCircuitGate) {
@@ -189,28 +187,60 @@ public class QCircuit {
             }
         }
 
+        JSONArray jsaCols = jsoCircuit.optJSONArray("cols");
+        if (jsaCols!=null) {
+            for (int i=0; i<jsaCols.length(); i++) {
+                JSONArray jsaCol = jsaCols.getJSONArray(i);
+                QColumn column = buildColumn(jsaCol, qc);
+                qc.addColumn(column);
+            }
+        }
+
         return qc;
+    }
+
+    private static QColumn buildColumn(JSONArray jsaCol, QCircuit qc) {
+        int qubits = 0;
+        QColumn column = new QColumn();
+        for (int i=0; i<jsaCol.length(); i++) {
+            String gateName = jsaCol.get(i).toString();
+            QGate gate;
+            if (gateName.startsWith("~")) 
+                gate = qc.findGate(gateName);
+            else 
+                gate = new QStdGate(gateName, qc);
+            column.addGate(gate);
+            qubits = qubits + 1;
+        }
+        QGate lastGate = column.getGates().get(column.size()-1);
+        if (lastGate.getQubits()>1)
+            qubits = qubits + lastGate.getQubits() - 1;
+        
+        if (qubits>qc.qubits)
+            qc.qubits = qubits;
+
+        return column;
     }
 
     private static QCircuitGate buildQCircuitGate(JSONObject jsoGate, QCircuit quirkCircuit) {
         QCircuitGate gate = new QCircuitGate(quirkCircuit);
         gate.setName(jsoGate.getString("name"));
+        gate.setId(jsoGate.getString("id"));
         JSONObject jsoCircuit = jsoGate.getJSONObject("circuit");
         JSONArray jsaCols = jsoCircuit.getJSONArray("cols");
         for (int i=0; i<jsaCols.length(); i++) {
             JSONArray jsaCol = jsaCols.getJSONArray(i);
-            addColumn(gate, jsaCol, quirkCircuit);
+            addColumnGates(gate, jsaCol, quirkCircuit);
         }
         return gate;
     }
 
-    private static void addColumn(QCircuitGate gate, JSONArray jsaCol, QCircuit quirkCircuit) {
+    private static void addColumnGates(QCircuitGate gate, JSONArray jsaCol, QCircuit quirkCircuit) {
         QColumn column = new QColumn();
         for (int i=0; i<jsaCol.length(); i++) {
             String gateId = jsaCol.get(i).toString();
             if (gateId.toString().startsWith("~")) {
-                String gateName = gateId.substring(1);
-                QGateReference qgr = new QGateReference(gateName, quirkCircuit);
+                QGateReference qgr = new QGateReference(gateId.substring(1), quirkCircuit);
                 column.addGate(qgr);
             } else {
                 column.addGate(new QStdGate(gateId, quirkCircuit));
@@ -222,6 +252,7 @@ public class QCircuit {
     private static QMatrixGate buildQMatrixGate(JSONObject jsoGate, QCircuit quirkCircuit) {
         QMatrixGate gate = new QMatrixGate(quirkCircuit);
         gate.setName(jsoGate.getString("name"));
+        gate.setId(jsoGate.getString("id"));
         gate.setMatrix(jsoGate.getString("matrix"));
         return gate;
     }
@@ -236,5 +267,12 @@ public class QCircuit {
         return null;
     }
 
-
+    public QGate findGate(String gateId) {
+        for (int i=0; i<this.gates.size(); i++) {
+            QGate existingGate = this.gates.get(i);
+            if (existingGate.getId().equals(gateId))
+                return existingGate;
+        }
+        return null;
+    }
 }

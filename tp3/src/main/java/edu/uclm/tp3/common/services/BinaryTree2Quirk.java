@@ -2,7 +2,6 @@ package edu.uclm.tp3.common.services;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,20 @@ public class BinaryTree2Quirk {
         }
         if (!originalGR)
             removeDuplicatedGates(gates);
+        
+        gates.sort(new Comparator<QGate>() {
+            @Override
+            public int compare(QGate a, QGate b) {
+                if (a instanceof QMatrixGate && !(b instanceof QMatrixGate))
+                    return -1;
+                if (!(a instanceof QMatrixGate) && b instanceof QMatrixGate)
+                    return 1;
+                return Integer.valueOf(b.getName().length()).compareTo(a.getName().length());
+            }
+        });
+
         quirkCircuit.setGates(gates);
+
         QColumn hColumn = new QColumn();
         for (int i=0; i<qubits; i++)
             hColumn.addGate(new QStdGate("H", quirkCircuit));
@@ -71,16 +83,6 @@ public class BinaryTree2Quirk {
         }
         gates.clear();
         gates.addAll(finalGates);
-        gates.sort(new Comparator<QGate>() {
-            @Override
-            public int compare(QGate a, QGate b) {
-                if (a instanceof QMatrixGate && !(b instanceof QMatrixGate))
-                    return -1;
-                if (!(a instanceof QMatrixGate) && b instanceof QMatrixGate)
-                    return 1;
-                return Integer.valueOf(b.getName().length()).compareTo(a.getName().length());
-            }
-        });
     }
 
     private static QGate findEquivalent(QGate gate, List<QGate> candidates) {
@@ -110,7 +112,7 @@ public class BinaryTree2Quirk {
         if (node.leftProbability == 0) {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
             gate.addColumn("1", new QGateReference(node.rightChild.name, quirkCircuit));
 
@@ -118,7 +120,7 @@ public class BinaryTree2Quirk {
         } else if (node.rightProbability == 0) {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
             gate.addColumn("1", new QGateReference(node.leftChild.name, quirkCircuit));
 
@@ -132,7 +134,7 @@ public class BinaryTree2Quirk {
         } else {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
             gate.addColumn(new QStdGate("X", quirkCircuit));
 
@@ -151,7 +153,7 @@ public class BinaryTree2Quirk {
 
         QGate ry0 = new QMatrixGate(quirkCircuit)
             .setTheta(node.leftAngle)
-            .setName(node.name + "-0");
+            .setName(node.name + "_0");
         gate.addColumn(ry0);
 
         gate.addColumn(new QStdGate("X", quirkCircuit));
@@ -181,7 +183,7 @@ public class BinaryTree2Quirk {
         if (node.leftProbability == 0) {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
 
             QGate ry1 = new QMatrixGate(quirkCircuit)
@@ -194,7 +196,7 @@ public class BinaryTree2Quirk {
         } else if (node.rightProbability == 0) {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
 
             QGate ry1 = new QMatrixGate(quirkCircuit)
@@ -224,7 +226,7 @@ public class BinaryTree2Quirk {
         } else {
             QGate ry0 = new QMatrixGate(quirkCircuit)
                 .setTheta(node.leftAngle)
-                .setName(node.name + "-0");
+                .setName(node.name + "_0");
             gate.addColumn(ry0);
 
             gate.addColumn(new QStdGate("X", quirkCircuit));
@@ -254,7 +256,7 @@ public class BinaryTree2Quirk {
 
         QGate ry0 = new QMatrixGate(quirkCircuit)
             .setTheta(node.leftAngle)
-            .setName(node.name + "-0");
+            .setName(node.name + "_0");
         gate.addColumn(ry0);
 
 		gate.addColumn(new QStdGate("X", quirkCircuit));

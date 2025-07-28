@@ -13,7 +13,7 @@ public abstract class QGate {
     @Override
     public abstract int hashCode();
 
-    public QGate setName(String name) {
+    public final QGate setName(String name) {
         this.name = name;
         this.control = name.equals("•") || name.equals("\u2022");
         return this;

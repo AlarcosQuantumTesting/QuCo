@@ -11,6 +11,7 @@ public class QCircuitGate extends QGate {
 
     private List<QColumn> columns;
     private int qubits;
+    private Object id;
 
     public QCircuitGate(QCircuit circuit) {
         super(circuit);
@@ -71,10 +72,14 @@ public class QCircuitGate extends QGate {
         return columns;
     }
 
-    public String getId() {
-        if (name == null)
-            return null;
-        return "~" + name;
+    public Object getId() {
+        if (this.id == null)
+            return "~" + this.name;
+        return this.id;
+    }
+
+    public void setId(Object id) {
+        this.id = id;
     }
 
     @Override

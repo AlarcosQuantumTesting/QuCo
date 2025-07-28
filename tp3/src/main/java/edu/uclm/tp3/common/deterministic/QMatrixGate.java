@@ -8,6 +8,7 @@ public class QMatrixGate extends QGate {
 
     private double theta = Math.PI; // Valor por defecto
     private double[][] matrix = new double[2][2];
+    private Object id;
 
     public QMatrixGate(QCircuit quirkCircuit) {
         super(quirkCircuit);
@@ -35,11 +36,14 @@ public class QMatrixGate extends QGate {
         return "{{" + this.matrix[0][0] + "," + this.matrix[0][1] + "},{" + this.matrix[1][0] + "," + this.matrix[1][1] + "}}";
     }
     
-    @Override
     public String getId() {
-        if (name == null)
-            return null;
-        return "~" + name;
+        if (this.id == null)
+            return "~" + this.name;
+        return this.id.toString();
+    }
+
+    public void setId(Object id) {
+        this.id = id;
     }
 
     @Override

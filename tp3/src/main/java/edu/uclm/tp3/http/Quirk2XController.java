@@ -22,7 +22,17 @@ public class Quirk2XController {
 		try {
 			JSONObject jsoCircuit = new JSONObject(circuit);
 			QCircuit qCircuit = QCircuit.build(jsoCircuit);
-			StringBuilder sb = Quirk2Qiskit.getGatesDeclaration(qCircuit);
+			StringBuilder sb = new StringBuilder("from qiskit import QuantumCircuit\n");
+			sb.append("from qiskit.circuit.library import *");
+
+			StringBuilder sbGatesDeclaration = Quirk2Qiskit.getGatesDeclaration(qCircuit);
+			if (sbGatesDeclaration.length()>0)
+				sb.append("\n\n").append(sbGatesDeclaration);
+
+			sb.append("circuit = QuantumCircuit(" + qCircuit.getQubits() + ")\n");
+
+			sb.append(Quirk2Qiskit.getColumnsDeclaration(qCircuit));
+			sb.append("print(circuit)");
 			return sb.toString();
 		} catch (Exception e) {
 			throw new RuntimeException("Error generating code: " + e.getMessage(), e);	
