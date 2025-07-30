@@ -108,10 +108,15 @@ public class Quirk2Qiskit {
                 sb.append("mcp(pi, " + controlQubits + ", " + controlledQubits + ")\n");
             else
                 sb.append("cz(" + controlQubits + ", " + controlledQubits + ")\n");
+        }  else if (controlledGate.getName().equals("H")) {
+            if (numberOfControlQubits>1) {
+                sb.append("HGate().control(" + controlQubits + controlledQubits + ")    # Ojo a esta H multicontrolada, no estoy seguro de que funcione\n");
+            } else
+                sb.append("ch(" + controlQubits + controlledQubits + ")\n");
         } else if (controlledGate instanceof QGateReference || controlledGate instanceof QCircuitGate || controlledGate instanceof QMatrixGate) {
             sb.append("append(get" + controlledGate.getName() + "().control(" + numberOfControlQubits + "), [" + controlQubits + controlledQubits + "])\n");
         } else 
-            sb = new StringBuilder("# " + circuitName + "." + controlledGate.getName() + "(" + controlledQubits + ")     # Ojo a esta puerta ******** \n");
+            sb = new StringBuilder("# " + circuitName + "." + controlledGate.getName() + "(" + controlledQubits + ")     # Ojo a esta puerta controlada ******** \n");
         if (circuitName.equals("circuit"))
             sb.append(circuitName + ".barrier()\n");
         return sb;
