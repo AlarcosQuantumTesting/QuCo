@@ -18,7 +18,7 @@ import edu.uclm.tp3.common.deterministic.QStdGate;
 
 public class BinaryTree2Quirk {
 
-    public static QCircuit buildQuirk(BinaryTree tree, int qubits, String functionPrefix, boolean originalGR) {
+    public static QCircuit buildQuirk(BinaryTree tree, int qubits, int circuitIndex, boolean originalGR) {
         QCircuit quirkCircuit = new QCircuit();
         quirkCircuit.setQubits(qubits);
         List<QGate> gates = new ArrayList<>();
@@ -28,9 +28,9 @@ public class BinaryTree2Quirk {
             if (node.depth == qubits - 1) 
                 continue; // Skip leaf nodes
             if (node.depth == qubits - 2) {
-                buildGatesDepth2(node, functionPrefix, originalGR, gates, quirkCircuit);
+                buildGatesDepth2(node, originalGR, gates, quirkCircuit);
             } else {
-                buildGatesDepthN(node, functionPrefix, originalGR, gates, quirkCircuit);
+                buildGatesDepthN(node, originalGR, gates, quirkCircuit);
             }
         }
         if (!originalGR)
@@ -48,12 +48,19 @@ public class BinaryTree2Quirk {
         });
 
         quirkCircuit.setGates(gates);
+        QCircuit.calculateQubits(quirkCircuit);
 
         QColumn hColumn = new QColumn();
         for (int i=0; i<qubits; i++)
             hColumn.addGate(new QStdGate("H", quirkCircuit));
         quirkCircuit.addColumn(hColumn);
-        quirkCircuit.addColumn(new QGateReference("0", quirkCircuit));
+        QGateReference zeroGate;
+        if (circuitIndex==-1)
+            zeroGate = new QGateReference("0", quirkCircuit);
+        else
+            zeroGate = new QGateReference("circ" + circuitIndex + "_0", quirkCircuit);
+        zeroGate.setQubits(qubits);
+        quirkCircuit.addColumn(zeroGate);
         return quirkCircuit;
     }
 
@@ -94,7 +101,7 @@ public class BinaryTree2Quirk {
         return null; // Esto no debería pasar si `seen.add(gate)` devolvió false
     }
 
-    private static void buildGatesDepthN(BinaryTree node, String functionPrefix, boolean originalGR, List<QGate> gates, QCircuit quirkCircuit) {
+    private static void buildGatesDepthN(BinaryTree node, boolean originalGR, List<QGate> gates, QCircuit quirkCircuit) {
         if (originalGR) {
             getGRCircuitGateForDepthN(node, gates, quirkCircuit);
         } else {
@@ -165,7 +172,7 @@ public class BinaryTree2Quirk {
         gates.add(gate);
     }
 
-    private static void buildGatesDepth2(BinaryTree node, String functionPrefix, boolean originalGR, List<QGate> gates, QCircuit quirkCircuit) {
+    private static void buildGatesDepth2(BinaryTree node, boolean originalGR, List<QGate> gates, QCircuit quirkCircuit) {
         if (originalGR) {
             getGRCircuitGateForDepth2(node, gates, quirkCircuit);
         } else {

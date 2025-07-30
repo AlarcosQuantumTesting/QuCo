@@ -111,7 +111,7 @@ public class QCircuit {
         return hGate;
     }
 
-    public Map<String, Object> clean(int qubits, String splitIndex) {
+    public Map<String, Object> clean(int qubits) {
 		this.sortGates();
 		QColumn column0 = new QColumn();
 		/*if (splitIndex==null)
@@ -179,13 +179,7 @@ public class QCircuit {
             }
         }
         qc.sortGates();
-        for (int i=0; i<qc.getGates().size(); i++) {
-            QGate gate = qc.getGates().get(i);
-            if (gate instanceof QCircuitGate) {
-                QCircuitGate qcg = (QCircuitGate) gate;
-                qcg.calculateQubits();
-            }
-        }
+        calculateQubits(qc);
 
         JSONArray jsaCols = jsoCircuit.optJSONArray("cols");
         if (jsaCols!=null) {
@@ -197,6 +191,16 @@ public class QCircuit {
         }
 
         return qc;
+    }
+
+    public static void calculateQubits(QCircuit qc) {
+        for (int i=0; i<qc.getGates().size(); i++) {
+            QGate gate = qc.getGates().get(i);
+            if (gate instanceof QCircuitGate) {
+                QCircuitGate qcg = (QCircuitGate) gate;
+                qcg.calculateQubits();
+            }
+        }
     }
 
     private static QColumn buildColumn(JSONArray jsaCol, QCircuit qc) {

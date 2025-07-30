@@ -129,7 +129,7 @@ public class GreenobleService {
 		Map<String, Object> result = solver.solve(shots);
 
 		QCircuit quirkCircuit = (QCircuit) result.get("QUIRK");
-		Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, null);
+		Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits);
 
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
@@ -185,7 +185,7 @@ public class GreenobleService {
 			Map<String, Object> partialResult = solver.solve(shots);
 
 			QCircuit quirkCircuit = (QCircuit) partialResult.get("QUIRK");
-			Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits, splitIndex.toString());
+			Map<String, Object> cleanCircuit = quirkCircuit.clean(qubits);
 
 			trees.add(tree.toMap());
 			String initializer = "\n\n# Functions for getting the value " + expectedFrequencies.getPairs().get(i).getIndex() + "\n" + partialResult.get("#INITIALIZE#").toString();

@@ -34,7 +34,7 @@ public class GroverService {
         Map<String, Object> result = new HashMap<>();
         result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
-		result.put("#SHOTS#", "1000");
+		result.put("#SHOTS#", "1024");
         result.put("#INITIALIZE#", code);
         result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, outputQubits)");	
         result.put("#ALGORITHM#", "Grover");
@@ -79,7 +79,7 @@ public class GroverService {
         Map<String, Object> result = new HashMap<>();
         result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
-		result.put("#SHOTS#", "1000");
+		result.put("#SHOTS#", "1024");
         StringBuilder code = Quirk2Qiskit.getGatesDeclaration(circuits);
         result.put("#INITIALIZE#", code);
 
@@ -153,8 +153,8 @@ public class GroverService {
         circuit.add(parallelCircuit.toJson().toMap());
         result.put("#QUBITS#", qubits*numberOfPairs);
 		result.put("#OUTPUT_QUBITS#", qubits*numberOfPairs);
-		result.put("#SHOTS#", "1000");
-        StringBuilder code = Quirk2Qiskit.getGatesDeclaration(parallelCircuit);
+		result.put("#SHOTS#", "1024");
+        StringBuilder code = Quirk2Qiskit.getGatesDeclaration(parallelCircuit); 
 
         result.put("#INITIALIZE#", code);
         result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, outputQubits)");

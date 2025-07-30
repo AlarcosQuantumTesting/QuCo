@@ -76,23 +76,18 @@ public class QColumn {
 
     public static QColumn merge(List<QColumn> columns, int qubits, QCircuit quirkCircuit) {
         QColumn mergedColumn = new QColumn();
-        int startQubit = 0, endQubit = 0;
         for (int i=0; i < columns.size(); i++) {
             QColumn column = columns.get(i);
             if (column == null || column.getGates() == null || column.getGates().isEmpty())
                 continue;
-            for (int j=startQubit; j<endQubit; j++)
-                mergedColumn.addGate(new QStdGate("1", quirkCircuit)); // Add empty gates for qubits before the first gate
 
             for (int j=0; j < column.getGates().size(); j++) {
                 QGate gate = column.getGates().get(j);
                 mergedColumn.addGate(gate);
-                startQubit = startQubit + qubits;
-                endQubit = startQubit + qubits - 1;
+                for (int k=0; k<gate.getQubits()-1; k++)
+                    mergedColumn.appendGate(new QStdGate("1", quirkCircuit), quirkCircuit);
             }
-         
         }
-
         return mergedColumn;
     }
 

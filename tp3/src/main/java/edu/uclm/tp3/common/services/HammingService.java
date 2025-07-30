@@ -81,7 +81,7 @@ public class HammingService {
 		//List<Integer> values = new ArrayList<>();
 		for (MixedCombination terna : ternas) {
 			QCircuit circuit = terna.getCircuit();
-			Map<String, Object> cleanCircuit = circuit.clean(qubits, functionPrefix);
+			Map<String, Object> cleanCircuit = circuit.clean(qubits);
 			partialCircuits.add(cleanCircuit);
 			code.append(terna.getCode());
 			//values.add(terna.values.size());
