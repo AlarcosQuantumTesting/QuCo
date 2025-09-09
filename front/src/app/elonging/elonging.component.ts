@@ -124,7 +124,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '20') : 20;
     this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '20') : 20;
 
-    this.updateOutputs();
+    //this.updateOutputs();
 
     const savedConfig = localStorage.getItem('qucoConfiguration');
     if (savedConfig) {
@@ -348,7 +348,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     localStorage.setItem('probOf3QubitGates', JSON.stringify(this.pc.probOf3QubitGates));
     localStorage.setItem('probOfNQubitGates', JSON.stringify(this.pc.probOfNQubitGates));
 
-    this.updateOutputs();
+    //this.updateOutputs();
     this.resetMatrix();
 
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");

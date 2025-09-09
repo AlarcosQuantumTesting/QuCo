@@ -52,13 +52,31 @@ export abstract class IService {
         return this.client.get<any>(environment.beUrl + this.controller + "/updateDesiredError?desiredError=" + desiredError, { withCredentials: true })
     }
 
-    updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
+    /*updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
         let info = {
             expectedFrequencies: expectedFrequencies,
             shots: shots
         }
         return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info, { withCredentials: true })
+    }*/
+
+    updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
+        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", {
+            expectedFrequencies: expectedFrequencies,
+            shots: shots
+        },  { withCredentials: true });
     }
+
+
+    /*updateExpectedFrequencies(selectedFitnesser: RemoteFitnesser, expectedFrequencies: number[], shots: number) {
+        let info = {
+            selectedFitnesser: selectedFitnesser,
+            expectedFrequencies: expectedFrequencies,
+            shots: shots
+        };
+        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info);
+    }*/
+
 
     selectFitnesser(name: string, selected: boolean, shots: number, desiredError: number, expectedFrequencies: number[], populationSize: number) {
         let info = {

@@ -208,7 +208,7 @@ export abstract class EvolutionaryComponent {
     return this.remoteFitnessers.filter(rf=>rf.selected).length
   }
 
-  loadRemoteFitnessers() {
+  /*loadRemoteFitnessers() {
     this.service.getFitnessers().subscribe(
       result => {
         this.error = undefined
@@ -224,9 +224,27 @@ export abstract class EvolutionaryComponent {
         this.error = error.error.message
       }
     )
+  }*/
+
+  async loadRemoteFitnessers() {
+    this.service.getFitnessers().subscribe(async result => {
+      this.error = undefined;
+      this.remoteFitnessers = result.map((r: string, i: number) => new RemoteFitnesser(i, r));
+
+      const simple = this.remoteFitnessers.find(rf => rf.name === "SimpleFitnesser");
+      if (simple) {
+        await this.selectFitnesser(simple); // esperar a que la sesión del backend se actualice
+      }
+    }, error => {
+      this.state = undefined;
+      this.substate = undefined;
+      this.error = error.error.message;
+    });
   }
 
-  resetMatrix() {
+  
+
+  async resetMatrix() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -235,7 +253,7 @@ export abstract class EvolutionaryComponent {
     this.calculateShots()
   }
 
-  random() {
+  async random() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -245,7 +263,7 @@ export abstract class EvolutionaryComponent {
     this.updateExpectedFrequencies()
   }
 
-  zeroTo2N() {
+  async zeroTo2N() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -255,7 +273,7 @@ export abstract class EvolutionaryComponent {
     this.updateExpectedFrequencies()
   }
 
-  updateExpectedFrequencies() {
+  /*updateExpectedFrequencies() {
     if (this.pc.inputConfiguration.outputs.length<this.pc.inputConfiguration.qubits) {
         for (let i=this.pc.inputConfiguration.outputs.length; i<this.pc.inputConfiguration.qubits; i++) {
             this.pc.inputConfiguration.outputs.push(true)
@@ -267,7 +285,33 @@ export abstract class EvolutionaryComponent {
     if (localStorage.getItem("isBlocks") === "true") {
       localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
     }
-  }
+  }*/
+
+    async updateExpectedFrequencies() {
+      // Asegurarse de que haya un fitnesser seleccionado en el backend
+      if (!this.remoteFitnesser) {
+        const simple = this.remoteFitnessers.find(rf => rf.name === "SimpleFitnesser");
+        if (simple) {
+          await this.selectFitnesser(simple);
+        } else {
+          this.error = "No fitnesser available to select";
+          return;
+        }
+      }
+
+      // Ahora sí se puede actualizar
+      this.service.updateExpectedFrequencies(this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.shots).subscribe(
+        result => {
+          this.updateRemoteFitnessers(result)
+        },
+        error => {
+          this.state = undefined
+          this.substate = undefined
+          this.error = error.error.message
+        }
+      )
+    }
+
 
   updateOutputs() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
@@ -293,10 +337,25 @@ export abstract class EvolutionaryComponent {
         this.error = error.error.message
       }
     )
+    /*if (this.remoteFitnesser) {
+      this.service.updateExpectedFrequencies(this.remoteFitnesser, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.shots)
+        .subscribe(
+          result => {
+            this.updateRemoteFitnessers(result);
+          },
+          error => {
+            this.state = undefined;
+            this.substate = undefined;
+            this.error = error.error.message;
+          }
+        );
+    }*/
 
     if (localStorage.getItem("isBlocks") === "true") {
       localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
     }
+
+    console.log(this.remoteFitnesser);
   }
 
   private updateRemoteFitnessers(result : any) {
@@ -316,13 +375,16 @@ export abstract class EvolutionaryComponent {
       this.pc.inputConfiguration.shots = this.pc.inputConfiguration.shots + this.pc.inputConfiguration.expectedFrequencies[i]
   }
 
-  selectFitnesser(rf : RemoteFitnesser) {
+  remoteFitnesser?: RemoteFitnesser;
+
+  /*selectFitnesser(rf : RemoteFitnesser) {
     rf.selected=!rf.selected
 
     for (let i=0; i<this.remoteFitnessers.length; i++) {
       if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
         rf = this.remoteFitnessers[i]
         rf.selected = true
+        this.remoteFitnesser = rf;
       }
     }
 
@@ -345,7 +407,72 @@ export abstract class EvolutionaryComponent {
           this.substate = undefined
           this.error = error.error.message
         })
-  }
+
+  }*/
+
+
+    /*selectFitnesser(rf: RemoteFitnesser) {
+      // fuerza a que siempre quede seleccionado
+      rf.selected = true;
+      this.remoteFitnesser = rf;
+
+      this.service.selectFitnesser(
+        rf.name!,
+        true,  // ya no usamos rf.selected, siempre true
+        this.pc.inputConfiguration.shots,
+        this.pc.desiredError,
+        this.pc.inputConfiguration.expectedFrequencies,
+        this.pc.inputConfiguration.populationSize
+      ).subscribe(
+        result => {
+          this.error = undefined;
+          if (result != null) {
+            rf.shortName = result.shortName;
+            rf.maxFitness = result.maxFitness;
+            rf.maxError = result.maxError;
+            rf.populationSize = result.populationSize;
+            rf.expectedFitness = result.expectedFitness;
+          }
+          this.selectedRemoteFitnessers = [rf]; // solo este
+        },
+        error => {
+          this.state = undefined;
+          this.substate = undefined;
+          this.error = error.error.message;
+        }
+      );
+    }*/
+
+    selectFitnesser(rf: RemoteFitnesser): Promise<void> {
+      rf.selected = true;
+      this.remoteFitnesser = rf;
+
+      return this.service.selectFitnesser(
+        rf.name!,
+        true,
+        this.pc.inputConfiguration.shots,
+        this.pc.desiredError,
+        this.pc.inputConfiguration.expectedFrequencies,
+        this.pc.inputConfiguration.populationSize
+      ).toPromise().then(result => {
+        this.error = undefined;
+        if (result != null) {
+          rf.shortName = result.shortName;
+          rf.maxFitness = result.maxFitness;
+          rf.maxError = result.maxError;
+          rf.populationSize = result.populationSize;
+          rf.expectedFitness = result.expectedFitness;
+        }
+        this.selectedRemoteFitnessers = [rf];
+        console.log("Fitnesser selected: " + rf.name);
+      }).catch(error => {
+        this.state = undefined;
+        this.substate = undefined;
+        this.error = error.error.message;
+      });
+    }
+
+
 
   updateDesiredError() {
     this.service.updateDesiredError(this.pc.desiredError).subscribe(
@@ -425,6 +552,7 @@ export abstract class EvolutionaryComponent {
     let individual
     let selectedRemoteFitnessers = this.remoteFitnessers.filter(rf=>rf.selected)
     let rf : RemoteFitnesser
+    rf = selectedRemoteFitnessers[0];
     let fitnesserResult
     this.individuals = []
     this.pc.inputConfiguration.populationSize = result.populationSize
