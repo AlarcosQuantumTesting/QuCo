@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, Renderer2 } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
 
@@ -7,8 +7,12 @@ import { AccessibilityService } from './accessibility.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   title = 'quco - Quantum Code Generation';
+
+  ngOnInit(): void {
+    this.loadSettings();
+  }
 
   menuAbierto = false;
   mostrarInicio = true;
@@ -70,8 +74,6 @@ export class AppComponent implements AfterViewInit {
   darkMode = false;
   highContrast = false;
   userBgColor = '';
-  //bgColor = '#ffffff';       // fondo por defecto
-  //containerColor = '#f5f5f5'; // contenedor por defecto
 
 
   toggleAccessibilityPanel() {
@@ -82,7 +84,7 @@ export class AppComponent implements AfterViewInit {
     this.showAccessibility = false;
   }
 
-  toggleDarkMode() {
+  /*stoggleDarkMode() {
     this.darkMode = !this.darkMode;
     if (this.darkMode) {
       this.highContrast = false;
@@ -114,7 +116,6 @@ export class AppComponent implements AfterViewInit {
     this.setTextColor(color, document.body);
   }
 
-  // Cambiar fondo de contenedores principales
   setContainerColor(event: any) {
     const color = event.target.value;
     this.containerColor = color;
@@ -125,7 +126,6 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  // Ajustar color de texto según brillo del fondo
   private setTextColor(bgColor: string, element: HTMLElement) {
     const c = bgColor.substring(1);
     const rgb = parseInt(c, 16);
@@ -136,7 +136,59 @@ export class AppComponent implements AfterViewInit {
 
     const textColor = brightness > 128 ? '#000000' : '#ffffff';
     this.renderer.setStyle(element, 'color', textColor);
+  }*/
+
+
+
+
+  private saveSettings() {
+    const settings = {
+      bgColor: this.bgColor,
+      containerColor: this.containerColor,
+      sidebarColor: this.sidebarColor,
+      grayscale: this.grayscale,
+      zoomLevel: this.zoomLevel
+    };
+    localStorage.setItem('settings', JSON.stringify(settings));
   }
+
+  private loadSettings() {
+    const data = localStorage.getItem('settings');
+    if (data) {
+      const settings = JSON.parse(data);
+
+      this.bgColor = settings.bgColor || this.bgColor;
+      this.containerColor = settings.containerColor || this.containerColor;
+      this.sidebarColor = settings.sidebarColor || this.sidebarColor;
+      this.grayscale = settings.grayscale || false;
+      this.zoomLevel = settings.zoomLevel || 1;
+
+      // Aplicar estilos guardados
+      this.renderer.setStyle(document.body, 'background-color', this.bgColor);
+
+      document.querySelectorAll('.content').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = this.containerColor;
+      });
+
+      document.querySelectorAll('.sidebar').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = this.sidebarColor;
+      });
+
+      if (this.grayscale) {
+        this.renderer.setStyle(document.body, 'filter', 'grayscale(100%) brightness(90%)');
+      }
+
+      this.updateZoom();
+
+      // Esperar a que los h1 estén en el DOM
+      /*setTimeout(() => {
+        document.querySelectorAll('h1').forEach(el => {
+          (el as HTMLElement).style.backgroundColor = this.sidebarColor;
+        });
+      }, 50);*/
+    }
+  }
+  
 
 
 
@@ -168,6 +220,7 @@ export class AppComponent implements AfterViewInit {
     const color = this.ensurePastel(event.target.value);
     this.bgColor = color;
     this.renderer.setStyle(document.body, 'background-color', color);
+    this.saveSettings();
   }
 
   setPastelContainerColor(event: any) {
@@ -176,6 +229,7 @@ export class AppComponent implements AfterViewInit {
     document.querySelectorAll('.content').forEach(el => {
       (el as HTMLElement).style.backgroundColor = color;
     });
+    this.saveSettings();
   }
 
   setPastelSidebarColor(event: any) {
@@ -187,15 +241,20 @@ export class AppComponent implements AfterViewInit {
     /*document.querySelectorAll('h1').forEach(el => {
       (el as HTMLElement).style.backgroundColor = color;
     });*/
+    this.saveSettings();
   }
 
   toggleGrayscale() {
     this.grayscale = !this.grayscale;
+    this.renderer.setStyle(document.body, 'transition', 'all 0.5s ease');
     if (this.grayscale) {
       this.renderer.setStyle(document.body, 'filter', 'grayscale(100%) brightness(90%)');
+      this.renderer.setStyle(document.body, 'background-color', '#ffffff');
     } else {
       this.renderer.removeStyle(document.body, 'filter');
+      this.renderer.setStyle(document.body, 'background-color', this.bgColor);
     }
+    this.saveSettings();
   }
 
   resetColors() {
@@ -203,6 +262,9 @@ export class AppComponent implements AfterViewInit {
     this.containerColor = '##e7eeed';
     this.sidebarColor = '#008b95';
     this.grayscale = false;
+    document.querySelectorAll('h1').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = '#008b95';
+    });
 
     this.renderer.setStyle(document.body, 'background-color', this.bgColor);
     document.querySelectorAll('.content').forEach(el => {
@@ -212,5 +274,71 @@ export class AppComponent implements AfterViewInit {
       (el as HTMLElement).style.backgroundColor = this.sidebarColor;
     });
     this.renderer.removeStyle(document.body, 'filter');
+    this.saveSettings();
   }
+
+    zoomLevel = 1;
+    minZoom = 0.8;
+    maxZoom = 1.2;
+    step = 0.1;
+
+    updateZoom() {
+      document.body.style.zoom = this.zoomLevel.toString();
+    }
+
+    increaseZoom() {
+      if (this.zoomLevel < this.maxZoom) {
+        this.zoomLevel += this.step;
+        this.updateZoom();
+        this.saveSettings();
+      }
+    }
+
+    decreaseZoom() {
+      if (this.zoomLevel > this.minZoom) {
+        this.zoomLevel -= this.step;
+        this.updateZoom();
+        this.saveSettings();
+      }
+    }
+
+    resetZoom() {
+      this.zoomLevel = 1;
+      this.updateZoom();
+      this.saveSettings();
+    }
+
+
+
+
+  /*letra
+  fontSize = 100;
+  minFont = 80; 
+  maxFont = 120;
+  step = 10;
+
+  updateFontSize() {
+    document.documentElement.style.setProperty('--font-scale', this.fontSize + '%');
+  }
+
+  increaseFontSize() {
+    if (this.fontSize < this.maxFont) {
+      this.fontSize += this.step;
+      this.updateFontSize();
+    }
+  }
+
+  decreaseFontSize() {
+    if (this.fontSize > this.minFont) {
+      this.fontSize -= this.step;
+      this.updateFontSize();
+    }
+  }
+
+  resetFontSize() {
+    this.fontSize = 100;
+    this.updateFontSize();
+  }*/
+
+
 }

@@ -102,9 +102,9 @@
     <div class="content">
       <div class="header">
         <!-- <h1 class="title fade-in" click)="goToHome()" style="cursor: pointer;" title="Go to home"> -->
-        <h1 class="title fade-in" routerLink="home" routerLinkActive="active" style="cursor: pointer;" title="Go to home">
+        <h2 class="title fade-in" routerLink="home" routerLinkActive="active" style="cursor: pointer;" title="Go to home">
           <img src="assets/img/logo1.png" alt="Logo" class="logo"> Quantum Code Generation
-        </h1>
+        </h2>
       </div>
     
       <app-home *ngIf="mostrarInicio"></app-home>
@@ -116,65 +116,59 @@
 
 
   <div class="accessibility-modal" *ngIf="showAccessibility">
-        <div class="modal-content instrucciones"
-            cdkDrag
-            cdkDragRootElement="modal-content">
-            <div class="modal-header" cdkDragHandle>
-                <h2 class="title-modal">Settings</h2>
-                <button class="close"><i class="close-i" (click)="showAccessibility = false">&times;</i></button>
-            </div>
-
-            <!-- Contenido del modal -->
-            <div class="accessibility-content">
-
-              <!-- <button (click)="toggleHighContrast()">
-                <i class="fas fa-adjust"></i> High contrast
-              </button> -->
-
-              <button (click)="accessibility.increaseFontSize()">
-                <i class="fas fa-search-plus"></i> Increase font size
-              </button>
-
-              <button (click)="accessibility.decreaseFontSize()">
-                <i class="fas fa-search-minus"></i> Reduce font size
-              </button>
-
-              <button (click)="accessibility.resetFontSize()">
-                <i class="fas fa-undo"></i> Default font size
-              </button>
-
-              <!-- <button (click)="toggleDarkMode()">
-                <i class="fas fa-moon"></i> Dark mode
-              </button> -->
-              <button (click)="toggleGrayscale()">Black and white mode</button>
-
-              <div class="accessibility-panel">
-                <!-- <label>
-                  🌈 Background color
-                  <input type="color" [value]="bgColor" (input)="setBgColor($event)">
-                </label>
-
-                <label>
-                  🎨 Main containers color
-                  <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
-                </label> -->
-
-                <label>
-                  Background color
-                  <input type="color" [value]="bgColor" (input)="setPastelBgColor($event)">
-                </label>
-                <label>
-                  Sidebar color
-                  <input type="color" [value]="sidebarColor" (input)="setPastelSidebarColor($event)">
-                </label>
-                
-              </div>
-
-              <button (click)="resetColors()">Reset</button>
-
-            </div>
-        </div>
+    <div class="modal-content instrucciones"
+      cdkDrag
+      cdkDragRootElement="modal-content">
+      <div class="modal-header" cdkDragHandle>
+        <h2 class="title-modal">Settings</h2>
+        <button class="close"><i class="close-i" (click)="showAccessibility = false">&times;</i></button>
       </div>
+    
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Zoom -->
+        <section class="accessibility-section">
+          <h3>Zoom</h3>
+          <div class="button-group">
+            <button (click)="increaseZoom()"><i class="fas fa-search-plus"></i> Zoom in</button>
+            <button (click)="decreaseZoom()"><i class="fas fa-search-minus"></i> Zoom out</button>
+            <button (click)="resetZoom()" class="default-btn"><i class="fas fa-undo"></i> Default</button>
+          </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="accessibility-section">
+          <h3 style="margin-top: 0px; padding: 0px;">Appearance</h3>
+          <div class="toggle-container">
+            <span class="toggle-label">Black & White</span>
+            <label class="switch">
+              <input type="checkbox" [checked]="grayscale" (change)="toggleGrayscale()">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <h3></h3>
+          <div class="color-settings">
+            <label>
+              Background:
+              <input title="Pick color" type="color" [value]="bgColor" (input)="setPastelBgColor($event)">
+            </label>
+            <label>
+              Sidebar:
+              <input title="Pick color" type="color" [value]="sidebarColor" (input)="setPastelSidebarColor($event)">
+            </label>
+          </div>
+        </section>
+
+        <!-- Reset -->
+        <section class="accessibility-section reset-section">
+          <button class="reset-btn" (click)="resetColors()"><i class="fas fa-redo"></i> Reset appearance</button>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
 
 
   <!-- Interfaz de accesibilidad -->
@@ -185,6 +179,16 @@
       <button (click)="toggleHighContrast()">
         <i class="fas fa-adjust"></i> High contrast
       </button>
+
+      <label>
+        🌈 Background color
+          <input type="color" [value]="bgColor" (input)="setBgColor($event)">
+      </label>
+
+      <label>
+        🎨 Main containers color
+        <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
+      </label>
 
       <button (click)="accessibility.increaseFontSize()">
         <i class="fas fa-search-plus"></i> Increase font size

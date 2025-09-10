@@ -4,3 +4,11 @@ html, body{
     margin: 0;
     padding: 0;
 }
+
+/* :root {
+  --font-scale: 100%;
+}
+
+body {
+  font-size: var(--font-scale);
+} */

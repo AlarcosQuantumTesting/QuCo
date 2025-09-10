@@ -27,6 +27,7 @@ div, section, article, main, aside, header, footer, p, span, h1, h2, h3, li, a, 
     gap: 5px;
     /* color: rgb(4, 87, 4); */
     color: #0b555a;
+    background-color: #ffffff00;
   }
 
   .title img {
@@ -34,7 +35,7 @@ div, section, article, main, aside, header, footer, p, span, h1, h2, h3, li, a, 
     height: 20px;
   }
 
-  h1 {
+  h2.title {
     text-align: center;
     width: 100%;
     margin-top: 20px;
@@ -56,7 +57,7 @@ div, section, article, main, aside, header, footer, p, span, h1, h2, h3, li, a, 
 
      background-color: #008b95;
      color: white;
-     height: 100vh;
+     height: 100%;
      transition: width 0.3s ease, left 0.3s ease;
      overflow: hidden;
      display: flex;
@@ -473,10 +474,172 @@ body.high-contrast button {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px;
+}
+
+.modal-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accessibility-section h3 {
+  font-size: 16px;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.button-group button {
+  flex: 1 1 30%;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: #4c9696;
+  color: white;
+  transition: background 0.2s;
+}
+
+.default-btn {
+  background: #17555A !important;
+}
+
+.default-btn:hover {
+  background: #8cbdbd !important;
 }
 
 
+.button-group button:hover {
+  background: #386161;
+  transform: scale(1.05);
+}
+
+.color-settings {
+  display: flex;
+  gap: 15px; /* espacio entre los dos labels */
+  margin-bottom: 15px;
+  justify-content: space-between;
+}
+
+.color-settings label {
+  display: flex;
+  align-items: center; /* centra verticalmente el input con el texto */
+  gap: 5px;            /* espacio entre texto e input */
+  font-size: 14px;
+  color: #333;
+}
+
+.color-settings input[type="color"] {
+  cursor: pointer;
+}
+
+.reset-section {
+  display: flex;
+  justify-content: center;
+}
+
+.reset-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #17555A;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.reset-btn:hover {
+  background: #8cbdbd;
+  transform: scale(1.05);
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;  /* más ancho para poner ON/OFF */
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+  font-size: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  box-sizing: border-box;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #007bff;
+}
+
+input:checked + .slider:before {
+  transform: translateX(32px);
+}
+
+/* Añadimos los textos ON / OFF */
+.slider:after {
+  content: "Off";
+  position: absolute;
+  right: 5px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+input:checked + .slider:after {
+  content: "On";
+  left: 5px;
+  right: auto;
+}
 
 
 
