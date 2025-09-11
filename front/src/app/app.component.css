@@ -562,6 +562,14 @@ body.high-contrast button {
   transform: scale(1.05);
 }
 
+button.increaseZoom:disabled,
+button.decreaseZoom:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #ccc !important;
+  transform: scale(1) !important;
+}
+
 .toggle-container {
   display: flex;
   justify-content: space-between;

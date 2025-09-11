@@ -131,8 +131,8 @@
         <section class="accessibility-section">
           <h3>Zoom</h3>
           <div class="button-group">
-            <button (click)="increaseZoom()"><i class="fas fa-search-plus"></i> Zoom in</button>
-            <button (click)="decreaseZoom()"><i class="fas fa-search-minus"></i> Zoom out</button>
+            <button (click)="increaseZoom()" [disabled]="isMaxZoom()" class="increaseZoom"><i class="fas fa-search-plus"></i> Zoom in</button>
+            <button (click)="decreaseZoom()" [disabled]="isMinZoom()" class="decreaseZoom"><i class="fas fa-search-minus"></i> Zoom out</button>
             <button (click)="resetZoom()" class="default-btn"><i class="fas fa-undo"></i> Default</button>
           </div>
         </section>

@@ -302,6 +302,15 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
     }
 
+    isMaxZoom(): boolean {
+      return this.zoomLevel >= this.maxZoom;
+    }
+
+    isMinZoom(): boolean {
+      return this.zoomLevel <= this.minZoom;
+    }
+
+
     resetZoom() {
       this.zoomLevel = 1;
       this.updateZoom();
