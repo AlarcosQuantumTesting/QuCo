@@ -334,8 +334,10 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   validarStartingColumns() : boolean {
     const config = this.pc.inputConfiguration;
-    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
-    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;
+    /*if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;*/
+    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > config.maxNumberOfColumns) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns < config.minNumberOfColumns) return true;
     if (config.minNumberOfColumns > config.maxNumberOfColumns) return true;
     return false;
   }

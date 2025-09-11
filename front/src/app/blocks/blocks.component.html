@@ -82,6 +82,13 @@
                     class="error-text-top">
                     The number of columns must be equal or greater than 1.
                 </small>
+                <small *ngIf="pc.inputConfiguration.minNumberOfColumns > pc.inputConfiguration.maxNumberOfColumns || 
+                    pc.inputConfiguration.maxNumberOfColumns < pc.inputConfiguration.minNumberOfColumns 
+                    && pc.inputConfiguration.minNumberOfColumns != null && pc.inputConfiguration.maxNumberOfColumns != null"
+                    class="error-text-top">
+                    The minimum number of columns must be less than or equal to the maximum number of columns.
+                </small>
+                
             </div>
             <div class="container matrix-container">
                 <div class="form-row">
@@ -132,9 +139,11 @@
                             <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
                         
                             Number of columns in the block: between 
-                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
+                            <input [disabled]="running" type="number" min="1" [max]="pc.inputConfiguration.maxNumberOfColumns"
+                            [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
                             and 
-                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
+                            <input [disabled]="running" type="number" min="1" [min]="pc.inputConfiguration.minNumberOfColumns"
+                            [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
                             <div class="table-scroll-wrapper">
