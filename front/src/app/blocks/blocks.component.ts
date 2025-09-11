@@ -68,6 +68,9 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
    ngOnInit () {
+
+    window.addEventListener('beforeunload', this.confirmExit);
+
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
       //console.log("Mensaje SSE:", msg);
@@ -530,4 +533,21 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
   }
 
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeunload', this.confirmExit);
+  }
+
+  confirmExit = (event: BeforeUnloadEvent): void => {
+    if (this.running || !this.notBuilt) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  };
+
+  canDeactivate(): boolean {
+    if (this.running || !this.notBuilt) {
+      return confirm('Are you sure you want to exit Blocks genetic algorithm?');
+    }
+    return true;
+  }
 }

@@ -17,7 +17,7 @@ const routes: Routes = [
   { path: "matrix", component: MatrixesComponent },
   { path: "grover", component: GroverComponent },
   { path: "elonging", component: ElongingComponent, canDeactivate: [CanDeactivateGuard] },
-  { path: "blocks", component: BlocksComponent },
+  { path: "blocks", component: BlocksComponent, canDeactivate: [CanDeactivateGuard] },
   { path: "grenoble", component: DeterministicComponent },
   { path: "editor", component: CircuitEditorComponent },
   { path: "templates", component: TemplatesComponent },
