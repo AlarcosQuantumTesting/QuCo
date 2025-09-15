@@ -367,14 +367,114 @@
                     <div class="form-group">
                         <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
                             Available gates
+                            <input type="checkbox" [checked]="areAllSelected(5)" (change)="toggleSelectGates(5)" title="Select/Deselect all">
                         </label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-                            <ng-container *ngFor="let gate of gates; let i = index">
-                            <label style="display: flex; align-items: center; gap: 4px;">
-                                <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> {{ gate.name }}
-                            </label>
-                            </ng-container>
+                        <div>
+                            <div>
+                                <div style="display: flex; align-items: center; margin: 12px 0;">
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                    <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        1 affected qubits
+                                        <input type="checkbox" [checked]="areAllSelected(1)" (change)="toggleSelectGates(1)" title="Select/Deselect all">
+                                    </label>
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                </div>
+
+                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <ng-container *ngFor="let gate of gates">
+                                    <ng-container *ngIf="gate.affectedQubits == 1">
+                                    <label style="display: flex; align-items: center; gap: 4px;">
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        {{ gate.name }}
+                                    </label>
+                                    </ng-container>
+                                </ng-container>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; align-items: center; margin: 12px 0;">
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                    <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        2 affected qubits
+                                        <input type="checkbox" [checked]="areAllSelected(2)" (change)="toggleSelectGates(2)" title="Select/Deselect all">
+                                    </label>
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <ng-container *ngFor="let gate of gates">
+                                    <ng-container *ngIf="gate.affectedQubits == 2">
+                                    <label style="display: flex; align-items: center; gap: 4px;">
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        {{ gate.name }}
+                                    </label>
+                                    </ng-container>
+                                </ng-container>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; align-items: center; margin: 12px 0;">
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+
+                                    <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        3 affected qubits
+                                        <input type="checkbox" [checked]="areAllSelected(3)" (change)="toggleSelectGates(3)" title="Select/Deselect all">
+                                    </label>
+
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                </div>
+
+                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                    <ng-container *ngFor="let gate of gates">
+                                        <ng-container *ngIf="gate.affectedQubits == 3">
+                                        <label style="display: flex; align-items: center; gap: 4px;">
+                                            <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                            {{ gate.name }}
+                                        </label>
+                                        </ng-container>
+                                    </ng-container>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; align-items: center; margin: 12px 0;">
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                    <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        4 or more affected qubits
+                                        <input type="checkbox" [checked]="areAllSelected(4)" (change)="toggleSelectGates(4)" title="Select/Deselect all">
+                                    </label>
+                                    <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
+                                </div>
+
+                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                    <ng-container *ngFor="let gate of gates">
+                                    <ng-container *ngIf="gate.affectedQubits >= 4">
+                                        <label style="display: flex; align-items: center; gap: 6px;">
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        {{ gate.name }}
+                                        </label>
+                                    </ng-container>
+                                    </ng-container>
+                                </div>
+                            </div>
                         </div>
+
+                        
+                        <!-- <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                            <div *ngFor="let group of groupedGates" style="margin-bottom: 16px;">
+                                <h4 style="margin: 8px 0;">{{ group.qubits }} qubit(s)</h4>
+
+                                <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                    <ng-container *ngFor="let gate of group.gates; let i = index">
+                                    <label style="display: flex; align-items: center; gap: 4px;">
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()"> 
+                                        {{ gate.name }}
+                                    </label>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

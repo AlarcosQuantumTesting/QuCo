@@ -198,8 +198,8 @@ button:hover {
 
 .form-row > * {
     position: relative;
-    padding-right: 10px;
-    margin-right: 10px;
+    /* padding-right: 10px;
+    margin-right: 10px; */
 }
 
 /* .form-row > *:not(:last-child)::after {
@@ -217,17 +217,17 @@ button:hover {
 
 .form-row input {
     /* width: 80px; */
-    width: 100%;
+    /* width: 100%; */
 }
 
 .form-row button {
     margin-left: auto; /* Empuja el botón hacia la derecha */
 }
 
-.section {
+/* .section {
     padding-left: 15px;
     padding-right: 15px;
-}
+} */
 
 .qubitsContainer {
     width: 32%;

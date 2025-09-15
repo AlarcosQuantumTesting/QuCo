@@ -11,6 +11,7 @@ import { BlockCircuit } from './BlockCircuit';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { BlockColumn } from './BlockColumn';
+import { min } from 'rxjs';
 
 Chart.register(...registerables)
 
@@ -550,4 +551,38 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
     return true;
   }
+
+  toggleSelectGates(minQubits: number) {
+    const allSelected = this.areAllSelected(minQubits);
+    this.gates.forEach(g => {
+      if (minQubits === 4) {
+        if (g.affectedQubits >= minQubits) {
+          g.selected = !allSelected;
+        }
+      } else if (g.affectedQubits === minQubits) {
+        g.selected = !allSelected;
+      } else if (minQubits === 5 && g.affectedQubits >= 1) {
+        g.selected = !allSelected;
+      }
+    });
+    this.saveGates();
+  }
+
+  areAllSelected(minQubits: number): boolean {
+    if (minQubits === 1) {
+      return this.gates.filter(g => g.affectedQubits === 1).every(g => g.selected);
+    } else if (minQubits === 2) {
+      return this.gates.filter(g => g.affectedQubits === 2).every(g => g.selected);
+    } else if (minQubits === 3) {
+      return this.gates.filter(g => g.affectedQubits === 3).every(g => g.selected);
+    } else if (minQubits === 4) {
+      return this.gates.filter(g => g.affectedQubits >= minQubits).every(g => g.selected);
+    } else if (minQubits === 5) {
+      return this.gates.filter(g => g.affectedQubits >= 1).every(g => g.selected);
+    } else {
+      return false;
+    }
+  }
+
+
 }
