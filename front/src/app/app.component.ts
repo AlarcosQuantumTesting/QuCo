@@ -54,6 +54,18 @@ export class AppComponent implements AfterViewInit, OnInit {
     window.location.href = '/home';
   }
 
+  navigateAndReload(route: string) {
+    // Si ya estamos en la ruta, forzamos reload
+    if (this.router.url === '/' + route) {
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate([route]);
+        this.navigateAndReload(route);
+      });
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
   /*
   // Para confirmar la recarga de la página
   ngOnInit(): void {
@@ -257,14 +269,27 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.saveSettings();
   }
 
+  /*toggleGrayscale() {
+    this.grayscale = !this.grayscale;
+    const mainContainer = document.querySelector('html') as HTMLElement;
+
+    if (this.grayscale) {
+      this.renderer.setStyle(mainContainer, 'filter', 'grayscale(100%) brightness(90%)');
+      this.renderer.setStyle(mainContainer, 'transition', 'filter 0.3s ease');
+    } else {
+      this.renderer.removeStyle(mainContainer, 'filter');
+      this.renderer.setStyle(mainContainer, 'background-color', this.bgColor);
+    }
+    this.saveSettings();
+  }*/
+
+
   resetColors() {
     this.bgColor = '#ffffff';
-    this.containerColor = '##e7eeed';
+    this.containerColor = '#e7eeed00';
     this.sidebarColor = '#008b95';
     this.grayscale = false;
-    document.querySelectorAll('h1').forEach(el => {
-      (el as HTMLElement).style.backgroundColor = '#008b95';
-    });
+    
 
     this.renderer.setStyle(document.body, 'background-color', this.bgColor);
     document.querySelectorAll('.content').forEach(el => {

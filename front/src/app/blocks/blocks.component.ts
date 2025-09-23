@@ -32,6 +32,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   showCharts: boolean = false;
   isNone: boolean = true;
   isRandom: boolean = false;
+  isZeroTo2N: boolean = false;
   selectedOptionFreq: string = 'none';
   selectedGate: String = 'H';
 
@@ -48,13 +49,16 @@ export class BlocksComponent extends EvolutionaryComponent {
     public transpileService: TranspileService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
-    this.pc.inputConfiguration.maxNumberOfColumns = 3
+    this.pc.inputConfiguration.maxNumberOfColumns = 4
   }
 
   ngAfterViewInit(): void {
     this.tieneFrecuenciasEsperadas()
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
     const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+
+    this.pc.inputConfiguration.minNumberOfColumns = 1;
+    this.pc.inputConfiguration.maxNumberOfColumns = 4;
 
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
@@ -80,7 +84,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits, this.pc.inputConfiguration.blockCircuit?.numberOfStartColumns || 2);
     this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
 
-
+    this.pc.inputConfiguration.minNumberOfColumns = 1;
+    this.pc.inputConfiguration.maxNumberOfColumns = 4;
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -207,7 +212,13 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.error = "You must select one fitnesser at least"
     } else {
       this.prepareCharts()
-      this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected), this.manager.selectedTemplate).subscribe(
+      // this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected), this.manager.selectedTemplate).subscribe(
+      this.pc.gateNames = []
+      let selectedGates = this.gates.filter(g => g.selected)
+      for (let i = 0; i < selectedGates.length; i++)
+        this.pc.gateNames.push(selectedGates[i].name!)
+      this.pc.codeTemplate = this.manager.selectedTemplate
+      this.service.generateInitialPopulation(this.pc).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -219,7 +230,8 @@ export class BlocksComponent extends EvolutionaryComponent {
           }
 
           for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
-            this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            this.individuals.push(new Individual(i))
           }
           if (this.running)
             this.firstRun()
@@ -410,6 +422,8 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.resetMatrix();
     } else if (this.isRandom) {
       this.random();
+    } else if (this.isZeroTo2N) {
+      this.zeroTo2N();
     }
 
     localStorage.setItem('selectedOptionFreqGenetic', this.selectedOptionFreq);
@@ -420,6 +434,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     
     this.isNone = value === 'none';
     this.isRandom = value === 'random';
+    this.isZeroTo2N = value === 'zeroTo2N';
   }
 
   copiarCodigo() {

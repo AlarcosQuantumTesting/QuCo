@@ -16,6 +16,7 @@ import edu.uclm.tp3.common.gates.TwoQubitsGate;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+import edu.uclm.tp3.genetic.fitnessers.SimpleFitnesser;
 
 public class ProblemConfiguration {
 	
@@ -23,7 +24,7 @@ public class ProblemConfiguration {
 	private int sourceGeneration;
 	private int targetGeneration;
 	
-	private Fitnesser[] fitnessers;
+	private SimpleFitnesser fitnesser;
 
 	private int probOf1QubitGates;
 	private int probOf2QubitGates;
@@ -189,14 +190,19 @@ public class ProblemConfiguration {
 		return this.history.get(fitnesserName);
 	}
 	
-	@JsonIgnore
+	/*@JsonIgnore
 	public void setRemoteFitnessers(Fitnesser[] fitnessers) {
 		this.fitnessers = fitnessers;
+	}*/
+
+	@JsonIgnore
+	public void setSimpleFitnesser(SimpleFitnesser fitnesser) {
+		this.fitnesser = fitnesser;
 	}
 	
-	public Fitnesser[] getRemoteFitnessers() {
+	/*public Fitnesser[] getRemoteFitnessers() {
 		return fitnessers;
-	}
+	}*/
 
 	public void setJSONHistory(JSONArray jsaHistories) {
 		JSONArray jsaHistory;

@@ -44,9 +44,9 @@ export abstract class IService {
         return this.client.get<any>(environment.beUrl + this.controller + "/getStrategies", { withCredentials: true })
     }
 
-    getFitnessers() {
+    /*getFitnessers() {
         return this.client.get<any>(environment.beUrl + this.controller + "/getFitnessers", { withCredentials: true })
-    }
+    }*/
 
     updateDesiredError(desiredError: number) {
         return this.client.get<any>(environment.beUrl + this.controller + "/updateDesiredError?desiredError=" + desiredError, { withCredentials: true })
@@ -61,10 +61,11 @@ export abstract class IService {
     }*/
 
     updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
-        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", {
+        let info = {
             expectedFrequencies: expectedFrequencies,
             shots: shots
-        },  { withCredentials: true });
+        }
+        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info,  { withCredentials: true });
     }
 
 
@@ -90,11 +91,8 @@ export abstract class IService {
         return this.client.put<any>(environment.beUrl + this.controller + "/selectFitnesser", info, { withCredentials: true })
     }
 
-    generateInitialPopulation(pc: ProblemConfiguration, gates: Gate[], template : CodeTemplate) {
-        pc.gateNames = []
-        for (let i = 0; i < gates.length; i++)
-            pc.gateNames.push(gates[i].name!)
-        pc.codeTemplate = template
+    // generateInitialPopulation(pc: ProblemConfiguration, gates: Gate[], template : CodeTemplate) {
+    generateInitialPopulation(pc: ProblemConfiguration) {
         return this.client.put<any>(environment.beUrl + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
     }
 
@@ -120,5 +118,9 @@ export abstract class IService {
     getCode(generation: number, index: number, fitnesserName: string) {
         return this.client.get(environment.beUrl + this.controller + "/getCode/" + generation + "/" + index + "?fitnesserName=" + fitnesserName,
             { responseType: 'text', withCredentials: true })
+    }
+
+    getSimpleFitnesser() {
+        return this.client.get<any>(environment.beUrl + this.controller + "/getSimpleFitnesser", { withCredentials: true })
     }
 }

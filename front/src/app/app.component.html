@@ -13,19 +13,19 @@
 
       <ul class="sidebar-menu">
         <!-- <li>
-          <a>
-            <i *ngIf="!menuAbierto">——</i>
-            <span *ngIf="menuAbierto">FEATURES</span>
+          <a routerLink="matrixes" routerLinkActive="active">
+            <i class="fas fa-table" title="Matrices"></i>
+            <span *ngIf="menuAbierto">Matrices</span>
           </a>
         </li> -->
         <li>
-          <a routerLink="matrixes" routerLinkActive="active">
+          <a routerLink="matrixes" routerLinkActive="active" (click)="navigateAndReload('matrixes')">
             <i class="fas fa-table" title="Matrices"></i>
             <span *ngIf="menuAbierto">Matrices</span>
           </a>
         </li>
         <li>
-          <a routerLink="grenoble" routerLinkActive="active">
+          <a routerLink="grenoble" routerLinkActive="active" (click)="navigateAndReload('grenoble')">
             <i class="fas fas fa-search" title="Grover, Grover and Rudolph, Grenoble"></i>
             <span *ngIf="menuAbierto">Algorithms
               <br>
@@ -33,20 +33,14 @@
             </span>
           </a>
         </li>
-        <!-- <li>
-          <a routerLink="grover" routerLinkActive="active">
-            <i class="fas fa-search" title="Grover"></i>
-            <span *ngIf="menuAbierto">Grover</span>
-          </a>
-        </li> -->
         <li>
-          <a routerLink="elonging" routerLinkActive="active">
+          <a routerLink="elonging" routerLinkActive="active" (click)="navigateAndReload('elonging')">
             <i class="fas fa-dna" title="Genetic algorithm"></i>
             <span *ngIf="menuAbierto">Genetic algorithm</span>
           </a>
         </li>
         <li>
-          <a routerLink="blocks" routerLinkActive="active">
+          <a routerLink="blocks" routerLinkActive="active" (click)="navigateAndReload('blocks')">
             <i class="fas fa-th-large" title="Blocks genetic algorithm"></i>
             <span *ngIf="menuAbierto">Blocks genetic algorithm</span>
           </a>
@@ -58,34 +52,30 @@
           </a>
         </li>
         <li>
-          <a routerLink="editor" routerLinkActive="active">
+          <a routerLink="editor" routerLinkActive="active" (click)="navigateAndReload('editor')">
             <i class="fas fa-microchip" title="Circuits editor"></i>
             <span *ngIf="menuAbierto">Circuits editor</span>
           </a>
         </li>
         <li>
-          <a routerLink="qubits-configuration" routerLinkActive="active">
+          <a routerLink="qubits-configuration" routerLinkActive="active" (click)="navigateAndReload('qubits-configuration')">
             <i class="fas fa-cubes" title="Qubits configuration"></i>
             <span *ngIf="menuAbierto">Qubits configurations</span>
           </a>
         </li>
         <li>
-          <a routerLink="templates" routerLinkActive="active">
+          <a routerLink="templates" routerLinkActive="active" (click)="navigateAndReload('templates')">
             <i class="fas fa-file-code" title="Code templates"></i>
             <span *ngIf="menuAbierto">Code templates</span>
           </a>
         </li>
 
         <li>
-          <a routerLink="transpilation" routerLinkActive="active">
+          <a routerLink="transpilation" routerLinkActive="active" (click)="navigateAndReload('transpilation')">
             <i class="fas fas fa-exchange-alt" title="Transpilation"></i>
             <span *ngIf="menuAbierto">Transpilation</span>
           </a>
         </li>
-
-
-
-
 
         <li class="ajustes">
           <a (click)="toggleAccessibilityPanel()" class="accessibility-link">
@@ -124,10 +114,8 @@
         <button class="close"><i class="close-i" (click)="showAccessibility = false">&times;</i></button>
       </div>
     
-      <!-- Body -->
       <div class="modal-body">
 
-        <!-- Zoom -->
         <section class="accessibility-section">
           <h3>Zoom</h3>
           <div class="button-group">
@@ -137,7 +125,6 @@
           </div>
         </section>
 
-        <!-- Appearance -->
         <section class="accessibility-section">
           <h3 style="margin-top: 0px; padding: 0px;">Appearance</h3>
           <div class="toggle-container">
@@ -160,7 +147,6 @@
           </div>
         </section>
 
-        <!-- Reset -->
         <section class="accessibility-section reset-section">
           <button class="reset-btn" (click)="resetColors()"><i class="fas fa-redo"></i> Reset appearance</button>
         </section>

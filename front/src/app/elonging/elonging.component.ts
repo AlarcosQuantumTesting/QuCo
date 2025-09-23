@@ -39,6 +39,9 @@ export class ElongingComponent extends EvolutionaryComponent {
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
     const contents = document.querySelectorAll<HTMLElement>(".tab-content");
 
+    this.pc.inputConfiguration.minNumberOfColumns = 4;
+    this.pc.inputConfiguration.maxNumberOfColumns = 20;
+
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
         const selectedIndex = parseInt(tab.dataset['tab'] || "0");
@@ -241,7 +244,12 @@ export class ElongingComponent extends EvolutionaryComponent {
       /*if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
         this.evolutionaryService.connectWS()*/
 
-      this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
+      // this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
+      this.pc.gateNames = []
+      for (let i = 0; i < selectedGates.length; i++)
+        this.pc.gateNames.push(selectedGates[i].name!)
+      this.pc.codeTemplate = this.manager.selectedTemplate
+      this.service.generateInitialPopulation(this.pc).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -254,7 +262,8 @@ export class ElongingComponent extends EvolutionaryComponent {
           }
 
           for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
-            this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            this.individuals.push(new Individual(i))
           }
           if (this.running)
             this.firstRun()
