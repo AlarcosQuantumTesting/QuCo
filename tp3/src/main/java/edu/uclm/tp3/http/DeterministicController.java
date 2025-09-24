@@ -51,6 +51,8 @@ public class DeterministicController {
 		
 		int qubits = jso.getInt("qubits");
 		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
+		if (expectedFrequencies.getPairs().size()==0)
+			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "There are no selected values");
 		double physicalAngle = jso.getDouble("physicalAngle");
 		//boolean originalGR = jso.getBoolean("originalGR");
 		boolean inParallel = jso.getBoolean("inParallel");
