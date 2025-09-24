@@ -682,7 +682,16 @@ export abstract class EvolutionaryComponent {
       result => {
         this.error = undefined
         this.code = result
-        document.getElementById("codeArea")!.scrollIntoView({ behavior : "smooth"})
+        //document.getElementById("codeArea")!.scrollIntoView({ behavior : "smooth"})
+        this.mostrarModalCode = true;
+
+        // Esperar a que Angular pinte el modal
+        setTimeout(() => {
+          const el = document.getElementById("codeArea");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 0);
       },
       result => {
         this.state = undefined

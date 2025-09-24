@@ -655,11 +655,11 @@
                         </th>
                         <th *ngFor="let individual of individuals; let individualIndex = index"
                             [ngStyle]="{ 'background-color' :  individual.selected[0] ? 'lightblue' : '#fffff'}">
-                            <span (click)="getCode(individual); copiarCodigo()" class="solutionFound" *ngIf="individual.selected[0]">💃</span>
-                            <u (click)="getCode(individual); copiarCodigo()" [class.solutionFound]="individual.selected[0]">
+                            <span (click)="getCode(individual); copiarCodigo2()" class="solutionFound" *ngIf="individual.selected[0]">💃</span>
+                            <u (click)="getCode(individual); copiarCodigo2()" [class.solutionFound]="individual.selected[0]">
                                 {{ individuals[individualIndex].index }}
                             </u>
-                            <span (click)="getCode(individual); copiarCodigo()" *ngIf="individual.selected[0]" class="solutionFound">💃</span>
+                            <span (click)="getCode(individual); copiarCodigo2()" *ngIf="individual.selected[0]" class="solutionFound">💃</span>
                         </th>
                     </tr>
                     <tr *ngFor="let i of [].constructor(pc.inputConfiguration.expectedFrequencies.length); let rowIndex = index" align="center">

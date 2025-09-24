@@ -438,16 +438,35 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
   copiarCodigo() {
+    
     const codigo = this.code?.toString() || '';
+    
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
       this.mensajeTemporal2 = 'Code copied';
       setTimeout(() => {
-          this.mensajeTemporal2 = '';
+        this.mensajeTemporal2 = '';
       }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  copiarCodigo2() {
+
+    setTimeout(() => {
+      const codigo = this.code?.toString() || '';
+    
+      navigator.clipboard.writeText(codigo).then(() => {
+        console.log('Código copiado al portapapeles');
+        this.mensajeTemporal2 = 'Code copied';
+        setTimeout(() => {
+            this.mensajeTemporal2 = '';
+        }, 1000);
+      }).catch(err => {
+        console.error('Error al copiar el código:', err);
+      });
+    }, 1000);
   }
 
   transpileCodigo() {
