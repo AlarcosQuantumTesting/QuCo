@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QColumn;
+import edu.uclm.tp3.common.deterministic.QStdGate;
 
 public class MixedCombination {
     public List<Integer> values;
@@ -125,15 +126,15 @@ public class MixedCombination {
         if (first==-1)
             first = 0;
         for (int i=0; i<first; i++)
-            column.addGate("1");
+            column.addGate(new QStdGate("1", r));
 
         for (int i=first; i<unified.length(); i++) {
             if (unified.charAt(i)=='1')
-                column.addGate("X");
+                column.addGate(new QStdGate("X", r));
             else if (unified.charAt(i)=='-')
-                column.addGate("H");
+                column.addGate(new QStdGate("H", r));
             else
-                column.addGate("1");
+                column.addGate(new QStdGate("1", r));
         }
         r.addColumn(column);
         r.setName(sb.toString());

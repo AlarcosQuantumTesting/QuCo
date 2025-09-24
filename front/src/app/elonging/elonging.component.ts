@@ -9,6 +9,7 @@ import { NotificationService } from '../notification.service';
 import { CanComponentDeactivate } from '../CanComponentDeactivate';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { RemoteFitnesser } from '../ae/RemoteFitnesser';
 
 
 
@@ -38,6 +39,9 @@ export class ElongingComponent extends EvolutionaryComponent {
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
     const contents = document.querySelectorAll<HTMLElement>(".tab-content");
 
+    this.pc.inputConfiguration.minNumberOfColumns = 4;
+    this.pc.inputConfiguration.maxNumberOfColumns = 20;
+
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
         const selectedIndex = parseInt(tab.dataset['tab'] || "0");
@@ -50,7 +54,19 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
   }
 
+  rf : any;
+
   ngOnInit () {
+
+    
+
+    for (let i=0; i<this.remoteFitnessers.length; i++) {
+      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
+        this.rf = this.remoteFitnessers[i]
+        this.rf.selected = true
+        this.selectFitnesser(this.rf);
+      }
+    }
 
     localStorage.setItem('isBlocks', "false");
     localStorage.setItem('isGenetic', "true");
@@ -108,10 +124,10 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGates') ? JSON.parse(localStorage.getItem('probOf1QubitGates') || '50') : 50;
     this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGates') ? JSON.parse(localStorage.getItem('probOf2QubitGates') || '50') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '20') : 20;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '20') : 20;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '50') : 50;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '50') : 50;
 
-    this.updateOutputs();
+    //this.updateOutputs();
 
     const savedConfig = localStorage.getItem('qucoConfiguration');
     if (savedConfig) {
@@ -228,7 +244,12 @@ export class ElongingComponent extends EvolutionaryComponent {
       /*if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
         this.evolutionaryService.connectWS()*/
 
-      this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
+      // this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
+      this.pc.gateNames = []
+      for (let i = 0; i < selectedGates.length; i++)
+        this.pc.gateNames.push(selectedGates[i].name!)
+      this.pc.codeTemplate = this.manager.selectedTemplate
+      this.service.generateInitialPopulation(this.pc).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -241,7 +262,8 @@ export class ElongingComponent extends EvolutionaryComponent {
           }
 
           for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
-            this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            this.individuals.push(new Individual(i))
           }
           if (this.running)
             this.firstRun()
@@ -335,7 +357,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     localStorage.setItem('probOf3QubitGates', JSON.stringify(this.pc.probOf3QubitGates));
     localStorage.setItem('probOfNQubitGates', JSON.stringify(this.pc.probOfNQubitGates));
 
-    this.updateOutputs();
+    //this.updateOutputs();
     this.resetMatrix();
 
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
@@ -348,7 +370,16 @@ export class ElongingComponent extends EvolutionaryComponent {
       contents[i].classList.toggle("active", i === selectedIndex);
     });
     this.tieneFrecuenciasEsperadas();
+    
   }
+
+   validarGates(): boolean {
+      return this.gates.some(g => g.affectedQubits === 1 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 2 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 3 && g.selected)
+        && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
+    }
+
 
   validarDatos(): boolean {
     const config = this.pc.inputConfiguration;
@@ -383,6 +414,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
+    if (!this.validarGates()) return true;
 
     return false;
   }
@@ -480,25 +512,42 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
   }
 
+  copiarCodigo2() {
+
+    setTimeout(() => {
+      const codigo = this.code?.toString() || '';
+    
+      navigator.clipboard.writeText(codigo).then(() => {
+        console.log('Código copiado al portapapeles');
+        this.mensajeTemporal2 = 'Code copied';
+        setTimeout(() => {
+            this.mensajeTemporal2 = '';
+        }, 1000);
+      }).catch(err => {
+        console.error('Error al copiar el código:', err);
+      });
+    }, 1000);
+  }
+
   transpileCodigo() {
-      this.modalTranspile = true;
-    }
+    this.modalTranspile = true;
+  }
   
-    selectBackend(backend: Backend) {
-      this.selectedBackends.push(backend);
-      this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
-      localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
-      localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
-    }
+  selectBackend(backend: Backend) {
+    this.selectedBackends.push(backend);
+    this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
   
-    deselectBackend(backend: Backend) {
-      this.availableBackends.push(backend);
-      this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
-      localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
-      localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
-    }
+  deselectBackend(backend: Backend) {
+    this.availableBackends.push(backend);
+    this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
+    localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
+    localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
+  }
   
-    transpile() {
+  transpile() {
       try{
         const backendsToTranspile = this.selectedBackends.map(b => b.name);
         this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
@@ -517,7 +566,39 @@ export class ElongingComponent extends EvolutionaryComponent {
         }, 2000);
       }
       
+  }
+
+  toggleSelectGates(minQubits: number) {
+    const allSelected = this.areAllSelected(minQubits);
+    this.gates.forEach(g => {
+      if (minQubits === 4) {
+        if (g.affectedQubits >= minQubits) {
+          g.selected = !allSelected;
+        }
+      } else if (g.affectedQubits === minQubits) {
+        g.selected = !allSelected;
+      } else if (minQubits === 5 && g.affectedQubits >= 1) {
+        g.selected = !allSelected;
+      }
+    });
+    this.saveGates();
+  }
+
+  areAllSelected(minQubits: number): boolean {
+    if (minQubits === 1) {
+      return this.gates.filter(g => g.affectedQubits === 1).every(g => g.selected);
+    } else if (minQubits === 2) {
+      return this.gates.filter(g => g.affectedQubits === 2).every(g => g.selected);
+    } else if (minQubits === 3) {
+      return this.gates.filter(g => g.affectedQubits === 3).every(g => g.selected);
+    } else if (minQubits === 4) {
+      return this.gates.filter(g => g.affectedQubits >= minQubits).every(g => g.selected);
+    } else if (minQubits === 5) {
+      return this.gates.filter(g => g.affectedQubits >= 1).every(g => g.selected);
+    } else {
+      return false;
     }
+  }
   
 
 }

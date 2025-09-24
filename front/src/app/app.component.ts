@@ -1,18 +1,23 @@
-import { Component, AfterViewInit, ElementRef } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router'
+import { Component, AfterViewInit, ElementRef, Renderer2, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { AccessibilityService } from './accessibility.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   title = 'quco - Quantum Code Generation';
+
+  ngOnInit(): void {
+    this.loadSettings();
+  }
 
   menuAbierto = false;
   mostrarInicio = true;
 
-  constructor(private router: Router, private el: ElementRef) {
+  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         // this.mostrarInicio = this.router.url === '/quco';
@@ -49,6 +54,18 @@ export class AppComponent implements AfterViewInit {
     window.location.href = '/home';
   }
 
+  navigateAndReload(route: string) {
+    // Si ya estamos en la ruta, forzamos reload
+    if (this.router.url === '/' + route) {
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate([route]);
+        this.navigateAndReload(route);
+      });
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
   /*
   // Para confirmar la recarga de la página
   ngOnInit(): void {
@@ -64,4 +81,298 @@ export class AppComponent implements AfterViewInit {
     event.returnValue = '';
   };
   */
+
+  showAccessibility = false;
+  darkMode = false;
+  highContrast = false;
+  userBgColor = '';
+
+
+  toggleAccessibilityPanel() {
+    this.showAccessibility = !this.showAccessibility;
+  }
+
+  closeAccessibilityPanel() {
+    this.showAccessibility = false;
+  }
+
+  /*stoggleDarkMode() {
+    this.darkMode = !this.darkMode;
+    if (this.darkMode) {
+      this.highContrast = false;
+      this.setBgColor('#121212');
+    } else {
+      this.setBgColor('');
+    }
+  }
+
+  toggleHighContrast() {
+    this.highContrast = !this.highContrast;
+    if (this.highContrast) {
+      this.darkMode = false;
+      this.setBgColor('#000000');
+    } else {
+      this.setBgColor('');
+    }
+  }
+
+  pickBgColor(event: any) {
+    const color = event.target.value;
+    this.setBgColor(color);
+  }
+
+  setBgColor(event: any) {
+    const color = event.target.value;
+    this.bgColor = color;
+    this.renderer.setStyle(document.body, 'background-color', color);
+    this.setTextColor(color, document.body);
+  }
+
+  setContainerColor(event: any) {
+    const color = event.target.value;
+    this.containerColor = color;
+    const mainContainers = document.querySelectorAll('.container');
+    mainContainers.forEach(el => {
+      (el as HTMLElement).style.backgroundColor = color;
+      this.setTextColor(color, el as HTMLElement);
+    });
+  }
+
+  private setTextColor(bgColor: string, element: HTMLElement) {
+    const c = bgColor.substring(1);
+    const rgb = parseInt(c, 16);
+    const r = (rgb >> 16) & 0xff;
+    const g = (rgb >> 8) & 0xff;
+    const b = rgb & 0xff;
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    const textColor = brightness > 128 ? '#000000' : '#ffffff';
+    this.renderer.setStyle(element, 'color', textColor);
+  }*/
+
+
+
+
+  private saveSettings() {
+    const settings = {
+      bgColor: this.bgColor,
+      containerColor: this.containerColor,
+      sidebarColor: this.sidebarColor,
+      grayscale: this.grayscale,
+      zoomLevel: this.zoomLevel
+    };
+    localStorage.setItem('settings', JSON.stringify(settings));
+  }
+
+  private loadSettings() {
+    const data = localStorage.getItem('settings');
+    if (data) {
+      const settings = JSON.parse(data);
+
+      this.bgColor = settings.bgColor || this.bgColor;
+      this.containerColor = settings.containerColor || this.containerColor;
+      this.sidebarColor = settings.sidebarColor || this.sidebarColor;
+      this.grayscale = settings.grayscale || false;
+      this.zoomLevel = settings.zoomLevel || 1;
+
+      // Aplicar estilos guardados
+      this.renderer.setStyle(document.body, 'background-color', this.bgColor);
+
+      document.querySelectorAll('.content').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = this.containerColor;
+      });
+
+      document.querySelectorAll('.sidebar').forEach(el => {
+        (el as HTMLElement).style.backgroundColor = this.sidebarColor;
+      });
+
+      if (this.grayscale) {
+        this.renderer.setStyle(document.body, 'filter', 'grayscale(100%) brightness(90%)');
+      }
+
+      this.updateZoom();
+
+      // Esperar a que los h1 estén en el DOM
+      /*setTimeout(() => {
+        document.querySelectorAll('h1').forEach(el => {
+          (el as HTMLElement).style.backgroundColor = this.sidebarColor;
+        });
+      }, 50);*/
+    }
+  }
+  
+
+
+
+
+
+  bgColor = '#ffffff';
+  containerColor = '#f5f5f5';
+  sidebarColor = '#1e1e1e';
+
+  grayscale = false;
+
+  // Forzar tonos pastel
+  private ensurePastel(hex: string): string {
+    const c = hex.substring(1);
+    const rgb = parseInt(c, 16);
+    let r = (rgb >> 16) & 0xff;
+    let g = (rgb >> 8) & 0xff;
+    let b = rgb & 0xff;
+
+    // Forzar a que los valores estén entre 150 y 255 → tonos claros
+    r = Math.max(150, r);
+    g = Math.max(150, g);
+    b = Math.max(150, b);
+
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  setPastelBgColor(event: any) {
+    const color = this.ensurePastel(event.target.value);
+    this.bgColor = color;
+    this.renderer.setStyle(document.body, 'background-color', color);
+    this.saveSettings();
+  }
+
+  setPastelContainerColor(event: any) {
+    const color = this.ensurePastel(event.target.value);
+    this.containerColor = color;
+    document.querySelectorAll('.content').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = color;
+    });
+    this.saveSettings();
+  }
+
+  setPastelSidebarColor(event: any) {
+    const color = this.ensurePastel(event.target.value);
+    this.sidebarColor = color;
+    document.querySelectorAll('.sidebar').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = color;
+    });
+    /*document.querySelectorAll('h1').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = color;
+    });*/
+    this.saveSettings();
+  }
+
+  toggleGrayscale() {
+    this.grayscale = !this.grayscale;
+    this.renderer.setStyle(document.body, 'transition', 'all 0.5s ease');
+    if (this.grayscale) {
+      this.renderer.setStyle(document.body, 'filter', 'grayscale(100%) brightness(90%)');
+      this.renderer.setStyle(document.body, 'background-color', '#ffffff');
+    } else {
+      this.renderer.removeStyle(document.body, 'filter');
+      this.renderer.setStyle(document.body, 'background-color', this.bgColor);
+    }
+    this.saveSettings();
+  }
+
+  /*toggleGrayscale() {
+    this.grayscale = !this.grayscale;
+    const mainContainer = document.querySelector('html') as HTMLElement;
+
+    if (this.grayscale) {
+      this.renderer.setStyle(mainContainer, 'filter', 'grayscale(100%) brightness(90%)');
+      this.renderer.setStyle(mainContainer, 'transition', 'filter 0.3s ease');
+    } else {
+      this.renderer.removeStyle(mainContainer, 'filter');
+      this.renderer.setStyle(mainContainer, 'background-color', this.bgColor);
+    }
+    this.saveSettings();
+  }*/
+
+
+  resetColors() {
+    this.bgColor = '#ffffff';
+    this.containerColor = '#e7eeed00';
+    this.sidebarColor = '#008b95';
+    this.grayscale = false;
+    
+
+    this.renderer.setStyle(document.body, 'background-color', this.bgColor);
+    document.querySelectorAll('.content').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = this.containerColor;
+    });
+    document.querySelectorAll('.sidebar').forEach(el => {
+      (el as HTMLElement).style.backgroundColor = this.sidebarColor;
+    });
+    this.renderer.removeStyle(document.body, 'filter');
+    this.saveSettings();
+  }
+
+    zoomLevel = 1;
+    minZoom = 0.8;
+    maxZoom = 1.2;
+    step = 0.1;
+
+    updateZoom() {
+      document.body.style.zoom = this.zoomLevel.toString();
+    }
+
+    increaseZoom() {
+      if (this.zoomLevel < this.maxZoom) {
+        this.zoomLevel += this.step;
+        this.updateZoom();
+        this.saveSettings();
+      }
+    }
+
+    decreaseZoom() {
+      if (this.zoomLevel > this.minZoom) {
+        this.zoomLevel -= this.step;
+        this.updateZoom();
+        this.saveSettings();
+      }
+    }
+
+    isMaxZoom(): boolean {
+      return this.zoomLevel >= this.maxZoom;
+    }
+
+    isMinZoom(): boolean {
+      return this.zoomLevel <= this.minZoom;
+    }
+
+
+    resetZoom() {
+      this.zoomLevel = 1;
+      this.updateZoom();
+      this.saveSettings();
+    }
+
+
+
+
+  /*letra
+  fontSize = 100;
+  minFont = 80; 
+  maxFont = 120;
+  step = 10;
+
+  updateFontSize() {
+    document.documentElement.style.setProperty('--font-scale', this.fontSize + '%');
+  }
+
+  increaseFontSize() {
+    if (this.fontSize < this.maxFont) {
+      this.fontSize += this.step;
+      this.updateFontSize();
+    }
+  }
+
+  decreaseFontSize() {
+    if (this.fontSize > this.minFont) {
+      this.fontSize -= this.step;
+      this.updateFontSize();
+    }
+  }
+
+  resetFontSize() {
+    this.fontSize = 100;
+    this.updateFontSize();
+  }*/
+
+
 }

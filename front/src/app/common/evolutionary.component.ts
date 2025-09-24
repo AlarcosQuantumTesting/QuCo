@@ -61,7 +61,7 @@ export abstract class EvolutionaryComponent {
       result=> {
         this.service.httpSessionId = result
        // this.service.connectWS()
-        this.loadRemoteFitnessers()
+        //this.loadRemoteFitnessers()
         this.random()
         this.loadConf()
         /*this.ws = this.service.ws
@@ -208,7 +208,7 @@ export abstract class EvolutionaryComponent {
     return this.remoteFitnessers.filter(rf=>rf.selected).length
   }
 
-  loadRemoteFitnessers() {
+  /*loadRemoteFitnessers() {
     this.service.getFitnessers().subscribe(
       result => {
         this.error = undefined
@@ -224,9 +224,27 @@ export abstract class EvolutionaryComponent {
         this.error = error.error.message
       }
     )
-  }
+  }*/
 
-  resetMatrix() {
+  /*async loadRemoteFitnessers() {
+    this.service.getFitnessers().subscribe(async result => {
+      this.error = undefined;
+      this.remoteFitnessers = result.map((r: string, i: number) => new RemoteFitnesser(i, r));
+
+      const simple = this.remoteFitnessers.find(rf => rf.name === "SimpleFitnesser");
+      if (simple) {
+        await this.selectFitnesser(simple); // esperar a que la sesión del backend se actualice
+      }
+    }, error => {
+      this.state = undefined;
+      this.substate = undefined;
+      this.error = error.error.message;
+    });
+  }*/
+
+  
+
+  async resetMatrix() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -235,7 +253,7 @@ export abstract class EvolutionaryComponent {
     this.calculateShots()
   }
 
-  random() {
+  async random() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -245,7 +263,7 @@ export abstract class EvolutionaryComponent {
     this.updateExpectedFrequencies()
   }
 
-  zeroTo2N() {
+  async zeroTo2N() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
@@ -255,7 +273,7 @@ export abstract class EvolutionaryComponent {
     this.updateExpectedFrequencies()
   }
 
-  updateExpectedFrequencies() {
+  /*updateExpectedFrequencies() {
     if (this.pc.inputConfiguration.outputs.length<this.pc.inputConfiguration.qubits) {
         for (let i=this.pc.inputConfiguration.outputs.length; i<this.pc.inputConfiguration.qubits; i++) {
             this.pc.inputConfiguration.outputs.push(true)
@@ -267,7 +285,77 @@ export abstract class EvolutionaryComponent {
     if (localStorage.getItem("isBlocks") === "true") {
       localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
     }
+  }*/
+
+    /*async updateExpectedFrequencies() {
+      if (!this.remoteFitnesser) {
+        const simple = this.service.getSimpleFitnesser().toPromise().then((result: any) => {
+          this.error = undefined;
+          console.log("SimpleFitnesser obtained: " + result);
+          return new RemoteFitnesser(0, result?.name);
+        }).catch(error => {
+          this.state = undefined;
+          this.substate = undefined;
+          this.error = error?.error?.message || 'Error al obtener el SimpleFitnesser.';
+          return null;
+        });
+      }
+
+      this.service.updateExpectedFrequencies(this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.shots).subscribe(
+        result => {
+          this.updateRemoteFitnessers(result)
+        },
+        error => {
+          this.state = undefined
+          this.substate = undefined
+          this.error = error.error.message
+        }
+      )
+    }*/
+
+    async updateExpectedFrequencies() {
+        if (!this.remoteFitnesser) {
+          try {
+            const result = await this.service.getSimpleFitnesser().toPromise();
+            console.log("SimpleFitnesser received:", result);
+
+            if (result) {
+              const fitnesser = new RemoteFitnesser(0, result.shortName);
+              fitnesser.shortName = result.shortName;
+              fitnesser.expectedFitness = result.expectedFitness;
+              fitnesser.maxFitness = result.maxFitness;
+              fitnesser.maxError = result.maxError;
+
+              await this.selectFitnesser(fitnesser);
+            } else {
+              this.error = "No fitnesser available to select";
+              return;
+            }
+          } catch (error: any) {
+            this.state = undefined;
+            this.substate = undefined;
+            this.error = error?.error?.message || 'Error al obtener el SimpleFitnesser.';
+            return;
+          }
+        }
+
+        console.log("Updating expected frequencies with info:", this.pc.inputConfiguration.expectedFrequencies,
+        "shots: ", this.pc.inputConfiguration.shots);
+
+        this.service.updateExpectedFrequencies(
+          this.pc.inputConfiguration.expectedFrequencies,
+          this.pc.inputConfiguration.shots
+        ).subscribe(
+          result => this.updateRemoteFitnessers(result),
+          error => {
+            this.state = undefined;
+            this.substate = undefined;
+            this.error = error.error.message;
+          }
+    );
   }
+
+
 
   updateOutputs() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
@@ -293,59 +381,88 @@ export abstract class EvolutionaryComponent {
         this.error = error.error.message
       }
     )
+    /*if (this.remoteFitnesser) {
+      this.service.updateExpectedFrequencies(this.remoteFitnesser, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.shots)
+        .subscribe(
+          result => {
+            this.updateRemoteFitnessers(result);
+          },
+          error => {
+            this.state = undefined;
+            this.substate = undefined;
+            this.error = error.error.message;
+          }
+        );
+    }*/
 
     if (localStorage.getItem("isBlocks") === "true") {
       localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
     }
+
+    console.log(this.remoteFitnesser);
   }
 
-  private updateRemoteFitnessers(result : any) {
-    for (let i=0; i<result.length; i++) {
-      let rf = this.remoteFitnessers.filter(rf=> rf.shortName==result[i].shortName).at(0)
-      if (!rf)
-        continue
-      rf.expectedFitness = result[i].expectedFitness
-      rf.maxError = result[i].maxError
-      rf.maxFitness = result[i].maxFitness
+  /*private updateRemoteFitnessers(result : any) {
+    console.log("Updating remote fitnesser: " + result);
+    result.expectedFitness = result.expectedFitness
+    result.maxError = result.maxError
+    result.maxFitness = result.maxFitness
+  }*/
+
+  private updateRemoteFitnessers(result: any) {
+    if (!this.remoteFitnesser) return;
+    if (!result) {
+      console.warn("No data received to update remote fitnesser");
+      return;
     }
+
+    console.log("Updating remote fitnesser:", result);
+
+    this.remoteFitnesser.expectedFitness = result.expectedFitness ?? this.remoteFitnesser.expectedFitness;
+    this.remoteFitnesser.maxError = result.maxError ?? this.remoteFitnesser.maxError;
+    this.remoteFitnesser.maxFitness = result.maxFitness ?? this.remoteFitnesser.maxFitness;
   }
 
-  private calculateShots() {
+
+
+  public calculateShots() {
     this.pc.inputConfiguration.shots = 0
     for (let i=0; i<this.pc.inputConfiguration.expectedFrequencies.length; i++)
       this.pc.inputConfiguration.shots = this.pc.inputConfiguration.shots + this.pc.inputConfiguration.expectedFrequencies[i]
   }
 
-  selectFitnesser(rf : RemoteFitnesser) {
-    rf.selected=!rf.selected
+  remoteFitnesser?: RemoteFitnesser;
 
-    for (let i=0; i<this.remoteFitnessers.length; i++) {
-      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
-        rf = this.remoteFitnessers[i]
-        rf.selected = true
-      }
+    selectFitnesser(rf: RemoteFitnesser): Promise<void> {
+      rf.selected = true;
+      this.remoteFitnesser = rf;
+
+      return this.service.selectFitnesser(
+        rf.name!,
+        true,
+        this.pc.inputConfiguration.shots,
+        this.pc.desiredError,
+        this.pc.inputConfiguration.expectedFrequencies,
+        this.pc.inputConfiguration.populationSize
+      ).toPromise().then(result => {
+        this.error = undefined;
+        if (result != null) {
+          rf.shortName = result.shortName;
+          rf.maxFitness = result.maxFitness;
+          rf.maxError = result.maxError;
+          rf.populationSize = result.populationSize;
+          rf.expectedFitness = result.expectedFitness;
+        }
+        this.selectedRemoteFitnessers = [rf];
+        console.log("Fitnesser selected: " + rf.name);
+      }).catch(error => {
+        this.state = undefined;
+        this.substate = undefined;
+        this.error = error.error.message;
+      });
     }
 
 
-    this.service.selectFitnesser(rf.name!, rf.selected, this.pc.inputConfiguration.shots, this.pc.desiredError, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.populationSize).
-      subscribe(
-        result=> {
-          this.error = undefined
-          if (result!=null) {
-            rf.shortName = result.shortName
-            rf.maxFitness = result.maxFitness
-            rf.maxError = result.maxError
-            rf.populationSize = result.populationSize
-            rf.expectedFitness = result.expectedFitness
-          }
-          this.selectedRemoteFitnessers = this.remoteFitnessers.filter(rf => rf.selected)
-        },
-        error => {
-          this.state = undefined
-          this.substate = undefined
-          this.error = error.error.message
-        })
-  }
 
   updateDesiredError() {
     this.service.updateDesiredError(this.pc.desiredError).subscribe(
@@ -423,17 +540,20 @@ export abstract class EvolutionaryComponent {
     this.pc.updateLastExecutionResults(lastExecutionResults)
 
     let individual
-    let selectedRemoteFitnessers = this.remoteFitnessers.filter(rf=>rf.selected)
+    //let selectedRemoteFitnessers = this.remoteFitnessers.filter(rf=>rf.selected)
     let rf : RemoteFitnesser
+    
+    rf = this.selectedRemoteFitnessers[0];
     let fitnesserResult
     this.individuals = []
     this.pc.inputConfiguration.populationSize = result.populationSize
     for (let i=0; i<this.pc.inputConfiguration.populationSize; i++)
-      this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+      // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+    this.individuals.push(new Individual(i))
 
     for (let i=0; i<this.individuals.length; i++) {
       individual = this.individuals[i]
-      for (let j=0; j<selectedRemoteFitnessers.length; j++) {
+      for (let j=0; j<this.selectedRemoteFitnessers.length; j++) {
         rf = this.selectedRemoteFitnessers[j]
         fitnesserResult = Reflect.get(lastExecutionResults, rf.name!)
         individual.gotFrequencies[j] = fitnesserResult.gotFrequencies[i]
@@ -453,7 +573,7 @@ export abstract class EvolutionaryComponent {
     let bestFitness
     let meanFitness
     let meanError
-    for (let i=0; i<selectedRemoteFitnessers.length; i++) {
+    for (let i=0; i<this.selectedRemoteFitnessers.length; i++) {
       rf = this.selectedRemoteFitnessers[i]
       strategy = lastExecutionResults[rf.name!].strategy
       bestFitness = parseFloat(Number(lastExecutionResults[rf.name!].bestFitness).toFixed(2))
@@ -496,7 +616,16 @@ export abstract class EvolutionaryComponent {
       result => {
         this.error = undefined
         this.code = result
-        document.getElementById("codeArea")!.scrollIntoView({ behavior : "smooth"})
+        //document.getElementById("codeArea")!.scrollIntoView({ behavior : "smooth"})
+        this.mostrarModalCode = true;
+
+        // Esperar a que Angular pinte el modal
+        setTimeout(() => {
+          const el = document.getElementById("codeArea");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 0);
       },
       result => {
         this.state = undefined
@@ -525,7 +654,8 @@ export abstract class EvolutionaryComponent {
   }
 
   protected prepareCharts() {
-    let rrff = this.remoteFitnessers.filter(rf=>rf.selected)
+    //let rrff = this.remoteFitnessers.filter(rf=>rf.selected)
+    let rrff = this.selectedRemoteFitnessers
     for (let i=0; i<rrff.length; i++)
       rrff[i].prepareChart("chart" + i, rrff[i].shortName!)
     if (this.timesChart)

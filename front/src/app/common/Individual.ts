@@ -7,13 +7,13 @@ export class Individual {
     selectionProbability : number = 0
     selected : boolean[] = []
 
-    constructor(index : number, numberOfFitnessers : number) {
+    // constructor(index : number, numberOfFitnessers : number) {
+    constructor(index : number) {
         this.index = index
-        for (let i=0; i<numberOfFitnessers; i++) {
-            this.gotFrequencies.push([])
-            this.error.push([])
-            this.fitness.push([])
-            this.length.push([])
-        }
+        this.gotFrequencies.push([])
+        this.error.push([])
+        this.fitness.push([])
+        this.length.push([])
+        
     }
 }

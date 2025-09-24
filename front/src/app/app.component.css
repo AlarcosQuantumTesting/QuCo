@@ -1,7 +1,16 @@
   body {
     width: 100%;
     height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
   }
+
+  .container {
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+div, section, article, main, aside, header, footer, p, span, h1, h2, h3, li, a, button {
+  transition: background-color 0.3s, color 0.3s;
+}
 
   .header {
     position: absolute;
@@ -18,6 +27,7 @@
     gap: 5px;
     /* color: rgb(4, 87, 4); */
     color: #0b555a;
+    background-color: #ffffff00;
   }
 
   .title img {
@@ -25,7 +35,7 @@
     height: 20px;
   }
 
-  h1 {
+  h2.title {
     text-align: center;
     width: 100%;
     margin-top: 20px;
@@ -47,7 +57,7 @@
 
      background-color: #008b95;
      color: white;
-     height: 100vh;
+     height: 100%;
      transition: width 0.3s ease, left 0.3s ease;
      overflow: hidden;
      display: flex;
@@ -58,6 +68,8 @@
      top: 0;
      z-index: 1000;
      padding-top: 50px;
+
+     justify-content: space-between;
    }
    
    .sidebar.open {
@@ -65,7 +77,17 @@
      align-items: flex-start;
      padding-left: 10px;
    }
-   
+
+   .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      height: 92%;
+    }
+
+   .sidebar-menu .ajustes {
+      margin-top: auto;
+    }
+      
    /* Botón para abrir/cerrar el menú */
    .toggle-btn {
      position: fixed;
@@ -74,7 +96,7 @@
      width: 40px;
      height: 40px;
      border: none;
-     background-color: #008b95;
+     background-color: #008b9500;
      color: white;
      font-size: 18px;
      border-radius: 50%;
@@ -349,4 +371,380 @@ h2 {
 .fade-in.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+
+
+
+
+
+
+/* Modo alto contraste */
+/* Se aplica cuando el body tiene la clase high-contrast */
+
+
+/* ---- ALTO CONTRASTE ---- */
+body.high-contrast {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+body.high-contrast a {
+  color: #0ff !important;
+}
+
+body.high-contrast button {
+  background: #fff !important;
+  color: #000 !important;
+  border: 2px solid #fff !important;
+}
+
+
+
+
+.sidebar ul li a.accessibility-link {
+  cursor: pointer;
+}
+
+.sidebar ul li a.accessibility-link:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+
+/* Interfaz modal de accesibilidad */
+/* .accessibility-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+} */
+
+/* .accessibility-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+} */
+
+.accessibility-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+
+  pointer-events: none;
+}
+
+.accessibility-modal .modal-content {
+  pointer-events: auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+
+.accessibility-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  min-width: 320px;
+  width: 88%;
+}
+
+.accessibility-content h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.accessibility-content button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background: #17555A;
+  color: white;
+  cursor: pointer;
+}
+
+.accessibility-content button:hover {
+  background: #0056b3;
+}
+
+
+
+.accessibility-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accessibility-section h3 {
+  font-size: 16px;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.button-group button {
+  flex: 1 1 30%;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: #4c9696;
+  color: white;
+  transition: background 0.2s;
+}
+
+.default-btn {
+  background: #17555A !important;
+}
+
+.default-btn:hover {
+  background: #8cbdbd !important;
+}
+
+
+.button-group button:hover {
+  background: #386161;
+  transform: scale(1.05);
+}
+
+.color-settings {
+  display: flex;
+  gap: 15px; /* espacio entre los dos labels */
+  margin-bottom: 15px;
+  justify-content: space-between;
+}
+
+.color-settings label {
+  display: flex;
+  align-items: center; /* centra verticalmente el input con el texto */
+  gap: 5px;            /* espacio entre texto e input */
+  font-size: 14px;
+  color: #333;
+}
+
+.color-settings input[type="color"] {
+  cursor: pointer;
+}
+
+.reset-section {
+  display: flex;
+  justify-content: center;
+}
+
+.reset-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #17555A;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.reset-btn:hover {
+  background: #8cbdbd;
+  transform: scale(1.05);
+}
+
+button.increaseZoom:disabled,
+button.decreaseZoom:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #ccc !important;
+  transform: scale(1) !important;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;  /* más ancho para poner ON/OFF */
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+  font-size: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  box-sizing: border-box;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #007bff;
+}
+
+input:checked + .slider:before {
+  transform: translateX(32px);
+}
+
+/* Añadimos los textos ON / OFF */
+.slider:after {
+  content: "Off";
+  position: absolute;
+  right: 5px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+input:checked + .slider:after {
+  content: "On";
+  left: 5px;
+  right: auto;
+}
+
+
+
+.modal-header {
+    position: sticky; /* Se mantiene fija en la parte superior dentro del modal */
+    top: 0; /* Pegada arriba */
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #008b95;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100; /* Asegura que esté por encima del contenido */
+}
+
+.title-modal {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+    padding-left: 20px;
+}
+
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding-left: 80px;
+    padding-right: 10px;
+    background: none;
+    border: none;
+}
+
+.close:hover {
+  background: none;
+  cursor: default;
+  color: white;
+}
+
+.close-i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
+
+.modal.instrucciones {
+    position: fixed;
+    z-index: 1000;
+    background-color: transparent;
+    pointer-events: none; /* Permite hacer clic fuera del modal */
+}
+  
+.modal-content.instrucciones {
+    pointer-events: auto; /* Solo el contenido del modal es interactivo */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: auto;
+    max-width: 400px;
+    max-height: none;
+    overflow-y: auto;
+    position: relative;
+
+    /* 🪟 Estilo de ventana emergente */
+    resize: both;
+    overflow: auto;
+
+    min-width: 360px;
+    min-height: 200px;
+
+    /* Opcional: borde para dar sensación de "ventana" */
+    border: 1px solid #ccc;
 }

@@ -8,10 +8,14 @@ export class ProblemConfiguration {
 	
     desiredError : number = 0.05
 
-	probOf1QubitGates : number = 50
+	/*probOf1QubitGates : number = 50
 	probOf2QubitGates : number = 50
 	probOf3QubitGates : number = 20
-    probOfNQubitGates : number = 20
+    probOfNQubitGates : number = 20*/
+    probOf1QubitGates : number = 50
+	probOf2QubitGates : number = 50
+	probOf3QubitGates : number = 50
+    probOfNQubitGates : number = 50
 
     inputConfiguration : ProblemInputConfiguration 
 

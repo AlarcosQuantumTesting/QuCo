@@ -63,7 +63,7 @@ public abstract class Fitnesser implements Task {
 	}
 	
 	public double getExpectedFitness() {
-		return expectedFitness;
+		return this.expectedFitness;
 	}
 
 	public String getShortName() {

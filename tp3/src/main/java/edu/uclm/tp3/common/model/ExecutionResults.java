@@ -73,7 +73,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	}
 
 	public double getFitness(int individual) {
-		return fitnesses[individual];
+		return this.fitnesses[individual];
 	}
 
 	public synchronized void setFitnesses(int individual, double fitness) {

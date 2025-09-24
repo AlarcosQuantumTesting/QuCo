@@ -6,15 +6,15 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import edu.uclm.tp3.common.deterministic.QCircuit;
+import edu.uclm.tp3.common.deterministic.QCircuitGate;
 import edu.uclm.tp3.common.deterministic.QColumn;
-import edu.uclm.tp3.common.deterministic.QGroverDiffuser;
-import edu.uclm.tp3.common.deterministic.QGroverOracle;
+import edu.uclm.tp3.common.deterministic.QGate;
 import edu.uclm.tp3.common.model.CodeTemplate;
 
 @Service
 public class NewGroverCoder {
 
-    public String getCode(QGroverDiffuser difussor) {
+    public String getCode(QCircuitGate difussor) {
         StringBuilder code = new StringBuilder();
 		List<QColumn> columns = difussor.getColumns();
 		for (QColumn column : columns)
@@ -22,7 +22,7 @@ public class NewGroverCoder {
 		return code.toString();
     }
 
-	public String getCode(QGroverOracle oracle) {
+	/*public String getCode(QGroverOracle oracle) {
 		QColumn encoding0 = oracle.getEncoding0();
 		QColumn h0 = oracle.getH0();
 		QColumn mcx = oracle.getMcXOrZ();
@@ -37,7 +37,7 @@ public class NewGroverCoder {
 			code.append(this.getCode(h1));
 		code.append(this.getCode(encoding1));
 		return code.toString();
-	}
+	}*/
 
     public String getCode(QCircuit circuit, int qubits) {
         StringBuilder sbCalculus = new StringBuilder();
@@ -52,9 +52,9 @@ public class NewGroverCoder {
 
 	private StringBuilder getCode(QColumn column) {
 		StringBuilder sb = new StringBuilder();
-		List<Object> gateIds = column.getGates();
-		for (int i=0; i<gateIds.size(); i++) {
-			Object gateName = gateIds.get(i);
+		List<QGate> gates = column.getGates();
+		for (int i=0; i<gates.size(); i++) {
+			/*Object gateName = gateIds.get(i);
 			if (gateName.equals("H"))
 				sb.append("\tU.h(" + i + ")\n");
 			else if (gateName.equals("X"))
@@ -65,12 +65,12 @@ public class NewGroverCoder {
 			} else if (gateName.equals("…")) {
 				sb.append("\tU.barrier()\n");
 				break;
-			}
+			}*/
 		}
 		return sb;
 	}
 
-	private Object getControlledGate(int start, QColumn column) {
+	/*private Object getControlledGate(int start, QColumn column) {
 		StringBuilder sb = new StringBuilder();
 		char last = column.get(column.size()-1).toString().charAt(0);
 		if (last=='z' || last=='Z')
@@ -81,7 +81,7 @@ public class NewGroverCoder {
 			sb.append(i + ", ");
 		sb.append((column.size()-2) + "], " + (column.size()-1) + ")\n");
 		return sb;
-	}
+	}*/
 
 	@SuppressWarnings("unchecked")
 	public String[] getCode(Map<String, Object> quirk, CodeTemplate template, String functionName) {

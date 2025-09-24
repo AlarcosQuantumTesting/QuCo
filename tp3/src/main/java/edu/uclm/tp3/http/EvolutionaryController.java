@@ -2,8 +2,6 @@ package edu.uclm.tp3.http;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,17 +28,13 @@ import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.services.GateDescription;
 import edu.uclm.tp3.common.strategies.RunPopulation;
 import edu.uclm.tp3.elonging.strategies.ManagerService;
-import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
-import edu.uclm.tp3.genetic.fitnessers.FitnessersService;
+import edu.uclm.tp3.genetic.fitnessers.SimpleFitnesser;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.ws.HWSession;
 
 @RestController
 public abstract class EvolutionaryController {
 		
-	@Autowired
-	protected FitnessersService fitnesserService;
-	
 	@Autowired
 	protected ManagerService manager;
 
@@ -106,18 +100,6 @@ public abstract class EvolutionaryController {
 			}
 		}).start();
 	}
-
-
-
-
-	
-	@GetMapping("/getFitnessers") @ResponseBody
-	public List<String> getFitnessers() {
-		List<String> result = new ArrayList<>();
-		for (Class<?> clazz : this.fitnesserService.getFitnesserClasses())
-			result.add(clazz.getSimpleName());
-		return result;
-	}
 	
 	@GetMapping("/getGates") @ResponseBody
 	public List<GateDescription> getGates() {
@@ -131,33 +113,19 @@ public abstract class EvolutionaryController {
 	
 	@SuppressWarnings("unchecked")
 	@PutMapping("/selectFitnesser") @ResponseBody
-	public Fitnesser selectFitness(HttpSession session, @RequestBody Map<String, Object> info) {
+	public SimpleFitnesser selectFitness(HttpSession session, @RequestBody Map<String, Object> info) {
 		try {
-			Map<String, Fitnesser> fitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-			if (fitnessers==null) {
-				fitnessers = new HashMap<>();
-				session.setAttribute("fitnessers", fitnessers);
-			}
-			
 			JSONObject jso = new JSONObject(info);
-			String name = jso.getString("name");
-			boolean selected = jso.getBoolean("selected");
-			
-			if (!selected) {
-				fitnessers.remove(name);
-				return null;
-			}
+			/*String name = jso.getString("name");
+			boolean selected = jso.getBoolean("selected");*/
 			
 			int shots = jso.getInt("shots");
 			double desiredError = jso.getDouble("desiredError");
 			session.setAttribute("lastDesiredError", desiredError);
 			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
 			
-			Fitnesser fitnesser = fitnessers.get(name);
-			if (fitnesser==null) {
-				fitnesser = this.fitnesserService.getInstance(name);
-				fitnessers.put(name, fitnesser);
-			}
+			SimpleFitnesser fitnesser = new SimpleFitnesser();
+			session.setAttribute("fitnesser", fitnesser);
 			int populationSize = jso.getInt("populationSize");
 			fitnesser.setPopulationSize(populationSize);
 			fitnesser.setShots(shots);
@@ -172,44 +140,69 @@ public abstract class EvolutionaryController {
 	
 	@SuppressWarnings("unchecked")
 	@GetMapping("/updateDesiredError") @ResponseBody
-	public Collection<Fitnesser> updateDesiredError(HttpSession session, @RequestParam double desiredError) {
+	public void updateDesiredError(HttpSession session, @RequestParam double desiredError) {
 		try {
-			Map<String, Fitnesser> fitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-			if (fitnessers==null) 
-				throw new Exception("Please, select one or more fistnessers before updating the desired error");
-
-			for (Fitnesser fitnesser : fitnessers.values()) {
-				fitnesser.setDesiredError(desiredError);
-				fitnesser.setUp();
+			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
+			if (fitnesser == null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fitnesser in session");
 			}
+			fitnesser.setDesiredError(desiredError);
+			fitnesser.setUp();
+			//SimpleFitnesser fitnesser = new SimpleFitnesser();
+			session.setAttribute("fitnesser", fitnesser);
+
 			session.setAttribute("lastDesiredError", desiredError);
-			return fitnessers.values();
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	@PutMapping("/updateExpectedFrequencies") @ResponseBody
-	public Collection<Fitnesser> updateExpectedFrequencies(HttpSession session, @RequestBody Map<String, Object> info) {
+	public SimpleFitnesser updateExpectedFrequencies(HttpSession session, @RequestBody Map<String, Object> info) {
 		try {
-			Map<String, Fitnesser> fitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-			if (fitnessers==null) 
-				throw new Exception("Please, select one or more fistnessers before updating the expected frequencies");
+			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
+			//SimpleFitnesser fitnesser = new SimpleFitnesser();
+			session.setAttribute("fitnesser", fitnesser);
 
 			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
 			int shots = (int) info.get("shots");
 			
-			for (Fitnesser fitnesser : fitnessers.values()) {
-				fitnesser.setExpected(expectedFrequencies);
-				fitnesser.setShots(shots);
-				fitnesser.setUp();
-			}
-			return fitnessers.values();
+			fitnesser.setExpected(expectedFrequencies);
+			fitnesser.setShots(shots);
+			fitnesser.setUp();
+			return fitnesser;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
+	}*/
+
+	@SuppressWarnings("unchecked")
+	@PutMapping("/updateExpectedFrequencies")
+	@ResponseBody
+	public SimpleFitnesser updateExpectedFrequencies(HttpSession session, @RequestBody Map<String, Object> info) {
+		try {
+			//SimpleFitnesser fitnesser = new SimpleFitnesser();
+			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
+			if (fitnesser == null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fitnesser in session");
+			}
+			session.setAttribute("fitnesser", fitnesser);
+
+			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
+			int shots = (int) info.get("shots");
+
+			fitnesser.setExpected(expectedFrequencies);
+			fitnesser.setShots(shots);
+			fitnesser.setUp();
+
+			return fitnesser;
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payload: " + e.getMessage(), e);
+		}
 	}
+
+
 	
 	@SuppressWarnings("unchecked")
 	public final long generateInitialPopulation(HttpSession session, ProblemConfiguration pc, int initialLength) {
@@ -217,8 +210,16 @@ public abstract class EvolutionaryController {
 		String gt = ""  + EvolutionaryService.dado.nextInt();
 		session.setAttribute("gt", gt);
 		//HWSession hw = this.manager.get(session);
-		Map<String, Fitnesser> fitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-		pc.setRemoteFitnessers(fitnessers.values().toArray(new Fitnesser[0]));
+		//SimpleFitnesser fitnesser = new SimpleFitnesser();
+		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
+		pc.setSimpleFitnesser(fitnesser);
+
+		//fitnesser.setDesiredError(pc());
+		/*int populationSize = pc.getInputConfiguration().getPopulationSize();
+		fitnesser.setPopulationSize(populationSize);
+		fitnesser.setShots(pc.getInputConfiguration().getShots());
+		fitnesser.setExpected(pc.getInputConfiguration().getExpectedFrequencies());
+		session.setAttribute("fitnesser", fitnesser);*/
 		
 		try {
 			//String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength, hw);
@@ -245,10 +246,14 @@ public abstract class EvolutionaryController {
 		
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
-		Map<String, Fitnesser> sessionFitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-		Fitnesser[] fitnessers = sessionFitnessers.values().toArray(new Fitnesser[0]);
+		/*Map<String, Fitnesser> sessionFitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
+		Fitnesser[] fitnessers = sessionFitnessers.values().toArray(new Fitnesser[0]);*/
+		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
+		//fitnesser = new SimpleFitnesser();
+		session.setAttribute("fitnesser", fitnesser);
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
-		pc.setRemoteFitnessers(fitnessers);
+		pc.setSimpleFitnesser(fitnesser);
+		//pc.setRemoteFitnessers(fitnesser);
 		
 		Map<String, Object> result = new HashMap<>();
 		try {			
@@ -259,11 +264,11 @@ public abstract class EvolutionaryController {
 			TextLogger.write(gt, "\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
 			TextLogger.write(gt, "\tgenerationToExecute=" + pc.getGenerationToExecute() + "\n");
 			
-			Fitnesser fitnesser;
+			//SimpleFitnesser fitnesser;
 			
 			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
 			if (emitters == null) {
-				emitters = new SseEmitters(); // solo si el constructor no necesita nada
+				emitters = new SseEmitters();
 			}
 
 			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
@@ -273,7 +278,7 @@ public abstract class EvolutionaryController {
 			result.put("executionTime", startCalculusTime-startTime);
 			
 			int sourceGeneration = pc.getSourceGeneration();
-			for (int i=0; i<fitnessers.length; i++) {
+			/*for (int i=0; i<fitnessers.length; i++) {
 
 				fitnesser = fitnessers[i];
 				pc.setSourceGeneration(sourceGeneration);
@@ -281,7 +286,14 @@ public abstract class EvolutionaryController {
 				runPopulation.setFitnesser(fitnesser);
 				pc = runPopulation.apply(this.manager, taskData);
 				pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy("First execution");
-			}
+			}*/
+
+			pc.setSourceGeneration(sourceGeneration);
+			TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");
+			runPopulation.setFitnesser(fitnesser);
+			pc = runPopulation.apply(this.manager, taskData);
+			pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy("First execution");
+
 	
 			result.put("calculusTime", System.currentTimeMillis()-startCalculusTime);
 			pc.increaseIterationIndex();
@@ -318,6 +330,12 @@ public abstract class EvolutionaryController {
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@GetMapping("/getSimpleFitnesser") @ResponseBody
+	public SimpleFitnesser getSimpleFitnesser(HttpSession session) {
+		return EvolutionaryService.getSimpleFitnesser();
 	}
 }
 
