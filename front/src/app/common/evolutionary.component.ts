@@ -264,6 +264,9 @@ export abstract class EvolutionaryComponent {
         this.pc.inputConfiguration.outputs.splice(this.pc.inputConfiguration.qubits, 1)
     }
     this.updateOutputs()
+    if (localStorage.getItem("isBlocks") === "true") {
+      localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
+    }
   }
 
   updateOutputs() {
@@ -290,6 +293,10 @@ export abstract class EvolutionaryComponent {
         this.error = error.error.message
       }
     )
+
+    if (localStorage.getItem("isBlocks") === "true") {
+      localStorage.setItem("qucoConfigurationBlocks", JSON.stringify(this.pc.inputConfiguration.blockCircuit))
+    }
   }
 
   private updateRemoteFitnessers(result : any) {

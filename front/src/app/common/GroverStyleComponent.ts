@@ -68,9 +68,11 @@ export abstract class GroverStyle {
     ]
     hideInstructions: boolean = true
 
+    mensajeTemporal: string = '';
+    mensajeTemporal2: string = '';
+
     constructor(protected qiskitService: QiskitService) {}
 
-    mensajeTemporal: string = '';
     saveCode() {
         this.error = undefined
         this.qiskitCode.qubits = this.qubits

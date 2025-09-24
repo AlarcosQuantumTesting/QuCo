@@ -2,6 +2,9 @@
     <div class="mensaje-temporal" *ngIf="mensajeTemporal">
       {{ mensajeTemporal }}
     </div>
+    <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
+        {{ mensajeTemporal2 }}
+    </div>
 
     <div class="titulo">
       <h1>Blocks genetic algorithm</h1>
@@ -65,43 +68,169 @@
         </div>
 
         <div class="container matrix-container">
-            <div class="form-row">
-                <div class="section qubitsContainer">
-                    <div class="form-group">
-                        <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
-                            Qubits
-                        </label>
-                        <span *ngIf="pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)"
-                            class="error-text">
-                                Must be between 1 and 24
-                        </span>
+            <div class="info1">
+                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfStartColumns === null || pc.inputConfiguration.blockCircuit.numberOfStartColumns < 0"
+                    class="error-text-top">
+                    The number of starting columns must be equal or greater than 0.
+                </small>
+                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfBlocks === null || pc.inputConfiguration.blockCircuit.numberOfBlocks < 0"
+                    class="error-text-top">
+                    The number of blocks columns must be equal or greater than 0.
+                </small>
+                <small *ngIf="pc.inputConfiguration.minNumberOfColumns === null || pc.inputConfiguration.minNumberOfColumns < 1 || 
+                    pc.inputConfiguration.maxNumberOfColumns === null || pc.inputConfiguration.maxNumberOfColumns < 1"
+                    class="error-text-top">
+                    The number of columns must be equal or greater than 1.
+                </small>
+            </div>
+            <div class="container matrix-container">
+                <div class="form-row">
+                    <div class="section qubitsContainer">
+                        
+                            <div class="form-group">
+                                <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                                    Qubits
+                                </label>
+                                <span *ngIf="pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24)"
+                                    class="error-text">
+                                        Must be between 1 and 24
+                                </span>
 
-                        <table class="qubit-table">
-                            <tr>
-                                <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
-                                <td [attr.colspan]="pc.inputConfiguration!.qubits">
-                                    <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
-                                        (change)="updateExpectedFrequencies()" 
-                                        [ngClass]="{'is-invalid': pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || 
-                                        pc.inputConfiguration!.qubits > 24)}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th align="left"><label for="numberOfQubits">Qubits:</label></th>
-                                <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                    <label>{{qubitIndex}}</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
-                                <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
-                                    <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
-                                        (change)="updateOutputs()">
-                                </td>
-                            </tr>
-                        </table>
+                                <table class="qubit-table">
+                                    <tr>
+                                        <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
+                                        <td [attr.colspan]="pc.inputConfiguration!.qubits">
+                                            <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
+                                                (change)="updateExpectedFrequencies(); deleteLocal()" 
+                                                [ngClass]="{'is-invalid': pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || 
+                                                pc.inputConfiguration!.qubits > 24)}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th align="left"><label for="numberOfQubits">Qubits:</label></th>
+                                        <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                                            <label>{{qubitIndex}}</label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
+                                        <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
+                                            <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
+                                                (change)="updateOutputs()">
+                                        </td>
+                                    </tr>
+                                </table>
+                        </div>
+                    </div>
+
+                    <div class="inline-config-row">
+                        <div style="gap: 10px; margin: 10px;">
+                            Starting columns: 
+                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
+                                (change)="updateColumnsFromInput()">
+                            Number of blocks: 
+                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                        
+                            Number of columns in the block: between 
+                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
+                            and 
+                            <input [disabled]="running" type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
+                        </div>
+                        <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                            <div class="table-scroll-wrapper">
+                                <div class="table-wrapper">
+                                    <table class="styled-table">
+                                        <tr>
+                                            <th style="background-color: #0b555a; color: white;" 
+                                            [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                                            Circuit view
+                                            </th>
+                                        </tr>
+                                        <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
+                                            <th><strong>q<sub>{{ qubitIndex }}</sub></strong></th>
+                                            <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
+                                                <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
+                                                    <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
+                                                            (change)="setGate(qubitIndex, colIndex, $event)">
+                                                        <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
+                                                    </select>
+
+                                                </ng-container>
+                                            </td>
+                                            <ng-container *ngIf="qubitIndex == 0">
+                                                <th *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfBlocks)" class="block-header"
+                                                    [rowSpan]="pc.inputConfiguration.qubits">
+                                                    Block
+                                                </th>
+                                            </ng-container>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="table-scroll-wrapper">
+                                <div class="table-wrapper">
+                                    <table class="styled-table">
+                                    <tr>
+                                        <th style="background-color: #0b555a; color: white;"
+                                        [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns + pc.inputConfiguration.blockCircuit.block.numberOfRightColumns + 1)">
+                                        Block description
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
+                                        <small style="margin-right: 5px;">Left</small>
+                                        <!-- <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
+                                            (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)"> -->
+                                        <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
+                                            (change)="updateColumnsFromInputLeft('left')">
+                                        </th>
+                                        <th [rowSpan]="pc.inputConfiguration.qubits + 1" class="block-header-center">U</th>
+                                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
+                                        <small style="margin-right: 5px;">Right</small>
+                                        <!-- <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
+                                            (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)"> -->
+                                        <input type="number" min="0" step="1" size="2"
+                                            [disabled]="running"
+                                            [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
+                                            (change)="updateColumnsFromInputRight('right')">
+                                        </th>
+                                    </tr>
+                                    <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
+                                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
+                                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
+                                                <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
+                                                        (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
+                                                    <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
+                                                </select>
+                                            </ng-container>
+                                        </td>
+                                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
+                                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
+                                                <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
+                                                        (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
+                                                    <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
+                                                </select>
+                                        </ng-container>
+                                        </td>
+                                    </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="container matrix-container">
+            <div class="form-row">
                 <div class="section parameterizationContainer">
                     <div class="form-group">
                         <label style="font-size: 16px; align-items: center; justify-content: center; display: flex; font-weight: bold;">Parameterization</label>
@@ -171,28 +300,40 @@
                                             <label>Apply after</label>
                                             <input [disabled]="running" class="form-control" type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold" 
                                             [ngClass]="{'is-invalid': validarDatosInputThreshold()}">
+
+                                            <div style="display: flex; gap: 8px;">
+                                                <label>falls of the </label>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                          <div style="display: flex; gap: 8px;">
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><label>best fitness</label>
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><label>mean fitness</label>
+                                            </div>
                                         </div>
 
                                         <small *ngIf="validarDatosInputThreshold()" class="text-danger">
                                             The number must be equal or greater than 0.
                                         </small>
 
-                                        <div style="display: flex; gap: 8px;">
+                                        <!-- <div style="display: flex; gap: 8px;">
                                             <label>falls of the </label>
                                             <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><label>best fitness</label>
                                             <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><label>mean fitness</label>
-                                        </div>
+                                        </div> -->
 
                                         
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Apply when the best indivudal reaches a fitness of </label>
+                                            <input [disabled]="running" class="form-control" type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"
+                                            [ngClass]="{'is-invalid': validarDatosInputFitnessPercentage()}">
                                         </div>
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
-                                            <input [disabled]="running" class="form-control" type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"
-                                            [ngClass]="{'is-invalid': validarDatosInputFitnessPercentage()}">
-                                            <label>of the expected fitness</label>
+                                            <!-- <input [disabled]="running" class="form-control" type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"
+                                            [ngClass]="{'is-invalid': validarDatosInputFitnessPercentage()}"> -->
+                                            <label>of the expected fitness.</label>
                                         </div>
 
                                         <small *ngIf="validarDatosInputFitnessPercentage()" class="text-danger">
@@ -201,11 +342,12 @@
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Maximum times of consecutive massive mutations:</label>
-                                        </div>
-
-                                        <div style="display: flex; align-items: center; gap: 8px;">
                                             <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
                                         </div>
+
+                                        <!-- <div style="display: flex; align-items: center; gap: 8px;">
+                                            <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
+                                        </div> -->
                                     </div>
                                 </td>
                             </tr>
@@ -228,111 +370,7 @@
                 </div>
             </div>
         </div>
-        <div class="container matrix-container">
-
-            <div class="info1">
-                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfStartColumns === null || pc.inputConfiguration.blockCircuit.numberOfStartColumns < 0"
-                    class="error-text-top">
-                    The number of starting columns must be equal or greater than 0.
-                </small>
-                <small *ngIf="pc.inputConfiguration.blockCircuit.numberOfBlocks === null || pc.inputConfiguration.blockCircuit.numberOfBlocks < 0"
-                    class="error-text-top">
-                    The number of blocks columns must be equal or greater than 0.
-                </small>
-                <small *ngIf="pc.inputConfiguration.minNumberOfColumns === null || pc.inputConfiguration.minNumberOfColumns < 1 || 
-                    pc.inputConfiguration.maxNumberOfColumns === null || pc.inputConfiguration.maxNumberOfColumns < 1"
-                    class="error-text-top">
-                    The number of columns must be equal or greater than 1.
-                </small>
-            </div>
-            <div class="info1">
-
-                <div style="width: 100%;">
-                    <div style="gap: 10px; margin: 10px;">
-                        Starting columns: 
-                        <input style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
-                                    (change)="pc.inputConfiguration.blockCircuit.updateStartColumns()">
-                        Number of blocks: 
-                        <input style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
-                    
-                        Number of columns in the block: between 
-                        <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
-                        and 
-                        <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">    
-                    </div>
-                    <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
-                        <div class="table-wrapper">
-                            <table class="styled-table">
-                            <tr>
-                                <th style="background-color: #0b555a; color: white;" 
-                                [colSpan]="pc.inputConfiguration.qubits + pc.inputConfiguration.blockCircuit.numberOfBlocks">
-                                Circuit view
-                                </th>
-                            </tr>
-                            <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                                <th><strong>q<sub>{{ qubitIndex }}</sub></strong></th>
-                                <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
-                                <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
-                                    <input size="3" type="text"
-                                    [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
-                                    (change)="setGate(qubitIndex, colIndex, $event)">
-                                </ng-container>
-                                </td>
-                                <ng-container *ngIf="qubitIndex == 0">
-                                <th *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfBlocks)" class="block-header"
-                                    [rowSpan]="pc.inputConfiguration.qubits">
-                                    Block
-                                </th>
-                                </ng-container>
-                            </tr>
-                            </table>
-                        </div>
-
-                        <div class="table-wrapper">
-                            <table class="styled-table">
-                            <tr>
-                                <th style="background-color: #0b555a; color: white;"
-                                [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns + pc.inputConfiguration.blockCircuit.block.numberOfRightColumns + 1)">
-                                Block description
-                                </th>
-                            </tr>
-                            <tr>
-                                <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
-                                <small style="margin-right: 5px;">Left</small>
-                                <input type="number" min="0" step="1" size="2"
-                                    [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
-                                    (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)">
-                                </th>
-                                <th [rowSpan]="pc.inputConfiguration.qubits + 1" class="block-header-center">U</th>
-                                <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
-                                <small style="margin-right: 5px;">Right</small>
-                                <input type="number" min="0" step="1" size="2"
-                                    [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
-                                    (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)">
-                                </th>
-                            </tr>
-                            <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                                <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
-                                <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
-                                    <input type="text" size="2"
-                                    [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
-                                    (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
-                                </ng-container>
-                                </td>
-                                <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
-                                <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
-                                    <input type="text" size="2"
-                                    [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
-                                    (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
-                                </ng-container>
-                                </td>
-                            </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     
@@ -459,10 +497,18 @@
                             &nbsp;
                             <small><small style="color : blue" (click)="random()">Random</small></small>
                         </th> -->
-                        <th *ngFor="let individual of individuals; let individualIndex = index" 
+                        <!-- <th *ngFor="let individual of individuals; let individualIndex = index" 
                             [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
                             <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
                             <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
+                        </th> -->
+                        <th *ngFor="let individual of individuals; let individualIndex = index"
+                            [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
+                            <span (click)="getCode(individual); copiarCodigo()" class="solutionFound" *ngIf="individual.selected[fitnesserIndex]">💃</span>
+                            <u (click)="getCode(individual); copiarCodigo()" [class.solutionFound]="individual.selected[fitnesserIndex]">
+                                {{ individuals[individualIndex].index }}
+                            </u>
+                            <span (click)="getCode(individual); copiarCodigo()" *ngIf="individual.selected[fitnesserIndex]" class="solutionFound">💃</span>
                         </th>
                     </tr>
                     <tr *ngFor="let i of [].constructor(pc.inputConfiguration.expectedFrequencies.length); let rowIndex = index" align="center">
@@ -545,7 +591,7 @@
         <div class="modal-content ejemplos"
             cdkDrag
             cdkDragRootElement=".modal-content">
-            <div class="modal-header">
+            <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Qiskit Code</h2>
 
                 <button class="close"><i class="close-i" (click)="mostrarModalCode = false">&times;</i></button>
@@ -560,7 +606,66 @@
             </div>
 
             <div class="modal-footer">
+                <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal instrucciones" *ngIf="modalTranspile">
+        <div class="modal-content instrucciones"
+            cdkDrag
+            cdkDragRootElement="modal-content"
+            style="min-width: 950px;">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Transpile Code</h2>
+                <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
+            </div>
+
+            <!-- Contenido del modal -->
+            <div class="intructions-content" style="justify-content: center; display: flex;">
+                <div class="form-row" style="justify-content: center; width: 100%;">
+                <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
+                <input
+                    id="circuitName"
+                    class="input-function form-control"
+                    type="text"
+                    [(ngModel)]="circuitName"
+                    placeholder="circuit name..."
+                    style="max-width: 40%;"
+                />
+                </div>
+            </div>
+            <div class="intructions-content">
+                <div class="form-row-backends">
+                    <div class="section contenedorBackends">
+                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
+                    <ul class="listaBackends">
+                        <li *ngFor="let backend of availableBackends" class="list-group-item">
+                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                        <button type="button" class="apply-button" (click)="selectBackend(backend)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        </li>
+                    </ul>
+                    </div>
+
+                    <div class="section contenedorBackends">
+                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
+                    <ul class="listaBackends">
+                        <li *ngFor="let backend of selectedBackends" class="list-group-item">
+                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                        <button type="button" class="deselect-button" (click)="deselectBackend(backend)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        </li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
             </div>
         </div>
     </div>
@@ -568,304 +673,4 @@
 
 
 
-<div>
-    <!-- Number of qubits: <input type="number" min="1" (change)="updateNumberOfQubits(); updateNumberOfBlocks()" [ngModel]="pc.inputConfiguration.qubits" id="numberOfQubits">
-    &nbsp;
-    <table style="border : solid 1px">
-        <tr>
-            <th align="left"><i>Qubits</i></th>
-            <th *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                {{qubitIndex}}
-            </th>
-            <th>Parameterization</th>
-            <th>Available gates</th>
-        </tr>
-        <tr>
-            <th align="left"><i>Output qubits</i></th>
-            <td *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                <input type="checkbox" [(ngModel)]="pc.inputConfiguration.outputs[qubitIndex]" 
-                    (change)="updateNumberOfBlocks(); updateOutputs()">
-            </td>
-            <td rowspan="2">
-                Initial population size: <input type="number" min="2" step="2" [(ngModel)]="pc.inputConfiguration.populationSize">
-                <br>
-                Shots: <span>{{ pc.inputConfiguration.shots }}</span>
-                <br>
-                Desired error (%): <input type="number" min="0" [step]="1/pc.inputConfiguration.shots" [(ngModel)]="pc.desiredError"
-                    (change)="updateDesiredError()">
-            </td>
-            <td>
-                <ng-container *ngFor="let gate of gates; let i=index">
-                    <input type="checkbox" [(ngModel)]="gate.selected" (change)="saveConf()"> {{ gate.name }}
-                </ng-container>
-            </td>
-        </tr>
-    </table>
-    <br> -->
-
-    <!-- <table>
-        <tr>
-            <td> Starting columns: <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
-                (change)="pc.inputConfiguration.blockCircuit.updateStartColumns()">
-            </td>
-            <td>
-                Number of blocks: <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
-                <br>
-                Number of columns in the block: between <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> and <input type="number" min="1" [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">            
-            </td>
-        </tr>
-        <tr>
-            <td valign="top">
-                <table>
-                    <tr>
-                        <th [colSpan]="pc.inputConfiguration.qubits+pc.inputConfiguration.blockCircuit.numberOfBlocks">Circuit view</th>
-                    </tr>
-                    <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                        <th>
-                            <strong>q<sub>{{ qubitIndex }}</sub></strong>
-                        </th>
-                        <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
-                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
-                                <input size="3" type="text" [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name" (change)="setGate(qubitIndex, colIndex, $event)">
-                            </ng-container>    
-                        </td>
-                        <ng-container *ngIf="qubitIndex==0">
-                            <th *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfBlocks)" style="background-color: antiquewhite;" [rowSpan]="pc.inputConfiguration.qubits">
-                                Block
-                            </th>
-                        </ng-container>
-                    </tr>
-                </table>                
-            </td>            
-            <td valign="top">
-                <table border="1">
-                    <tr>
-                        <th [colSpan]="math.max(3, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns+pc.inputConfiguration.blockCircuit.block.numberOfRightColumns+1)">
-                            Block description
-                        </th>
-                    </tr>
-                    <tr>
-                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)">
-                            <small>Left&nbsp;</small>
-                            <input type="number" min="0" step="1" size="2" 
-                                [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns"
-                                (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('left', pc.inputConfiguration.qubits)">
-                        </th>
-                        <th [rowSpan]="pc.inputConfiguration.qubits+1" valign="center" align="center" style="background-color: antiquewhite;">
-                            U
-                        </th>
-                        <th [colSpan]="math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)">
-                            <small>Right&nbsp;</small>
-                            <input type="number" min="0" step="1" size="2" 
-                                [(ngModel)]="pc.inputConfiguration.blockCircuit.block.numberOfRightColumns"
-                                (change)="pc.inputConfiguration.blockCircuit.block.updateColumns('right', pc.inputConfiguration.qubits)">
-                        </th>
-                    </tr>
-                    <tr *ngFor="let i of [].constructor(pc.inputConfiguration.qubits); let qubitIndex = index">
-                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
-                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
-                                <input type="text" size="2" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
-                                    (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
-                            </ng-container>
-                        </td>
-                        <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
-                            <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
-                                <input type="text" size="2" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
-                                   (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
-                            </ng-container>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table> -->
-
-    <!-- <br>
-    <table border="1">
-        <tr>
-            <th [colSpan]="remoteFitnessers.length">
-                Available fitnessers
-            </th>
-        </tr>
-        <tr>
-            <th *ngFor="let rf of remoteFitnessers">
-                {{ rf.name }} ({{ rf.index }})
-                <input type="checkbox" [(ngModel)]="rf.selected" (click)="selectFitnesser(rf)">
-            </th>
-        </tr>
-        <tr>
-            <td *ngFor="let rf of remoteFitnessers">
-                Max. fitness: {{ rf.maxFitness }}
-                <br>
-                Max. error: {{ rf.maxError }}
-                <br>
-                <mark>Expected fitness: {{ rf.expectedFitness }}</mark>
-            </td>
-        </tr>
-    </table> -->
-    
-    <!-- <br>
-    Delete files: <input type="checkbox" [(ngModel)]="pc.inputConfiguration.deleteFiles">
-    &nbsp;
-    <span style="border : solid 1px">
-        % of 1 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf1QubitGates">
-        &nbsp;
-        % of 2 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf2QubitGates">
-        &nbsp;
-        % of 3 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOf3QubitGates">
-        &nbsp;
-        % of >=4 qubit gates <input type="number" min="0" max="100" step ="1" [(ngModel)]="pc.probOfNQubitGates">
-    </span>
-    <br>
-    <div style="border : solid 1px">
-        <strong>Strategies policy</strong>
-        <br>
-        <u>Massive mutation</u>:
-        <br>&nbsp;&nbsp;Apply after <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold"> 
-            falls of the <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><u>best fitness</u> 
-            <input type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><u>mean fitness</u>
-        <br>&nbsp;&nbsp;Apply when the best indivudal reaches a fitness of <input type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"> 
-            of the expected fitness 
-        <br>&nbsp;&nbsp;Maximum times of consecutive massive mutations: <input type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
-    </div>
-    <br>
-    &nbsp;
-    Available templates:
-    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-        <option *ngFor="let template of manager.templates" [ngValue]="template">
-            {{ template.fileName }}
-        </option>
-    </select>
-    <button (click)="generateInitialPopulation()" [disabled]="selectedRemoteFitnessers.length==0 && running">Generate initial population and start running</button>
-    &nbsp;
-    <button (click)="stop()" [disabled]="!running">Stop</button> -->
-</div>
-
 <span style="color : red">{{ error }}</span>
-<!-- 
-<small>
-    <table border="1">
-        <tr>
-            <th colspan="2" valign="right">Generation</th>
-            <th *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                {{ iterationIndex }}
-            </th>
-        </tr>
-        <ng-container *ngFor="let fitnesser of selectedRemoteFitnessers; let fitnesserIndex = index">
-            <tr>
-                <th rowspan="5">{{ fitnesser.shortName }}</th>
-            </tr>
-            <tr>
-                <th>Strategy</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ strategies[fitnesserIndex][iterationIndex] }}
-                </td>
-            </tr>
-            <tr>
-                <th>Best fitness</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ bestFitnesses[fitnesserIndex][iterationIndex] }}
-                </td>
-            </tr>
-            <tr>
-                <th>Mean fitness</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ meanFitnesses[fitnesserIndex][iterationIndex] }}
-                </td>
-            </tr>
-            <tr>
-                <th>Error</th>
-                <td *ngFor="let i of [].constructor(pc.iterationIndex); let iterationIndex = index">
-                    {{ meanErrors[fitnesserIndex][iterationIndex] }}
-                </td>
-            </tr>
-        </ng-container>
-    </table>
-</small>
-
-<table border="1" *ngFor="let rf of selectedRemoteFitnessers; let fitnesserIndex = index">
-    <tr>
-        <th [colSpan]="2+individuals.length" align="left">{{ rf.shortName }}</th>
-    </tr>
-    <tr>
-        <th [colSpan]="2+individuals.length" align="left">
-            <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-            &nbsp;
-            <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
-        </th>
-    </tr>
-    <tr>
-        <th>Output</th>
-        <th>
-            <i>p<sub>i</sub></i>
-            &nbsp;
-            <small><small style="color : blue" (click)="random()">Random</small></small>
-        </th>
-        <th *ngFor="let individual of individuals; let individualIndex = index" 
-            [ngStyle]="{ 'background-color' :  individual.selected[fitnesserIndex] ? 'lightblue' : '#fffff'}">
-            <span *ngIf="individual.selected[fitnesserIndex]">💃</span>
-            <u (click)="getCode(individual)">{{ individuals[individualIndex].index }}</u>
-        </th>
-    </tr>
-    <tr *ngFor="let i of [].constructor(pc.inputConfiguration.expectedFrequencies.length); let rowIndex = index" align="center">
-        <td>
-            {{ rowIndex }}
-            <sub>{{ rowIndex.toString(2) }}</sub>
-        </td>
-        <td>
-            <input type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.expectedFrequencies[rowIndex]" (change)="updateExpectedFrequencies()">
-        </td>
-        <td *ngFor="let individual of individuals" align="right">
-            {{ individual.gotFrequencies[fitnesserIndex][rowIndex] }}
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" align="right">
-            <strong><i>Error</i></strong>
-        </td>
-        <td *ngFor="let individual of individuals" align="right">
-            {{ individual.error[fitnesserIndex] }}
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" align="right">
-            <strong><i>Fitness</i></strong>
-        </td>
-        <td *ngFor="let individual of individuals" align="right">
-            {{ individual.fitness[fitnesserIndex] }}
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2" align="right">
-            <strong><i>Length</i></strong>
-        </td>
-        <td *ngFor="let individual of individuals" align="right">
-            {{ individual.length[fitnesserIndex] }}
-        </td>
-    </tr>    
-</table> -->
-
-
-
-
-
-
-<!-- <i style="color : green" [hidden]="state==undefined">{{ state }}</i>
-&nbsp;
-<small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
-
-<span *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
-    <div class="chart-container" style="position: relative; height:40vh; width:80vw" [hidden]="!rf.selected">
-        <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
-    </div>
-</span>
-
-<div class="chart-container" style="position: relative; height:40vh; width:80vw">
-    <canvas id="timesChart"></canvas>
-</div> -->
-
-<!-- <small>
-    <pre>
-    {{ code }}
-    </pre>
-</small> -->

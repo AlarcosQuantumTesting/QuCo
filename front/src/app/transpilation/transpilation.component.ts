@@ -12,7 +12,24 @@ export class TranspilationComponent {
   transpiledCode?: string;
   svgCircuit? : any
 
+  mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
+  searchQuery: string = "";
+  transpilationSelected: any = null;
+  transpilationFiltered: any[] = [];
+  selectedBackend: string | null = null;
+  selectedStatusLine: any = null;
+  selectedStatusLineId: string = "";
+  modalDelete: boolean = false;
+  mostrarTabla: boolean = false;
+  modalCodigo: boolean = false;
+
+
   constructor(private service: TranspilationService) { 
+    this.getTranspilationWorks();
+  }
+
+  ngOnInit() {
     this.getTranspilationWorks();
   }
 
@@ -20,6 +37,14 @@ export class TranspilationComponent {
     this.service.getListOfTranspilationWorks().subscribe({
       next: (data) => {
         this.transpilationWorks = data;
+        this.transpilationFiltered = data;
+
+        if (data.length > 0) {
+          this.transpilationSelected = data[0];
+          this.searchQuery = data[0].name;
+          this.selectedBackend = this.transpilationSelected.statusLines[0].id;
+          this.onBackendChange(this.transpilationSelected.statusLines[0].id);
+        }
       },
       error: (err) => {
         console.error("Error fetching transpilation works:", err);
@@ -34,6 +59,8 @@ export class TranspilationComponent {
 
     this.service.cancelTranspilation(id).subscribe({
       next: (data) => {
+        this.transpilationSelected = null;
+        this.searchQuery = '';
        this.getTranspilationWorks(); // Refresh the list after cancellation
       },
       error: (err) => {
@@ -73,6 +100,99 @@ export class TranspilationComponent {
       error: err => {
         console.error('Error loading image', err);
       }
+    });
+  }
+
+
+  onSearchInput() {
+    // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
+  }
+
+  onFocusInput() {
+    
+  }
+
+  onTabPress(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      this.selectTranspilationIfMatch();
+    }
+  }
+
+  selectTranspilationIfMatch() {
+    const match = this.transpilationWorks.find(
+      t => t.name.toLowerCase() === this.searchQuery.trim().toLowerCase()
+    );
+
+    if (match) {
+      this.transpilationSelected = match;
+      this.searchQuery = match.name;
+    }
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.transpilationSelected = null;
+    this.transpilationFiltered = [...this.transpilationWorks];
+  }
+
+  searchTranspilation() {
+    const match = this.transpilationWorks.find(
+      t => t.name.toLowerCase() === this.searchQuery.trim().toLowerCase()
+    );
+
+    if (match) {
+      this.transpilationSelected = match;
+      this.mostrarTabla = false;
+    } else {
+      console.warn('No se encontró ninguna transpilación con ese nombre.');
+    }
+  }
+
+  onBackendChange(id: string) {
+    if (id) {
+      this.getTranspiledCode(id);
+    }
+  }
+
+  seleccionarTranspilation(transpilation: any) {
+    this.transpilationSelected = transpilation;
+    this.deleteModal();
+  }
+
+  deleteModal() {
+    if (this.transpilationSelected) {
+      this.modalDelete = true;
+    }
+  }
+
+  confirmDelete(id: any) {
+    if (this.transpilationSelected) {
+      this.cancelTranspilation(id);
+    }
+  }
+
+  showAll() {
+    this.transpilationSelected = null;
+    this.transpilationFiltered = [...this.transpilationWorks];
+    this.mostrarTabla = true;
+    this.searchQuery = '';
+  }
+
+  showModalCode(id: any) {
+    this.modalCodigo = true;
+    this.getTranspiledCode(id);
+  }
+
+  copiarCodigo() {
+    const codigo = this.transpiledCode?.toString() || '';
+    navigator.clipboard.writeText(codigo).then(() => {
+      console.log('Código copiado al portapapeles');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
+    }).catch(err => {
+      console.error('Error al copiar el código:', err);
     });
   }
 }

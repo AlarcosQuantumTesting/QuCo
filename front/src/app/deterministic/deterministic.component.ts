@@ -109,6 +109,7 @@ export class DeterministicComponent extends GroverStyle {
   isLoadingQiskitCode = false;
   mostrarModalTree: boolean = false;
   modalTranspile: boolean = false;
+  modalError: boolean = false;
 
   expressionToDelete: any = null;
   deleteIndex: number = -1;
@@ -173,6 +174,7 @@ export class DeterministicComponent extends GroverStyle {
     const savedUserExpressions = localStorage.getItem('processedExpressionsDeterministic');
 
     if (savedQubits) {
+      this.qubits = Number(savedQubits);
         this.buildMatrixActions();
         setTimeout(() => {
 
@@ -452,6 +454,7 @@ export class DeterministicComponent extends GroverStyle {
           this.running   = false;
           this.isLoadingQiskitCode = false;
           this.mostrarModal = true;
+          this.copiarCodigo();
         })
       },
       err => {
@@ -459,10 +462,12 @@ export class DeterministicComponent extends GroverStyle {
         this.running = false;
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
-        this.mensajeTemporal = 'Error generating code';
+        /*this.mensajeTemporal = 'Error generating code';
         setTimeout(() => {
             this.mensajeTemporal = '';
-        }, 2000);
+        }, 2000);*/
+
+        this.modalError = true;
       }
     );
   }
@@ -823,6 +828,8 @@ export class DeterministicComponent extends GroverStyle {
     this.numberOfQubits = this.qubits;
     this.userExpressions = [];
     this.mostrarTabla = true;
+    this.pageInput = 1;
+    this.pageIndex = 1;
     this.reset();
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrixDeterministic');
@@ -831,6 +838,7 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem('mostrarTabla', JSON.stringify(this.mostrarTabla));
     localStorage.setItem('selectedAlgorithm', this.selectedAlgorithm);
 
+    this.pageIndex = 0;
 
     
     //this.getEmptyMatrix();
@@ -933,7 +941,6 @@ export class DeterministicComponent extends GroverStyle {
       this.inParallel = false;
     }
   }
-
   onAlgorithmChange(algorithm: string): void {
     this.selectedAlgorithm = algorithm;
     /*if(this.selectedAlgorithm === 'grover') {
@@ -953,6 +960,8 @@ export class DeterministicComponent extends GroverStyle {
     /*  this.isGrover = algorithm === 'grover';
     this.isGrenoble = algorithm === 'grenoble';
     this.isOriginalGR = algorithm === 'originalGR';*/
+    
+    //this.mostrarTabla = false;
 
     if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
@@ -974,6 +983,7 @@ export class DeterministicComponent extends GroverStyle {
       });
     }
 
+    localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     
   }
 
@@ -1308,7 +1318,11 @@ export class DeterministicComponent extends GroverStyle {
   copiarCodigo() {
     const codigo = this.qiskitCode ? this.qiskitCode.lines.join('\n') : '';
     navigator.clipboard.writeText(codigo).then(() => {
-      alert('Code copied to clipboard');
+      //alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
         }).catch(err => {
           console.error('Error copying code: ', err);
       });

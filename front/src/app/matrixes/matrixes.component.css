@@ -852,12 +852,16 @@ td {
     text-align: center;
 }
 
-tr:nth-child(even) {
-    background-color: #4377612a;
+tr {
+    background-color: #4377611c;
 }
 
+/* tr:nth-child(even) {
+    background-color: #4377612a;
+} */
+ 
 tr:hover {
-    background-color: #e8f3ed;
+    background-color: #0b555a4b;
     transition: 0.3s;
 }
 
@@ -2388,4 +2392,50 @@ input[disabled], textarea[disabled], select[disabled] {
     font-size: 16px;
     color: #333;
     text-align: center;
+}
+
+.modal-body {
+  padding: 1rem 1.5rem;
+}
+
+.modal-message {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.mensaje-temporal2 {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #004d4f;
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  font-weight: 500;
+  z-index: 9999;
+  animation: aparecerDesaparecer 2s ease-in-out forwards;
+  pointer-events: none; /* Para no bloquear la interacción */
+}
+
+@keyframes aparecerDesaparecer {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
 }

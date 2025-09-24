@@ -47,6 +47,7 @@ export class MatrixesComponent implements AfterViewInit  {
   outputQubits : number = 3
 
   mensajeTemporal: string = '';
+  mensajeTemporal2: string = '';
   showHelp = false;
   isDisabled = false;
   isDisabled2 = false;
@@ -134,6 +135,8 @@ export class MatrixesComponent implements AfterViewInit  {
   transpiledCode: string = '';
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
+
+  modalError: boolean = false;
 
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
@@ -500,10 +503,23 @@ export class MatrixesComponent implements AfterViewInit  {
         if (asFunction) {
           this.mostrarModal = true;
         }
+
+        this.copiarCodigo();
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
+        //this.isLoadingQiskitCode = false;
+
+        this.error   = err.error?.message || err.message;
+        
         this.isLoadingQiskitCode = false;
+        this.mostrarModal = false;
+        /*this.mensajeTemporal = 'Error generating code';
+        setTimeout(() => {
+            this.mensajeTemporal = '';
+        }, 2000);*/
+
+        this.modalError = true;
       },
       complete: () => {
         this.isLoadingQiskitCode = false; // ← finaliza carga
@@ -559,6 +575,7 @@ export class MatrixesComponent implements AfterViewInit  {
         }
         this.isLoadingQiskitCode = false;
         this.mostrarModal = true;
+        this.copiarCodigo();
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
@@ -569,7 +586,6 @@ export class MatrixesComponent implements AfterViewInit  {
       }
     });
   }
-
 
   //mio
 
@@ -896,7 +912,11 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     const codigo = this.qiskitCode 
     navigator.clipboard.writeText(codigo).then(() => {
-      alert('Code copied to clipboard');
+      //alert('Code copied to clipboard');
+      this.mensajeTemporal2 = 'Code copied';
+      setTimeout(() => {
+          this.mensajeTemporal2 = '';
+      }, 1000);
         }).catch(err => {
           console.error('Error copying code: ', err);
       });
