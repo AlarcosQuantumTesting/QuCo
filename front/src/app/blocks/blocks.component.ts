@@ -129,10 +129,10 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
 
 
-    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '{}') : 50;
-    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '{}') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '{}') : 20;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '{}') : 20;
+    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '50') : 50;
+    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '50') : 50;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '50') : 50;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '50') : 50;
 
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
@@ -336,8 +336,17 @@ export class BlocksComponent extends EvolutionaryComponent {
     if (this.validarStartingColumns()) return true;
     if (this.validarProbabilities()) return true;
 
+    if (!this.validarGates()) return true;
+
     
     return false;
+  }
+
+  validarGates(): boolean {
+      return this.gates.some(g => g.affectedQubits === 1 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 2 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 3 && g.selected)
+        && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
   }
 
   validarInputPopSize() : boolean {

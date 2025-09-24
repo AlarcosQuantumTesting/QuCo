@@ -124,8 +124,8 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGates') ? JSON.parse(localStorage.getItem('probOf1QubitGates') || '50') : 50;
     this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGates') ? JSON.parse(localStorage.getItem('probOf2QubitGates') || '50') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '20') : 20;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '20') : 20;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '50') : 50;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '50') : 50;
 
     //this.updateOutputs();
 
@@ -370,7 +370,16 @@ export class ElongingComponent extends EvolutionaryComponent {
       contents[i].classList.toggle("active", i === selectedIndex);
     });
     this.tieneFrecuenciasEsperadas();
+    
   }
+
+   validarGates(): boolean {
+      return this.gates.some(g => g.affectedQubits === 1 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 2 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 3 && g.selected)
+        && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
+    }
+
 
   validarDatos(): boolean {
     const config = this.pc.inputConfiguration;
@@ -405,6 +414,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
+    if (!this.validarGates()) return true;
 
     return false;
   }

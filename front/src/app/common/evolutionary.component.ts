@@ -425,79 +425,13 @@ export abstract class EvolutionaryComponent {
 
 
 
-  private calculateShots() {
+  public calculateShots() {
     this.pc.inputConfiguration.shots = 0
     for (let i=0; i<this.pc.inputConfiguration.expectedFrequencies.length; i++)
       this.pc.inputConfiguration.shots = this.pc.inputConfiguration.shots + this.pc.inputConfiguration.expectedFrequencies[i]
   }
 
   remoteFitnesser?: RemoteFitnesser;
-
-  /*selectFitnesser(rf : RemoteFitnesser) {
-    rf.selected=!rf.selected
-
-    for (let i=0; i<this.remoteFitnessers.length; i++) {
-      if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
-        rf = this.remoteFitnessers[i]
-        rf.selected = true
-        this.remoteFitnesser = rf;
-      }
-    }
-
-
-    this.service.selectFitnesser(rf.name!, rf.selected, this.pc.inputConfiguration.shots, this.pc.desiredError, this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.populationSize).
-      subscribe(
-        result=> {
-          this.error = undefined
-          if (result!=null) {
-            rf.shortName = result.shortName
-            rf.maxFitness = result.maxFitness
-            rf.maxError = result.maxError
-            rf.populationSize = result.populationSize
-            rf.expectedFitness = result.expectedFitness
-          }
-          this.selectedRemoteFitnessers = this.remoteFitnessers.filter(rf => rf.selected)
-        },
-        error => {
-          this.state = undefined
-          this.substate = undefined
-          this.error = error.error.message
-        })
-
-  }*/
-
-
-    /*selectFitnesser(rf: RemoteFitnesser) {
-      // fuerza a que siempre quede seleccionado
-      rf.selected = true;
-      this.remoteFitnesser = rf;
-
-      this.service.selectFitnesser(
-        rf.name!,
-        true,  // ya no usamos rf.selected, siempre true
-        this.pc.inputConfiguration.shots,
-        this.pc.desiredError,
-        this.pc.inputConfiguration.expectedFrequencies,
-        this.pc.inputConfiguration.populationSize
-      ).subscribe(
-        result => {
-          this.error = undefined;
-          if (result != null) {
-            rf.shortName = result.shortName;
-            rf.maxFitness = result.maxFitness;
-            rf.maxError = result.maxError;
-            rf.populationSize = result.populationSize;
-            rf.expectedFitness = result.expectedFitness;
-          }
-          this.selectedRemoteFitnessers = [rf]; // solo este
-        },
-        error => {
-          this.state = undefined;
-          this.substate = undefined;
-          this.error = error.error.message;
-        }
-      );
-    }*/
 
     selectFitnesser(rf: RemoteFitnesser): Promise<void> {
       rf.selected = true;
