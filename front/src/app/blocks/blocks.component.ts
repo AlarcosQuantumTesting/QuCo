@@ -11,6 +11,7 @@ import { BlockCircuit } from './BlockCircuit';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { BlockColumn } from './BlockColumn';
+import { min } from 'rxjs';
 
 Chart.register(...registerables)
 
@@ -31,6 +32,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   showCharts: boolean = false;
   isNone: boolean = true;
   isRandom: boolean = false;
+  isZeroTo2N: boolean = false;
   selectedOptionFreq: string = 'none';
   selectedGate: String = 'H';
 
@@ -47,13 +49,16 @@ export class BlocksComponent extends EvolutionaryComponent {
     public transpileService: TranspileService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
-    this.pc.inputConfiguration.maxNumberOfColumns = 3
+    this.pc.inputConfiguration.maxNumberOfColumns = 4
   }
 
   ngAfterViewInit(): void {
     this.tieneFrecuenciasEsperadas()
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
     const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+
+    this.pc.inputConfiguration.minNumberOfColumns = 1;
+    this.pc.inputConfiguration.maxNumberOfColumns = 4;
 
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
@@ -68,6 +73,9 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
    ngOnInit () {
+
+    window.addEventListener('beforeunload', this.confirmExit);
+
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
       //console.log("Mensaje SSE:", msg);
@@ -76,7 +84,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits, this.pc.inputConfiguration.blockCircuit?.numberOfStartColumns || 2);
     this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
 
-
+    this.pc.inputConfiguration.minNumberOfColumns = 1;
+    this.pc.inputConfiguration.maxNumberOfColumns = 4;
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -120,10 +129,10 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
 
 
-    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '{}') : 50;
-    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '{}') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '{}') : 20;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '{}') : 20;
+    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '50') : 50;
+    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '50') : 50;
+    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '50') : 50;
+    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '50') : 50;
 
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
@@ -203,7 +212,13 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.error = "You must select one fitnesser at least"
     } else {
       this.prepareCharts()
-      this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected), this.manager.selectedTemplate).subscribe(
+      // this.service.generateInitialPopulation(this.pc, this.gates.filter(g => g.selected), this.manager.selectedTemplate).subscribe(
+      this.pc.gateNames = []
+      let selectedGates = this.gates.filter(g => g.selected)
+      for (let i = 0; i < selectedGates.length; i++)
+        this.pc.gateNames.push(selectedGates[i].name!)
+      this.pc.codeTemplate = this.manager.selectedTemplate
+      this.service.generateInitialPopulation(this.pc).subscribe(
         result => {
           this.error = undefined
           this.state = undefined
@@ -215,7 +230,8 @@ export class BlocksComponent extends EvolutionaryComponent {
           }
 
           for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
-            this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
+            this.individuals.push(new Individual(i))
           }
           if (this.running)
             this.firstRun()
@@ -320,8 +336,17 @@ export class BlocksComponent extends EvolutionaryComponent {
     if (this.validarStartingColumns()) return true;
     if (this.validarProbabilities()) return true;
 
+    if (!this.validarGates()) return true;
+
     
     return false;
+  }
+
+  validarGates(): boolean {
+      return this.gates.some(g => g.affectedQubits === 1 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 2 && g.selected)
+        && this.gates.some(g => g.affectedQubits === 3 && g.selected)
+        && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
   }
 
   validarInputPopSize() : boolean {
@@ -334,8 +359,10 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   validarStartingColumns() : boolean {
     const config = this.pc.inputConfiguration;
-    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
-    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;
+    /*if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > 10) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns > 10) return true;*/
+    if (config.minNumberOfColumns == null || config.minNumberOfColumns < 1 || config.minNumberOfColumns > config.maxNumberOfColumns) return true;
+    if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 1 || config.maxNumberOfColumns < config.minNumberOfColumns) return true;
     if (config.minNumberOfColumns > config.maxNumberOfColumns) return true;
     return false;
   }
@@ -404,6 +431,8 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.resetMatrix();
     } else if (this.isRandom) {
       this.random();
+    } else if (this.isZeroTo2N) {
+      this.zeroTo2N();
     }
 
     localStorage.setItem('selectedOptionFreqGenetic', this.selectedOptionFreq);
@@ -414,19 +443,39 @@ export class BlocksComponent extends EvolutionaryComponent {
     
     this.isNone = value === 'none';
     this.isRandom = value === 'random';
+    this.isZeroTo2N = value === 'zeroTo2N';
   }
 
   copiarCodigo() {
+    
     const codigo = this.code?.toString() || '';
+    
     navigator.clipboard.writeText(codigo).then(() => {
       console.log('Código copiado al portapapeles');
       this.mensajeTemporal2 = 'Code copied';
       setTimeout(() => {
-          this.mensajeTemporal2 = '';
+        this.mensajeTemporal2 = '';
       }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  copiarCodigo2() {
+
+    setTimeout(() => {
+      const codigo = this.code?.toString() || '';
+    
+      navigator.clipboard.writeText(codigo).then(() => {
+        console.log('Código copiado al portapapeles');
+        this.mensajeTemporal2 = 'Code copied';
+        setTimeout(() => {
+            this.mensajeTemporal2 = '';
+        }, 1000);
+      }).catch(err => {
+        console.error('Error al copiar el código:', err);
+      });
+    }, 1000);
   }
 
   transpileCodigo() {
@@ -527,5 +576,56 @@ export class BlocksComponent extends EvolutionaryComponent {
         
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
   }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeunload', this.confirmExit);
+  }
+
+  confirmExit = (event: BeforeUnloadEvent): void => {
+    if (this.running || !this.notBuilt) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  };
+
+  canDeactivate(): boolean {
+    if (this.running || !this.notBuilt) {
+      return confirm('Are you sure you want to exit Blocks genetic algorithm?');
+    }
+    return true;
+  }
+
+  toggleSelectGates(minQubits: number) {
+    const allSelected = this.areAllSelected(minQubits);
+    this.gates.forEach(g => {
+      if (minQubits === 4) {
+        if (g.affectedQubits >= minQubits) {
+          g.selected = !allSelected;
+        }
+      } else if (g.affectedQubits === minQubits) {
+        g.selected = !allSelected;
+      } else if (minQubits === 5 && g.affectedQubits >= 1) {
+        g.selected = !allSelected;
+      }
+    });
+    this.saveGates();
+  }
+
+  areAllSelected(minQubits: number): boolean {
+    if (minQubits === 1) {
+      return this.gates.filter(g => g.affectedQubits === 1).every(g => g.selected);
+    } else if (minQubits === 2) {
+      return this.gates.filter(g => g.affectedQubits === 2).every(g => g.selected);
+    } else if (minQubits === 3) {
+      return this.gates.filter(g => g.affectedQubits === 3).every(g => g.selected);
+    } else if (minQubits === 4) {
+      return this.gates.filter(g => g.affectedQubits >= minQubits).every(g => g.selected);
+    } else if (minQubits === 5) {
+      return this.gates.filter(g => g.affectedQubits >= 1).every(g => g.selected);
+    } else {
+      return false;
+    }
+  }
+
 
 }

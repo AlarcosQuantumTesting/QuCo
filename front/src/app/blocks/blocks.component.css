@@ -252,8 +252,8 @@ button:hover {
 
 .form-row > * {
     position: relative;
-    padding-right: 10px;
-    margin-right: 10px;
+    /* padding-right: 10px;
+    margin-right: 10px; */
 }
 
 /* .form-row > *:not(:last-child)::after {
@@ -266,7 +266,7 @@ button:hover {
 } */
 
 .form-row label {
-    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    white-space: nowrap;
 }
 
 .form-row input {
@@ -275,7 +275,7 @@ button:hover {
 }
 
 .form-row button {
-    margin-left: auto; /* Empuja el botón hacia la derecha */
+    margin-left: auto;
 }
 
 /* .section {

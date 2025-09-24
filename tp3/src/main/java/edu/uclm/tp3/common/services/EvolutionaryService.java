@@ -23,6 +23,7 @@ import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.common.utils.Files;
+import edu.uclm.tp3.genetic.fitnessers.SimpleFitnesser;
 
 @Service
 public abstract class EvolutionaryService {
@@ -84,14 +85,27 @@ public abstract class EvolutionaryService {
 	public abstract String getInitialization(ProblemConfiguration gc);
 	
 	//public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength, HWSession hw) throws Exception {
-	public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength) throws Exception {
+	/*public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength) throws Exception {
 		String[] result = this.prepareCodeTemplate(pc, token);
-
-		//this.buildIndividuals(token, pc, result, initialLength, hw);
 		this.buildIndividuals(token, pc, result, initialLength);
 		
 		return result;
+	}*/
+	public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength) throws Exception {
+		String[] result = this.prepareCodeTemplate(pc, token);
+
+		if (result == null) {
+			throw new IllegalStateException("prepareCodeTemplate devolvió null");
+		}
+		if (result.length < 2) {
+			throw new IllegalStateException("prepareCodeTemplate devolvió menos de 2 elementos");
+		}
+
+		this.buildIndividuals(token, pc, result, initialLength);
+
+		return result;
 	}
+
 	
 	// protected abstract void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength, HWSession hw) throws Exception ;
 	protected abstract void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength) throws Exception ;
@@ -355,5 +369,9 @@ public abstract class EvolutionaryService {
 
 	public static Class<? extends Gate> findGate(String gateName) {
 		return gatesByName.get(gateName).getGateClazz();
+	}
+
+	public static SimpleFitnesser getSimpleFitnesser() {
+		return new SimpleFitnesser();
 	}
 }
