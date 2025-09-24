@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { MatrixesComponent } from './matrixes/matrixes.component';
 import { BlocksComponent } from './blocks/blocks.component';
 import { ElongingComponent } from './elonging/elonging.component';
-import { GroverComponent } from './grover/grover.component';
 import { DeterministicComponent } from './deterministic/deterministic.component';
 import { CircuitEditorComponent } from './circuit-editor/circuit-editor.component';
 import { TemplatesComponent } from './templates/templates.component';
@@ -15,7 +14,6 @@ import { TranspilationComponent } from './transpilation/transpilation.component'
 const routes: Routes = [
   // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
   { path: "matrix", component: MatrixesComponent },
-  { path: "grover", component: GroverComponent },
   { path: "elonging", component: ElongingComponent, canDeactivate: [CanDeactivateGuard] },
   { path: "blocks", component: BlocksComponent, canDeactivate: [CanDeactivateGuard] },
   { path: "grenoble", component: DeterministicComponent },

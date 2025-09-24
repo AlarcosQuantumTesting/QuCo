@@ -9,7 +9,6 @@ import { MatrixesComponent } from './matrixes/matrixes.component';
 import { RouterModule, Routes } from '@angular/router';
 import { BlocksComponent } from './blocks/blocks.component';
 import { ElongingComponent } from './elonging/elonging.component';
-import { GroverComponent } from './grover/grover.component';
 import { DeterministicComponent } from './deterministic/deterministic.component';
 import { CircuitEditorComponent } from './circuit-editor/circuit-editor.component';
 import { TemplatesComponent } from './templates/templates.component';
@@ -23,7 +22,6 @@ const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
   { path : 'elonging', component : ElongingComponent },
   { path : 'blocks', component : BlocksComponent },
-  { path : 'grover', component : GroverComponent },
   { path : 'home', component : HomeComponent },
   // { path : 'quco', component : AppComponent }
   { path : '', redirectTo : '/', pathMatch : 'full'}
@@ -35,7 +33,6 @@ const appRoutes : Routes = [
     MatrixesComponent,
     BlocksComponent,
     ElongingComponent,
-    GroverComponent,
     DeterministicComponent,
     CircuitEditorComponent,
     TemplatesComponent,
