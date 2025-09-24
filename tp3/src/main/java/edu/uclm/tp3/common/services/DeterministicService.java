@@ -135,7 +135,11 @@ public class DeterministicService {
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", "1024");
-		result.put("#CALCULUS#", "circuits[0].append(get" + prefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])");
+		String sCalculus = "for i in range(0, len(circuits)) :\n" + 
+			"\tfor j in range(startQubit, qubits) :\n" +
+			"\t\tcircuits[i].h(j)\n" + 
+			"circuits[0].append(get" + prefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])";
+		result.put("#CALCULUS#", sCalculus);
 		result.put("tree", tree.toMap());
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph" : "Grenoble");
 
@@ -179,10 +183,12 @@ public class DeterministicService {
 		}
 
 		StringBuilder circuitsDeclaration = new StringBuilder();
-		StringBuilder calculus = new StringBuilder();
+		String sCalculus = "for i in range(0, len(circuits)) :\n" + 
+			"\tfor j in range(startQubit, qubits) :\n" +
+			"\t\tcircuits[i].h(j)\n";
 		StringBuilder sbExpected = new StringBuilder("expected = [");
 		for (int i=0; i<numberOfPairs; i++) {
-			calculus.append("circuits[" + i + "].append(getcirc" + i + "_0(), [" + Coder.getTargetQubits(0, qubits) + "])\n");
+			sCalculus = sCalculus + "circuits[" + i + "].append(getcirc" + i + "_0(), [" + Coder.getTargetQubits(0, qubits) + "])\n";
 			Pair pair = expectedFrequencies.getPairs().get(i);
 			int index = pair.getIndex();
 			sbExpected.append("(" + index + ", 1),");
@@ -196,7 +202,7 @@ public class DeterministicService {
 		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", "1024");
 		result.put("#EXPECTED#", sbExpected.toString());
-		result.put("#CALCULUS#", calculus.toString());
+		result.put("#CALCULUS#", sCalculus);
 		result.put("#CIRCUITS_DECLARATION#", circuitsDeclaration);	
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph split" : "Grenoble split");
 		result.put("QUIRK", partialCircuits);
@@ -241,11 +247,14 @@ public class DeterministicService {
 
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph parallel" : "Grenoble parallel");
 
-		StringBuilder calculus = new StringBuilder();
+		
 		StringBuilder sbExpected = new StringBuilder("expected = [");
 		int startQubit = 0;
+		String sCalculus = "for i in range(0, len(circuits)) :\n" + 
+			"\tfor j in range(startQubit, qubits) :\n" +
+			"\t\tcircuits[i].h(j)\n";
 		for (int i=0; i<numberOfPairs; i++) {
-			calculus.append("circuits[0].append(getcirc" + i + "_0(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n");
+			sCalculus = sCalculus + "circuits[0].append(getcirc" + i + "_0(), [" + Coder.getTargetQubits(startQubit, startQubit+qubits) + "])\n";
 
 			Pair pair = expectedFrequencies.getPairs().get(i);
 			int index = pair.getIndex();
@@ -257,7 +266,7 @@ public class DeterministicService {
 		}
 		sbExpected.append("]");
 		result.put("#EXPECTED#", sbExpected.toString());
-		result.put("#CALCULUS#", calculus.toString());
+		result.put("#CALCULUS#", sCalculus);
 		return result;
 	}
 

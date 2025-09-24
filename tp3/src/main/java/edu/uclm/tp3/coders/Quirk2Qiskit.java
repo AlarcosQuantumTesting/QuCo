@@ -105,7 +105,7 @@ public class Quirk2Qiskit {
                 sb.append("cx([" + controlQubits + "], [" + controlledQubits + "])\n");
         } else if (controlledGate.getName().equals("Z")) {
             if (numberOfControlQubits>1)
-                sb.append("mcp(pi, " + controlQubits + ", " + controlledQubits + ")\n");
+                sb.append("mcp(pi, [" + controlQubits  + "], [" + controlledQubits + "])\n");
             else
                 sb.append("cz(" + controlQubits + ", " + controlledQubits + ")\n");
         }  else if (controlledGate.getName().equals("H")) {
