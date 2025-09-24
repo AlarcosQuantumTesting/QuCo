@@ -252,40 +252,45 @@
 
               <th rowspan="2">
 
-                Output
-
-                <br>
-
-                <small>
-
-                  ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
-
-                </small>
+                
 
                 <!-- Paginación -->
 
-                <div style="text-align: center; margin: 1em 0;">
+                <div style="text-align: center;">
+                        
+                      <small>
+                        <button class="paginador-btn" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1" [disabled]="pageIndex === 0">
+                          <i class="fas fa-chevron-left"></i>
+                        </button>
 
-                  <button (click)="pageIndex = pageIndex - 1" [disabled]="pageIndex === 0">Previous</button>
+                        <input
+                          class="inputPaginador"
+                          type="number"
+                          [min]="1"
+                          [max]="pageCount"
+                          [(ngModel)]="pageInput"
+                          style="text-align: center;"
+                          (ngModelChange)="goToPage()"
+                        />
 
-                  <span>Page {{ pageIndex + 1 }} of {{ pageCount }}</span>
+                        <span> / {{ pageCount }}</span>
 
-                  <button (click)="pageIndex = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">Next</button>
+                        <button class="paginador-btn" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">
+                          <i class="fas fa-chevron-right"></i>
+                        </button>
+                      </small>
 
-                </div>
-
-                <div style="text-align: center; margin-top: 0.5em;">
-
-                  <label>
-
-                    Ir a página:
-
-                    <input type="number" [min]="1" [max]="pageCount" [(ngModel)]="pageInput">
-
-                  </label>
-
-                  <button (click)="goToPage()">Ir</button>
-
+                      </div>
+                <div class="header-with-button">
+                  <div style="margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                      Output 
+                      <br>
+                    </div>
+                    <small style="margin-left: 5px;">
+                      ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
+                    </small>
+                  </div>
                 </div>
 
                 <!-- Fin de paginación -->
