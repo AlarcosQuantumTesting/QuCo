@@ -27,7 +27,6 @@ import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.elonging.strategies.IStratego;
 import edu.uclm.tp3.elonging.strategies.ParameterizableStratego;
 import edu.uclm.tp3.elonging.strategies.Stratego;
-import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 import edu.uclm.tp3.genetic.fitnessers.SimpleFitnesser;
 import edu.uclm.tp3.parallel.TaskData;
 import edu.uclm.tp3.ws.HWSession;
@@ -72,8 +71,6 @@ public class BlocksController extends EvolutionaryController {
 		
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
-		//Map<String, Fitnesser> sessionFitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-		//itnesser[] fitnessers = sessionFitnessers.values().toArray(new Fitnesser[0]);
 		SimpleFitnesser sessionFitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
 		
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
@@ -91,7 +88,7 @@ public class BlocksController extends EvolutionaryController {
 			
 			int sourceGeneration = pc.getSourceGeneration();
 			IStratego stratego = selectedStratego.equalsIgnoreCase("fixedStratego") ? new Stratego() : new ParameterizableStratego();
-			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
+
 			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
 
 
@@ -117,33 +114,6 @@ public class BlocksController extends EvolutionaryController {
 			pc = runPopulation.apply(this.manager, taskData);
 			result.put("calculusTime", System.currentTimeMillis()-startCalculusTime);
 			pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy(strategy);
-			/*for (int i=0; i<fitnessers.length; i++) {
-				fitnesser = fitnessers[i];
-				pc.setSourceGeneration(sourceGeneration);
-
-				TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");
-				long strategyTime= System.currentTimeMillis();
-				Strategy strategy = stratego.getStrategy(gt, pc, fitnesser, manager, selectedStrategies);
-				TextLogger.write(gt, "\t\t" + strategy.getClass().getSimpleName() + "\n");
-				TextLogger.write(gt, "\t\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
-				TextLogger.write(gt, "\t\ttargetGeneration=" + pc.getTargetGeneration() + "\n");				
-				
-				
-				//hw.send("Applying " + strategy.getClass().getSimpleName());
-				emitters.sendMessage("Applying " + strategy.getClass().getSimpleName());
-				StrategyWrapper sw = new StrategyWrapper(strategy);
-				sw.apply(gt, pc, templateStart, templateEnd, fitnesser);
-				result.put("strategyTime", System.currentTimeMillis()-strategyTime);
-
-				runPopulation.setFitnesser(fitnesser);
-				long startExecutionTime = System.currentTimeMillis();
-				TaskData taskData = runPopulation.execute();
-				long startCalculusTime = System.currentTimeMillis();
-				result.put("executionTime", startCalculusTime-startExecutionTime);
-				pc = runPopulation.apply(this.manager, taskData);
-				result.put("calculusTime", System.currentTimeMillis()-startCalculusTime);
-				pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy(strategy);
-			}*/
 
 			pc.increaseIterationIndex();
 			pc.increaseTargetGeneration();

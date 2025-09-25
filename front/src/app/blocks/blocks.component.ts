@@ -75,17 +75,21 @@ export class BlocksComponent extends EvolutionaryComponent {
    ngOnInit () {
 
     window.addEventListener('beforeunload', this.confirmExit);
+    localStorage.removeItem('qucoConfigurationBlocks');
+    localStorage.removeItem('qucoConfiguration');
+    localStorage.removeItem('blocksQubits');
 
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
-      //console.log("Mensaje SSE:", msg);
     });
 
-    //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits, this.pc.inputConfiguration.blockCircuit?.numberOfStartColumns || 2);
-    this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
+    //this.pc.inputConfiguration.blockCircuit = localStorage.getItem('qucoConfigurationBlocks') ? JSON.parse(localStorage.getItem('qucoConfigurationBlocks') || '{}') : new BlockCircuit(this.pc.inputConfiguration.qubits);
 
     this.pc.inputConfiguration.minNumberOfColumns = 1;
     this.pc.inputConfiguration.maxNumberOfColumns = 4;
+
+
+    this.pc.inputConfiguration.qubits = localStorage.getItem('blocksQubits') ? JSON.parse(localStorage.getItem('blocksQubits') || '5') : 5;
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -114,7 +118,6 @@ export class BlocksComponent extends EvolutionaryComponent {
           }, 1000);
           console.log('Nombre:', template.fileName);
           this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === template.fileName) || new CodeTemplate("", "", "");
-          //this.manager.selectedTemplate = new CodeTemplate(template.fileName, template.code, template.description);
           console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
         } catch (error) {
           console.error('Error al parsear plantilla desde localStorage:', error);
@@ -128,12 +131,6 @@ export class BlocksComponent extends EvolutionaryComponent {
       console.log('No hay plantilla seleccionada');
     }
 
-
-    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf1QubitGatesBlocks') || '50') : 50;
-    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf2QubitGatesBlocks') || '50') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOf3QubitGatesBlocks') || '50') : 50;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGatesBlocks') ? JSON.parse(localStorage.getItem('probOfNQubitGatesBlocks') || '50') : 50;
-
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
 
@@ -141,8 +138,10 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   updateNumberOfQubits() {
     let qubits = parseInt((document.getElementById("numberOfQubits") as HTMLInputElement).value)
-    this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits)
+    localStorage.setItem('blocksQubits', JSON.stringify(qubits));
+    // this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits);
     this.pc.inputConfiguration.qubits = qubits
+    this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits);
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
 
@@ -169,18 +168,6 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
   }
-
-  /*setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
-    let gate = this.findGate(e)
-    if (gate) {
-      if (side=="left")
-        this.pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex] = gate
-      else
-        this.pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex] = gate
-    }
-
-    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
-  }*/
 
   setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
     let gate = this.findGate(e)
@@ -269,10 +256,6 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     localStorage.setItem('templateSelectedBlocks', JSON.stringify(this.templateSelected));
     localStorage.setItem('selectedTemplateBlocks', JSON.stringify(this.manager.selectedTemplate));
-    localStorage.setItem('probOf1QubitGatesBlocks', JSON.stringify(this.pc.probOf1QubitGates));
-    localStorage.setItem('probOf2QubitGatesBlocks', JSON.stringify(this.pc.probOf2QubitGates));
-    localStorage.setItem('probOf3QubitGatesBlocks', JSON.stringify(this.pc.probOf3QubitGates));
-    localStorage.setItem('probOfNQubitGatesBlocks', JSON.stringify(this.pc.probOfNQubitGates));
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
 
     this.updateOutputs();
@@ -423,6 +406,9 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
   reload() {
+    localStorage.removeItem('qucoConfigurationBlocks');
+    localStorage.removeItem('qucoConfiguration');
+    localStorage.removeItem('blocksQubits');
     location.reload();
   }
 
@@ -626,6 +612,14 @@ export class BlocksComponent extends EvolutionaryComponent {
       return false;
     }
   }
+
+  disableTyping(event: KeyboardEvent) {
+    const allowedKeys = ['ArrowUp', 'ArrowDown', 'Tab', 'Backspace'];
+    if (!allowedKeys.includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
 
 
 }

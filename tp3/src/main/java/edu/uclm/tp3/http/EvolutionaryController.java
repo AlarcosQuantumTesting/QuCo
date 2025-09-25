@@ -40,13 +40,6 @@ public abstract class EvolutionaryController {
 
 	@Autowired
     private SseEmitters emitters;
-	
-	/*@GetMapping("/resetSession") @ResponseBody
-	public String resetSession(HttpSession session, HttpServletRequest request) {
-		session.removeAttribute("gt");
-		session.removeAttribute("pc");
-		return session.getId();
-	}*/
 
 	@GetMapping("/resetSession")
 	@ResponseBody
@@ -56,8 +49,7 @@ public abstract class EvolutionaryController {
 
 		if (gtObj != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
 			String gt = (String) gtObj;
-
-			// Solicita cancelación antes de bloquear
+			
 			RunPopulation.requestCancellation(gt);
 
 			ReentrantLock lock = RunPopulation.getLockFor(gt);
@@ -116,8 +108,6 @@ public abstract class EvolutionaryController {
 	public SimpleFitnesser selectFitness(HttpSession session, @RequestBody Map<String, Object> info) {
 		try {
 			JSONObject jso = new JSONObject(info);
-			/*String name = jso.getString("name");
-			boolean selected = jso.getBoolean("selected");*/
 			
 			int shots = jso.getInt("shots");
 			double desiredError = jso.getDouble("desiredError");
@@ -156,33 +146,12 @@ public abstract class EvolutionaryController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
-	
-	/*@SuppressWarnings("unchecked")
-	@PutMapping("/updateExpectedFrequencies") @ResponseBody
-	public SimpleFitnesser updateExpectedFrequencies(HttpSession session, @RequestBody Map<String, Object> info) {
-		try {
-			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
-			//SimpleFitnesser fitnesser = new SimpleFitnesser();
-			session.setAttribute("fitnesser", fitnesser);
-
-			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
-			int shots = (int) info.get("shots");
-			
-			fitnesser.setExpected(expectedFrequencies);
-			fitnesser.setShots(shots);
-			fitnesser.setUp();
-			return fitnesser;
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}*/
 
 	@SuppressWarnings("unchecked")
 	@PutMapping("/updateExpectedFrequencies")
 	@ResponseBody
 	public SimpleFitnesser updateExpectedFrequencies(HttpSession session, @RequestBody Map<String, Object> info) {
 		try {
-			//SimpleFitnesser fitnesser = new SimpleFitnesser();
 			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
 			if (fitnesser == null) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fitnesser in session");
@@ -209,20 +178,10 @@ public abstract class EvolutionaryController {
 		long startTime = System.currentTimeMillis();
 		String gt = ""  + EvolutionaryService.dado.nextInt();
 		session.setAttribute("gt", gt);
-		//HWSession hw = this.manager.get(session);
-		//SimpleFitnesser fitnesser = new SimpleFitnesser();
 		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
 		pc.setSimpleFitnesser(fitnesser);
-
-		//fitnesser.setDesiredError(pc());
-		/*int populationSize = pc.getInputConfiguration().getPopulationSize();
-		fitnesser.setPopulationSize(populationSize);
-		fitnesser.setShots(pc.getInputConfiguration().getShots());
-		fitnesser.setExpected(pc.getInputConfiguration().getExpectedFrequencies());
-		session.setAttribute("fitnesser", fitnesser);*/
 		
 		try {
-			//String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength, hw);
 			String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength);
 			session.setAttribute("templateStart", startEnd[0]);
 			session.setAttribute("templateEnd", startEnd[1]);
@@ -246,14 +205,10 @@ public abstract class EvolutionaryController {
 		
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
-		/*Map<String, Fitnesser> sessionFitnessers = (Map<String, Fitnesser>) session.getAttribute("fitnessers");
-		Fitnesser[] fitnessers = sessionFitnessers.values().toArray(new Fitnesser[0]);*/
 		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
-		//fitnesser = new SimpleFitnesser();
 		session.setAttribute("fitnesser", fitnesser);
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
 		pc.setSimpleFitnesser(fitnesser);
-		//pc.setRemoteFitnessers(fitnesser);
 		
 		Map<String, Object> result = new HashMap<>();
 		try {			
@@ -264,9 +219,6 @@ public abstract class EvolutionaryController {
 			TextLogger.write(gt, "\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
 			TextLogger.write(gt, "\tgenerationToExecute=" + pc.getGenerationToExecute() + "\n");
 			
-			//SimpleFitnesser fitnesser;
-			
-			// RunPopulation runPopulation = new RunPopulation(gt, pc, hw);
 			if (emitters == null) {
 				emitters = new SseEmitters();
 			}
@@ -278,15 +230,6 @@ public abstract class EvolutionaryController {
 			result.put("executionTime", startCalculusTime-startTime);
 			
 			int sourceGeneration = pc.getSourceGeneration();
-			/*for (int i=0; i<fitnessers.length; i++) {
-
-				fitnesser = fitnessers[i];
-				pc.setSourceGeneration(sourceGeneration);
-				TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");
-				runPopulation.setFitnesser(fitnesser);
-				pc = runPopulation.apply(this.manager, taskData);
-				pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy("First execution");
-			}*/
 
 			pc.setSourceGeneration(sourceGeneration);
 			TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");

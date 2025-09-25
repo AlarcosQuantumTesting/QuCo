@@ -15,7 +15,6 @@ import edu.uclm.tp3.common.gates.ThreeQubitsGate;
 import edu.uclm.tp3.common.gates.TwoQubitsGate;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.common.strategies.Strategy;
-import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
 import edu.uclm.tp3.genetic.fitnessers.SimpleFitnesser;
 
 public class ProblemConfiguration {
@@ -189,20 +188,11 @@ public class ProblemConfiguration {
 	public History getHistory(String fitnesserName) {
 		return this.history.get(fitnesserName);
 	}
-	
-	/*@JsonIgnore
-	public void setRemoteFitnessers(Fitnesser[] fitnessers) {
-		this.fitnessers = fitnessers;
-	}*/
 
 	@JsonIgnore
 	public void setSimpleFitnesser(SimpleFitnesser fitnesser) {
 		this.fitnesser = fitnesser;
 	}
-	
-	/*public Fitnesser[] getRemoteFitnessers() {
-		return fitnessers;
-	}*/
 
 	public void setJSONHistory(JSONArray jsaHistories) {
 		JSONArray jsaHistory;
