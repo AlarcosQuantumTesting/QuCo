@@ -93,10 +93,23 @@
                                     <tr>
                                         <th align="left"><label for="numberOfQubits">Number of qubits:</label></th>
                                         <td [attr.colspan]="pc.inputConfiguration!.qubits">
-                                            <input [disabled]="running" id="numberOfQubits" class="form-control" type="number" min="1" [(ngModel)]="pc.inputConfiguration!.qubits"
-                                                (change)="updateExpectedFrequencies(); deleteLocal()"
-                                                [ngClass]="{'is-invalid': pc.inputConfiguration!.qubits === null || (pc.inputConfiguration!.qubits < 1 || 
-                                                pc.inputConfiguration!.qubits > 24)}">
+                                            <input
+                                            [disabled]="running"
+                                            id="numberOfQubits"
+                                            class="form-control"
+                                            type="number"
+                                            min="1"
+                                            max="24"
+                                            step="1"
+                                            [(ngModel)]="pc.inputConfiguration!.qubits"
+                                            (change)="updateExpectedFrequencies(); updateNumberOfQubits()"
+                                            (keydown)="disableTyping($event)"
+                                            [ngClass]="{
+                                                'is-invalid': pc.inputConfiguration!.qubits === null || pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24
+                                            }"
+                                            />
+
+
                                         </td>
                                     </tr>
                                     <tr>
@@ -228,7 +241,7 @@
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Initial population size:</label>
-                                            <input [disabled]="running" type="number" class="form-control" min="2" step="2" (change)="saveConf()" [(ngModel)]="pc.inputConfiguration!.populationSize"
+                                            <input [disabled]="running" type="number" class="form-control" min="2" step="2" [(ngModel)]="pc.inputConfiguration!.populationSize"
                                             [ngClass]="{'is-invalid': validarInputPopSizeInit()}">
                                         </div>
 
@@ -246,7 +259,7 @@
                                             <label>Desired error (%):</label>
                                             <input type="number" class="form-control" min="0" step="0.025"
                                                 [(ngModel)]="pc.desiredError" [disabled]="running"
-                                                (change)="saveConf(); updateDesiredError()"
+                                                (change)="updateDesiredError()"
                                                 [ngClass]="{'is-invalid': validarInputError()}">
                                         </div>
 
@@ -304,10 +317,6 @@
                                             <label>Maximum times of consecutive massive mutations:</label>
                                             <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
                                         </div>
-
-                                        <!-- <div style="display: flex; align-items: center; gap: 8px;">
-                                            <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
-                                        </div> -->
                                     </div>
                                 </td>
                             </tr>
@@ -581,19 +590,11 @@
                     &nbsp;
                     <small><i style="color : green" [hidden]="substate==undefined">{{ substate }}</i></small>
 
-                    <!-- Gráfico izquierdo -->
-                    <!-- <div class="chart-container" [ngClass]="{ 'hidden': !showCharts }"
-                        style="flex: 1 1 48%; position: relative; height:40vh;"
-                        *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
-                        <canvas [id]="'chart' + fIndex">{{ rf.chart }}</canvas>
-                    </div> -->
                     <div class="chart-container" [ngClass]="{ 'hidden': !showCharts }"
                         style="flex: 1 1 48%; position: relative; height:40vh;"
                         *ngFor="let rf of selectedRemoteFitnessers; let fIndex = index">
                         <canvas [id]="'chart' + 0">{{ rf.chart }}</canvas>
                     </div>
-
-                    <!-- Gráfico derecho -->
                     <div class="chart-container" style="flex: 1 1 48%; position: relative; height:40vh;" [ngClass]="{ 'hidden': !showCharts }">
                         <canvas id="timesChart"></canvas>
                     </div>
@@ -613,11 +614,9 @@
             </div>
 
             <div class="code-output">
-                <!-- <small id="codeArea"> -->
-                    <pre>
+                <pre>
                     {{ code }}
-                    </pre>
-                <!-- </small> -->
+                </pre>
             </div>
 
             <div class="modal-footer">

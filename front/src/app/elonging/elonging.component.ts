@@ -58,7 +58,8 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit () {
 
-    
+    localStorage.removeItem('qucoConfigurationBlocks');
+    localStorage.removeItem('qucoConfiguration');    
 
     for (let i=0; i<this.remoteFitnessers.length; i++) {
       if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
@@ -87,7 +88,6 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     this.notificationService.getMessages().subscribe(msg => {
       this.message = msg;
-      //console.log("Mensaje SSE:", msg);
     });
 
     this.templateSelected = localStorage.getItem('templateSelected') === 'true' || false;
@@ -101,7 +101,6 @@ export class ElongingComponent extends EvolutionaryComponent {
           }, 1000);
           console.log('Nombre:', template.fileName);
           this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === template.fileName) || new CodeTemplate("", "", "");
-          //this.manager.selectedTemplate = new CodeTemplate(template.fileName, template.code, template.description);
           console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
         } catch (error) {
           console.error('Error al parsear plantilla desde localStorage:', error);
@@ -113,23 +112,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       console.log('No hay plantilla seleccionada');
     }
 
-    //localStorage.setItem("selectedRemoteFitnessers", JSON.stringify(this.selectedRemoteFitnessers));
-
-    
-
-    /*localStorage.removeItem('templateSelected');
-    localStorage.removeItem('selectedTemplate');
-    this.templateSelected = false;
-    this.manager.selectedTemplate = new CodeTemplate("", "", "");*/
-
-    this.pc.probOf1QubitGates = localStorage.getItem('probOf1QubitGates') ? JSON.parse(localStorage.getItem('probOf1QubitGates') || '50') : 50;
-    this.pc.probOf2QubitGates = localStorage.getItem('probOf2QubitGates') ? JSON.parse(localStorage.getItem('probOf2QubitGates') || '50') : 50;
-    this.pc.probOf3QubitGates = localStorage.getItem('probOf3QubitGates') ? JSON.parse(localStorage.getItem('probOf3QubitGates') || '50') : 50;
-    this.pc.probOfNQubitGates = localStorage.getItem('probOfNQubitGates') ? JSON.parse(localStorage.getItem('probOfNQubitGates') || '50') : 50;
-
-    //this.updateOutputs();
-
-    const savedConfig = localStorage.getItem('qucoConfiguration');
+    /*const savedConfig = localStorage.getItem('qucoConfiguration');
     if (savedConfig) {
       try {
         const conf = JSON.parse(savedConfig);
@@ -158,7 +141,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     
     if(!savedConfig) {
       console.log('No hay configuración guardada en localStorage');
-    }
+    }*/
     
 
     this.validarDatos()
@@ -212,7 +195,6 @@ export class ElongingComponent extends EvolutionaryComponent {
   notBuilt: boolean = true;
   templateSelected: boolean = false;
   generateClicked: boolean = false;
-  //qucoConfiguration: any;
 
   circuitName: string = '';
   
@@ -241,10 +223,6 @@ export class ElongingComponent extends EvolutionaryComponent {
       if (qubitGates.length==0)
         this.pc.probOfNQubitGates = 0
 
-      /*if (this.evolutionaryService.ws==undefined || this.evolutionaryService.ws.readyState==WebSocket.CLOSED)
-        this.evolutionaryService.connectWS()*/
-
-      // this.service.generateInitialPopulation(this.pc, selectedGates, this.manager.selectedTemplate).subscribe(
       this.pc.gateNames = []
       for (let i = 0; i < selectedGates.length; i++)
         this.pc.gateNames.push(selectedGates[i].name!)
@@ -262,7 +240,6 @@ export class ElongingComponent extends EvolutionaryComponent {
           }
 
           for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
-            // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
             this.individuals.push(new Individual(i))
           }
           if (this.running)
@@ -284,7 +261,6 @@ export class ElongingComponent extends EvolutionaryComponent {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
     console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
     console.log('plantillas:', this.manager.templates);
-    //console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
     this.templateSelected = true;
 
     localStorage.setItem('templateSelected', JSON.stringify(this.templateSelected));
@@ -292,21 +268,17 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   toggleTooltipGeneration(event: MouseEvent): void {
-    //this.tooltipVisible = !this.tooltipVisible;
     event.stopPropagation();
 
     if (this.tooltipGenerationVisible) {
       this.tooltipGenerationVisible = false;
-      //this.tooltipVisible = false;
     } else {
       this.tooltipGenerationVisible = true;
-      //this.tooltipVisible = false;
     }
   }
 
   @HostListener('document:click', ['$event'])
     onDocumentClick(event: MouseEvent): void {
-      // Verifica si el clic fue fuera del tooltip y el botón
       const tooltipElement = document.querySelector('.tooltip');
       const tooltipCustomElement = document.querySelector('.custom-tooltip');
       const buttonElement = document.querySelector('button');
@@ -352,12 +324,7 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     localStorage.setItem('templateSelected', JSON.stringify(this.templateSelected));
     localStorage.setItem('selectedTemplate', JSON.stringify(this.manager.selectedTemplate));
-    localStorage.setItem('probOf1QubitGates', JSON.stringify(this.pc.probOf1QubitGates));
-    localStorage.setItem('probOf2QubitGates', JSON.stringify(this.pc.probOf2QubitGates));
-    localStorage.setItem('probOf3QubitGates', JSON.stringify(this.pc.probOf3QubitGates));
-    localStorage.setItem('probOfNQubitGates', JSON.stringify(this.pc.probOfNQubitGates));
 
-    //this.updateOutputs();
     this.resetMatrix();
 
     const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
@@ -454,10 +421,6 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   reload() {
-    //localStorage.removeItem('qucoConfiguration');
-    //localStorage.removeItem('selectedOptionFreqGenetic');
-    //localStorage.removeItem('templateSelected');
-    //localStorage.removeItem('selectedTemplate');
     location.reload();
   }
 
