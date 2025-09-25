@@ -84,13 +84,6 @@ public abstract class EvolutionaryService {
 	
 	public abstract String getInitialization(ProblemConfiguration gc);
 	
-	//public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength, HWSession hw) throws Exception {
-	/*public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength) throws Exception {
-		String[] result = this.prepareCodeTemplate(pc, token);
-		this.buildIndividuals(token, pc, result, initialLength);
-		
-		return result;
-	}*/
 	public String[] generatePopulation(String token, ProblemConfiguration pc, int initialLength) throws Exception {
 		String[] result = this.prepareCodeTemplate(pc, token);
 
@@ -106,8 +99,6 @@ public abstract class EvolutionaryService {
 		return result;
 	}
 
-	
-	// protected abstract void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength, HWSession hw) throws Exception ;
 	protected abstract void buildIndividuals(String token, ProblemConfiguration pc, String[] startEnd, int initialLength) throws Exception ;
 
 	public static Circuit generateRandomCircuit(ProblemConfiguration pc, int initialLength) {
