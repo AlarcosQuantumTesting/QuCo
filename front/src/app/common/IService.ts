@@ -27,11 +27,6 @@ export abstract class IService {
         return this.eventSource;
     }
 
-    /*connectWS() {
-        let localUrl = environment.wsUrl
-        //this.ws = new WebSocket(localUrl + "wstp3?httpSessionId=" + this.httpSessionId)
-    }*/
-
     resetSession() {
         return this.client.get(environment.beUrl + this.controller + "/resetSession", { withCredentials: true, responseType: 'text' })
     }
@@ -44,21 +39,9 @@ export abstract class IService {
         return this.client.get<any>(environment.beUrl + this.controller + "/getStrategies", { withCredentials: true })
     }
 
-    /*getFitnessers() {
-        return this.client.get<any>(environment.beUrl + this.controller + "/getFitnessers", { withCredentials: true })
-    }*/
-
     updateDesiredError(desiredError: number) {
         return this.client.get<any>(environment.beUrl + this.controller + "/updateDesiredError?desiredError=" + desiredError, { withCredentials: true })
     }
-
-    /*updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
-        let info = {
-            expectedFrequencies: expectedFrequencies,
-            shots: shots
-        }
-        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info, { withCredentials: true })
-    }*/
 
     updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
         let info = {
@@ -67,16 +50,6 @@ export abstract class IService {
         }
         return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info,  { withCredentials: true });
     }
-
-
-    /*updateExpectedFrequencies(selectedFitnesser: RemoteFitnesser, expectedFrequencies: number[], shots: number) {
-        let info = {
-            selectedFitnesser: selectedFitnesser,
-            expectedFrequencies: expectedFrequencies,
-            shots: shots
-        };
-        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info);
-    }*/
 
 
     selectFitnesser(name: string, selected: boolean, shots: number, desiredError: number, expectedFrequencies: number[], populationSize: number) {
@@ -91,15 +64,10 @@ export abstract class IService {
         return this.client.put<any>(environment.beUrl + this.controller + "/selectFitnesser", info, { withCredentials: true })
     }
 
-    // generateInitialPopulation(pc: ProblemConfiguration, gates: Gate[], template : CodeTemplate) {
     generateInitialPopulation(pc: ProblemConfiguration) {
         return this.client.put<any>(environment.beUrl + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
     }
-
-    /*firstRun(pc: ProblemConfiguration) {
-        return this.client.get<any>(environment.beUrl + this.controller + "/firstRun", { withCredentials: true })
-    }*/
-
+    
     firstRun() {
         return this.client.get<any>(environment.beUrl + this.controller + "/firstRun", { withCredentials: true })
     }

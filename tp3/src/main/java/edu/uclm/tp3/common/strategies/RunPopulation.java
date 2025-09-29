@@ -53,9 +53,6 @@ public class RunPopulation {
 		return freqsAndLengths; 
 	}
 
-
-
-
 	private static final Map<String, Boolean> cancellationRequested = new ConcurrentHashMap<>();
 
 	public static void requestCancellation(String gt) {
@@ -88,12 +85,9 @@ public class RunPopulation {
 		return this.latch.getCount() == 0;
 	}
 
-
-
-
 	@SuppressWarnings("unchecked")
 	public ProblemConfiguration apply(ManagerService manager, TaskData taskData) throws Exception {
-		ReentrantLock lock = getLockFor(gt); // o como tengas el identificador
+		ReentrantLock lock = getLockFor(gt);
 		lock.lock();
 		try {
 			if (isCancellationRequested(gt)) {
@@ -104,7 +98,6 @@ public class RunPopulation {
 			List<Object> obtainedFrequencies = (List<Object>) freqsAndLengths.get("frequencies");
 
 			TextLogger.write(gt, "\t\tRunPopulation:apply\n");
-			//emitters.sendMessage("\t\tRunPopulation:apply\n");
 			int executedGeneration = pc.getGenerationToExecute();
 			
 			int outputBits = (int) Math.pow(2, pc.getInputConfiguration().getNumberOfOutputs());
