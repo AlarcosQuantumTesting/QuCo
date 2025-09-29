@@ -75,7 +75,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.21</version>
+			<!-- <version>8.0.21</version> -->
 		</dependency>
 
 		<dependency>
@@ -140,6 +140,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>tp3</finalName>
 	    <plugins>
 	        <plugin>
 	            <groupId>org.springframework.boot</groupId>
