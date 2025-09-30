@@ -6,7 +6,7 @@ import edu.uclm.tp3.common.services.EvolutionaryService;
 
 public class TextLogger {
 	
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 
 	public static void write(String gt, String text) {
 		if (!DEBUG)

@@ -79,8 +79,13 @@ public class QiskitSimpleRunner implements Runnable {
 				pb.inheritIO();
 			Map<String, String> env = pb.environment();
 			env.clear();
-			env.put("path", jsoConf.getString("path"));
-			env.put("PYTHONPATH", jsoConf.optString("PYTHONPATH"));
+			String path = jsoConf.optString("path");
+			if (path.length()>0)
+				env.put("path", path);
+
+			String pythonPath = jsoConf.optString("PYTHONPATH");
+			if (pythonPath.length()>0)
+				env.put("PYTHONPATH", pythonPath);
 			
 			TextLogger.write(this.runner.getGt(), 8, "env.path=" + env.get("path") + "\n");
 			
