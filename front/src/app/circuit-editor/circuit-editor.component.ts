@@ -51,6 +51,7 @@ export class CircuitEditorComponent {
   gateToDelete?: EdGate;
   modalCodigoGate: boolean = false;
   modalTranspile: boolean = false;
+  mostrarInstEjecucion = false;
 
   circuitName: string = '';
   transpiledCode: string = '';

@@ -28,6 +28,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   transpiledCode: string = '';
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
+  mostrarInstEjecucion = false;
 
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
      public transpileService: TranspileService) {

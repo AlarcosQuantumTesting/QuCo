@@ -131,6 +131,7 @@ export class DeterministicComponent extends GroverStyle {
   transpiledCode: string = '';
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
+  mostrarInstEjecucion = false;
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,

@@ -137,6 +137,7 @@ export class MatrixesComponent implements AfterViewInit  {
   selectedBackends: Backend[] = [];
 
   modalError: boolean = false;
+  mostrarInstEjecucion = false;
 
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,

@@ -528,11 +528,14 @@
             </div>
 
             <div class="modal-footer">
+                <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute</button>
                 <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
             </div>
         </div>
     </div>
+
+    <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" style="width: 100%; height: 100%;"></app-modal-descarga>
 
     <div class="modal instrucciones" *ngIf="modalTranspile">
         <div class="modal-content instrucciones"
