@@ -1317,16 +1317,19 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   copiarCodigo() {
-    const codigo = this.qiskitCode ? this.qiskitCode.lines.join('\n') : '';
-    navigator.clipboard.writeText(codigo).then(() => {
-      //alert('Code copied to clipboard');
-      this.mensajeTemporal2 = 'Code copied';
-      setTimeout(() => {
-          this.mensajeTemporal2 = '';
-      }, 1000);
-        }).catch(err => {
-          console.error('Error copying code: ', err);
-      });
+    if (!this.qiskitCode)
+      return;
+
+    const codigo = this.qiskitCode.lines.join('\n');
+    const textarea = document.createElement('textarea');
+    textarea.value = codigo;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    this.mensajeTemporal2 = 'Code copied';
+    setTimeout(() => this.mensajeTemporal2 = '', 1000);
   }
 
   guardarCodigo() {
