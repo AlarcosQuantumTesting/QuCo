@@ -79,9 +79,6 @@
               <div class="form-row">
                     <div class="section qubitsContainer">
                       <div class="form-group">
-                        <!-- <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
-                          Gates <button (click)="createCustomizedGate()">Create customized gate</button>
-                        </label> -->
                         <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
                           <div class="template-buttons">
                             <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
@@ -158,12 +155,18 @@
                                           <th>q<sub>{{ i }}</sub></th>
                                           <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
                                             
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
+                                            <!-- <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
                                                 [attr.rowspan]="circuit!.qubits[i].gates[j].qubits" (click)="removeGate(i, j)">
                                               <button title="Remove gate" class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button> 
+                                            </td> -->
+                                            
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                                                [attr.rowspan]="circuit!.qubits[i].gates[j].targetQubits?.length || 1"
+                                                (click)="removeGate(i, j)">
+                                              <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
                                             </td>
 
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGate(i, j)"></td>
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGateSpecification(i, j)"></td>
                                           </ng-container>
                                           <td class="physicalQubits">
                                             {{ getPhysicalQubit(i) }}
@@ -494,4 +497,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para seleccionar qubits -->
+    <div class="modal instrucciones" *ngIf="showGatePlacementModal">
+        <div class="modal-content instrucciones"
+            cdkDrag
+            cdkDragRootElement="modal-content"
+            style="min-width: 950px;">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Qubits specification</h2>
+                <button class="close"><i class="close-i" (click)="showGatePlacementModal = false">&times;</i></button>
+        </div>
+        <div class="intructions-content">
+          <h3>Select qubits for {{ selectedGate?.name }}</h3>
+
+          <div class="qubit-selection">
+            <label *ngFor="let qIndex of getAvailableQubits(selectedColumn ?? 0)">
+              <input
+                type="checkbox"
+                [checked]="selectedQubitsForGate.includes(qIndex)"
+                (change)="toggleQubitSelection(qIndex, $event)"
+              />
+              q<sub>{{ qIndex }}</sub>
+            </label>
+          </div>
+
+
+          <div class="modal-actions">
+            <button class="btn btn-confirm-modal" (click)="confirmGatePlacement()">Confirm</button>
+            <button class="btn btn-delete-modal" (click)="cancelGatePlacement()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </body>

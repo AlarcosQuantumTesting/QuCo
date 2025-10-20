@@ -1544,3 +1544,22 @@ i:hover {
     transform: translate(-50%, -40%);
   }
 }
+
+.qubit-selection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+
+  .btn-confirm-modal {
+    background-color: #10989c;
+    color: white;
+  }
+
+  .btn-confirm-modal:hover {
+  background-color: #267375;
+  transform: scale(1.05);
+}

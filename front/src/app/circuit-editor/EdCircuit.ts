@@ -67,6 +67,9 @@ export class EdGate {
     code: string = ''; 
     description: string = ''; 
 
+    targetQubits?: number[];
+    parentQubit?: number;
+
     constructor(name: string, qubits: number) {
         if (!name) 
             name = "XX"
@@ -78,10 +81,20 @@ export class EdGate {
         this.qubits = qubits;
     }
 
-    copy(): EdGate {
+    /*copy(): EdGate {
         let result = new EdGate(this.name!, this.qubits);
         result.code = this.code;
         result.description = this.description;
         return result;
+    }*/
+
+
+    copy(): EdGate {
+        const gateCopy = new EdGate(this.name!, this.qubits);
+
+        gateCopy.targetQubits = this.targetQubits ? [...this.targetQubits] : undefined;
+        gateCopy.parentQubit = this.parentQubit;
+
+        return gateCopy;
     }
 }
