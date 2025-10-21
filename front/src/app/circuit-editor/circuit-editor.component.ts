@@ -58,6 +58,13 @@ export class CircuitEditorComponent {
   availableBackends: Backend[] = [];
   selectedBackends: Backend[] = [];
 
+  gateRegistry: CircuitGate[] = [];
+
+  showPlacementChoiceModal: boolean = false;
+  currentStartQubit: number | null = null;
+  currentColumn: number | null = null;
+  qubitsConsecutivos: boolean = false;
+
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
     private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
     this.qiskitService.getCustomizedGates().subscribe(
@@ -463,7 +470,7 @@ export class CircuitEditorComponent {
     this.circuit!.removeColumn()
   }  
 
-  placeGate(startQubit: number, column: number) {
+  /*placeGate(startQubit: number, column: number) {
     if (!this.selectedGate || !this.qubitsConfiguration) 
       return;
 
@@ -477,8 +484,77 @@ export class CircuitEditorComponent {
     this.circuit!.qubits[startQubit].gates[column] = gate;
     for (let i = 1; i < requiredQubits; i++)
       this.circuit!.qubits[startQubit + i].gates[column] = new EdGate('0', 1);
+  }*/
+
+  placeGate(startQubit: number, column: number) {
+    if (!this.selectedGate || !this.qubitsConfiguration) 
+      return;
+
+    const requiredQubits = this.selectedGate.qubits;
+    const circuitLength = this.circuit!.qubits.length;
+    
+    if (startQubit + requiredQubits > circuitLength) {
+      alert("Not enough qubits for this gate");
+      return;
+    }
+
+    console.log("Preparing to place gate:", this.selectedGate.name, "at qubit:", startQubit, "column:", column);
+    this.confirmGatePlacement2(startQubit, column); 
   }
 
+  confirmGatePlacement2(mainQubit: number, column: number) {
+
+    if (!this.selectedGate || !this.qubitsConfiguration) 
+      return;
+
+    const requiredQubits = this.selectedGate.qubits;
+    
+    const selectedQubits: number[] = [];
+
+    if (mainQubit + requiredQubits > this.circuit!.qubits.length) {
+      alert("Not enough qubits for this gate");
+      return;
+    }
+    
+    for (let i = 0; i < requiredQubits; i++) {
+        selectedQubits.push(mainQubit + i);
+    }
+
+    const newGateId = `T-${Date.now()}`;
+    const uniqueGateId = `${newGateId}-${mainQubit}`; 
+
+    const gate = this.selectedGate.copy();
+    
+    (gate as any).gateId = uniqueGateId;
+    (gate as any).transactionId = newGateId;
+
+    this.gateRegistry.push({
+        id: uniqueGateId,
+        name: gate.name!,
+        column: column,
+        qubits: selectedQubits,
+        parentQubit: mainQubit,
+        transactionId: newGateId
+    } as CircuitGate);
+
+    this.circuit!.qubits[mainQubit].gates[column] = gate;
+    this.circuit!.qubits[mainQubit].gates[column].targetQubits = selectedQubits.slice(1); 
+    this.circuit!.qubits[mainQubit].gates[column].parentQubit = undefined;
+
+    
+    for (let i = 1; i < selectedQubits.length; i++) {
+        const q = selectedQubits[i];
+        const filler = new EdGate('0', 1);
+        filler.parentQubit = mainQubit; 
+        (filler as any).gateId = uniqueGateId;
+        (filler as any).transactionId = newGateId;
+        
+        this.circuit!.qubits[q].gates[column] = filler;
+    }
+
+    this.qubitsConsecutivos = true;
+    console.log("Gate Registry after placement:", this.gateRegistry);
+  }
   
   showGatePlacementModal = false;
   pendingColumn: number | null = null;
@@ -507,7 +583,82 @@ export class CircuitEditorComponent {
     }
   }
 
-  confirmGatePlacement() {
+  confirmGatePlacement(selectedQubits: number[], column: number) {
+    
+    if (!this.selectedGate || this.pendingColumn === null) return;
+
+    const selected = [...this.selectedQubitsForGate].sort((a, b) => a - b);
+    
+    if (selected.length === 0) {
+      alert("Please select at least one qubit.");
+      return;
+    }
+
+    if (selected.length !== this.selectedGate.qubits) {
+      alert(`This gate requires ${this.selectedGate.qubits} qubits.`);
+      return;
+    }
+
+    const transactionId = `T-${Date.now()}`;
+    column = this.pendingColumn;
+
+    const groups: number[][] = [];
+    let currentGroup: number[] = [selected[0]];
+
+    for (let i = 1; i < selected.length; i++) {
+      if (selected[i] === selected[i - 1] + 1) {
+        currentGroup.push(selected[i]);
+      } else {
+        groups.push(currentGroup);
+        currentGroup = [selected[i]];
+      }
+    }
+    groups.push(currentGroup);
+
+    for (const group of groups) {
+      const uniqueGateId = `${transactionId}-${group[0]}`;
+      const gate = this.selectedGate.copy();
+      const mainQubit = group[0];
+
+      gate.qubits = group.length; 
+      
+      (gate as any).gateId = uniqueGateId;
+      (gate as any).transactionId = transactionId;
+      
+      this.gateRegistry.push({
+        id: uniqueGateId, 
+        name: gate.name!,
+        column: column,
+        qubits: group, 
+        parentQubit: mainQubit,
+        transactionId: transactionId 
+      } as CircuitGate);
+
+     
+      this.circuit!.qubits[mainQubit].gates[column] = gate;
+      this.circuit!.qubits[mainQubit].gates[column].targetQubits = group.slice(1); 
+      this.circuit!.qubits[mainQubit].gates[column].parentQubit = undefined;
+
+      for (let i = 1; i < group.length; i++) {
+          const q = group[i];
+          const filler = new EdGate('0', 1);
+          filler.parentQubit = mainQubit;
+          (filler as any).gateId = uniqueGateId; 
+          (filler as any).transactionId = transactionId;
+          
+          this.circuit!.qubits[q].gates[column] = filler;
+      }
+    }
+
+    this.showGatePlacementModal = false;
+    this.pendingColumn = null;
+
+    this.qubitsConsecutivos = false;
+
+    console.log("Gate Registry after placement:", this.gateRegistry);
+  }
+
+  /*confirmGatePlacement(selectedQubits: number[], column: number) {
     if (!this.selectedGate || this.pendingColumn === null) return;
 
     const selected = [...this.selectedQubitsForGate].sort((a, b) => a - b);
@@ -522,7 +673,7 @@ export class CircuitEditorComponent {
     }
 
     const transactionId = `G-${Date.now()}`; 
-    const column = this.pendingColumn;
+    column = this.pendingColumn;
 
     const groups: number[][] = [];
     let currentGroup: number[] = [selected[0]];
@@ -572,58 +723,10 @@ export class CircuitEditorComponent {
     this.showGatePlacementModal = false;
     this.pendingColumn = null;
 
+    this.qubitsConsecutivos = false;
+
     console.log("Gate Registry after placement:", this.gateRegistry);
-  }
-
-  /* 
-  confirmGatePlacement() {
-    if (!this.selectedGate || this.pendingColumn === null) return;
-
-    const selected = [...this.selectedQubitsForGate].sort((a, b) => a - b);
-    if (selected.length === 0) {
-      alert("Please select at least one qubit.");
-      return;
-    }
-
-    if (selected.length !== this.selectedGate.qubits) {
-      alert(`This gate requires ${this.selectedGate.qubits} qubits.`);
-      return;
-    }
-
-    const groups: number[][] = [];
-    let currentGroup: number[] = [selected[0]];
-
-    for (let i = 1; i < selected.length; i++) {
-      if (selected[i] === selected[i - 1] + 1) {
-        currentGroup.push(selected[i]);
-      } else {
-        groups.push(currentGroup);
-        currentGroup = [selected[i]];
-      }
-    }
-    groups.push(currentGroup);
-
-    for (const group of groups) {
-      const gate = this.selectedGate.copy();
-      const mainQubit = group[0];
-
-      this.circuit!.qubits[mainQubit].gates[this.pendingColumn] = gate;
-      this.circuit!.qubits[mainQubit].gates[this.pendingColumn].targetQubits = group;
-      this.circuit!.qubits[mainQubit].gates[this.pendingColumn].parentQubit = undefined;
-
-      for (let i = 1; i < group.length; i++) {
-        const q = group[i];
-        const filler = new EdGate('0', 1);
-        filler.parentQubit = mainQubit;
-        this.circuit!.qubits[q].gates[this.pendingColumn] = filler;
-      }
-    }
-
-    this.showGatePlacementModal = false;
-    this.pendingColumn = null;
-  }
-  */
-
+  }*/
 
   getGateRowspan(gate: any): number {
     if (!gate || !gate.targetQubits) return 1;
@@ -1032,7 +1135,7 @@ export class CircuitEditorComponent {
     }      
   }
 
-  getAvailableQubits(column: number): number[] {
+  /*getAvailableQubits(column: number): number[] {
     if (!this.circuit) return [];
 
     const usedQubits = new Set<number>();
@@ -1059,18 +1162,71 @@ export class CircuitEditorComponent {
     }
 
     return available;
-  }
+  }*/
+
+  getAvailableQubits(column: number): number[] {
+    if (!this.circuit) return [];
+
+    const available: number[] = [];
+    const qubitsLength = this.circuit.qubits.length;
+
+    for (let i = 0; i < qubitsLength; i++) {
+        const gate = this.circuit.qubits[i].gates[column];
+        
+        if (gate && gate.name === "I") {
+            available.push(i);
+        }
+    }
+    
+    return available;
+}
 
 
   selectedColumn: number | null = null;
 
-  openQubitSelectionModal(column: number) {
+  /*openQubitSelectionModal(column: number) {
     this.selectedColumn = column;
     this.selectedQubitsForGate = [];
     this.showGatePlacementModal = true;
+  }*/
+ 
+  openPlacementChoice(startQubit: number, column: number) {
+      if (!this.selectedGate) return;
+
+      this.currentStartQubit = startQubit;
+      this.currentColumn = column;
+      this.showPlacementChoiceModal = true;
   }
 
-  gateRegistry: CircuitGate[] = [];
+  placeConsecutiveGate() {
+    if (this.currentStartQubit === null || this.currentColumn === null || !this.selectedGate) return;
+
+    const startQ = this.currentStartQubit;
+    const col = this.currentColumn;
+    
+    console.log("Placing gate at qubit:", startQ, "column:", col);
+    this.placeGate(startQ, col); 
+
+    this.showPlacementChoiceModal = false;
+    this.currentStartQubit = null;
+    this.currentColumn = null;
+  }
+
+  openQubitSelectionModal(column: number) {
+      if (!this.selectedGate) return;
+
+      this.pendingColumn = column; 
+      this.selectedQubitsForGate = [];
+      
+      this.showPlacementChoiceModal = false;
+      this.showGatePlacementModal = true;
+  }
+
+  cancelChoice() {
+      this.showPlacementChoiceModal = false;
+      this.currentStartQubit = null;
+      this.currentColumn = null;
+  }
 
 }
 

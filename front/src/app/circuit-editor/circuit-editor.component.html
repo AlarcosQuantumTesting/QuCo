@@ -160,13 +160,21 @@
                                               <button title="Remove gate" class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button> 
                                             </td> -->
                                             
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                                            <!-- <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
                                                 [attr.rowspan]="circuit!.qubits[i].gates[j].targetQubits?.length || 1"
                                                 (click)="removeGate(i, j)">
                                               <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
-                                            </td>
+                                            </td> -->
+<td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+    [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
+    (click)="removeGate(i, j)">
+  <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
+</td>
 
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGateSpecification(i, j)"></td>
+<td *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
+    </td>
+
+<td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
                                           </ng-container>
                                           <td class="physicalQubits">
                                             {{ getPhysicalQubit(i) }}
@@ -512,7 +520,7 @@
           <h3>Select qubits for {{ selectedGate?.name }}</h3>
 
           <div class="qubit-selection">
-            <label *ngFor="let qIndex of getAvailableQubits(selectedColumn ?? 0)">
+            <label *ngFor="let qIndex of getAvailableQubits(pendingColumn ?? 0)"> 
               <input
                 type="checkbox"
                 [checked]="selectedQubitsForGate.includes(qIndex)"
@@ -524,11 +532,44 @@
 
 
           <div class="modal-actions">
-            <button class="btn btn-confirm-modal" (click)="confirmGatePlacement()">Confirm</button>
+            <button class="btn btn-confirm-modal" (click)="confirmGatePlacement(selectedQubitsForGate, pendingColumn ?? 0)">Confirm</button>
             <button class="btn btn-delete-modal" (click)="cancelGatePlacement()">Cancel</button>
           </div>
         </div>
       </div>
     </div>
+
+  <div class="modal choice-modal" *ngIf="showPlacementChoiceModal">
+    <div class="modal-content choice-content"
+        cdkDrag
+        cdkDragRootElement="choice-content"
+        style="min-width: 450px;">
+        
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal">Qubit Placement for {{ selectedGate?.name }}</h2>
+            <button class="close" (click)="cancelChoice()"><i class="close-i">&times;</i></button>
+        </div>
+        
+        <div class="intructions-content">
+            <h3>How do you want to place the {{ selectedGate?.qubits }} qubits?</h3>
+            
+            <div class="modal-actions">
+                <button 
+                    class="btn btn-confirm-modal" 
+                    (click)="placeConsecutiveGate()">
+                    Consecutive Qubits (from q<sub>{{ currentStartQubit }}</sub>)
+                </button>
+                
+                <button 
+                    class="btn btn-secondary-modal" 
+                    (click)="openQubitSelectionModal(currentColumn ?? 0)">
+                    Specify Individual Qubits
+                </button>
+            </div>
+            
+            <button class="btn btn-delete-modal" (click)="cancelChoice()">Cancel</button>
+        </div>
+    </div>
+  </div>
 
 </body>
