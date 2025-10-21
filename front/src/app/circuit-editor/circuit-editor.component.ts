@@ -486,38 +486,27 @@ export class CircuitEditorComponent {
       this.circuit!.qubits[startQubit + i].gates[column] = new EdGate('0', 1);
   }*/
 
-  // Si usas el nombre 'placeGate' en tu código, modifícalo así:
-placeGate(startQubit: number, column: number) { 
-// Si usas 'processConsecutivePlacement', modifícalo así:
-// processConsecutivePlacement(startQubit: number, column: number) { 
+  placeGate(startQubit: number, column: number) { 
     if (!this.selectedGate || !this.qubitsConfiguration) 
         return;
 
     const requiredQubits = this.selectedGate.qubits;
     const circuitLength = this.circuit!.qubits.length;
     
-    // 1. Validación de límites (se mantiene)
     if (startQubit + requiredQubits > circuitLength) {
         alert("Not enough qubits for this gate");
         return;
     }
   
-    // 2. Generar la lista de qubits consecutivos
     const selectedQubits: number[] = [];
     for (let i = 0; i < requiredQubits; i++) {
         selectedQubits.push(startQubit + i);
     }
     
-    // ----------------------------------------------------
-    // ✅ CORRECCIÓN CLAVE: Validación de disponibilidad
-    // ----------------------------------------------------
     if (!this.areQubitsAvailable(selectedQubits, column)) {
         alert(`Cannot place ${this.selectedGate.name} starting at q${startQubit}. One or more required qubits (q${selectedQubits.join(', q')}) are already occupied.`);
         return;
     }
-    // ----------------------------------------------------
-
-    // 3. Delegar a la función de confirmación robusta
     this.confirmGatePlacement2(startQubit, column); 
   }
 

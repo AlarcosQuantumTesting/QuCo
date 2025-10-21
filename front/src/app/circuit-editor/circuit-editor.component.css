@@ -1563,3 +1563,91 @@ i:hover {
   background-color: #267375;
   transform: scale(1.05);
 }
+
+
+.modal.choice-modal {
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content.choice-content {
+    background-color: #fefefe;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    padding: 0;
+}
+
+.title-modal {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.instructions-content {
+    padding: 25px 30px;
+    text-align: center;
+}
+
+.placement-question {
+    font-size: 1.4em;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.placement-note {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.9em;
+}
+
+.placement-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    border: 2px solid transparent;
+}
+
+.btn-primary-choice {
+    background-color: #2B8B95;
+    color: #fff;
+}
+
+.btn-primary-choice:hover {
+    background-color: #17555A;
+}
+
+.btn-secondary-choice {
+  background-color: #31A744;
+  color: white;
+}
+
+.btn-secondary-choice:hover {
+  background-color: #1b6e29;
+}
+
+.btn-cancel-choice {
+    background: none;
+    color: #a0a0a0;
+    border: none;
+    font-size: 0.9em;
+    text-decoration: underline;
+    margin-top: 10px;
+}
+
+.btn-cancel-choice:hover {
+    color: #333;
+    background-color: rgba(255, 255, 255, 0);
+}
