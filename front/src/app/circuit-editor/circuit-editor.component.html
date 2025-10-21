@@ -507,7 +507,7 @@
     </div>
 
     <!-- Modal para seleccionar qubits -->
-    <div class="modal instrucciones" *ngIf="showGatePlacementModal">
+    <!-- <div class="modal instrucciones" *ngIf="showGatePlacementModal">
         <div class="modal-content instrucciones"
             cdkDrag
             cdkDragRootElement="modal-content"
@@ -533,6 +533,50 @@
 
           <div class="modal-actions">
             <button class="btn btn-confirm-modal" (click)="confirmGatePlacement(selectedQubitsForGate, pendingColumn ?? 0)">Confirm</button>
+            <button class="btn btn-delete-modal" (click)="cancelGatePlacement()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <div class="modal instrucciones" *ngIf="showGatePlacementModal">
+        <div class="modal-content instrucciones"
+            cdkDrag
+            cdkDragRootElement="modal-content"
+            style="min-width: 950px;">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Qubits specification for {{ selectedGate?.name }}</h2>
+                <button class="close"><i class="close-i" (click)="showGatePlacementModal = false">&times;</i></button>
+        </div>
+        <div class="intructions-content">
+
+          <div class="qubit-selector-container">
+            
+            <div class="qubit-header">
+              <span>Qubits</span>
+              <span class="required-count">Required: <strong>{{ selectedGate?.qubits }}</strong></span>
+              <span class="selected-count">Selected: <strong>{{ selectedQubitsForGate.length }}</strong></span>
+            </div>
+
+            <div class="qubit-selection-grid">
+              <label *ngFor="let qIndex of getAvailableQubits(pendingColumn ?? 0)" 
+                    [class.selected]="selectedQubitsForGate.includes(qIndex)"> <input
+                  type="checkbox"
+                  [checked]="selectedQubitsForGate.includes(qIndex)"
+                  (change)="toggleQubitSelection(qIndex, $event)"
+                />
+                q<sub>{{ qIndex }}</sub>
+              </label>
+            </div>
+          </div>
+
+
+          <div class="modal-actions">
+            <button class="btn btn-confirm-modal" 
+                    [disabled]="selectedQubitsForGate.length !== selectedGate?.qubits"
+                    (click)="confirmGatePlacement(selectedQubitsForGate, pendingColumn ?? 0)">
+                Confirm ({{ selectedQubitsForGate.length }}/{{ selectedGate?.qubits }})
+            </button>
             <button class="btn btn-delete-modal" (click)="cancelGatePlacement()">Cancel</button>
           </div>
         </div>
