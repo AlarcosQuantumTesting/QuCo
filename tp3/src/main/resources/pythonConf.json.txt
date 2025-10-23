@@ -26,6 +26,7 @@
 			"name" : "AlarcosJ2",
 			"path" : "C:/Windows/system32;C:/Windows;C:/Windows/System32/Wbem;C:/Windows/System32/WindowsPowerShell/v1.0/;C:/Windows/System32/OpenSSH/;C:/Program Files (x86)/Common Files/Acronis/SnapAPI/;C:/Program Files (x86)/Common Files/Acronis/VirtualFile/;C:/Program Files (x86)/Common Files/Acronis/VirtualFile64/;C:/Users/Tomcat/AppData/Local/Programs/Python/Python310/Scripts/;C:/Users/Tomcat/AppData/Local/Programs/Python/Python310/;C:/Program Files/MySQL/MySQL Shell 8.0/bin/;C:/Users/Tomcat/AppData/Local/Microsoft/WindowsApps;C:/Users/Tomcat/AppData/Local/Programs/Microsoft VS Code/bin",
 			"PYTHONPATH" : "C:/Users/Tomcat/AppData/Local/Programs/Python/Python310/Lib/site-packages",
+
 			"commands" : [ "cmd", "/c", "C:/Users/Tomcat/AppData/Local/Programs/Python/Python310/python.exe" ],
 			"joinLastCommand" : true,
 			"inheritIO" : false,

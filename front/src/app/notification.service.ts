@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
+
   getMessages(): Observable<string> {
     return new Observable<string>(observer => {
-      const eventSource = new EventSource('http://localhost:8080/sse');
+      let url = environment.beUrl + "sse"
+      const eventSource = new EventSource(url);
 
       eventSource.onmessage = event => observer.next(event.data);
 

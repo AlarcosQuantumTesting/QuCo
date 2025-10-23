@@ -66,7 +66,6 @@ export class EdGate {
     columnIndex? : number
     code: string = ''; 
     description: string = ''; 
-
     targetQubits?: number[];
     parentQubit?: number;
 
@@ -79,6 +78,7 @@ export class EdGate {
             "\t# Add code here\n" + 
             "\treturn U.to_gate()\n";
         this.qubits = qubits;
+        this.qubitsUsed = Array.from({length: qubits}, (_, i) => i);
     }
 
     /*copy(): EdGate {
@@ -96,5 +96,9 @@ export class EdGate {
         gateCopy.parentQubit = this.parentQubit;
 
         return gateCopy;
+    }
+
+    setQubitsUsed(qubits: number[]) {
+        this.qubitsUsed = qubits;
     }
 }
