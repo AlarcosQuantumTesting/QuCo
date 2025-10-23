@@ -78,15 +78,7 @@ export class EdGate {
             "\t# Add code here\n" + 
             "\treturn U.to_gate()\n";
         this.qubits = qubits;
-        this.qubitsUsed = Array.from({length: qubits}, (_, i) => i);
     }
-
-    /*copy(): EdGate {
-        let result = new EdGate(this.name!, this.qubits);
-        result.code = this.code;
-        result.description = this.description;
-        return result;
-    }*/
 
 
     copy(): EdGate {
@@ -96,9 +88,5 @@ export class EdGate {
         gateCopy.parentQubit = this.parentQubit;
 
         return gateCopy;
-    }
-
-    setQubitsUsed(qubits: number[]) {
-        this.qubitsUsed = qubits;
     }
 }

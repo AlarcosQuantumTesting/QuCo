@@ -1,0 +1,147 @@
+<div class="modal ejemplos" *ngIf="mostrarModal">
+  <div class="modal-content ejemplos"
+    cdkDrag
+    cdkDragRootElement=".modal-content">
+
+    <div class="modal-header" cdkDragHandle>
+      <h2 class="title-modal">Run Code Configuration</h2>
+      <button class="close">
+        <i class="close-i" (click)="cerrarModal()">&times;</i>
+      </button>
+    </div>
+
+    <div class="intructions-content">
+      <form (ngSubmit)="runCode()" #runForm="ngForm">
+        <div class="form-group">
+          <label for="iterations">Iterations:</label>
+          <input
+            type="number"
+            id="iterations"
+            name="iterations"
+            [(ngModel)]="formData.iterations"
+            required
+            min="1"
+            (ngModelChange)="updateHttpLabel()"  #iterations="ngModel"
+        >
+          <div *ngIf="iterations.invalid && (iterations.dirty || iterations.touched)" class="error-message">
+            <div *ngIf="iterations.errors?.['required']">Iterations is required.</div>
+            <div *ngIf="iterations.errors?.['min']">Value must be 1 or greater.</div>
+          </div>
+        </div>
+        
+        <!-- <div class="form-group radio-group">
+          <label>Override:</label>
+          <div>
+            <input
+              type="radio"
+              id="override_yes"
+              name="override"
+              [value]="true"
+              [(ngModel)]="formData.override"
+            >
+            <label for="override_yes">Yes</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="override_no"
+              name="override"
+              [value]="false"
+              [(ngModel)]="formData.override"
+            >
+            <label for="override_no">No</label>
+          </div>
+        </div> -->
+
+        <div class="form-group radio-group">
+            <label>Override:</label>
+            <div>
+                <input
+                type="radio"
+                id="override_yes"
+                name="override"
+                [value]="true"
+                [(ngModel)]="formData.override"
+                (ngModelChange)="updateHttpLabel()"  >
+                <label for="override_yes">Yes</label>
+            </div>
+            <div>
+                <input
+                type="radio"
+                id="override_no"
+                name="override"
+                [value]="false"
+                [(ngModel)]="formData.override"
+                (ngModelChange)="updateHttpLabel()"  >
+                <label for="override_no">No</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label for="option">Option:</label>
+          <select
+            id="option"
+            name="option"
+            [(ngModel)]="formData.option"
+            required
+            (change)="updateHttpLabel()"
+            #option="ngModel"
+          >
+            <option *ngFor="let opt of options" [value]="opt">{{ opt }}</option>
+          </select>
+          <div *ngIf="option.invalid && (option.dirty || option.touched)" class="error-message">
+            <div>Option is required.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ibm_token">IBM Token {{ isIbmRequired ? '' : '(Optional)' }}:</label>
+            <input
+                type="text"
+                id="ibm_token"
+                name="ibm_token"
+                [(ngModel)]="formData.ibm_token"
+                [required]="isIbmRequired"
+                (ngModelChange)="updateHttpLabel()"  #ibmToken="ngModel"
+            >
+            <div *ngIf="isIbmRequired && ibmToken.invalid && (ibmToken.dirty || ibmToken.touched)" class="error-message">
+                <div>IBM Token is required for options 4 and 5.</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ibm_instance">IBM Instance {{ isIbmRequired ? '' : '(Optional)' }}:</label>
+            <input
+                type="text"
+                id="ibm_instance"
+                name="ibm_instance"
+                [(ngModel)]="formData.ibm_instance"
+                [required]="isIbmRequired"
+                (ngModelChange)="updateHttpLabel()"  #ibmInstance="ngModel"
+            >
+            <div *ngIf="isIbmRequired && ibmInstance.invalid && (ibmInstance.dirty || ibmInstance.touched)" class="error-message">
+                <div>IBM Instance is required for options 4 and 5.</div>
+            </div>
+        </div>
+
+        <!-- <div class="form-group http-label-group">
+          <label class="http-label">HTTP:</label>
+          <p class="http-value">{{ httpLabel }}</p>
+        </div> -->
+        <div class="form-group http-label-group">
+            <label class="http-label">URL:</label>
+            <p class="http-value">{{ httpLabel.split(' ')[0] }}</p>
+            
+            <!-- <label class="http-label">BODY/AUTH STATUS:</label>
+            <p class="http-value">{{ httpLabel.split(' ').slice(1).join(' ') }}</p> -->
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="download-btn" [disabled]="runForm.invalid">
+            <i class="fas fa-play"></i> Run
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
