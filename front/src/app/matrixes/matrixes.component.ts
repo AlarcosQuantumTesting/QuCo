@@ -138,6 +138,7 @@ export class MatrixesComponent implements AfterViewInit  {
 
   modalError: boolean = false;
   mostrarInstEjecucion = false;
+  mostrarEjecucionRemote = false;
 
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
