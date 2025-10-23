@@ -66,7 +66,8 @@ export class EdGate {
     columnIndex? : number
     code: string = ''; 
     description: string = ''; 
-
+    qubitsUsed: number[] = []; // user selected qubits for multi-qubit gates
+    
     constructor(name: string, qubits: number) {
         if (!name) 
             name = "XX"
@@ -76,6 +77,7 @@ export class EdGate {
             "\t# Add code here\n" + 
             "\treturn U.to_gate()\n";
         this.qubits = qubits;
+        this.qubitsUsed = Array.from({length: qubits}, (_, i) => i);
     }
 
     copy(): EdGate {
@@ -83,5 +85,9 @@ export class EdGate {
         result.code = this.code;
         result.description = this.description;
         return result;
+    }
+
+    setQubitsUsed(qubits: number[]) {
+        this.qubitsUsed = qubits;
     }
 }

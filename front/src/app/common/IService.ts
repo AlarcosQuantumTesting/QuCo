@@ -22,7 +22,8 @@ export abstract class IService {
 
     connectSSE(): EventSource {
         if (!this.eventSource) {
-            this.eventSource = new EventSource('http://localhost:8080/sse');
+            let url = environment.beUrl + "sse"
+            this.eventSource = new EventSource(url);
         }
         return this.eventSource;
     }
