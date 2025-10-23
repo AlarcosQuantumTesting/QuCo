@@ -43,6 +43,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   circuitName: string = '';
   availableGates: string[] = ['X', 'RX', 'RZ', 'Identity', 'RY', 'Z', 'H', 'S', 'Y', 'P', 'T', 'U', 'TDG', 'SDG'];
   startingColumns : BlockColumn[] = [];
+  mostrarInstEjecucion = false;
 
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,

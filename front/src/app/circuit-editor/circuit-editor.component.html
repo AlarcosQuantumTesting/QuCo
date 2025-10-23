@@ -79,9 +79,6 @@
               <div class="form-row">
                     <div class="section qubitsContainer">
                       <div class="form-group">
-                        <!-- <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
-                          Gates <button (click)="createCustomizedGate()">Create customized gate</button>
-                        </label> -->
                         <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
                           <div class="template-buttons">
                             <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
@@ -136,13 +133,12 @@
 
                             <div class="table-scroll-wrapper">
                                 <div class="table-wrapper">
-                                    <table *ngIf="qubitsConfiguration">
+                                    <!-- <table *ngIf="qubitsConfiguration">
                                       <thead>
                                         <tr>
                                           <th></th>
                                           <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
                                             {{ i }}
-                                            <!-- <sub title="Measure all" (click)="measureColumn(i)">📐</sub> -->
                                              <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i class="fas fa-ruler"></i></sub>
                                           </th>
                                           <th>
@@ -157,20 +153,77 @@
                                         <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
                                           <th>q<sub>{{ i }}</sub></th>
                                           <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
-                                            
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'" 
-                                                [attr.rowspan]="circuit!.qubits[i].gates[j].qubits" (click)="removeGate(i, j)">
-                                              <button title="Remove gate" class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button> 
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                                                [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
+                                                (click)="removeGate(i, j)">
+                                              <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
                                             </td>
 
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="placeGate(i, j)"></td>
+                                            <td *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
+                                                </td>
+
+                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
                                           </ng-container>
                                           <td class="physicalQubits">
                                             {{ getPhysicalQubit(i) }}
                                           </td>
                                         </tr>
                                       </tbody>
-                                    </table>
+                                    </table> -->
+                                    <table *ngIf="qubitsConfiguration" [ngClass]="{'circuit-expanded': isGridExpanded}">
+                                      <thead>
+                                          <tr>
+                                              <th>
+                                                  <!-- <button 
+                                                      class="btn-toggle-grid" 
+                                                      title="{{ isGridExpanded ? 'Minimize' : 'Expand' }} circuit view"
+                                                      (click)="toggleCircuitView()">
+                                                      <i class="fas" [ngClass]="{'fa-compress-alt': isGridExpanded, 'fa-expand-alt': !isGridExpanded}"></i>
+                                                  </button> -->
+                                                  <button 
+                                                      class="btn-toggle-grid" 
+                                                      title="Open Floating Circuit View" 
+                                                      (click)="openFloatingCircuit()">
+                                                      <!-- <i class="fas fa-external-link-alt"></i> -->
+                                                      <i class="fas fa-expand-alt"></i>
+                                                  </button>
+                                              </th>
+                                              <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
+                                                  {{ i }}
+                                                  <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i class="fas fa-ruler"></i></sub>
+                                              </th>
+                                              <th>
+                                                  <div class="buttons-column-container">
+                                                      <button title="Add column" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i class="fas fa-plus"></i></button>
+                                                      <button title="Remove last column" class="remove-column-btn" (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i class="fas fa-minus"></i></button>
+                                                  </div>
+                                              </th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                          <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
+                                              <th>q<sub>{{ i }}</sub></th>
+                                              
+                                              <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
+                                                  
+                                                  <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                                                      [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
+                                                      (click)="removeGate(i, j)">
+                                                    <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
+                                                  </td>
+
+                                                  <td *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
+                                                  </td>
+
+                                                  <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
+                                              </ng-container>
+                                              
+                                              <td class="physicalQubits">
+                                                  {{ getPhysicalQubit(i) }}
+                                              </td>
+                                          </tr>
+                                      </tbody>
+                                  </table>
                                 </div>
                             </div>
                         </div>
@@ -181,7 +234,7 @@
 
     <!-- Modales -->
 
-    <div class="modal instrucciones" *ngIf="modalCodigo">
+    <div class="modal instrucciones" *ngIf="modalCodigo" style="z-index: 1001">
         <div class="modal-content ejemplos"
         cdkDrag
         cdkDragRootElement="modal-content">
@@ -200,13 +253,15 @@
             </div>
 
             <div class="modal-footer">
+              <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute</button>
               <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
               <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
             </div>
         </div>
     </div>
+    <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" style="width: 100%; height: 100%;" [style.z-index]="9999"></app-modal-descarga>
 
-    <div class="modal" *ngIf="mostrarModalCrear">
+    <div class="modal" *ngIf="mostrarModalCrear" style="z-index: 1001">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -278,7 +333,7 @@
         </div>
     </div>
 
-    <div class="modal" *ngIf="gatesModal">
+    <div class="modal" *ngIf="gatesModal" style="z-index: 1001">
       <div class="modal-content">
           <!-- Encabezado del modal -->
           <div class="modal-header">
@@ -492,4 +547,151 @@
             </div>
         </div>
     </div>
+
+    <div class="modal instrucciones" *ngIf="showGatePlacementModal" style="z-index: 1001">
+        <div class="modal-content instrucciones"
+            cdkDrag
+            cdkDragRootElement="modal-content"
+            style="min-width: 950px;">
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Qubits specification for {{ selectedGate?.name }}</h2>
+                <button class="close"><i class="close-i" (click)="showGatePlacementModal = false">&times;</i></button>
+        </div>
+        <div class="intructions-content">
+
+          <div class="qubit-selector-container">
+            
+            <div class="qubit-header">
+              <span>Qubits</span>
+              <span class="required-count">Required: <strong>{{ selectedGate?.qubits }}</strong></span>
+              <span class="selected-count">Selected: <strong>{{ selectedQubitsForGate.length }}</strong></span>
+            </div>
+
+            <div class="qubit-selection-grid">
+              <label *ngFor="let qIndex of getAvailableQubits(pendingColumn ?? 0)" 
+                    [class.selected]="selectedQubitsForGate.includes(qIndex)"> <input
+                  type="checkbox"
+                  [checked]="selectedQubitsForGate.includes(qIndex)"
+                  (change)="toggleQubitSelection(qIndex, $event)"
+                />
+                q<sub>{{ qIndex }}</sub>
+              </label>
+            </div>
+          </div>
+
+
+          <div class="modal-actions">
+            <button class="btn btn-confirm-modal" 
+                    [disabled]="selectedQubitsForGate.length !== selectedGate?.qubits"
+                    (click)="confirmGatePlacement(selectedQubitsForGate, pendingColumn ?? 0)">
+                Confirm ({{ selectedQubitsForGate.length }}/{{ selectedGate?.qubits }})
+            </button>
+            <button class="btn btn-delete-modal" (click)="cancelGatePlacement()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div class="modal choice-modal" *ngIf="showPlacementChoiceModal" style="z-index: 1001">
+    <div class="modal-content choice-content"
+        cdkDrag
+        cdkDragRootElement="choice-content"
+        style="min-width: 550px; max-width: fit-content;">
+        
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal">Qubit placement for "{{ selectedGate?.name }}"</h2>
+            <button class="close" title="Cancel" (click)="cancelChoice()">
+              <i class="fas fa-times"></i> 
+            </button>
+        </div>
+        
+        <div class="instructions-content">
+            <h3 class="placement-question">
+                How do you want to place the <strong>{{ selectedGate?.qubits }} qubits</strong>?
+            </h3>
+            
+            <p class="placement-note">Select an option to define the qubit positions for the <strong>"{{ selectedGate?.name }}"</strong> gate.</p>
+
+            <div class="modal-actions placement-options">
+                <button 
+                    class="btn btn-primary-choice" 
+                    (click)="placeConsecutiveGate()"
+                    title="Place the gate on consecutive qubits starting from q{{ currentStartQubit }}">
+                    Consecutive (from q<sub>{{ currentStartQubit }}</sub>)
+                </button>
+                
+                <button 
+                    class="btn btn-secondary-choice" 
+                    (click)="openQubitSelectionModal(currentColumn ?? 0)"
+                    title="Open a selector to choose individual qubit positions">
+                    Specify qubits
+                </button>
+            </div>
+            
+            <button class="btn btn-cancel-choice" (click)="cancelChoice()">Cancel placement</button>
+        </div>
+    </div>
+  </div>
+
+  <div class="modal instrucciones" *ngIf="showFloatingCircuit">
+    <div class="modal-content ejemplos circuito" 
+      style="max-width: 90vw; max-height: 90vh; width: 100%; height: 100%;" 
+      cdkDrag 
+      cdkDragRootElement="modal-content">
+      <div class="modal-header" cdkDragHandle>
+        <h2 class="title-modal">Circuit view</h2>
+
+        <button class="close"><i class="close-i" (click)="showFloatingCircuit = false">&times;</i></button>
+      </div>
+
+      <div class="instructions circuito">
+        <div class="table-scroll-wrapper-modal" style="width: 100%;">
+          <div class="table-wrapper-modal" style="width: 100%;">
+            <table *ngIf="qubitsConfiguration">
+              <thead>
+                <tr>
+                  <th>
+                  </th>
+                  <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
+                    {{ i }}
+                    <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i class="fas fa-ruler"></i></sub>
+                  </th>
+                  <th>
+                    <div class="buttons-column-container" style="width: 100%;">
+                      <button title="Add column" style="width: 50%;" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i class="fas fa-plus"></i></button>
+                      <button title="Remove last column" style="width: 50%;" class="remove-column-btn" (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i class="fas fa-minus"></i></button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
+                  <th>q<sub>{{ i }}</sub></th>
+                                              
+                  <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
+                                                  
+                    <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                        [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
+                        (click)="removeGate(i, j)">
+                      <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
+                    </td>
+
+                    <td *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
+                    </td>
+
+                    <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
+                  </ng-container>
+                                              
+                  <td class="physicalQubits">
+                    {{ getPhysicalQubit(i) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>

@@ -1145,9 +1145,29 @@ u:hover {
   cursor: pointer;
 }
 
-.transpile-code-btn:disabled {
+.execute-code-btn:disabled {
   background-color: #7e838482;
   cursor: not-allowed;
+}
+
+.execute-code-btn {
+  /* background-color: #968820; */
+  background-color: #0B555A;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.execute-code-btn:hover {
+  background-color: #267375;
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 
