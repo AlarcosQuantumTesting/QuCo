@@ -1254,6 +1254,37 @@ export class CircuitEditorComponent {
       this.currentColumn = null;
   }
 
+  isGridExpanded: boolean = false; 
+
+  toggleCircuitView() {
+      this.isGridExpanded = !this.isGridExpanded;
+  }
+
+
+  showFloatingCircuit: boolean = false;
+
+  floatingCircuitWidth: string = '1000px';
+  floatingCircuitHeight: string = '600px';
+  floatingCircuitTop: string = '50px';
+  floatingCircuitLeft: string = '50px';
+
+
+  openFloatingCircuit() {
+      this.showFloatingCircuit = true;
+  }
+
+  closeFloatingCircuit() {
+      this.showFloatingCircuit = false;
+  }
+
+  public baseZIndex: number = 1000;
+
+  private currentMaxZIndex: number = this.baseZIndex; 
+
+  getNewZIndex(): number {
+      this.currentMaxZIndex++;
+      return this.currentMaxZIndex;
+  }
 }
 
 interface CircuitGate {
