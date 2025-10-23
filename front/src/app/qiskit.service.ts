@@ -31,6 +31,10 @@ export class QiskitService {
     return this.client.put<any>(environment.beUrl + "qiskit/getCode", info)
   }
 
+  getCodeByName(name: string) {
+    return this.client.get<any>(`${environment.beUrl}qiskit/getCodeByName/${name}`);
+  }
+
   saveCode(qiskitCode : QiskitCode) {
     return this.client.post<any>(environment.beUrl + "qiskit/saveCode", qiskitCode)
   }

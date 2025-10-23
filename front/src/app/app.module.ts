@@ -17,6 +17,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { EditorComponent } from './editor/editor.component';
 import { HomeComponent } from './home/home.component';
 import { TranspilationComponent } from './transpilation/transpilation.component';
+import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -47,7 +48,8 @@ const appRoutes : Routes = [
     FormsModule,
     HttpClientModule,
     DragDropModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    ModalDescargaComponent,
   ],
   providers: [ ],
   bootstrap: [AppComponent]

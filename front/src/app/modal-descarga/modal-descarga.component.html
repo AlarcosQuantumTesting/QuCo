@@ -1,0 +1,53 @@
+<body>
+    <div class="modal ejemplos" *ngIf="mostrarModal">
+        <div class="modal-content ejemplos" 
+        cdkDrag 
+        cdkDragRootElement=".modal-content">
+
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Execution instructions</h2>
+                <button class="close">
+                    <i class="close-i" (click)="cerrarModal()">&times;</i>
+                </button>
+            </div>
+            <div class="intructions-content">
+                <p class="text-instructions">To try the generated code on your local machine, follow these steps:</p>
+                <ol class="list-instructions">
+                    <li>
+                        Download the ZIP containing all the files needed by clicking the "Download ZIP" button below.
+                    </li>
+                    <li>
+                        Unzip the downloaded folder to a desired location on your computer.
+                    </li>
+                    <li>
+                        Create in the folder a new file with your code.
+                    </li>
+                    <li>
+                        Open a terminal and navigate to the folder where you unzipped the files.
+                    </li>
+                    <li>
+                        Run the command <code>python3 -m venv qiskit-env</code> to create a virtual environment.
+                    </li>
+                    <li>
+                        Activate the virtual environment with the command <code>source ~/qiskit-env/bin/activate</code>.
+                    </li>
+                    <li>
+                        Install the required packages.
+                    </li>
+                    <li>
+                        Run the code with the command <code>python run_gpt.py yourProgramFile.py 1 y</code>.
+                    </li>
+                    <li>
+                        Finally, choose the desired option.
+                    </li>
+                </ol>
+
+                <div class="modal-footer">
+                    <button class="download-btn" (click)="descargarZip()">
+                        <i class="fas fa-download"></i> Download ZIP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
