@@ -59,7 +59,7 @@ export class RunCodeComponent implements OnInit {
     
     const overwriteValue = override ? 'y' : 'n';
 
-    let url = `http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let url = `https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
         url += `&ibm_token=${ibm_token}`; 
