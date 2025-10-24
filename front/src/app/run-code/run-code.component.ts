@@ -5,6 +5,13 @@ import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
+interface BatchInfo {
+    id: string;
+    status: string; // O el tipo de unión 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR'
+    creationDateTime: string;
+    name: string;
+}
+
 @Component({
   selector: 'app-run-code',
   standalone: true, 
@@ -12,8 +19,8 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './run-code.component.html',
   styleUrls: ['./run-code.component.scss']
 })
-export class RunCodeComponent implements OnInit {
 
+export class RunCodeComponent implements OnInit {
 
   @Input() qiskitCode: string = '';
 
@@ -87,43 +94,93 @@ export class RunCodeComponent implements OnInit {
   }
 
   runCode(): void {
-        if (!this.isFormValid()) {
-            console.error('Form is invalid. Cannot run code.');
-            return;
-        }
+    if (!this.isFormValid()) {
+      console.error('Form is invalid. Cannot run code.');
+      return;
+    }
 
-        const { iterations, override, ibm_token, ibm_instance } = this.formData;
+    const { iterations, override, ibm_token, ibm_instance } = this.formData;
         
-        const optionMatch = this.formData.option.match(/^(\d+)/);
-        const runnerNumber = optionMatch ? optionMatch[0] : '1';
-        const overwriteValue = override ? 'y' : 'n';
+    const optionMatch = this.formData.option.match(/^(\d+)/);
+    const runnerNumber = optionMatch ? optionMatch[0] : '1';
+    const overwriteValue = override ? 'y' : 'n';
 
-        let finalUrl = `http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let finalUrl = `http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
-        if (ibm_token) {
-            finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;
-        }
+    if (ibm_token) {
+      finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;
+    }
 
-        if (ibm_instance) {
-            finalUrl += `&ibm_instance=${encodeURIComponent(ibm_instance)}`;
-        }
+    if (ibm_instance) {
+      finalUrl += `&ibm_instance=${encodeURIComponent(ibm_instance)}`;
+    }
         
-        const finalBody = [this.qiskitCode]; 
+    const finalBody = [this.qiskitCode]; 
 
-        console.log('Sending POST Request...');
-        console.log('URL:', finalUrl);
-        console.log('Body:', finalBody);
+    console.log('Sending POST Request...');
+    console.log('URL:', finalUrl);
+    console.log('Body:', finalBody);
 
-        this.http.post(finalUrl, finalBody).subscribe({
+        /*this.http.post(finalUrl, finalBody).subscribe({
             next: (response: any) => {
                 console.log('Execution successful!', response);
                 alert(`Execution successful! Batch ID: ${response.batch_id}`);
+                if (response && response.batch_id) {
+                  const currentIds = this.getSavedExecutionIds();
+                  currentIds.push(response.batch_id);
+                  this.saveExecutionIds(currentIds);
+
+                  console.log(`Batch ID ${response.batch_id} saved to localStorage.`);
+                }
             },
             error: (err) => {
                 console.error('Execution failed:', err);
                 alert(`Execution failed. Error: ${err.error?.message || err.message}`);
             }
-        });
+        });*/
+
+    this.http.post(finalUrl, finalBody).subscribe({
+      next: (response: any) => {
+        console.log('Execution successful!', response);
+        alert(`Execution successful! Batch ID: ${response.batch_id}`);
+
+        if (response && response.batch_id) {
+                    
+          const batchesJson = localStorage.getItem('execution_batches');
+          const currentBatches = batchesJson ? JSON.parse(batchesJson) : [];
+                    
+          /*const newBatch = {
+            id: response.batch_id,
+            status: 'PENDING',
+            creationDateTime: new Date().toISOString(),
+            name: `Execution Batch ${response.batch_id}`
+          };*/
+
+          const newBatch = {
+                id: response.batch_id,
+                status: 'PENDING',
+                creationDateTime: new Date().toISOString(),
+                name: `Execution ${response.batch_id}`,
+                
+                details: {
+                    runner: runnerNumber, 
+                    iterations: iterations,
+                    optionSelected: this.formData.option,
+                }
+            };
+
+          currentBatches.push(newBatch);
+                    
+          localStorage.setItem('execution_batches', JSON.stringify(currentBatches));
+
+          console.log(`Batch ID ${response.batch_id} saved as object to localStorage.`);
+        }
+      },
+      error: (err) => {
+        console.error('Execution failed:', err);
+        alert(`Execution failed. Error: ${err.error?.message || err.message}`);
+      }
+    });
   }
 
   isFormValid(): boolean {
@@ -132,5 +189,14 @@ export class RunCodeComponent implements OnInit {
     }
     return true;
   }
+
+  /*private getSavedExecutionIds(): string[] {
+    const idsJson = localStorage.getItem('execution_batch_ids');
+    return idsJson ? JSON.parse(idsJson) : [];
+  }
+
+  private saveExecutionIds(ids: string[]): void {
+    localStorage.setItem('execution_batch_ids', JSON.stringify(ids));
+  }*/
 
 }

@@ -78,6 +78,13 @@
           </a>
         </li>
 
+        <li>
+            <a routerLink="execution-history" routerLinkActive="active" (click)="navigateAndReload('execution-history')">
+                <i class="fas fa-list-check" title="Execution History"></i>
+                <span *ngIf="menuAbierto">Execution History</span>
+            </a>
+        </li>
+
         <li class="ajustes">
           <a (click)="toggleAccessibilityPanel()" class="accessibility-link">
             <i  class="fas fa-cog" title="Settings"></i>
