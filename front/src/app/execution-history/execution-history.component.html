@@ -25,14 +25,19 @@
             <div class="section inputsContainer">
                 <div class="input-group">
                     <label>Executions:</label>
-                    <input type="text"
+                    <!-- <input type="text"
                         [(ngModel)]="searchQuery"
                         (input)="searchExecution()"
+                        placeholder="Search for an ID or name..."
+                        list="executionList"> -->
+                        
+                    <input type="text"
+                        [(ngModel)]="searchQuery"
                         placeholder="Search for an ID or name..."
                         list="executionList">
             
                     <datalist id="executionList">
-                        <option class="executionOpt" *ngFor="let execution of filteredExecutionWorks" [value]="execution.id + ' - ' + execution.name"></option>
+                        <option class="executionOpt" *ngFor="let execution of filteredExecutionWorks" [value]="execution.name"></option>
                     </datalist>
 
                     <div>
