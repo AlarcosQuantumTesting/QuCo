@@ -4,6 +4,7 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 interface BatchInfo {
     id: string;
@@ -29,6 +30,7 @@ export class RunCodeComponent implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
 
   executionUrl : string = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=';
+  batchId? : string
 
   cerrarModal(): void {
     this.cerrar.emit();
@@ -44,10 +46,14 @@ export class RunCodeComponent implements OnInit {
     option: this.options[0]
   };
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router : Router) { }
+
+  goTo(url: string): void {
+    this.router.navigateByUrl(url);
+  }
 
   ngOnInit(): void {
-    this.updateHttpLabel();
+    this.updateHttpLabel(); 
   }
 
   get isIbmRequired(): boolean {
@@ -122,53 +128,23 @@ export class RunCodeComponent implements OnInit {
     console.log('URL:', finalUrl);
     console.log('Body:', finalBody);
 
-        /*this.http.post(finalUrl, finalBody).subscribe({
-            next: (response: any) => {
-                console.log('Execution successful!', response);
-                alert(`Execution successful! Batch ID: ${response.batch_id}`);
-                if (response && response.batch_id) {
-                  const currentIds = this.getSavedExecutionIds();
-                  currentIds.push(response.batch_id);
-                  this.saveExecutionIds(currentIds);
-
-                  console.log(`Batch ID ${response.batch_id} saved to localStorage.`);
-                }
-            },
-            error: (err) => {
-                console.error('Execution failed:', err);
-                alert(`Execution failed. Error: ${err.error?.message || err.message}`);
-            }
-        });*/
-
     this.http.post(finalUrl, finalBody).subscribe({
       next: (response: any) => {
         console.log('Execution successful!', response);
-        alert(`Execution successful! Batch ID: ${response.batch_id}`);
+        //alert(`Execution successful! Batch ID: ${response.batch_id}`);
 
         if (response && response.batch_id) {
                     
           const batchesJson = localStorage.getItem('execution_batches');
           const currentBatches = batchesJson ? JSON.parse(batchesJson) : [];
+          this.batchId = response.batch_id;
                     
-          /*const newBatch = {
-            id: response.batch_id,
-            status: 'PENDING',
-            creationDateTime: new Date().toISOString(),
-            name: `Execution Batch ${response.batch_id}`
-          };*/
-
           const newBatch = {
                 id: response.batch_id,
                 status: 'PENDING',
                 creationDateTime: new Date().toISOString(),
                 name: `Execution ${response.batch_id}`,
                 
-                /*details: {
-                    runner: runnerNumber, 
-                    iterations: iterations,
-                    optionSelected: this.formData.option,
-                }*/
-
                 details: {
                     runner: runnerNumber, 
                     iterations: iterations,

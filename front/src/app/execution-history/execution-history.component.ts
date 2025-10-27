@@ -85,7 +85,6 @@ export class ExecutionHistoryComponent implements OnInit {
     }
   }
 
-
   get filteredExecutionWorks(): ExecutionHistory[] {
     if (!this.searchQuery) {
       return this.executionWorks;
