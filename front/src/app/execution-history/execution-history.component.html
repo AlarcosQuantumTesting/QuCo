@@ -204,6 +204,14 @@
                             <label>Option selected:</label> 
                             <span>{{ executionSelected.details?.optionSelected || 'N/A' }}</span>
                         </div>
+                        <div class="param-line">
+                            <label>IBM Token provided:</label> 
+                            <span>{{ executionSelected.details?.ibm_token_provided ? 'Yes' : 'No' }}</span>
+                        </div>
+                        <div class="param-line">
+                            <label>IBM Instance provided:</label> 
+                            <span>{{ executionSelected.details?.ibm_instance_provided ? 'Yes' : 'No' }}</span>
+                        </div>
                     </div>
                     
                     <hr>

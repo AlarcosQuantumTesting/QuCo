@@ -12,6 +12,8 @@ interface ExecutionHistory {
     runner?: string;
     iterations?: number;
     optionSelected?: string;
+    ibm_token_provided?: boolean;
+    ibm_instance_provided?: boolean;
     //backend_status?: string;
     started_at?: string;
     finished_at?: string;

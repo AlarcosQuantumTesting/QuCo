@@ -162,10 +162,18 @@ export class RunCodeComponent implements OnInit {
                 creationDateTime: new Date().toISOString(),
                 name: `Execution ${response.batch_id}`,
                 
+                /*details: {
+                    runner: runnerNumber, 
+                    iterations: iterations,
+                    optionSelected: this.formData.option,
+                }*/
+
                 details: {
                     runner: runnerNumber, 
                     iterations: iterations,
                     optionSelected: this.formData.option,
+                    ibm_token_provided: ibm_token ? true : false,
+                    ibm_instance_provided: ibm_instance ? true : false
                 }
             };
 
