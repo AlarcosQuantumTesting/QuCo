@@ -274,4 +274,21 @@ export class ExecutionHistoryComponent implements OnInit {
   clearSelection(): void {
     this.executionSelected = null;
   }
+
+  calculateExecutionTime(): string | null {
+    const details = this.executionSelected?.details;
+    
+    if (details?.finished_at && details.started_at) {
+        const finishedTime = new Date(details.finished_at).getTime();
+        const startedTime = new Date(details.started_at).getTime();
+        
+        const durationMs = finishedTime - startedTime;
+        
+        const durationSeconds = (durationMs / 1000).toFixed(2);
+
+        return durationSeconds + ' s';
+    }
+    
+    return null;
+  }
 }

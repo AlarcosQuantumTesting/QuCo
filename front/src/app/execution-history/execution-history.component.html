@@ -171,10 +171,10 @@
                         </div>
 
                         <div class="info-column">
-                            <div class="info-block">
+                            <!-- <div class="info-block">
                                 <label><strong>Submitted at:</strong></label>
                                 <span>{{ executionSelected.creationDateTime | date: 'medium' }}</span>
-                            </div>
+                            </div> -->
                             <div class="info-block" *ngIf="executionSelected.details?.started_at">
                                 <label><strong>Started at:</strong></label>
                                 <span>{{ executionSelected.details?.started_at | date: 'medium' }}</span>
@@ -182,6 +182,10 @@
                             <div class="info-block" *ngIf="executionSelected.details?.finished_at">
                                 <label><strong>Finished at:</strong></label>
                                 <span>{{ executionSelected.details?.finished_at | date: 'medium' }}</span>
+                            </div>
+                            <div class="info-block" *ngIf="calculateExecutionTime()">
+                                <label><strong>Execution time:</strong></label>
+                                <span>{{ calculateExecutionTime() }}</span>
                             </div>
                         </div>
                     </div>
