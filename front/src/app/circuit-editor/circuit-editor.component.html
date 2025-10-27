@@ -253,13 +253,15 @@
             </div>
 
             <div class="modal-footer">
-              <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute</button>
+              <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute local </button>
+              <button class="execute-remote-code-btn" (click)="mostrarEjecucionRemote = true"><i class="fas fa-rocket"></i> Execute remote</button>
               <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
               <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
             </div>
         </div>
     </div>
-    <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" style="width: 100%; height: 100%;" [style.z-index]="9999"></app-modal-descarga>
+    <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" [style.z-index]="9999"></app-modal-descarga>
+    <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="code || ''" ></app-run-code>
 
     <div class="modal" *ngIf="mostrarModalCrear" style="z-index: 1001">
         <div class="modal-content">
@@ -376,7 +378,7 @@
       </div>
     </div>
 
-    <div class="modal instrucciones" *ngIf="modalCodigoGate">
+    <div class="modal instrucciones" *ngIf="modalCodigoGate" style="z-index: 1001">
         <div class="modal-content ejemplos"
         cdkDrag
         cdkDragRootElement="modal-content" style="width: 400px; height: 200px;">
@@ -401,7 +403,7 @@
         </div>
     </div>
 
-    <div *ngIf="showDeleteModal" class="modal-delete">
+    <div *ngIf="showDeleteModal" class="modal-delete" style="z-index: 1001;">
       <div class="modal-content-delete">
           <div class="modal-header" style="background-color: rgb(201, 46, 46);">
               <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete gate</h2>

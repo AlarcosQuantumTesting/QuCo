@@ -548,7 +548,7 @@
         <!-- Botón para copiar el código -->
         <div class="modal-footer">
             <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute local</button>
-            <button class="execute-code-btn" (click)="mostrarEjecucionRemote = true"><i class="fas fa-rocket"></i> Execute remote</button>
+            <button class="execute-remote-code-btn" (click)="mostrarEjecucionRemote = true"><i class="fas fa-rocket"></i> Execute remote</button>
             <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
             <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
         </div>
@@ -556,10 +556,7 @@
 </div>
 <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" style="width: 100%; height: 100%;"></app-modal-descarga>
 <!-- <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" style="width: 100%; height: 100%;"></app-run-code> -->
-<app-run-code 
-  [mostrarModal]="mostrarEjecucionRemote" 
-  (cerrar)="mostrarEjecucionRemote = false"
-  [qiskitCode]="qiskitCode || ''" ></app-run-code>
+<app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="qiskitCode || ''" ></app-run-code>
 
     <!-- Modal para ingresar el nombre de la función -->
     <div class="modal" *ngIf="mostrarModalNombreFuncion">

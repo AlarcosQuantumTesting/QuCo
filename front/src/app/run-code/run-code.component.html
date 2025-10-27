@@ -4,7 +4,7 @@
     cdkDragRootElement=".modal-content">
 
     <div class="modal-header" cdkDragHandle>
-      <h2 class="title-modal">Run Code Configuration</h2>
+      <h2 class="title-modal">Run code configuration</h2>
       <button class="close">
         <i class="close-i" (click)="cerrarModal()">&times;</i>
       </button>
@@ -28,30 +28,6 @@
             <div *ngIf="iterations.errors?.['min']">Value must be 1 or greater.</div>
           </div>
         </div>
-        
-        <!-- <div class="form-group radio-group">
-          <label>Override:</label>
-          <div>
-            <input
-              type="radio"
-              id="override_yes"
-              name="override"
-              [value]="true"
-              [(ngModel)]="formData.override"
-            >
-            <label for="override_yes">Yes</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="override_no"
-              name="override"
-              [value]="false"
-              [(ngModel)]="formData.override"
-            >
-            <label for="override_no">No</label>
-          </div>
-        </div> -->
 
         <div class="form-group radio-group">
             <label>Override:</label>

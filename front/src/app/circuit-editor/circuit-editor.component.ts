@@ -64,6 +64,14 @@ export class CircuitEditorComponent {
   currentStartQubit: number | null = null;
   currentColumn: number | null = null;
   qubitsConsecutivos: boolean = false;
+  mostrarEjecucionRemote = false;
+
+  private readonly LOCAL_STORAGE_KEYS = {
+    CIRCUIT: 'circuitEditorCircuit',
+    QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
+    GATE_REGISTRY: 'circuitEditorGateRegistry',
+    SELECTED_TEMPLATE_FILENAME: 'circuitEditorTemplateFileName'
+  };
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
     private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
@@ -112,7 +120,35 @@ export class CircuitEditorComponent {
             this.searchQuery = this.selectedQubitsConfigurationName;
           }
             
-      })
+    })
+
+      const savedTemplateFileName = localStorage.getItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
+      if (savedTemplateFileName) {
+        this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === savedTemplateFileName) || this.manager.templates[0];
+      } else {
+        this.manager.selectedTemplate = this.manager.templates[0];
+      }
+
+
+      const savedRegistry = localStorage.getItem(this.LOCAL_STORAGE_KEYS.GATE_REGISTRY);
+      if (savedRegistry) {
+        this.gateRegistry = JSON.parse(savedRegistry);
+      }
+
+
+      this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
+        qubitsConfigurationNames => {
+          this.existingConfigurationNames = qubitsConfigurationNames;
+
+          const savedConfigName = localStorage.getItem(this.LOCAL_STORAGE_KEYS.QUBITS_CONFIG_NAME);
+          let configToLoad = savedConfigName || qubitsConfigurationNames[0];
+
+          if (configToLoad) {
+            this.selectedQubitsConfigurationName = configToLoad;
+            this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName, true);
+            this.searchQuery = this.selectedQubitsConfigurationName;
+          }
+      });
     
   }
 
@@ -175,7 +211,7 @@ export class CircuitEditorComponent {
     )
   }
 
-  onQubitsConfigurationChange(configurationName : string) {
+  /*onQubitsConfigurationChange(configurationName : string) {
     this.qubitsConfigurationService.getQubitsConfiguration(configurationName).subscribe(
       qubitsConfiguration => {
         this.qubitsConfiguration = new QubitsConfiguration()
@@ -194,8 +230,104 @@ export class CircuitEditorComponent {
       error => { 
         this.error = error.error.message
       })
+  }*/
+
+  
+    onQubitsConfigurationChange(configurationName : string, isLoadingFromStorage: boolean = false) {
+      this.qubitsConfigurationService.getQubitsConfiguration(configurationName).subscribe(
+        qubitsConfiguration => {
+          this.qubitsConfiguration = new QubitsConfiguration()
+          this.qubitsConfiguration.name = qubitsConfiguration.name
+          this.qubitsConfiguration.matrix = qubitsConfiguration.matrix
+          this.qubitsConfiguration.qubits = qubitsConfiguration.qubits
+
+          if (isLoadingFromStorage) {
+              const savedCircuit = localStorage.getItem(this.LOCAL_STORAGE_KEYS.CIRCUIT);
+              if (savedCircuit) {
+                  const loadedCircuitData = JSON.parse(savedCircuit);
+                  
+                  const loadedCircuit = new EdCircuit();
+                  loadedCircuit.name = loadedCircuitData.name;
+                  loadedCircuit.columns = loadedCircuitData.columns;
+                  
+                  loadedCircuit.qubits = loadedCircuitData.qubits.map((qubitData: { gates: any[]; }) => ({
+                      ...qubitData,
+                      gates: qubitData.gates.map((gateData: any) => {
+                          const gate = new EdGate(gateData.name, gateData.qubits);
+                          Object.assign(gate, gateData);
+                          return gate;
+                      })
+                  }));
+                  
+                  this.circuit = loadedCircuit;
+
+                  this.circuit.resizeTo(this.qubitsConfiguration.qubits); 
+                  setTimeout(() => {
+                    this.restoreGatesFromRegistry();
+                  }, 1000);
+              } else {
+                  this.circuit = new EdCircuit()
+                  this.circuit.columns = 10
+                  this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+              }
+          } else {
+              if (!this.circuit) {
+                  this.circuit = new EdCircuit()
+                  this.circuit.columns = 10
+              }
+              this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+          }
+          
+          this.saveState();
+        },
+        error => { 
+          this.error = error.error.message
+    })
   }
 
+  restoreGatesFromRegistry() {
+    if (!this.circuit || !this.gateRegistry) return;
+
+    for (let i = 0; i < this.circuit.qubits.length; i++) {
+        for (let j = 0; j < this.circuit.columns; j++) {
+            this.circuit.qubits[i].gates[j] = new EdGate('I', 1);
+        }
+    }
+    
+    this.gateRegistry.forEach(registration => {
+        const { name, column, qubits, parentQubit, transactionId } = registration;
+
+        if (column >= this.circuit!.columns) return;
+        
+        if (parentQubit === qubits[0]) {
+            const gateData = this.customizedGates.find(g => g.name === name) || new EdGate(name, qubits.length);
+            const gate = gateData.copy(); 
+
+            gate.qubits = qubits.length;
+            (gate as any).gateId = registration.id;
+            (gate as any).transactionId = transactionId;
+            gate.targetQubits = qubits.slice(1); 
+            gate.parentQubit = undefined; 
+
+            if (parentQubit < this.circuit!.qubits.length) {
+                this.circuit!.qubits[parentQubit].gates[column] = gate;
+            }
+
+            for (let i = 1; i < qubits.length; i++) {
+                const q = qubits[i];
+                if (q < this.circuit!.qubits.length) {
+                    const filler = new EdGate('0', 1);
+                    filler.parentQubit = parentQubit;
+                    (filler as any).gateId = registration.id;
+                    (filler as any).transactionId = transactionId;
+                    this.circuit!.qubits[q].gates[column] = filler;
+                }
+            }
+        }
+    });
+
+  }
+      
   getPhysicalQubit(qubit: number) {
     if (!this.qubitsConfiguration)
       return qubit
@@ -463,11 +595,13 @@ export class CircuitEditorComponent {
 
 
   addColumn() {
-    this.circuit!.addColumn()
+    this.circuit!.addColumn();
+    this.saveState();
   }
   
   removeColumn() {
-    this.circuit!.removeColumn()
+    this.circuit!.removeColumn();
+    this.saveState();
   }  
 
   /*placeGate(startQubit: number, column: number) {
@@ -580,6 +714,7 @@ export class CircuitEditorComponent {
 
     this.qubitsConsecutivos = true;
     console.log("Gate Registry after placement:", this.gateRegistry);
+    this.saveState();
   }
   
   showGatePlacementModal = false;
@@ -682,6 +817,7 @@ export class CircuitEditorComponent {
     this.qubitsConsecutivos = false;
 
     console.log("Gate Registry after placement:", this.gateRegistry);
+    this.saveState();
   }
 
   /*confirmGatePlacement(selectedQubits: number[], column: number) {
@@ -904,6 +1040,7 @@ export class CircuitEditorComponent {
     this.gateRegistry = this.gateRegistry.filter(r => r.transactionId !== transactionId);
 
     console.log(`¡Transacción ${transactionId} eliminada! Registros restantes:`, this.gateRegistry.length);
+    this.saveState();
 }
 
   /* 
@@ -947,7 +1084,7 @@ export class CircuitEditorComponent {
 
 
   editGate(gate: EdGate) {
-    this.selectedGate = Object.assign({}, gate); // Clonar para edición sin afectar la original
+    this.selectedGate = Object.assign({}, gate);
     this.creatingNewGate = true;
   }
 
@@ -955,8 +1092,8 @@ export class CircuitEditorComponent {
     let wholeCode = document.getElementById("codeArea") 
     let range = document.createRange()
     range.selectNode(wholeCode!)
-    window.getSelection()!.removeAllRanges(); // clear current selection
-    window.getSelection()!.addRange(range); // to select text
+    window.getSelection()!.removeAllRanges();
+    window.getSelection()!.addRange(range);
     document.execCommand("copy")
     window.getSelection()!.removeAllRanges()
   }
@@ -967,11 +1104,12 @@ export class CircuitEditorComponent {
    
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    this.saveState();
   }
 
 
   onSearchInput() {
-    // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
+    // Aquí no se hace nada porque el <datalist> ya lo hace
   }
 
   onTabPress(event: KeyboardEvent) {
@@ -986,11 +1124,8 @@ export class CircuitEditorComponent {
 
   selectCOnfigIfMatch() {
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(configNames => {
-      // Assuming configNames is an array of strings, adjust if it's an array of objects
       const match = configNames.find(name => name.toLowerCase() === this.searchQuery.toLowerCase());
       if (match) {
-        // If you want to set selectedTemplate, you may need to fetch the actual template object
-        // Here, just storing the name as an example
         this.qubitsConfiguration = new QubitsConfiguration()
 
         if (!this.circuit) {
@@ -1000,7 +1135,6 @@ export class CircuitEditorComponent {
         } else {
           this.circuit.resizeTo(this.qubitsConfiguration.qubits)
         }
-        //console.log('Template seleccionado:', match);
       }
     });
   }
@@ -1016,10 +1150,6 @@ export class CircuitEditorComponent {
   
     if (match) {
       this.manager.selectedTemplate = match;
-      /*console.log('Template seleccionado:', match);
-      console.log('Nombre del template:', this.nameTemplate);*/
-      //this.editingTemplate = false;
-      // Aquí podrías hacer algo más con el template (mostrarlo, navegar, etc.)
     } else {
       console.warn('No se encontró ningún template con ese nombre.');
     }
@@ -1027,11 +1157,18 @@ export class CircuitEditorComponent {
 
   searchConfiguration() {
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(configNames => {
-      // Assuming configNames is an array of strings, adjust if it's an array of objects
       const match = configNames.find(name => name.toLowerCase() === this.searchQuery.toLowerCase());
       if (match) {
         this.selectedQubitsConfigurationName = match;
         this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName);
+        console.log("Qubit configuration changed. Clearing circuit and gate registry.");
+        this.circuit = new EdCircuit();
+        this.circuit.columns = 10;
+        if (this.qubitsConfiguration) {
+          this.circuit.resizeTo(this.qubitsConfiguration.qubits);
+        }
+        this.gateRegistry = [];
+        this.saveState();
       } else {
         console.warn('No se encontró ninguna configuracion con ese nombre.');
       }
@@ -1284,6 +1421,28 @@ export class CircuitEditorComponent {
   getNewZIndex(): number {
       this.currentMaxZIndex++;
       return this.currentMaxZIndex;
+  }
+
+  saveState() {
+    if (this.circuit) {
+      localStorage.setItem(this.LOCAL_STORAGE_KEYS.CIRCUIT, JSON.stringify(this.circuit));
+    } else {
+      localStorage.removeItem(this.LOCAL_STORAGE_KEYS.CIRCUIT);
+    }
+
+    if (this.selectedQubitsConfigurationName) {
+      localStorage.setItem(this.LOCAL_STORAGE_KEYS.QUBITS_CONFIG_NAME, this.selectedQubitsConfigurationName);
+    } else {
+      localStorage.removeItem(this.LOCAL_STORAGE_KEYS.QUBITS_CONFIG_NAME);
+    }
+
+    localStorage.setItem(this.LOCAL_STORAGE_KEYS.GATE_REGISTRY, JSON.stringify(this.gateRegistry));
+
+    if (this.manager.selectedTemplate) {
+      localStorage.setItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME, this.manager.selectedTemplate.fileName);
+    } else {
+      localStorage.removeItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
+    }
   }
 }
 

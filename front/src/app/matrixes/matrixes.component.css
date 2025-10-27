@@ -1171,6 +1171,32 @@ u:hover {
 }
 
 
+.execute-remote-code-btn:disabled {
+  background-color: #7e838482;
+  cursor: not-allowed;
+}
+
+.execute-remote-code-btn {
+  /* background-color: #968820; */
+  background-color: #247cc0;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
+}
+
+.execute-remote-code-btn:hover {
+  background-color: #13476f;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+
 .form-row-backends {
     display: flex;
     align-items: center;
