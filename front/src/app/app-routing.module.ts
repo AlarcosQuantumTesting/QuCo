@@ -10,6 +10,7 @@ import { QubitsConfigurationComponent } from './qubits-configuration/qubits-conf
 import { HomeComponent } from './home/home.component';
 import { CanDeactivateGuard } from './CanDeactivateGuard';
 import { TranspilationComponent } from './transpilation/transpilation.component';
+import { ExecutionHistoryComponent } from './execution-history/execution-history.component';
 
 const routes: Routes = [
   { path: "", redirectTo: "/home", pathMatch: "full" },
@@ -21,7 +22,10 @@ const routes: Routes = [
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "transpilation", component: TranspilationComponent },
-  { path: "home", component: HomeComponent }
+
+  { path: "home", component: HomeComponent },
+  { path: 'execution-history', component: ExecutionHistoryComponent },
+
 ];
 
 
