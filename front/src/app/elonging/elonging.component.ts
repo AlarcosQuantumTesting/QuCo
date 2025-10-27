@@ -6,12 +6,8 @@ import { EvolutionaryComponent } from '../common/evolutionary.component';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
-import { CanComponentDeactivate } from '../CanComponentDeactivate';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
-import { RemoteFitnesser } from '../ae/RemoteFitnesser';
-
-
 
 Chart.register(...registerables)
 
