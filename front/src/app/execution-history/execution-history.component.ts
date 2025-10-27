@@ -41,7 +41,7 @@ export class ExecutionHistoryComponent implements OnInit {
   modalDelete = false;
   modalDetails = false;
   
-  private readonly serverUrl = 'http://172.20.48.130:8080/run_qiskit'; 
+  private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit'; 
 
   constructor(private http: HttpClient) { }
 
@@ -123,7 +123,7 @@ export class ExecutionHistoryComponent implements OnInit {
     
     execution.status = 'UNKNOWN'; 
 
-    this.http.get(statusUrl).subscribe({
+    this.http.post(statusUrl, null).subscribe({
         next: (result: any) => {
             
             let newStatus: 'PENDING' | 'RUNNING' | 'FINISHED' | 'ERROR' | 'UNKNOWN' = 'UNKNOWN';
@@ -204,7 +204,7 @@ export class ExecutionHistoryComponent implements OnInit {
     
     this.showMessage(`Initiating download for Batch ID ${id}...`);
 
-    this.http.get(downloadUrl, { responseType: 'blob' }).subscribe({
+    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
         next: (responseBlob: Blob) => {
             const downloadLink = document.createElement('a');
             const url = window.URL.createObjectURL(responseBlob);
@@ -240,7 +240,7 @@ export class ExecutionHistoryComponent implements OnInit {
 
     this.showMessage(`Initiating download for All Results (ID ${id})...`);
 
-    this.http.get(downloadUrl, { responseType: 'blob' }).subscribe({
+    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
         next: (responseBlob: Blob) => {
             const downloadLink = document.createElement('a');
             const url = window.URL.createObjectURL(responseBlob);
