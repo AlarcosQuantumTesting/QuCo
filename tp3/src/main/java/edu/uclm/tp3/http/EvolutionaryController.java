@@ -78,7 +78,6 @@ public abstract class EvolutionaryController {
 		return "Session reset and files deleted.";
 	}
 
-
 	public static void deleteDirectorySafelyLater(File dir) {
 		new Thread(() -> {
 			try {
@@ -128,7 +127,6 @@ public abstract class EvolutionaryController {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GetMapping("/updateDesiredError") @ResponseBody
 	public void updateDesiredError(HttpSession session, @RequestParam double desiredError) {
 		try {
@@ -138,7 +136,6 @@ public abstract class EvolutionaryController {
 			}
 			fitnesser.setDesiredError(desiredError);
 			fitnesser.setUp();
-			//SimpleFitnesser fitnesser = new SimpleFitnesser();
 			session.setAttribute("fitnesser", fitnesser);
 
 			session.setAttribute("lastDesiredError", desiredError);
@@ -171,9 +168,6 @@ public abstract class EvolutionaryController {
 		}
 	}
 
-
-	
-	@SuppressWarnings("unchecked")
 	public final long generateInitialPopulation(HttpSession session, ProblemConfiguration pc, int initialLength) {
 		long startTime = System.currentTimeMillis();
 		String gt = ""  + EvolutionaryService.dado.nextInt();
@@ -192,7 +186,6 @@ public abstract class EvolutionaryController {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GetMapping("/firstRun") @ResponseBody
 	public Map<String, Object> firstRun(HttpSession session) {
 		long startTime = System.currentTimeMillis();

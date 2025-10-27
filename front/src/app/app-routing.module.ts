@@ -12,7 +12,7 @@ import { CanDeactivateGuard } from './CanDeactivateGuard';
 import { TranspilationComponent } from './transpilation/transpilation.component';
 
 const routes: Routes = [
-  // { path: "", redirectTo: "/matrix", pathMatch: "full" }, // Redirect empty path to 'matrix'
+  { path: "", redirectTo: "/home", pathMatch: "full" },
   { path: "matrix", component: MatrixesComponent },
   { path: "elonging", component: ElongingComponent, canDeactivate: [CanDeactivateGuard] },
   { path: "blocks", component: BlocksComponent, canDeactivate: [CanDeactivateGuard] },
@@ -21,9 +21,7 @@ const routes: Routes = [
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "transpilation", component: TranspilationComponent },
-  { path: "home", component: HomeComponent },
-  //{ path: '**', redirectTo: 'home' }
-  { path: "", redirectTo: "/home", pathMatch: "full" }
+  { path: "home", component: HomeComponent }
 ];
 
 

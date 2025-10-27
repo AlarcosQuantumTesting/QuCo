@@ -21,6 +21,8 @@ export class RunCodeComponent implements OnInit {
 
   @Output() cerrar = new EventEmitter<void>();
 
+  executionUrl : string = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=';
+
   cerrarModal(): void {
     this.cerrar.emit();
   }
@@ -59,7 +61,7 @@ export class RunCodeComponent implements OnInit {
     
     const overwriteValue = override ? 'y' : 'n';
 
-    let url = `http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let url = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
         url += `&ibm_token=${ibm_token}`; 
@@ -81,8 +83,6 @@ export class RunCodeComponent implements OnInit {
     }
     
     console.log('Auth Status:', authStatus);
-
-    const finalBody = this.qiskitCode;
     this.httpLabel = url;
   }
 
@@ -98,7 +98,7 @@ export class RunCodeComponent implements OnInit {
         const runnerNumber = optionMatch ? optionMatch[0] : '1';
         const overwriteValue = override ? 'y' : 'n';
 
-        let finalUrl = `http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+        let finalUrl = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
         if (ibm_token) {
             finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;
