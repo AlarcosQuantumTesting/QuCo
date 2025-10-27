@@ -64,6 +64,7 @@ export class CircuitEditorComponent {
   currentStartQubit: number | null = null;
   currentColumn: number | null = null;
   qubitsConsecutivos: boolean = false;
+  mostrarEjecucionRemote = false;
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
     private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
