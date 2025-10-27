@@ -43,126 +43,13 @@
                 </div>
 
                 <div class="buttons-container">
-                    <button class="btn btn-primary" (click)="enrichExecutionData()">
+                    <button class="btn btn-primary" (click)="refresExecutionData()">
                         <i class="fas fa-sync-alt" [class.spin]="isLoading"></i> Refresh list
                     </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- <div *ngIf="executionSelected" class="template-details">
-        <div class="template-header">
-            <h2>Executions specifications</h2>
-            <div class="template-buttons">
-            <button class="btn-cancel" title="Delete execution" (click)="deleteModalConfirm(executionSelected)">
-                <i class="bi bi-trash3-fill"></i> Delete local
-            </button>
-            </div>
-        </div>
-
-        <div class="template-info" style="margin-top: 20px;">
-            <div class="name-description">
-                <div class="info-block">
-                    <label><strong>ID:</strong></label>
-                    <span>{{ executionSelected.id }}</span>
-                </div>
-                <div class="info-block">
-                    <label><strong>Name:</strong></label>
-                    <span>{{ executionSelected.name }}</span>
-                </div>
-                <div class="info-block">
-                    <label><strong>Started at:</strong></label>
-                    <span>{{ executionSelected.creationDateTime | date: 'medium' }}</span>
-                </div>
-                <div class="info-block">
-                    <label><strong>Status:</strong></label>
-                    <span [ngClass]="{'text-success': executionSelected.status === 'COMPLETED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR'}">
-                        {{ executionSelected.status }}
-                    </span>
-                </div>
-            </div>
-
-            <pre class="template-code" style="text-align: left;">
-                Batch runner: {{ executionSelected.details?.runner }}
-                Iterations: {{ executionSelected.details?.iterations }}
-                Backend used: {{ executionSelected.details?.backend_status }}
-            </pre>
-        </div>
-    </div> -->
-    <!-- <div *ngIf="executionSelected" class="template-details">
-        <div class="template-header">
-            <h2>Executions specifications</h2>
-            <div class="template-buttons">
-            <button class="btn-cancel" title="Delete execution" (click)="deleteModalConfirm(executionSelected)">
-                <i class="bi bi-trash3-fill"></i> Delete local
-            </button>
-            </div>
-        </div>
-
-        <div class="template-info" style="margin-top: 20px;">
-            <div class="name-description">
-                <div class="info-block">
-                    <label><strong>ID:</strong></label>
-                    <span>{{ executionSelected.id }}</span>
-                </div>
-                <div class="info-block">
-                    <label><strong>Name:</strong></label>
-                    <span>{{ executionSelected.name }}</span>
-                </div>
-                <div class="info-block">
-                    <label><strong>Status:</strong></label>
-                    <span [ngClass]="{'text-success': executionSelected.status === 'COMPLETED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR', 'text-secondary': executionSelected.status === 'PENDING'}">
-                        {{ executionSelected.status }}
-                    </span>
-                </div>
-                
-                <div class="info-block">
-                    <label><strong>Submitted at:</strong></label>
-                    <span>{{ executionSelected.creationDateTime | date: 'medium' }}</span>
-                </div>
-                <div class="info-block" *ngIf="executionSelected.details?.started_at">
-                    <label><strong>Started at:</strong></label>
-                    <span>{{ executionSelected.details?.started_at | date: 'medium' }}</span>
-                </div>
-                <div class="info-block" *ngIf="executionSelected.details?.finished_at">
-                    <label><strong>Finished at:</strong></label>
-                    <span>{{ executionSelected.details?.finished_at | date: 'medium' }}</span>
-                </div>
-            </div>
-
-            <pre class="template-code" style="text-align: left;">
-    
-                <p><strong>Execution Parameters</strong></p>
-                
-                <div class="param-line">
-                    <label>Batch runner:</label> 
-                    <span>{{ executionSelected.details?.runner || 'N/A' }}</span>
-                </div>
-                <div class="param-line">
-                    <label>Iterations:</label> 
-                    <span>{{ executionSelected.details?.iterations || 'N/A' }}</span>
-                </div>
-                
-                <div class="param-line">
-                    <label>Option selected:</label> 
-                    <span>{{ executionSelected.details?.optionSelected || 'N/A' }}</span>
-                </div>
-                
-                <hr>
-                <p><strong>Server Paths</strong></p>
-                
-                <p *ngIf="executionSelected.details?.stdout_path">
-                    <label>Stdout Path:</label> {{ executionSelected.details?.stdout_path }}
-                    <i class="fas fa-file-alt" title="Standard Output"></i>
-                </p>
-                <p *ngIf="executionSelected.details?.stderr_path">
-                    <label>Stderr Path:</label> {{ executionSelected.details?.stderr_path }}
-                    <i class="fas fa-exclamation-triangle" title="Standard Error" style="color: #dc3545;"></i>
-                </p>
-            </pre>
-        </div>
-    </div> -->
 
     <div class="table-responsive" style="margin-top: 30px;">
         <table class="table table-bordered table-hover align-middle">
@@ -177,11 +64,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let execution of executionWorks" (click)="selectExecution(execution)" [class.table-active]="execution.id === executionSelected?.id">
+                <tr *ngFor="let execution of executionWorks" [class.table-active]="execution.id === executionSelected?.id">
                     <td>
                         <i class="bi bi-circle-fill" 
                         [ngClass]="{
-                            'text-success': execution.status === 'COMPLETED',
+                            'text-success': execution.status === 'FINISHED',
                             'text-danger': execution.status === 'ERROR',
                             'text-warning': execution.status === 'RUNNING',
                             'text-secondary': execution.status === 'PENDING'
@@ -198,21 +85,31 @@
                         </span>
                     </td>
                     <td>
-                        <button class="apply-button" title="Check status" (click)="$event.stopPropagation(); checkStatus(execution.id)">
-                            <i class="fas fa-chart-line"></i> Check status
+                        <button class="apply-button" title="Check status" (click)="selectExecution(execution)">
+                            <i class="fas fa-eye"></i> See details
                         </button>
 
                         <button 
                             class="apply-button" 
                             title="Download Summary CSV" 
-                            [disabled]="execution.status !== 'COMPLETED'" 
+                            [disabled]="execution.status !== 'FINISHED'" 
                             (click)="$event.stopPropagation(); downloadSummary(execution.id)"
                             style="margin-left: 10px; background-color: #28a745;"
                             >
                             <i class="fas fa-file-download"></i> Sumary CSV
                         </button>
 
-                        <button class="btn-cancel" title="Delete local" style="margin-left: 10px;" (click)="$event.stopPropagation(); deleteModalConfirm(execution)">
+                        <button 
+                            class="apply-button" 
+                            title="Download All Results CSV" 
+                            [disabled]="execution.status !== 'FINISHED'" 
+                            (click)="$event.stopPropagation(); downloadResults(execution.id)"
+                            style="margin-left: 10px; background-color: #0b555a;"
+                            >
+                            <i class="fas fa-download"></i> All results CSV
+                        </button>
+
+                        <button class="btn-cancel" title="Delete local" style="margin-left: 10px;" (click)="deleteModalConfirm(execution)">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     </td>
@@ -240,15 +137,15 @@
 
 
 
-    <div class="modal ejemplos" *ngIf="executionSelected">
+    <div class="modal ejemplos" *ngIf="executionSelected && modalDetails">
         <div class="modal-content ejemplos"
             cdkDrag
             cdkDragRootElement=".modal-content.ejecuciones">
 
             <div class="modal-header" cdkDragHandle>
-                <h2 class="title-modal">Execution Specifications - ID: {{ executionSelected.id }}</h2>
+                <h2 class="title-modal">Execution specifications: {{ executionSelected.name }}</h2>
                 <button class="close">
-                    <i class="close-i" (click)="clearSelection()">&times;</i>
+                    <i class="close-i" (click)="clearSelection(); modalDetails = false">&times;</i>
                 </button>
             </div>
 
@@ -267,7 +164,7 @@
                             </div>
                             <div class="info-block">
                                 <label><strong>Status:</strong></label>
-                                <span [ngClass]="{'text-success': executionSelected.status === 'COMPLETED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR', 'text-secondary': executionSelected.status === 'PENDING'}">
+                                <span [ngClass]="{'text-success': executionSelected.status === 'FINISHED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR', 'text-secondary': executionSelected.status === 'PENDING'}">
                                     {{ executionSelected.status }}
                                 </span>
                             </div>
@@ -295,10 +192,10 @@
                     <p class="section-title">Execution parameters</p>
                     
                     <div class="parameters-grid">
-                        <div class="param-line">
+                        <!-- <div class="param-line">
                             <label>Batch runner:</label> 
                             <span>{{ executionSelected.details?.runner || 'N/A' }}</span>
-                        </div>
+                        </div> -->
                         <div class="param-line">
                             <label>Iterations:</label> 
                             <span>{{ executionSelected.details?.iterations || 'N/A' }}</span>

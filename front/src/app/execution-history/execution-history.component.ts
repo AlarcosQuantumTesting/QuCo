@@ -7,7 +7,7 @@ interface ExecutionHistory {
   id: string;
   name: string;
   creationDateTime: string;
-  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR' | 'UNKNOWN';
+  status: 'PENDING' | 'RUNNING' | 'FINISHED' | 'ERROR' | 'UNKNOWN';
   details?: {
     runner?: string;
     iterations?: number;
@@ -37,6 +37,7 @@ export class ExecutionHistoryComponent implements OnInit {
   isLoading: boolean = false;
   mensajeTemporal: string = '';
   modalDelete = false;
+  modalDetails = false;
   
   private readonly serverUrl = 'http://172.20.48.130:8080/run_qiskit'; 
 
@@ -61,14 +62,15 @@ export class ExecutionHistoryComponent implements OnInit {
     localStorage.setItem('execution_batches', JSON.stringify(this.executionWorks.slice().reverse()));
   }
 
-  enrichExecutionData(): void {
+  refresExecutionData(): void {
     this.refreshAllStatuses();
   }
 
   refreshAllStatuses(): void {
     if (this.executionWorks.length > 0) {
       this.isLoading = true;
-      this.showMessage(`Fetching real status for ${this.executionWorks.length} batches...`);
+      // this.showMessage(`Fetching real status for ${this.executionWorks.length} batches...`);
+      this.showMessage(`Refreshing executions...`);
 
       this.executionWorks.forEach(execution => {
           this.checkStatus(execution.id); 
@@ -96,6 +98,7 @@ export class ExecutionHistoryComponent implements OnInit {
     const found = this.executionWorks.find(e => e.name === this.searchQuery || e.id === this.searchQuery);
     if (found) {
       this.selectExecution(found);
+      this.modalDetails = true;
     } else {
       this.showMessage(`No execution found with name or ID: ${this.searchQuery}`);
       this.executionSelected = null;
@@ -105,7 +108,8 @@ export class ExecutionHistoryComponent implements OnInit {
   selectExecution(execution: ExecutionHistory): void {
     this.executionSelected = execution;
     this.searchQuery = execution.name;
-    this.showMessage(`Execution ${execution.id} selected.`);
+    this.modalDetails = true;
+    //this.showMessage(`Execution ${execution.id} selected.`);
     this.checkStatus(execution.id); 
   }
 
@@ -120,14 +124,14 @@ export class ExecutionHistoryComponent implements OnInit {
     this.http.get(statusUrl).subscribe({
         next: (result: any) => {
             
-            let newStatus: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'ERROR' | 'UNKNOWN' = 'UNKNOWN';
+            let newStatus: 'PENDING' | 'RUNNING' | 'FINISHED' | 'ERROR' | 'UNKNOWN' = 'UNKNOWN';
             
             switch (result.state) {
                 case 'running':
                     newStatus = 'RUNNING';
                     break;
                 case 'finished':
-                    newStatus = 'COMPLETED';
+                    newStatus = 'FINISHED';
                     break;
                 case 'error':
                     newStatus = 'ERROR';
@@ -151,7 +155,7 @@ export class ExecutionHistoryComponent implements OnInit {
                 this.executionSelected = {...execution}; 
             }
 
-            this.showMessage(`Status for ID ${id} fetched. Current Status: ${execution.status}`);
+            //this.showMessage(`Status for ID ${id} fetched. Current Status: ${execution.status}`);
         },
         error: (err) => {
             execution.status = 'ERROR'; 
@@ -217,6 +221,42 @@ export class ExecutionHistoryComponent implements OnInit {
         error: (err) => {
             console.error('Error fetching summary CSV:', err);
             let errorMessage = `Failed to download summary for Batch ID ${id}.`;
+            
+            if (err.status === 404) {
+                errorMessage += ' File not found on server (404).';
+            } else if (err.status >= 500) {
+                errorMessage += ` Server error (${err.status}).`;
+            }
+            
+            this.showMessage(errorMessage, true);
+        }
+    });
+  }
+
+  downloadResults(id: string): void {
+    const downloadUrl = `${this.serverUrl}/get_results/${id}`;
+
+    this.showMessage(`Initiating download for All Results (ID ${id})...`);
+
+    this.http.get(downloadUrl, { responseType: 'blob' }).subscribe({
+        next: (responseBlob: Blob) => {
+            const downloadLink = document.createElement('a');
+            const url = window.URL.createObjectURL(responseBlob);
+            
+            downloadLink.href = url;
+            downloadLink.download = `all_results_${id}.csv`; 
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            window.URL.revokeObjectURL(url);
+            
+            this.showMessage(`Download for All Results (ID ${id}) started successfully!`);
+        },
+        error: (err) => {
+            console.error('Error fetching results CSV:', err);
+            let errorMessage = `Failed to download results for Batch ID ${id}.`;
             
             if (err.status === 404) {
                 errorMessage += ' File not found on server (404).';
