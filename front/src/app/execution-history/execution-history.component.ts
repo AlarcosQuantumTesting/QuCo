@@ -47,7 +47,8 @@ export class ExecutionHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadExecutionHistory();
-    this.refreshAllStatuses(); 
+    this.refreshAllStatuses();
+    this.searchQuery = '';
   }
 
   loadExecutionHistory(): void {
@@ -284,5 +285,81 @@ export class ExecutionHistoryComponent implements OnInit {
     }
     
     return null;
+  }
+
+
+
+
+  downloadStdout(id: string): void {
+    const downloadUrl = `${this.serverUrl}/get_stdout/${id}`;
+
+    this.showMessage(`Initiating download for STDOUT Log (ID ${id})...`);
+
+    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+        next: (responseBlob: Blob) => {
+            const downloadLink = document.createElement('a');
+            const url = window.URL.createObjectURL(responseBlob);
+            
+            downloadLink.href = url;
+            downloadLink.download = `stdout_${id}.txt`;
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            window.URL.revokeObjectURL(url);
+            
+            this.showMessage(`Download for STDOUT Log (ID ${id}) started successfully!`);
+        },
+        error: (err) => {
+            console.error('Error fetching STDOUT log:', err);
+            let errorMessage = `Failed to download STDOUT log for Batch ID ${id}.`;
+            
+            if (err.status === 404) {
+                errorMessage += ' Log file not found on server (404).';
+            } else if (err.status >= 500) {
+                errorMessage += ` Server error (${err.status}).`;
+            }
+            
+            this.showMessage(errorMessage, true);
+        }
+    });
+  }
+
+
+  downloadStderr(id: string): void {
+    const downloadUrl = `${this.serverUrl}/get_stderr/${id}`;
+
+    this.showMessage(`Initiating download for STDERR Log (ID ${id})...`);
+
+    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+        next: (responseBlob: Blob) => {
+            const downloadLink = document.createElement('a');
+            const url = window.URL.createObjectURL(responseBlob);
+            
+            downloadLink.href = url;
+            downloadLink.download = `stderr_${id}.txt`;
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            window.URL.revokeObjectURL(url);
+            
+            this.showMessage(`Download for STDERR Log (ID ${id}) started successfully!`);
+        },
+        error: (err) => {
+            console.error('Error fetching STDERR log:', err);
+            let errorMessage = `Failed to download STDERR log for Batch ID ${id}.`;
+            
+            if (err.status === 404) {
+                errorMessage += ' Log file not found on server (404).';
+            } else if (err.status >= 500) {
+                errorMessage += ` Server error (${err.status}).`;
+            }
+            
+            this.showMessage(errorMessage, true);
+        }
+    });
   }
 }

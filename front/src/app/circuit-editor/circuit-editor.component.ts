@@ -111,7 +111,7 @@ export class CircuitEditorComponent {
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.manager.selectedTemplate = this.manager.templates[0];
-    this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
+    /*this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
         qubitsConfiguration => {
           this.selectedQubitsConfigurationName = qubitsConfiguration[0];
           
@@ -120,7 +120,7 @@ export class CircuitEditorComponent {
             this.searchQuery = this.selectedQubitsConfigurationName;
           }
             
-    })
+    })*/
 
       const savedTemplateFileName = localStorage.getItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
       if (savedTemplateFileName) {
