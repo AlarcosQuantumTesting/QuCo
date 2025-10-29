@@ -231,11 +231,17 @@
                             <label>Stdout path:</label> 
                             <span>{{ executionSelected.details?.stdout_path }}</span>
                             <i class="fas fa-file-alt" title="Standard Output"></i>
+                            <button class="apply-button" title="Download STDOUT Log" (click)="downloadStdout(executionSelected!.id)" style="margin-left: 10px; padding: 5px 10px;">
+                                <i class="fas fa-download"></i>
+                            </button>
                         </p>
                         <p *ngIf="executionSelected.details?.stderr_path" class="log-line log-error">
                             <label>Stderr path:</label> 
                             <span>{{ executionSelected.details?.stderr_path }}</span>
                             <i class="fas fa-exclamation-triangle" title="Standard Error"></i>
+                            <button class="apply-button" title="Download STDERR Log" (click)="downloadStderr(executionSelected!.id)" style="margin-left: 10px; padding: 5px 10px;">
+                                <i class="fas fa-download"></i>
+                            </button>
                         </p>
                     </div>
                     
