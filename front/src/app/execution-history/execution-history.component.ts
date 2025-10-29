@@ -85,7 +85,6 @@ export class ExecutionHistoryComponent implements OnInit {
     }
   }
 
-
   get filteredExecutionWorks(): ExecutionHistory[] {
     if (!this.searchQuery) {
       return this.executionWorks;
@@ -175,11 +174,6 @@ export class ExecutionHistoryComponent implements OnInit {
     this.modalDelete = false;
     this.showMessage(`Execution batch ${id} deleted locally.`);
   }
-
-  /*deleteModalConfirm(execution: ExecutionHistory): void {
-    this.executionSelected = execution;
-    this.modalDelete = true;
-  }*/
 
   deleteModalConfirm(execution: ExecutionHistory | null): void {
     if (!execution || !execution.id) {

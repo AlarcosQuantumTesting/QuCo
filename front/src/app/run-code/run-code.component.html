@@ -100,20 +100,17 @@
             </div>
         </div>
 
-        <!-- <div class="form-group http-label-group">
-          <label class="http-label">HTTP:</label>
-          <p class="http-value">{{ httpLabel }}</p>
-        </div> -->
         <div class="form-group http-label-group">
             <label class="http-label">URL:</label>
             <p class="http-value">{{ httpLabel.split(' ')[0] }}</p>
-            
-            <!-- <label class="http-label">BODY/AUTH STATUS:</label>
-            <p class="http-value">{{ httpLabel.split(' ').slice(1).join(' ') }}</p> -->
+        </div>
+
+        <div class="form-group http-label-group" *ngIf="batchId">
+            <label class="http-label" (click)="goTo('/execution-history')">Succesfully sent. Check here the execution status (work {{ batchId }})</label>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="download-btn" [disabled]="runForm.invalid">
+          <button type="submit" class="download-btn" [disabled]="runForm.invalid" *ngIf="!batchId">
             <i class="fas fa-play"></i> Run
           </button>
         </div>
