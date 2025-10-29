@@ -106,12 +106,11 @@
         </div>
 
         <div class="form-group http-label-group" *ngIf="batchId">
-            <label class="http-label">Succesfully sent. Check the execution status at:</label>
-            <p class="http-value" (click)="goTo('/execution-history')">{{ executionUrl + "http://172.20.48.130:8080/run_qiskit/status/" + batchId }}</p>
+            <label class="http-label" (click)="goTo('/execution-history')">Succesfully sent. Check here the execution status (work {{ batchId }})</label>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="download-btn" [disabled]="runForm.invalid">
+          <button type="submit" class="download-btn" [disabled]="runForm.invalid" *ngIf="!batchId">
             <i class="fas fa-play"></i> Run
           </button>
         </div>

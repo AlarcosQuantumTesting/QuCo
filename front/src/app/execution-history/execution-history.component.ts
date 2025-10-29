@@ -175,11 +175,6 @@ export class ExecutionHistoryComponent implements OnInit {
     this.showMessage(`Execution batch ${id} deleted locally.`);
   }
 
-  /*deleteModalConfirm(execution: ExecutionHistory): void {
-    this.executionSelected = execution;
-    this.modalDelete = true;
-  }*/
-
   deleteModalConfirm(execution: ExecutionHistory | null): void {
     if (!execution || !execution.id) {
       console.error('Attempted to delete a null or invalid execution.');
