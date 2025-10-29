@@ -47,7 +47,8 @@ export class ExecutionHistoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadExecutionHistory();
-    this.refreshAllStatuses(); 
+    this.refreshAllStatuses();
+    this.searchQuery = '';
   }
 
   loadExecutionHistory(): void {
