@@ -101,7 +101,6 @@ button:hover {
     padding-right: 15px;
 }
 
-/* texto */
 p {
     font-size: 15px;
     line-height: 1.6;
@@ -119,8 +118,8 @@ p {
 
 .form-row {
     display: flex;
-    align-items: center; /* Alinea verticalmente los elementos */
-    gap: 10px; /* Espacio entre elementos */
+    align-items: center;
+    gap: 10px;
 }
 
 label {
@@ -128,7 +127,7 @@ label {
 }
 
 .form-row label {
-    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    white-space: nowrap;
 }
 
 .form-row input {
@@ -137,7 +136,7 @@ label {
 }
 
 .form-row button {
-    margin-left: auto; /* Empuja el botón hacia la derecha */
+    margin-left: auto;
 }
 
 .container {
@@ -223,7 +222,6 @@ label {
     margin-bottom: 20px;
   }
   
-  /* Estilo para el botón al pasar el ratón */
   .btn-search:hover {
     /* background-color: #0056b3; */
     background-color: #386161;
@@ -324,7 +322,7 @@ label {
   }
   
   .input-wrapper input {
-    padding-right: 110px; /* espacio para la extensión */
+    padding-right: 110px;
   }
   
   .fixed-extension {
@@ -333,7 +331,7 @@ label {
     top: 50%;
     transform: translateY(-50%);
     color: #555;
-    pointer-events: none; /* no clickeable */
+    pointer-events: none;
     user-select: none;
   }
   
@@ -345,7 +343,7 @@ label {
   }
   
   .template-header h2 {
-    grid-column: 2; /* centrado en la columna del medio */
+    grid-column: 2;
     text-align: center;
     margin: 0;
   }
@@ -396,9 +394,9 @@ label {
   }
 
   .disabled {
-    pointer-events: none; /* Bloquea los clics */
-    opacity: 0.5; /* Reduce la opacidad para indicar que está bloqueado */
-    cursor: not-allowed; /* Cambia el cursor */
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .error-text {
@@ -462,8 +460,8 @@ label {
 }
 
 .modal-header {
-    position: sticky; /* Se mantiene fija en la parte superior dentro del modal */
-    top: 0; /* Pegada arriba */
+    position: sticky;
+    top: 0;
     left: 0;
     width: 100%;
     height: 50px;
@@ -472,7 +470,7 @@ label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 100; /* Asegura que esté por encima del contenido */
+    z-index: 100;
 }
 
 .title-modal {
@@ -553,11 +551,11 @@ label {
   position: fixed;
   z-index: 1000;
   background-color: transparent;
-  pointer-events: none; /* Permite hacer clic fuera del modal */
+  pointer-events: none;
 }
 
 .modal-content.instrucciones {
-  pointer-events: auto; /* Solo el contenido del modal es interactivo */
+  pointer-events: auto;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -567,7 +565,6 @@ label {
   overflow-y: auto;
   position: relative;
 
-  /* 🪟 Estilo de ventana emergente */
   resize: both;
   overflow: auto;
 
@@ -655,17 +652,15 @@ ol.list-instructions {
     border-radius: 15px;
 }
 
-/* Caja del contenido del modal */
 .modal-content-delete {
     background-color: white;
     border-radius: 10px;
     width: fit-content;
-    max-width: 90vw; /* Para evitar que se desborde en pantallas pequeñas */
+    max-width: 90vw;
     max-height: 90vh;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
 }
 
-/* Encabezado del modal */
 .modal-header-delete {
     width: 100%;
     background-color: #a1241b;
@@ -876,7 +871,7 @@ th, td {
   font-weight: 500;
   z-index: 9999;
   animation: aparecerDesaparecer 2s ease-in-out forwards;
-  pointer-events: none; /* Para no bloquear la interacción */
+  pointer-events: none;
 }
 
 @keyframes aparecerDesaparecer {
@@ -899,7 +894,6 @@ th, td {
 }
 
 
-/* Estilos de estado de texto para la tabla */
 .text-success {
     color: #28a745 !important;
 }
@@ -916,7 +910,6 @@ th, td {
     font-weight: 600;
 }
 
-/* Spinner */
 .spinner-border {
     display: inline-block;
     width: 1rem;
@@ -979,8 +972,6 @@ tr.table-active {
   transform: scale(1.05);
 }
 
-
-/* Estilos para la Metadata Superior (ID, Name, Status, Dates) */
 .execution-metadata {
     padding-bottom: 20px;
     border-bottom: 1px solid #eee;
@@ -1013,10 +1004,6 @@ tr.table-active {
     min-width: 100px;
 }
 
-/* ---------------------------------------------------- */
-/* Estilos para la sección de Parámetros y Logs (DETAILS-VIEWER) */
-/* ---------------------------------------------------- */
-
 .details-viewer {
     background-color: #fcfcfc;
     border: 1px solid #e0e0e0;
@@ -1037,7 +1024,7 @@ tr.table-active {
 
 .parameters-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Distribuye los parámetros en 2 columnas */
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -1046,16 +1033,15 @@ tr.table-active {
     display: flex;
     align-items: center;
     gap: 8px;
-    white-space: nowrap; /* Evita que la línea se rompa */
+    white-space: nowrap;
 }
 
 .param-line label {
     font-weight: 600;
     color: #333;
-    min-width: 120px; /* Asegura la alineación de los valores */
+    min-width: 120px;
 }
 
-/* Estilos de Logs */
 .log-paths {
     margin-top: 10px;
 }
@@ -1075,6 +1061,91 @@ tr.table-active {
     min-width: 100px;
 }
 
-.log-error {
+// .log-error {
+//     color: #dc3545;
+// }
+
+.no-data-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.no-data-card {
+    text-align: center;
+    padding: 30px 40px;
+    border: 2px dashed #008b95;
+    border-radius: 15px;
+    background-color: #f7feff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+    font-size: 3.5em;
+    color: #008b95;
+    margin-bottom: 15px;
+    opacity: 0.75;
+}
+
+.no-data-card h3 {
+    font-size: 1.5em;
+    color: #0b555a;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.guide-text {
+    font-size: 1.0em;
+    color: #4a4a4a;
+    font-weight: 500;
+}
+
+
+.file-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted #f0f0f0;
+}
+
+.file-name-label {
+    font-weight: 600;
+    min-width: 150px;
+    flex-grow: 1;
+}
+
+.file-size-info {
+    font-size: 0.9em;
+    color: #666;
+    margin-right: 20px;
+}
+
+.file-download-actions {
+    flex-shrink: 0;
+}
+
+.log-paths {
+    color: #333;
+}
+
+.log-paths.files-running .file-name-label,
+.log-paths.files-running .file-size-info {
+    color: #444;
+    font-weight: 500;
+}
+
+.log-paths.files-error .file-name-label,
+.log-paths.files-error .file-size-info {
     color: #dc3545;
+    font-weight: 600;
+}
+
+.log-paths.files-success .file-name-label,
+.log-paths.files-success .file-size-info {
+    color: #28a745;
+    font-weight: 600;
 }
