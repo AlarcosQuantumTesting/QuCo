@@ -48,7 +48,7 @@ public class RunPopulation {
 		int generationToExecute = pc.getGenerationToExecute();
 		QiskitRunner runner = new QiskitRunner(gt, pc.getInputConfiguration().getNumberOfOutputs(), generationToExecute, emitters);
 		
-		TaskData freqsAndLengths = runner.runAll(pc, this.fitnesser, hw);
+		TaskData freqsAndLengths = runner.runAll(pc, this.fitnesser, hw, false);
 		
 		return freqsAndLengths; 
 	}

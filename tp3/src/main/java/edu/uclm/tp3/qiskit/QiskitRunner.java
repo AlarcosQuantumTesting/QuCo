@@ -1,16 +1,22 @@
 package edu.uclm.tp3.qiskit;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+import edu.uclm.tp3.http.HttpClient;
 import edu.uclm.tp3.http.SseEmitters;
 import edu.uclm.tp3.http.TextLogger;
 import edu.uclm.tp3.parallel.TaskData;
@@ -42,7 +48,7 @@ public class QiskitRunner implements TaskReceptor {
 		TextLogger.write(gt, 5, "processDirectory: " + processDirectory + "\n");
 	}
 
-	public TaskData runAll(ProblemConfiguration pc, Fitnesser fitnesser, HWSession hw) throws Exception {
+	public TaskData runAll(ProblemConfiguration pc, Fitnesser fitnesser, HWSession hw, boolean runInLocal) throws Exception {
 		TextLogger.write(gt, 4, "QiskitRunner::runAll(pc, fitnesser, hw)\n");
 		this.executionResults.clear();
 
@@ -55,9 +61,44 @@ public class QiskitRunner implements TaskReceptor {
 		
 		TextLogger.write(gt, 4, "files= " + files + "\n");
 		
+		if (runInLocal)
+			return getResultInLocal(fileNames);
+		else
+			return getResultInRemote(fileNames);
+	}
+
+	private TaskData getResultInRemote(String[] fileNames) {
+		int files = fileNames.length;
+		JSONArray codes = new JSONArray();
+		for (int i=0; i<files; i++) {
+			String wholeFileName = this.getProcessDirectory() + fileNames[i];
+			codes.put(this.read(wholeFileName));
+		}
+		//String url = "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1";
+		String url = "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1";
+		HttpClient remoteRunner = new HttpClient();
+		JSONArray headers = new JSONArray();
+		headers.put("Content-Type:application/json");
+		String response = remoteRunner.sendPost(url, headers, codes);
+		return null;
+	}
+
+	private String read(String wholeFileName) {
+		try(FileInputStream fis = new FileInputStream(wholeFileName)) {
+			byte[] data = new byte[fis.available()];
+			fis.read(data);
+			return new String(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private TaskData getResultInLocal(String[] fileNames) throws IOException, InterruptedException {
+		int files = fileNames.length;
 		int cores = Runtime.getRuntime().availableProcessors();
 		cores = cores*2;
-		if (files<cores)
+		if (fileNames.length<cores)
 			cores = files;
 		
 		TextLogger.write(gt, 4, "cores= " + cores + "\n");
