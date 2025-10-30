@@ -16,6 +16,7 @@ interface ExecutionHistory {
     ibm_token_provided?: boolean;
     ibm_instance_provided?: boolean;
     //backend_status?: string;
+    files?: { name: string; size: number }[];
     started_at?: string;
     finished_at?: string;
     stderr_path?: string;
@@ -220,6 +221,7 @@ export class ExecutionHistoryComponent implements OnInit {
                 finished_at: result.finished_at,
                 stderr_path: result.stderr_path,
                 stdout_path: result.stdout_path,
+                files: result.files || execution.details?.files,
             };
             
             if (this.executionSelected?.id === id) {
@@ -444,5 +446,56 @@ export class ExecutionHistoryComponent implements OnInit {
     this.modalDelete = false;
     this.showMessage('All execution history cleared successfully.');
     
+  }
+
+  downloadGenericFile(batchId: string, fileName: string): void {
+    const downloadUrl = `${this.serverUrl}/get_file/${batchId}/${fileName}`;
+
+    this.showMessage(`Initiating download for ${fileName} (ID ${batchId})...`);
+
+    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+        next: (responseBlob: Blob) => {
+            const downloadLink = document.createElement('a');
+            const url = window.URL.createObjectURL(responseBlob);
+            
+            downloadLink.href = url;
+            downloadLink.download = fileName; 
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            window.URL.revokeObjectURL(url);
+            
+            this.showMessage(`${fileName} download started successfully!`);
+        },
+        error: (err) => {
+            console.error(`Error fetching ${fileName}:`, err);
+            this.showMessage(`Failed to download ${fileName}. Status: ${err.status}`, true);
+        }
+    });
+  }
+
+  getFileListColorClass(): string {
+    const status = this.executionSelected?.status;
+    const files = this.executionSelected?.details?.files;
+
+    if (!files || status === 'PENDING' || status === 'UNKNOWN') {
+        return '';
+    }
+    
+    if (status === 'RUNNING') {
+        return 'files-running';
+    }
+
+    const stderrFile = files.find(f => f.name === 'stderr.txt');
+
+    if (status === 'FINISHED' || status === 'ERROR') {
+        if (stderrFile && stderrFile.size > 0) {
+            return 'files-error';
+        }
+        return 'files-success';
+    }
+
+    return '';
   }
 }

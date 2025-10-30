@@ -1102,3 +1102,50 @@ tr.table-active {
     color: #4a4a4a;
     font-weight: 500;
 }
+
+
+.file-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted #f0f0f0;
+}
+
+.file-name-label {
+    font-weight: 600;
+    min-width: 150px;
+    flex-grow: 1;
+}
+
+.file-size-info {
+    font-size: 0.9em;
+    color: #666;
+    margin-right: 20px;
+}
+
+.file-download-actions {
+    flex-shrink: 0;
+}
+
+.log-paths {
+    color: #333;
+}
+
+.log-paths.files-running .file-name-label,
+.log-paths.files-running .file-size-info {
+    color: #444;
+    font-weight: 500;
+}
+
+.log-paths.files-error .file-name-label,
+.log-paths.files-error .file-size-info {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.log-paths.files-success .file-name-label,
+.log-paths.files-success .file-size-info {
+    color: #28a745;
+    font-weight: 600;
+}
