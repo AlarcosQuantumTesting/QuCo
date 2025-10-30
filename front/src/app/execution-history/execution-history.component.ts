@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
 interface ExecutionHistory {
   id: string;
@@ -25,7 +26,7 @@ interface ExecutionHistory {
 @Component({
   selector: 'app-execution-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe],
+  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe, CdkDrag, CdkDragHandle],
   templateUrl: './execution-history.component.html',
   styleUrls: ['./execution-history.component.scss']
 })
@@ -81,7 +82,7 @@ export class ExecutionHistoryComponent implements OnInit {
       setTimeout(() => this.isLoading = false, 2000); 
 
     } else {
-      this.showMessage(`No execution batches found locally.`);
+      //this.showMessage(`No execution batches found locally.`);
       this.isLoading = false;
     }
   }
@@ -96,7 +97,7 @@ export class ExecutionHistoryComponent implements OnInit {
     );
   }
 
-  searchExecution(): void {
+  /*searchExecution(): void {
     const found = this.executionWorks.find(e => e.name === this.searchQuery || e.id === this.searchQuery);
     if (found) {
       this.selectExecution(found);
@@ -105,6 +106,74 @@ export class ExecutionHistoryComponent implements OnInit {
       this.showMessage(`No execution found with name or ID: ${this.searchQuery}`);
       this.executionSelected = null;
     }
+  }*/
+
+
+  searchExecution(): void {
+    if (!this.searchQuery) {
+        this.showMessage(`Please enter an ID or name to search.`);
+        this.executionSelected = null;
+        return;
+    }
+    
+    const query = this.searchQuery.trim();
+
+    // 1. BUSCAR LOCALMENTE (por ID o nombre)
+    const foundLocal = this.executionWorks.find(e => 
+        e.name.toLowerCase() === query.toLowerCase() || 
+        e.id === query
+    );
+
+    if (foundLocal) {
+        this.selectExecution(foundLocal);
+    } else {
+        
+        if (query && !isNaN(Number(query))) {
+            this.searchRemoteExecution(query);
+        } else {
+            this.showMessage(`No local execution found for: ${query}. Please search by ID.`);
+            this.executionSelected = null;
+            this.modalDetails = false;
+        }
+    }
+  }
+
+  searchRemoteExecution(id: string): void {
+    this.isLoading = true;
+    this.showMessage(`Searching server for Batch ID ${id}...`);
+    
+    const statusUrl = `${this.serverUrl}/status/${id}`;
+    
+    this.http.post(statusUrl, null).subscribe({
+        next: (result: any) => {
+            const remoteExecution: ExecutionHistory = {
+                id: id,
+                name: `${id}`,
+                creationDateTime: result.started_at || new Date().toISOString(),
+                status: 'UNKNOWN',
+                details: {
+                    started_at: result.started_at,
+                    finished_at: result.finished_at,
+                    stderr_path: result.stderr_path,
+                    stdout_path: result.stdout_path,
+                }
+            };
+            
+            this.selectExecution(remoteExecution);
+
+            this.checkStatus(id); 
+            this.isLoading = false;
+            
+        },
+        error: (err) => {
+            if (err.status === 404) {
+                this.showMessage(`Error: Execution ID ${id} not found on the server.`, true);
+            } else {
+                this.showMessage(`Error connecting to server. Code: ${err.status}`, true);
+            }
+            this.isLoading = false;
+        }
+    });
   }
 
   selectExecution(execution: ExecutionHistory): void {
@@ -361,5 +430,19 @@ export class ExecutionHistoryComponent implements OnInit {
             this.showMessage(errorMessage, true);
         }
     });
+  }
+
+  clearAllHistory(): void {
+    
+    localStorage.removeItem('execution_batches');
+
+    this.executionWorks = [];
+    this.executionSelected = null;
+    this.searchQuery = '';
+    this.modalDetails = false;
+    this.isLoading = false;
+    this.modalDelete = false;
+    this.showMessage('All execution history cleared successfully.');
+    
   }
 }
