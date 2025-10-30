@@ -11,7 +11,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,7 +46,7 @@ public class HttpClient {
 		}
 	}
 	
-	public String sendPost(String url, JSONArray headers, JSONObject payload) {
+	public String sendPost(String url, JSONArray headers, Object payload) {
 		try(CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			HttpPost post = new HttpPost(url);
 			try {
@@ -63,7 +62,7 @@ public class HttpClient {
 				
 				CloseableHttpResponse response = client.execute(post);
 				int code = response.getStatusLine().getStatusCode();
-				if (response.getStatusLine().getStatusCode()!=200) {
+				if (response.getStatusLine().getStatusCode()>=300) {
 					HttpStatus status = HttpStatus.resolve(code);
 					String errorMessage = response.getStatusLine().getReasonPhrase();
 					throw new ResponseStatusException(status, errorMessage);
