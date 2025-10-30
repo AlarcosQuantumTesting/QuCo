@@ -25,11 +25,6 @@
             <div class="section inputsContainer">
                 <div class="input-group">
                     <label>Executions:</label>
-                    <!-- <input type="text"
-                        [(ngModel)]="searchQuery"
-                        (input)="searchExecution()"
-                        placeholder="Search for an ID or name..."
-                        list="executionList"> -->
                         
                     <input type="text"
                         [(ngModel)]="searchQuery"
@@ -51,12 +46,18 @@
                     <button class="btn btn-primary" (click)="refresExecutionData()">
                         <i class="fas fa-sync-alt" [class.spin]="isLoading"></i> Refresh list
                     </button>
+
+                   <button class="btn btn-primary" *ngIf="executionWorks.length > 0" 
+                            (click)="executionSelected = null; modalDelete = true" 
+                            style="margin-left: 10px; background-color: #dc3545;">
+                        <i class="fas fa-trash-can"></i> Clear all
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="table-responsive" style="margin-top: 30px;">
+    <div class="table-responsive" style="margin-top: 30px;" *ngIf="executionWorks.length > 0;">
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-dark">
                 <tr>
@@ -123,17 +124,33 @@
         </table>
     </div>
 
+    <div class="no-data-container" *ngIf="executionWorks.length === 0">
+        <div class="no-data-card">
+            <i class="fas fa-box-open empty-icon"></i>
+            <h3>No execution history found</h3>
+            <p>Your local execution history is empty. </p>
+            <p class="guide-text">Run a new job using the <strong>Execute remote</strong> button to see your first entry here.</p>
+        </div>
+    </div>
+
     <div *ngIf="modalDelete" class="modal-delete">
         <div class="modal-content-delete">
             <div class="modal-header" style="background-color: rgb(201, 46, 46);">
                 <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete execution</h2>
                 <button class="close"><i class="close-i" (click)="modalDelete = false">&times;</i></button>
             </div>
-            <div class="modal-message-delete">
+            <div class="modal-message-delete" *ngIf="executionSelected != null">
                 <p>Are you sure you want to delete the local history for batch <strong>{{executionSelected?.name}}</strong>?</p>
                 <div class="modal-buttons">
-                    <button class="btn btn-delete-modal" (click)="confirmDelete(executionSelected!.id)">Yes, delete</button>
-                    <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false">Cancel</button>
+                    <button class="btn btn-delete-modal" (click)="confirmDelete(executionSelected!.id); executionSelected=null;">Yes, delete</button>
+                    <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false; executionSelected=null;">Cancel</button>
+                </div>
+            </div>
+            <div class="modal-message-delete" *ngIf="executionSelected == null">
+                <p>Are you sure you want to delete the local history?</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-delete-modal" (click)="clearAllHistory(); executionSelected=null;">Yes, delete</button>
+                    <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false; executionSelected=null;">Cancel</button>
                 </div>
             </div>
         </div>
@@ -176,10 +193,6 @@
                         </div>
 
                         <div class="info-column">
-                            <!-- <div class="info-block">
-                                <label><strong>Submitted at:</strong></label>
-                                <span>{{ executionSelected.creationDateTime | date: 'medium' }}</span>
-                            </div> -->
                             <div class="info-block" *ngIf="executionSelected.details?.started_at">
                                 <label><strong>Started at:</strong></label>
                                 <span>{{ executionSelected.details?.started_at | date: 'medium' }}</span>
@@ -201,10 +214,6 @@
                     <p class="section-title">Execution parameters</p>
                     
                     <div class="parameters-grid">
-                        <!-- <div class="param-line">
-                            <label>Batch runner:</label> 
-                            <span>{{ executionSelected.details?.runner || 'N/A' }}</span>
-                        </div> -->
                         <div class="param-line">
                             <label>Iterations:</label> 
                             <span>{{ executionSelected.details?.iterations || 'N/A' }}</span>
@@ -223,7 +232,7 @@
                         </div>
                     </div>
                     
-                    <hr>
+                    <!-- <hr>
                     <p class="section-title">Server paths & logs</p>
                     
                     <div class="log-paths">
@@ -235,8 +244,8 @@
                                 <i class="fas fa-download"></i>
                             </button>
                         </p>
-                        <p *ngIf="executionSelected.details?.stderr_path" class="log-line log-error">
-                            <label>Stderr path:</label> 
+                        <p *ngIf="executionSelected.details?.stderr_path" class="log-line">
+                            <label>Stderr path:</label>
                             <span>{{ executionSelected.details?.stderr_path }}</span>
                             <i class="fas fa-exclamation-triangle" title="Standard Error"></i>
                             <button class="apply-button" title="Download STDERR Log" (click)="downloadStderr(executionSelected!.id)" style="margin-left: 10px; padding: 5px 10px;">
@@ -247,7 +256,73 @@
                     
                     <p *ngIf="executionSelected.status === 'ERROR' && !executionSelected.details?.stderr_path" class="error-note">
                         No stderr path available. Check server console for generic errors.
-                    </p>
+                    </p> -->
+                </div>
+                <div class="details-viewer">
+                    <p class="section-title">Server files</p>
+                    
+                    <!-- <div class="log-paths">
+                        
+                        <p class="guide-text" style="margin-bottom: 5px;">Files generated in batch directory:</p>
+
+                        <div *ngFor="let file of executionSelected.details?.files" class="param-line file-line">
+                            <label class="file-name-label">{{ file.name }}</label>
+                            <span class="file-size-info">({{ (file.size / 1024) | number:'1.0-2' }} KB)</span>
+                            
+                            <div class="file-download-actions">
+                                
+                                <ng-container *ngIf="executionSelected.status === 'FINISHED'">
+                                    
+                                    <button class="apply-button download-btn" 
+                                            title="Download {{ file.name }}"
+                                            (click)="downloadGenericFile(executionSelected!.id, file.name)"
+                                            style="padding: 5px 10px; margin-left: 10px;">
+                                        
+                                        <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
+                                        <i *ngIf="file.name.endsWith('.txt')" class="fas fa-file-alt"></i>
+                                        <i *ngIf="!file.name.endsWith('.csv') && !file.name.endsWith('.txt')" class="fas fa-download"></i>
+                                        
+                                    </button>
+
+                                </ng-container>
+                            </div>
+                        </div>
+
+                    </div> -->
+                    <div class="log-paths" [class]="getFileListColorClass()">
+    
+                        <p class="guide-text" style="margin-bottom: 5px;">Files generated in batch directory:</p>
+
+                        <div *ngFor="let file of executionSelected.details?.files" class="param-line file-line">
+                            
+                            <label class="file-name-label">{{ file.name }}</label>
+                            <span class="file-size-info">({{ (file.size) | number:'1.0-2' }} KB)</span>
+                            
+                            <div class="file-download-actions">
+                                <ng-container *ngIf="executionSelected.status === 'FINISHED'">
+                                    </ng-container>
+                            </div>
+
+                            <div class="file-download-actions">
+                                
+                                <ng-container *ngIf="executionSelected.status === 'FINISHED'">
+                                    
+                                    <button class="apply-button download-btn" 
+                                            title="Download {{ file.name }}"
+                                            (click)="downloadGenericFile(executionSelected!.id, file.name)"
+                                            style="padding: 5px 10px; margin-left: 10px;">
+                                        
+                                        <!-- <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
+                                        <i *ngIf="file.name.endsWith('.txt')" class="fas fa-file-alt"></i>
+                                        <i *ngIf="!file.name.endsWith('.csv') && !file.name.endsWith('.txt')" class="fas fa-download"></i> -->
+                                         <i class="fas fa-download"></i>
+                                        
+                                    </button>
+
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

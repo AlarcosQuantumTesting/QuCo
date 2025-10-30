@@ -487,18 +487,6 @@ export class MatrixesComponent implements AfterViewInit  {
           this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
 
-          this.qiskitCode = this.qiskitCode.replace("for i in range(0, len(circuits)) :", "")
-          this.qiskitCode = this.qiskitCode.replace("\tfor j in range (0, qubits) :", "")
-          this.qiskitCode = this.qiskitCode.replace("\t\tcircuits[i].h(j)", "")
-          this.qiskitCode = this.qiskitCode.replace("for i in range(0, len(circuits)) :", "")
-          this.qiskitCode = this.qiskitCode.replace("\tfor j in range(0, qubits) :", "")
-          this.qiskitCode = this.qiskitCode.replace("\t\tcircuits[i].measure(j, qubits-j-1)", "").trim()
-          
-          let cont = this.inputQubits
-          for (let i=0; i<this.outputQubits; i++) {
-            this.qiskitCode = this.qiskitCode + "\ncircuits[0].measure(" + cont + ", " + i + ")"
-            cont++
-          }
         }
 
         // Mostrar modal solo si el usuario ingresó un nombre válido
