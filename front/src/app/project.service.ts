@@ -7,11 +7,16 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ProjectService {
-  private apiUrl = 'http://localhost:8081/projects/save'; 
+  private baseUrl = 'http://localhost:8081/projects'; 
 
   constructor(private http: HttpClient) { }
 
   saveProject(projectData: any): Observable<any> {
-    return this.http.put(this.apiUrl, projectData);
+    return this.http.put(`${this.baseUrl}/save`, projectData);
+  }
+
+  getProjectsByUser(userEmail: string): Observable<any> {
+    const requestBody = { email: userEmail };
+    return this.http.post(`${this.baseUrl}/getAllByUser`, requestBody);
   }
 }

@@ -144,6 +144,10 @@ export class MatrixesComponent implements AfterViewInit  {
   mostrarModalGuardarProyecto: boolean = false;
   saveError: string = '';
 
+  projects: StoredProject[] = [];
+  selectedProjectId: string = '';
+  readonly currentUserEmail: string = 'exampleUser@gmail.com';
+
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
     private projectService: ProjectService) {}
@@ -718,7 +722,8 @@ export class MatrixesComponent implements AfterViewInit  {
   isInvalid: boolean = true;
 
   ngOnInit() {
-    // Valida cuando se inicializan los valores
+    this.loadUserProjects();
+
     this.validateInputs();
 
     this.transpileService.getBackends().subscribe(backends => {
@@ -1625,7 +1630,7 @@ export class MatrixesComponent implements AfterViewInit  {
       QCodes: [
           {
               platform: "AerSimulator",
-              code: this.qiskitCode || "Código Qiskit no generado"
+              code: this.qiskitCode || "No qiskit code generated."
           }
       ],
       inputQubits: Array.from({length: this.inputQubits}, (_, i) => i).join(','),
@@ -1654,13 +1659,61 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
-        alert('✅ Proyecto "' + this.circuitName + '" guardado con éxito!');
+        alert('Project "' + this.circuitName + '" saved successfully!');
       },
       error: (error: any) => {
-        console.error('❌ Error al guardar el proyecto:', error);
-        alert('❌ Error al guardar el proyecto (Código 400). Revisa la consola y la documentación de la API.');
+        console.error('Error al guardar el proyecto:', error);
+        alert('Error saving project (Code 400). Check the console and the API documentation.');
       }
     });
+  }
+
+  loadUserProjects(): void {
+    if (this.currentUserEmail) {
+        this.projectService.getProjectsByUser(this.currentUserEmail).subscribe({
+            next: (data: StoredProject[]) => {
+                this.projects = data;
+                console.log('Proyectos cargados:', this.projects);
+            },
+            error: (err) => {
+                console.error('Error al cargar proyectos del usuario:', err);
+            }
+        });
+    }
+  }
+
+  onProjectSelected(): void {
+    if (this.selectedProjectId) {
+        const project = this.projects.find(p => p.id === this.selectedProjectId);
+        
+        if (project) {
+            this.loadProject(project);
+        }
+    } else {
+        this.resetValues();
+    }
+  }
+
+  loadProject(project: StoredProject): void {
+    if (!project.qProgram) {
+        console.error('El proyecto seleccionado no contiene datos de qProgram.');
+        alert('This project does not have valid circuit data.');
+        return;
+    }
+
+    const qp = project.qProgram;
+
+    this.circuitName = project.name;
+    this.inputQubits = qp.qubits - qp.outputQubits;
+    this.outputQubits = qp.outputQubits;
+
+    this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
+
+    this.fillTableWithUserExpressions();
+    
+    this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
+
+    alert(`Proyecto "${project.name}" cargado con éxito.`);
   }
 
 }
@@ -1694,4 +1747,10 @@ interface Circuit {
 interface SaveProjectData {
     circuit: Circuit;
     user: { id: string };
+}
+
+interface StoredProject {
+  id: string;
+  name: string;
+  qProgram: any;
 }
