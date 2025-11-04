@@ -220,39 +220,18 @@
     </div>
 </div>
 
-<div *ngIf="matrix" style="display: flex; justify-content: center; align-items: center; position: relative;">
-    <div style="display: flex; align-items: center;">
-        <h2 *ngIf="matrix" style="margin-top: 10px;">Table</h2>
-        <!-- <div style="position: relative;">
-            <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
-              <i class="fa fa-edit"></i>
-            </button>
-            <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
-
-              <div>
-                <p class="radioTitle">Select domain:</p>
-                <label class="custom-radio">
-                  <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
-                </label>
-                <label class="custom-radio">
-                  <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
-                </label>
-              </div>
-
-                <div>
-                    <p class="radioTitle">Available templates:</p>
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-                        <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes'])" [ngValue]="template">
-                            {{ template.fileName }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-        </div> -->
+<div *ngIf="matrix" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px; position: relative; margin-bottom: 10px;">
+    
+    <div style="width: 200px;"></div>
+    
+    <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
+    
+    <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
+        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save">
+            <i class="fas fa-save"></i> Save project
+        </button>
     </div>
-
 </div>
-
 
 <div *ngIf="matrix" class="matrix-editor-container">
     <div class="table-button-container">
@@ -790,6 +769,31 @@
                 </div>
             </div>
             
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Save project</h2>
+                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+            </div>
+            <div class="info-form">
+                <h3>Enter project name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                    
+                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                        <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarSaveModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="saveError">{{ saveError }}</div>
+            </div>
         </div>
     </div>
   

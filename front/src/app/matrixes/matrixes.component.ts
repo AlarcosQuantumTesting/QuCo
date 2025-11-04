@@ -10,12 +10,14 @@ import { Expression } from './Expression';
 import { EditorComponent } from '../editor/editor.component';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { ProjectService } from '../project.service';
 
 @Component({
   selector: 'app-matrixes',
   templateUrl: './matrixes.component.html',
   styleUrls: ['./matrixes.component.css']
 })
+
 export class MatrixesComponent implements AfterViewInit  {
 
   @ViewChild(EditorComponent) editor!: EditorComponent;
@@ -139,10 +141,12 @@ export class MatrixesComponent implements AfterViewInit  {
   modalError: boolean = false;
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
-
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
-    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService) {}
+    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
+    private projectService: ProjectService) {}
 
   addUserExpression(): void {
     console.log('Añadir expresión de usuario');
@@ -1518,4 +1522,176 @@ export class MatrixesComponent implements AfterViewInit  {
     return true;
   }
 
+  openSaveProjectModal(): void {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal(): void {
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.circuitName = ''; 
+  }
+
+  confirmarGuardarProyecto(): void {
+      if (!this.circuitName || this.circuitName.trim().length === 0) {
+          this.saveError = "The project name is mandatory.";
+          return;
+      }
+
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      
+      this.guardarProyecto();
+  }
+
+  guardarProyecto(): void {
+
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+        console.error("No se puede guardar: el nombre del circuito es obligatorio.");
+        this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
+        return;
+    }
+
+    let interestingRows = 0; 
+    const positionValue: { [key: number]: number } = {};
+    
+    if (this.matrix && this.matrix.length > 0) {
+        for (let i = 0; i < this.matrix.length; i++) {
+            const row = this.matrix[i];
+            const outputQubitsValues = row.slice(this.inputQubits, this.inputQubits + this.outputQubits);
+            
+            let outputDecimalValue = 0;
+            for (let j = 0; j < outputQubitsValues.length; j++) {
+                outputDecimalValue += outputQubitsValues[j] * Math.pow(2, this.outputQubits - 1 - j);
+            }
+            
+            if (outputDecimalValue !== 0) {
+                positionValue[i] = outputDecimalValue; 
+            }
+        }
+        interestingRows = Object.keys(positionValue).length;
+    } else {
+        interestingRows = 0;
+        positionValue["0"] = 0;
+    }
+    
+    const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
+        name: `UserExpr${index + 1}`,
+        expr: expr,
+        description: `User Expression ${index + 1}`,
+        type: 'matrixes'
+    }));
+    
+    let quirkCircuitData: any = {};
+    if (this.quirkURL) {
+      const urlString = this.sanitizer.sanitize(4, this.quirkURL) as string;
+      const match = urlString.match(/circuit=(.*)/);
+      if (match && match[1]) {
+        try {
+          quirkCircuitData = JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+          console.error("Error al parsear JSON del quirkURL:", e);
+        }
+      }
+    }
+
+    let quirkCodeFinal: any = {};
+    if (quirkCircuitData.cols) {
+        quirkCodeFinal.cols = quirkCircuitData.cols.map((col: any[]) => {
+             if (col.some(item => item === "…")) {
+                 return col;
+             }
+             
+             let lastSignificantIndex = col.length - 1;
+             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+                 lastSignificantIndex--;
+             }
+             
+             return col.slice(0, lastSignificantIndex + 1);
+        });
+    }
+    
+    const qProgram: QProgram = {
+      id: this.circuitName,
+      qubits: this.inputQubits + this.outputQubits,
+      expressions: qProgramExpressions,
+      shots: 0,
+      generator: {
+          type: "MATRIX",
+          interestingRows: interestingRows,
+          positionValue: positionValue
+      },
+      QCodes: [
+          {
+              platform: "AerSimulator",
+              code: this.qiskitCode || "Código Qiskit no generado"
+          }
+      ],
+      inputQubits: Array.from({length: this.inputQubits}, (_, i) => i).join(','),
+      outputQubits: Array.from({length: this.outputQubits}, (_, i) => i + this.inputQubits).join(','),
+      qCircuit: {
+          id: this.circuitName,
+          qbits: this.inputQubits + this.outputQubits,
+          quirkCode: quirkCodeFinal 
+      }
+    };
+    
+    const projectDtoForMapping: any = {
+        id: this.circuitName,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: 'exampleUser@gmail.com' 
+    };
+    
+    const finalPayload: any = {
+        circuit: projectDtoForMapping, 
+        user: { id: 'exampleUser@gmail.com' } 
+    };
+
+    console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
+
+    
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: (response: unknown) => {
+        alert('✅ Proyecto "' + this.circuitName + '" guardado con éxito!');
+      },
+      error: (error: any) => {
+        console.error('❌ Error al guardar el proyecto:', error);
+        alert('❌ Error al guardar el proyecto (Código 400). Revisa la consola y la documentación de la API.');
+      }
+    });
+  }
+
+}
+
+
+interface QProgramExpression {
+  name: string;
+  expr: string;
+  description: string;
+  type: string;
+}
+
+interface QProgram {
+    id: string;
+    qubits: number;
+    expressions: QProgramExpression[];
+    shots: number;
+    generator: any;
+    QCodes: { platform: string, code: string }[];
+    inputQubits: string;
+    outputQubits: string;
+    qCircuit: any;
+}
+
+interface Circuit {
+    id: string;
+    name: string;
+    qProgram: string;
+}
+
+interface SaveProjectData {
+    circuit: Circuit;
+    user: { id: string };
 }
