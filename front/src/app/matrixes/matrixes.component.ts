@@ -1627,7 +1627,7 @@ export class MatrixesComponent implements AfterViewInit  {
           interestingRows: interestingRows,
           positionValue: positionValue
       },
-      QCodes: [
+      qcodes: [
           {
               platform: "AerSimulator",
               code: this.qiskitCode || "No qiskit code generated."
@@ -1732,7 +1732,7 @@ interface QProgram {
     expressions: QProgramExpression[];
     shots: number;
     generator: any;
-    QCodes: { platform: string, code: string }[];
+    qcodes: { platform: string, code: string }[];
     inputQubits: string;
     outputQubits: string;
     qCircuit: any;
