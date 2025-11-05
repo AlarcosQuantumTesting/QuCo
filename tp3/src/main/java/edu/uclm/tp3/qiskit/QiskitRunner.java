@@ -75,7 +75,7 @@ public class QiskitRunner implements TaskReceptor {
 			codes.put(this.read(wholeFileName));
 		}
 		//String url = "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1";
-		String url = "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1";
+		String url = "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/run_code";
 		HttpClient remoteRunner = new HttpClient();
 		JSONArray headers = new JSONArray();
 		headers.put("Content-Type:application/json");
