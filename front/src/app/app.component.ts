@@ -66,22 +66,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
   }
 
-  /*
-  // Para confirmar la recarga de la página
-  ngOnInit(): void {
-    window.addEventListener('beforeunload', this.confirmExit);
-  }
-
-  ngOnDestroy(): void {
-    window.removeEventListener('beforeunload', this.confirmExit);
-  }
-
-  confirmExit = (event: BeforeUnloadEvent): void => {
-    event.preventDefault();
-    event.returnValue = '';
-  };
-  */
-
   showAccessibility = false;
   darkMode = false;
   highContrast = false;
@@ -95,63 +79,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   closeAccessibilityPanel() {
     this.showAccessibility = false;
   }
-
-  /*stoggleDarkMode() {
-    this.darkMode = !this.darkMode;
-    if (this.darkMode) {
-      this.highContrast = false;
-      this.setBgColor('#121212');
-    } else {
-      this.setBgColor('');
-    }
-  }
-
-  toggleHighContrast() {
-    this.highContrast = !this.highContrast;
-    if (this.highContrast) {
-      this.darkMode = false;
-      this.setBgColor('#000000');
-    } else {
-      this.setBgColor('');
-    }
-  }
-
-  pickBgColor(event: any) {
-    const color = event.target.value;
-    this.setBgColor(color);
-  }
-
-  setBgColor(event: any) {
-    const color = event.target.value;
-    this.bgColor = color;
-    this.renderer.setStyle(document.body, 'background-color', color);
-    this.setTextColor(color, document.body);
-  }
-
-  setContainerColor(event: any) {
-    const color = event.target.value;
-    this.containerColor = color;
-    const mainContainers = document.querySelectorAll('.container');
-    mainContainers.forEach(el => {
-      (el as HTMLElement).style.backgroundColor = color;
-      this.setTextColor(color, el as HTMLElement);
-    });
-  }
-
-  private setTextColor(bgColor: string, element: HTMLElement) {
-    const c = bgColor.substring(1);
-    const rgb = parseInt(c, 16);
-    const r = (rgb >> 16) & 0xff;
-    const g = (rgb >> 8) & 0xff;
-    const b = rgb & 0xff;
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-
-    const textColor = brightness > 128 ? '#000000' : '#ffffff';
-    this.renderer.setStyle(element, 'color', textColor);
-  }*/
-
-
-
 
   private saveSettings() {
     const settings = {
@@ -191,20 +118,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
 
       this.updateZoom();
-
-      // Esperar a que los h1 estén en el DOM
-      /*setTimeout(() => {
-        document.querySelectorAll('h1').forEach(el => {
-          (el as HTMLElement).style.backgroundColor = this.sidebarColor;
-        });
-      }, 50);*/
     }
   }
-  
-
-
-
-
 
   bgColor = '#ffffff';
   containerColor = '#f5f5f5';
@@ -212,7 +127,6 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   grayscale = false;
 
-  // Forzar tonos pastel
   private ensurePastel(hex: string): string {
     const c = hex.substring(1);
     const rgb = parseInt(c, 16);
@@ -220,7 +134,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     let g = (rgb >> 8) & 0xff;
     let b = rgb & 0xff;
 
-    // Forzar a que los valores estén entre 150 y 255 → tonos claros
     r = Math.max(150, r);
     g = Math.max(150, g);
     b = Math.max(150, b);
@@ -250,9 +163,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     document.querySelectorAll('.sidebar').forEach(el => {
       (el as HTMLElement).style.backgroundColor = color;
     });
-    /*document.querySelectorAll('h1').forEach(el => {
-      (el as HTMLElement).style.backgroundColor = color;
-    });*/
     this.saveSettings();
   }
 
@@ -268,21 +178,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
     this.saveSettings();
   }
-
-  /*toggleGrayscale() {
-    this.grayscale = !this.grayscale;
-    const mainContainer = document.querySelector('html') as HTMLElement;
-
-    if (this.grayscale) {
-      this.renderer.setStyle(mainContainer, 'filter', 'grayscale(100%) brightness(90%)');
-      this.renderer.setStyle(mainContainer, 'transition', 'filter 0.3s ease');
-    } else {
-      this.renderer.removeStyle(mainContainer, 'filter');
-      this.renderer.setStyle(mainContainer, 'background-color', this.bgColor);
-    }
-    this.saveSettings();
-  }*/
-
 
   resetColors() {
     this.bgColor = '#ffffff';
@@ -343,36 +238,27 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
 
 
+  mostrarModalLogin = false;
+  emailUsuario: string = '';
+  passwordUsuario: string = '';
+  errorLogin: string = '';
 
-
-  /*letra
-  fontSize = 100;
-  minFont = 80; 
-  maxFont = 120;
-  step = 10;
-
-  updateFontSize() {
-    document.documentElement.style.setProperty('--font-scale', this.fontSize + '%');
+  toggleLogin() {
+    this.mostrarModalLogin = true;
   }
 
-  increaseFontSize() {
-    if (this.fontSize < this.maxFont) {
-      this.fontSize += this.step;
-      this.updateFontSize();
-    }
+  isLoginDisabled(): boolean {
+    return !this.emailUsuario || !this.passwordUsuario;
   }
 
-  decreaseFontSize() {
-    if (this.fontSize > this.minFont) {
-      this.fontSize -= this.step;
-      this.updateFontSize();
-    }
+  iniciarSesion(): void {
+    console.log('Intentando iniciar sesión con:', this.emailUsuario);
   }
 
-  resetFontSize() {
-    this.fontSize = 100;
-    this.updateFontSize();
-  }*/
-
-
+  cerrarModalLogin(): void {
+    this.mostrarModalLogin = false;
+    this.emailUsuario = '';
+    this.passwordUsuario = '';
+    this.errorLogin = '';
+  }
 }

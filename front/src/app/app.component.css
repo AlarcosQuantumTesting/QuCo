@@ -724,11 +724,11 @@ input:checked + .slider:after {
     position: fixed;
     z-index: 1000;
     background-color: transparent;
-    pointer-events: none; /* Permite hacer clic fuera del modal */
+    pointer-events: none;
 }
   
 .modal-content.instrucciones {
-    pointer-events: auto; /* Solo el contenido del modal es interactivo */
+    pointer-events: auto;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -738,13 +738,153 @@ input:checked + .slider:after {
     overflow-y: auto;
     position: relative;
 
-    /* 🪟 Estilo de ventana emergente */
     resize: both;
     overflow: auto;
 
     min-width: 360px;
     min-height: 200px;
 
-    /* Opcional: borde para dar sensación de "ventana" */
     border: 1px solid #ccc;
+}
+
+
+.modal-login {
+    position: fixed; 
+    z-index: 1000; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-login-content {
+    background-color: #fff;
+    /* padding: 25px; */
+    border-radius: 8px;
+    max-width: 450px; 
+    width: 90%; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+    position: relative; 
+}
+
+.modal-login-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.modal-login-title {
+    margin: 15px;
+    font-size: 1.5em;
+    color: white;
+}
+
+.modal-login-close-btn {
+  margin: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: white;
+    line-height: 1;
+}
+
+.modal-login-close-btn.i:hover {
+    color: #777;
+}
+
+.modal.login-info-form {
+    text-align: left;
+    padding: 0 25px 25px 25px;
+}
+
+.modal-login-info-form h3 {
+    margin-top: 0;
+    color: #555;
+}
+
+.modal-login-input-row {
+    margin-bottom: 15px;
+}
+
+.modal-login-input-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.modal-login-input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.modal-login-buttons {
+    display: flex;
+    justify-content: flex-end; 
+    gap: 10px; 
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.modal-login-btn-confirm, .modal-login-btn-cancel {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-login-buttons.i.fa-sign-in:hover {
+    transform: scale(1) !important;
+}
+
+.modal-login-btn-confirm {
+    background-color: #13989D;
+    color: white;
+}
+
+.modal-login-btn-confirm:hover:not([disabled]) {
+    background-color: #136062;
+    transform: scale(1.05);
+}
+
+.modal-login-btn-confirm[disabled] {
+    background-color: #85bfc0;
+    cursor: not-allowed;
+}
+
+.modal-login-btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-login-btn-cancel:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}
+
+
+.modal-login-error {
+    color: #dc3545; 
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    text-align: center;
 }

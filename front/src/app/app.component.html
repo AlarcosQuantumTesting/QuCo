@@ -85,6 +85,13 @@
             </a>
         </li>
 
+        <li>
+            <a routerLinkActive="active" (click)="toggleLogin()">
+                <i class="fas fa-circle-user" title="User"></i>
+                <span *ngIf="menuAbierto">User</span>
+            </a>
+        </li>
+
         <li class="ajustes">
           <a (click)="toggleAccessibilityPanel()" class="accessibility-link">
             <i  class="fas fa-cog" title="Settings"></i>
@@ -165,57 +172,55 @@
   </div>
 
 
-  <!-- Interfaz de accesibilidad -->
-  <!-- <div class="accessibility-modal" *ngIf="showAccessibility">
-    <div class="accessibility-content">
-      <h2>Accesibility and settings</h2>
+  <div class="modal-login" *ngIf="mostrarModalLogin">
+    <div class="modal-login-content">
+        <div class="modal-header" style="border-top-left-radius: 8px; border-top-right-radius: 8px">
+            <h2 class="modal-login-title">Login</h2>
+            <button class="modal-login-close-btn" (click)="cerrarModalLogin()">
+                <i class="close-i">&times;</i>
+            </button>
+        </div>
+        <div class="modal-login-info-form" style="margin: 15px;">
+            
+            <div class="modal-login-input-row">
+                <label for="email">Email</label>
+                <input 
+                    id="email" 
+                    class="modal-login-input-field" 
+                    type="email" 
+                    [(ngModel)]="emailUsuario" 
+                    placeholder="example@email.com"
+                >
+            </div>
 
-      <button (click)="toggleHighContrast()">
-        <i class="fas fa-adjust"></i> High contrast
-      </button>
+            <div class="modal-login-input-row">
+                <label for="password">Password</label>
+                <input 
+                    id="password" 
+                    class="modal-login-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordUsuario" 
+                    placeholder="password"
+                >
+            </div>
 
-      <label>
-        🌈 Background color
-          <input type="color" [value]="bgColor" (input)="setBgColor($event)">
-      </label>
-
-      <label>
-        🎨 Main containers color
-        <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
-      </label>
-
-      <button (click)="accessibility.increaseFontSize()">
-        <i class="fas fa-search-plus"></i> Increase font size
-      </button>
-
-      <button (click)="accessibility.decreaseFontSize()">
-        <i class="fas fa-search-minus"></i> Reduce font size
-      </button>
-
-      <button (click)="accessibility.resetFontSize()">
-        <i class="fas fa-undo"></i> Default font size
-      </button>
-
-      <button (click)="toggleDarkMode()">
-        <i class="fas fa-moon"></i> Dark mode
-      </button>
-
-      <div class="accessibility-panel">
-        <label>
-          🌈 Background color
-          <input type="color" [value]="bgColor" (input)="setBgColor($event)">
-        </label>
-
-        <label>
-          🎨 Main containers color
-          <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
-        </label>
-      </div>
-
-      <button (click)="closeAccessibilityPanel()">
-        <i class="fas fa-times"></i> Close
-      </button>
+            <div class="modal-login-buttons">
+                <button 
+                    class="modal-login-btn-confirm" 
+                    (click)="iniciarSesion()" 
+                    [disabled]="isLoginDisabled()" 
+                >
+                    Login
+                </button>
+                
+                <button class="modal-login-btn-cancel" (click)="cerrarModalLogin()">
+                    Cancel
+                </button>
+            </div>
+            
+            <div class="modal-login-error" *ngIf="errorLogin">{{ errorLogin }}</div>
+        </div>
     </div>
-  </div> -->
+  </div>
   
 </body>
