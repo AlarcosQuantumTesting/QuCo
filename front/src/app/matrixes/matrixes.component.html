@@ -210,7 +210,7 @@
                 </span>
             </div>
 
-            <div class="form-group" *ngIf="projects && projects.length > 0">
+            <div class="form-group" *ngIf="currentUserEmail && projects && projects.length > 0">
                 <div class="label-container">
                     <label for="projectSelector">Load Project:</label>
                 </div>
@@ -239,7 +239,7 @@
     <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
     
     <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
-        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save">
+        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="currentUserEmail && currentUserToken">
             <i class="fas fa-save"></i> Save project
         </button>
     </div>
@@ -549,7 +549,6 @@
 <!-- <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" style="width: 100%; height: 100%;"></app-run-code> -->
 <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="qiskitCode || ''" ></app-run-code>
 
-    <!-- Modal para ingresar el nombre de la función -->
     <div class="modal" *ngIf="mostrarModalNombreFuncion">
         <div class="modal-content">
             <div class="modal-header">
@@ -576,13 +575,11 @@
 
     <div class="modal" *ngIf="mostrarModalCrearExp">
         <div class="modal-content">
-            <!-- Botón para cerrar el modal -->
             <div class="modal-header">
                 <h2 class="title-modal">Create expression</h2>
                 <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false; cerrarModal()">&times;</i></button>
             </div>
     
-            <!-- Contenido del modal -->
             <div class="expression-output">
 
                 <div class="expressionsContainer">
@@ -625,26 +622,18 @@
                     <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
-    
-            <!-- Botón para copiar el código -->
-            <!-- <div class="modal-footer">
-                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
-            </div> -->
         </div>
     </div>
 
     <div class="modal" *ngIf="mostrarModalVerExp">
         <div class="modal-content">
-            <!-- Encabezado del modal -->
             <div class="modal-header">
                 <div class="header-with-button">
                     <h2 class="title-modal">Manage expressions</h2>
-                    <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
                 </div>
                 <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</i></button>
             </div>
             
-            <!-- Tabla de expresiones -->
             <div class="table-container-expressions">
                 <table class="expressions-table">
                     <thead>
@@ -665,7 +654,6 @@
                                     <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
                                 <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
-                                    <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)"> -->
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -674,19 +662,14 @@
                 </table>
             </div>
     
-            <!-- Botón de cerrar -->
            
             <div class="modal-footer">
-                <!-- <div class="help-actions" style="margin-bottom: 15px;">
-                    <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
-                </div> -->
                 <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
             </div>
             
         </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
     <div *ngIf="showDeleteModal" class="modal-delete">
         <div class="modal-content-delete">
             <div class="modal-header" style="background-color: rgb(201, 46, 46);">
@@ -714,7 +697,6 @@
                 <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
             </div>
 
-            <!-- Contenido del modal -->
             <div class="intructions-content" style="justify-content: center; display: flex;">
                 <div class="form-row" style="justify-content: center; width: 100%;">
                 <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
@@ -776,7 +758,6 @@
                 </div>
 
                 <div class="help-actions">
-                    <!-- <button class="btn-cancel" (click)="modalError = false">Close</button> -->
                     <button class="btn-confirm" (click)="modalError = false">Got it!</button>
                 </div>
             </div>

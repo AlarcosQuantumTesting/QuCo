@@ -146,7 +146,8 @@ export class MatrixesComponent implements AfterViewInit  {
 
   projects: StoredProject[] = [];
   selectedProjectId: string = '';
-  readonly currentUserEmail: string = 'exampleUser@gmail.com';
+  readonly currentUserEmail: string = localStorage.getItem('userEmail') || '';
+  readonly currentUserToken: string = localStorage.getItem('userToken') || '';
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
@@ -722,6 +723,9 @@ export class MatrixesComponent implements AfterViewInit  {
   isInvalid: boolean = true;
 
   ngOnInit() {
+
+    console.log("User email in matrixes:", this.currentUserEmail);
+    console.log("User token in matrixes:", this.currentUserToken);
     this.loadUserProjects();
 
     this.validateInputs();

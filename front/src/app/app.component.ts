@@ -378,8 +378,11 @@ export class AppComponent implements AfterViewInit, OnInit {
             localStorage.setItem('userToken', token);
             this.mostrarModalLogin = false;
             this.mensajeExito = `Logged successfully! Welcome, ${this.emailUsuario}!`;
+            localStorage.setItem('userEmail', this.emailUsuario);
             this.mostrarMensajeExito = true;
             this.limpiarMensajeExito(2000);
+
+            location.reload();
             return token;
         } else if (response.status === 403) {
             throw new Error("Credenciales inválidas (email o contraseña incorrectos).");
@@ -409,6 +412,7 @@ export class AppComponent implements AfterViewInit, OnInit {
         if (response.ok) {
             const email = await response.text(); 
             console.log("Email del usuario:", email);
+            localStorage.setItem('userEmail', email);
             return email;
         } else {
             throw new Error("Token inválido o expirado.");
@@ -445,6 +449,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   confirmarCerrarSesion(): void {
     localStorage.removeItem('userToken');
+    localStorage.removeItem('userEmail');
     console.log("Sesión cerrada.");
     
     this.mostrarModalLogoutConfirmacion = false;
@@ -452,6 +457,8 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.mensajeExito = `Logged out successfully! See you soon!`; 
     this.mostrarMensajeExito = true;
     this.limpiarMensajeExito(3000); 
+
+    location.reload();
 
   }
 
