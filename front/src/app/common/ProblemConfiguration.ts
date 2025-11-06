@@ -66,6 +66,7 @@ export class ProblemConfiguration {
 }
 
 export class ProblemInputConfiguration {
+   
     qubits : number 
     outputs : boolean[] 
     expectedFrequencies : number[] = []
@@ -106,11 +107,22 @@ export class ProblemInputConfiguration {
             this.blockCircuit = new BlockCircuit(this.qubits)
         } else {
             this.qubits = 5
-            this.outputs = [false, false, true, true, true]
+            this.outputs = [true, true, true, true, true]
             //this.blockCircuit = new BlockCircuit(this.qubits, config.blockCircuit?.numberOfStartColumns || 2)
             this.blockCircuit = new BlockCircuit(this.qubits)
         }
-        
+    }
+
+    startAllWithHadamard() {
+        for (let i=0; i<this.qubits; i++) {
+            this.startWithH[i] = !this.startWithH[i]
+        }
+    }
+
+     toggleOutputQubits() {
+        for (let i=0; i<this.qubits; i++) {
+            this.outputs[i] = !this.outputs[i]
+        }
     }
 
     updateNumberOfQubits(qubits : number) {
@@ -125,8 +137,8 @@ export class ProblemInputConfiguration {
             this.outputs[i] = true
             this.startWithH[i] = false
         }
-        this.outputs[0] = false
-        this.outputs[1] = false
+        //this.outputs[0] = false
+        //this.outputs[1] = false
     }
 }
 
