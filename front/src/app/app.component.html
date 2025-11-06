@@ -279,6 +279,9 @@
                     [(ngModel)]="passwordConfirmacion" 
                     placeholder="confirm password"
                 >
+                <div *ngIf="passwordMismatchMessage" class="input-error-message">
+                    {{ passwordMismatchMessage }}
+                </div>
             </div>
 
             <div class="modal-register-buttons">

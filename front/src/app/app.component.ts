@@ -270,6 +270,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   errorRegistro: string = '';
   mensajeExito: string = '';
   mostrarMensajeExito: boolean = false;
+  passwordMismatchError: string = '';
 
   abrirRegistro(): void {
     this.cerrarModalLogin();
@@ -281,6 +282,13 @@ export class AppComponent implements AfterViewInit, OnInit {
             !this.passwordRegistro || 
             !this.passwordConfirmacion || 
             (this.passwordRegistro !== this.passwordConfirmacion);
+  }
+
+  get passwordMismatchMessage(): string {
+    if (this.passwordConfirmacion && this.passwordRegistro !== this.passwordConfirmacion) {
+        return "Passwords do not match.";
+    }
+    return '';
   }
 
   cerrarModalRegistro(): void {
