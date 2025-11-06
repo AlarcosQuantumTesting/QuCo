@@ -1650,12 +1650,12 @@ export class MatrixesComponent implements AfterViewInit  {
         id: this.circuitName,
         name: this.circuitName,
         qProgram: qProgram,
-        userEmail: 'exampleUser@gmail.com' 
+        userEmail: this.currentUserEmail
     };
     
     const finalPayload: any = {
         circuit: projectDtoForMapping, 
-        user: { id: 'exampleUser@gmail.com' } 
+        user: { id: this.currentUserEmail } 
     };
 
     console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
