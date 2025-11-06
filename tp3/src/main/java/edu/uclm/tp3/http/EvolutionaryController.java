@@ -57,12 +57,8 @@ public abstract class EvolutionaryController {
 			try {
 				File dirToDelete = new File(EvolutionaryService.generationFolder(gt));
 
-				if (dirToDelete.exists()) {
+				if (dirToDelete.exists()) 
 					FileUtils.deleteDirectory(dirToDelete);
-					System.out.println("Deleted directory: " + dirToDelete.getAbsolutePath());
-				} else {
-					System.out.println("Directory does not exist: " + dirToDelete.getAbsolutePath());
-				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				return "Error deleting files: " + e.getMessage();
@@ -84,7 +80,6 @@ public abstract class EvolutionaryController {
 				Thread.sleep(3000);
 				if (dir.exists()) {
 					FileUtils.deleteDirectory(dir);
-					System.out.println("📂 Directorio eliminado en segundo intento: " + dir.getAbsolutePath());
 				}
 			} catch (Exception e) {
 				System.err.println("Error al eliminar en segundo intento: " + e.getMessage());
