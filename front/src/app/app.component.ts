@@ -271,6 +271,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   mensajeExito: string = '';
   mostrarMensajeExito: boolean = false;
   passwordMismatchError: string = '';
+  mensajeError: string = ''; 
+  mostrarMensajeError: boolean = false;
 
   abrirRegistro(): void {
     this.cerrarModalLogin();
@@ -343,6 +345,9 @@ export class AppComponent implements AfterViewInit, OnInit {
               throw new Error(`Error al registrar. Estado: ${response.status}`);
           }
       } catch (error) {
+          this.mensajeError = `User registration failed. Please try again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
           console.error("Fallo en la comunicación:", error);
           return false;
       }
@@ -383,6 +388,9 @@ export class AppComponent implements AfterViewInit, OnInit {
         }
     } catch (error) {
         console.error("Fallo en la comunicación o credenciales:", error);
+        this.mensajeError = `User log in failed. Please try again.`; 
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
         return null;
     }
   }
@@ -415,6 +423,8 @@ export class AppComponent implements AfterViewInit, OnInit {
     setTimeout(() => {
         this.mostrarMensajeExito = false;
         this.mensajeExito = '';
+        this.mostrarMensajeError = false;
+        this.mensajeError = '';
     }, duration);
   }
 

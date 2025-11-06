@@ -332,5 +332,10 @@
     <i class="fas fa-check-circle success-icon"></i>
     <p>{{ mensajeExito }}</p>
   </div>
+
+  <div class="notification-error" *ngIf="mostrarMensajeError">
+    <i class="fas fa-times-circle fail-icon"></i>
+    <p style="color: white;">{{ mensajeError }}</p>
+  </div>
   
 </body>

@@ -965,8 +965,37 @@ input:checked + .slider:after {
     font-weight: 500;
 }
 
+.notification-error {
+    position: fixed; 
+    z-index: 2000;
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    
+    background-color: rgb(207, 156, 156);
+    color: #ffffff;
+    border: 1px solid #e6c3c3;
+    border-radius: 5px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 400px;
+    text-align: center;
+}
 
+.error-icon {
+    font-size: 1.5em;
+    color: #a72828;
+}
 
+.notification-error p {
+    margin: 0;
+    font-weight: 500;
+}
 
 .modal-logout-confirm {
     position: fixed; 
