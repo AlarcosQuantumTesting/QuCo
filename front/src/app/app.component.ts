@@ -251,9 +251,9 @@ export class AppComponent implements AfterViewInit, OnInit {
     return !this.emailUsuario || !this.passwordUsuario;
   }
 
-  iniciarSesion(): void {
+  /*iniciarSesion(): void {
     console.log('Intentando iniciar sesión con:', this.emailUsuario);
-  }
+  }*/
 
   cerrarModalLogin(): void {
     this.mostrarModalLogin = false;
@@ -261,4 +261,184 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.passwordUsuario = '';
     this.errorLogin = '';
   }
+
+  // Para el Registro
+  mostrarModalRegistro: boolean = false;
+  emailRegistro: string = '';
+  passwordRegistro: string = '';
+  passwordConfirmacion: string = '';
+  errorRegistro: string = '';
+  mensajeExito: string = '';
+  mostrarMensajeExito: boolean = false;
+
+  abrirRegistro(): void {
+    this.cerrarModalLogin();
+    this.mostrarModalRegistro = true;
+  }
+
+  isRegisterDisabled(): boolean {
+      return !this.emailRegistro || 
+            !this.passwordRegistro || 
+            !this.passwordConfirmacion || 
+            (this.passwordRegistro !== this.passwordConfirmacion);
+  }
+
+  cerrarModalRegistro(): void {
+    this.mostrarModalRegistro = false;
+    this.emailRegistro = '';
+    this.passwordRegistro = '';
+    this.passwordConfirmacion = '';
+    this.errorRegistro = '';
+  }
+
+
+  URL_BASE = "http://localhost:80";
+
+  async registrarUsuario(): Promise<boolean> {
+
+    this.errorRegistro = '';
+    this.mostrarMensajeExito = false;
+
+    if (this.passwordRegistro !== this.passwordConfirmacion) {
+        this.errorRegistro = 'Las contraseñas no coinciden.';
+        return false;
+    }
+
+      const userData = {
+        email: this.emailRegistro,
+        pwd: this.passwordRegistro
+      };
+
+    let body =  JSON.stringify(userData)
+    console.log("Intentando iniciar sesión con:", body);
+
+      try {
+          const response = await fetch(`${this.URL_BASE}/users/create`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(userData)
+          });
+
+          if (response.ok) {
+              console.log("Usuario registrado con éxito.");
+              this.mostrarModalRegistro = false;
+              this.mensajeExito = `Registered successfully! You can now log in, ${this.emailRegistro}!`; 
+              this.mostrarMensajeExito = true;
+              this.limpiarMensajeExito(2000);
+              return true;
+          } else if (response.status === 409) {
+              const error = await response.text();
+              throw new Error(`Error de registro: ${error}`);
+          } else {
+              throw new Error(`Error al registrar. Estado: ${response.status}`);
+          }
+      } catch (error) {
+          console.error("Fallo en la comunicación:", error);
+          return false;
+      }
+  }
+
+
+  async iniciarSesion(): Promise<string | null> {
+    this.errorLogin = '';
+    this.mostrarMensajeExito = false;
+
+    const loginData = {
+        email: this.emailUsuario,
+        pwd: this.passwordUsuario
+    };
+
+    try {
+        const response = await fetch(`${this.URL_BASE}/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        if (response.ok) {
+            const token = await response.text(); 
+            console.log("Login exitoso. Token recibido:", token);
+            localStorage.setItem('userToken', token);
+            this.mostrarModalLogin = false;
+            this.mensajeExito = `Logged successfully! Welcome, ${this.emailUsuario}!`;
+            this.mostrarMensajeExito = true;
+            this.limpiarMensajeExito(2000);
+            return token;
+        } else if (response.status === 403) {
+            throw new Error("Credenciales inválidas (email o contraseña incorrectos).");
+        } else {
+            throw new Error(`Error al iniciar sesión. Estado: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Fallo en la comunicación o credenciales:", error);
+        return null;
+    }
+  }
+
+
+  async obtenerEmailUsuario(token: string) {
+    try {
+        const response = await fetch(`${this.URL_BASE}/tokens/getUser`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token: token })
+        });
+
+        if (response.ok) {
+            const email = await response.text(); 
+            console.log("Email del usuario:", email);
+            return email;
+        } else {
+            throw new Error("Token inválido o expirado.");
+        }
+    } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+        return null;
+    }
+  }
+
+  limpiarMensajeExito(duration: number = 3000): void {
+    setTimeout(() => {
+        this.mostrarMensajeExito = false;
+        this.mensajeExito = '';
+    }, duration);
+  }
+
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('userToken');
+  }
+
+  mostrarModalLogoutConfirmacion: boolean = false;
+
+  cerrarSesion(): void {
+    if (this.isLoggedIn()) {
+        this.mostrarModalLogoutConfirmacion = true;
+    } else {
+        console.log("No hay sesión activa para cerrar.");
+    }
+  }
+
+  confirmarCerrarSesion(): void {
+    localStorage.removeItem('userToken');
+    console.log("Sesión cerrada.");
+    
+    this.mostrarModalLogoutConfirmacion = false;
+    
+    this.mensajeExito = `Logged out successfully! See you soon!`; 
+    this.mostrarMensajeExito = true;
+    this.limpiarMensajeExito(3000); 
+
+  }
+
+  cerrarModalLogoutConfirmacion(): void {
+      this.mostrarModalLogoutConfirmacion = false;
+  }
+
 }

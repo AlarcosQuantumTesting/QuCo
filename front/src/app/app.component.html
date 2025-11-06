@@ -85,11 +85,17 @@
             </a>
         </li>
 
-        <li>
-            <a routerLinkActive="active" (click)="toggleLogin()">
-                <i class="fas fa-circle-user" title="User"></i>
-                <span *ngIf="menuAbierto">User</span>
-            </a>
+        <li class="user">
+          <a 
+              routerLinkActive="active" 
+              (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()"
+          >
+              <i class="fas fa-circle-user" title="Usuario"></i>
+              
+              <span *ngIf="menuAbierto">
+                  {{ isLoggedIn() ? 'Log out' : 'Log in' }}
+              </span>
+          </a>
         </li>
 
         <li class="ajustes">
@@ -175,7 +181,7 @@
   <div class="modal-login" *ngIf="mostrarModalLogin">
     <div class="modal-login-content">
         <div class="modal-header" style="border-top-left-radius: 8px; border-top-right-radius: 8px">
-            <h2 class="modal-login-title">Login</h2>
+            <h2 class="modal-login-title">Log in</h2>
             <button class="modal-login-close-btn" (click)="cerrarModalLogin()">
                 <i class="close-i">&times;</i>
             </button>
@@ -204,23 +210,124 @@
                 >
             </div>
 
+            
+
             <div class="modal-login-buttons">
+              <p class="login-spec-link" (click)="abrirRegistro()">
+                Don't have an account? Register here.
+              </p>
+              <div class="modal-login-action-group">
                 <button 
-                    class="modal-login-btn-confirm" 
-                    (click)="iniciarSesion()" 
-                    [disabled]="isLoginDisabled()" 
+                  class="modal-login-btn-confirm" 
+                  (click)="iniciarSesion()" 
+                  [disabled]="isLoginDisabled()" 
                 >
-                    Login
+                  Login
                 </button>
-                
+                  
                 <button class="modal-login-btn-cancel" (click)="cerrarModalLogin()">
-                    Cancel
+                  Cancel
                 </button>
+              </div>
+              
             </div>
             
             <div class="modal-login-error" *ngIf="errorLogin">{{ errorLogin }}</div>
         </div>
     </div>
+  </div>
+
+
+  <div class="modal-register" *ngIf="mostrarModalRegistro">
+    <div class="modal-register-content">
+        <div class="modal-header" style="border-top-left-radius: 8px; border-top-right-radius: 8px">
+            <h2 class="modal-register-title">Register</h2>
+            <button class="modal-register-close-btn" (click)="cerrarModalRegistro()">
+                <i class="close-i">&times;</i>
+            </button>
+        </div>
+        
+        <div class="modal-register-info-form" style="margin: 15px;">
+            <div class="modal-register-input-row">
+                <label for="register-email">Email</label>
+                <input 
+                    id="register-email" 
+                    class="modal-register-input-field" 
+                    type="email" 
+                    [(ngModel)]="emailRegistro" 
+                    placeholder="example@email.com"
+                >
+            </div>
+
+            <div class="modal-register-input-row">
+                <label for="register-password">Password</label>
+                <input 
+                    id="register-password" 
+                    class="modal-register-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordRegistro" 
+                    placeholder="password"
+                >
+            </div>
+            
+            <div class="modal-register-input-row">
+                <label for="register-confirm-password">Confirm password</label>
+                <input 
+                    id="register-confirm-password" 
+                    class="modal-register-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordConfirmacion" 
+                    placeholder="confirm password"
+                >
+            </div>
+
+            <div class="modal-register-buttons">
+                <button 
+                    class="modal-register-btn-confirm" 
+                    (click)="registrarUsuario()" 
+                    [disabled]="isRegisterDisabled()" 
+                >
+                    Register
+                </button>
+                
+                <button class="modal-register-btn-cancel" (click)="cerrarModalRegistro()">
+                    Cancel
+                </button>
+            </div>
+            
+            <div class="modal-register-error" *ngIf="errorRegistro">{{ errorRegistro }}</div>
+        </div>
+    </div>
+  </div>
+
+  <div class="modal-logout-confirm" *ngIf="mostrarModalLogoutConfirmacion">
+    <div class="modal-logout-content">
+        
+        <div class="modal-logout-header">
+            <h3 class="modal-logout-title">Log out</h3>
+            <button class="modal-logout-close-btn" (click)="cerrarModalLogoutConfirmacion()">
+                &times;
+            </button>
+        </div>
+
+        <div class="modal-logout-body">
+            <p>Are you sure you want to log out?</p>
+        </div>
+
+        <div class="modal-logout-buttons">
+            <button class="modal-logout-btn-cancel" (click)="cerrarModalLogoutConfirmacion()">
+                Cancel
+            </button>
+            <button class="modal-logout-btn-confirm" (click)="confirmarCerrarSesion()">
+                Log out
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <div class="notification-success" *ngIf="mostrarMensajeExito">
+    <i class="fas fa-check-circle success-icon"></i>
+    <p>{{ mensajeExito }}</p>
   </div>
   
 </body>
