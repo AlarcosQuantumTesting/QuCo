@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { DeterministicService } from '../deterministic.service';
 import { GroverStyle } from '../common/GroverStyleComponent';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
 import { QiskitCode } from '../grover/QiskitCode';
@@ -13,6 +13,14 @@ import { Expression } from '../matrixes/Expression';
 import { ExpressionsService } from '../expressions.service';
 import { TranspileService } from '../transpile.service';  
 import { Backend } from './Backend';
+import { ProjectService } from '../project.service';
+
+
+interface QProgramExpression { name: string; expr: string; description: string; type: string; }
+interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
+interface ProjectListItem { id: string; name: string; type: string; }
+interface StoredProject { id: string; name: string; qProgram: any; }
+interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
 
@@ -134,9 +142,19 @@ export class DeterministicComponent extends GroverStyle {
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
 
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  projectList: ProjectListItem[] = []; 
+  selectedProjectId: string = '';
+
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
+
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
-     public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService) {
+     public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService, 
+    private projectService: ProjectService) {
     super(qiskitService)
 
     this.updateOutputs()
@@ -152,6 +170,8 @@ export class DeterministicComponent extends GroverStyle {
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
     
+    this.loadProjectNames();
+
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
 
@@ -756,6 +776,7 @@ export class DeterministicComponent extends GroverStyle {
     if (index == undefined) 
       index = 0
     let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
+    this.quirkURL = url
     window.open(url, "_blank")
   }    
 
@@ -1731,7 +1752,6 @@ export class DeterministicComponent extends GroverStyle {
     return false;
   }
 
-  // Lo meto para paginación de la tabla
   pageIndex = 0;
 
   get pageCount(): number {
@@ -1751,5 +1771,277 @@ export class DeterministicComponent extends GroverStyle {
   goToPage(): void {
     const target = Math.max(1, Math.min(this.pageInput, this.pageCount));
     this.pageIndex = target - 1;
+  }
+
+
+
+
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+
+    if (projectId) {
+        body.projectId = projectId;
+    }
+    return body;
+  }
+
+  loadProjectNames(): void {
+    if (this.userEmail && this.userToken) {
+        const requestBody = this.getAuthRequestBody();
+
+        this.projectService.getProjectsName(requestBody).subscribe({
+            next: (data: ProjectListItem[]) => {
+                const requiredType = this.mapAlgorithmToRequiredType(this.selectedAlgorithm);
+                
+                this.projectList = data.filter(project => 
+                    project.type === requiredType
+                );
+
+                console.log("Project names loaded.", this.projectList);
+            },
+            error: (err) => {
+                console.error('Error al cargar nombres de proyectos:', err);
+                this.projectList = []; 
+            }
+        });
+
+        
+    }
+  }
+
+  onProjectSelected(): void {
+    if (!this.selectedProjectId) return;
+
+    const requestBody = this.getAuthRequestBody(this.selectedProjectId);
+
+    this.projectService.getProject(requestBody).subscribe({
+        next: (project: StoredProject) => {
+            alert(`Proyecto "${project.name}" cargando...`);
+            this.loadProjectDataToComponent(project);
+            this.mostrarTabla = true;
+        },
+        error: (err) => {
+            console.error('Error al cargar detalles del proyecto:', err);
+            alert('❌ Error al cargar los detalles del proyecto.');
+        }
+    });
+  }
+
+  loadProjectDataToComponent(project: StoredProject): void {
+    if (!project.qProgram) return;
+
+    const qp = project.qProgram;
+
+    this.circuitName = project.name; 
+    
+    if (qp.generator && qp.generator.type) {
+        this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
+    }
+    
+    this.qubits = qp.qubits;
+    this.expectedFrequencies = new FreqTable();
+    this.expectedFrequencies.setQubits(this.qubits);
+
+    const generator = qp.generator;
+
+    if (generator.type === 'GROVER' && generator.truePositions) {
+        generator.truePositions.forEach((pos: number) => {
+            this.expectedFrequencies.setFreq(pos, 1);
+        });
+    } 
+    
+    this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
+
+    this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
+
+    this.updateOutputs();
+    this.updateTotalSelectedElements();
+    this.mostrarTabla = true; 
+    this.goToTable();
+
+    alert(`Proyecto "${project.name}" cargado con éxito.`);
+  }
+  
+  openSaveProjectModal(): void {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal(): void {
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.circuitName = ''; 
+  }
+
+  confirmarGuardarProyecto(): void {
+      if (!this.circuitName || this.circuitName.trim().length === 0) {
+          this.saveError = "The project name is mandatory.";
+          return;
+      }
+
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      
+      this.guardarProyecto();
+  }
+
+  getTruePositions(): number[] {
+    const positions: number[] = [];
+    if (this.expectedFrequencies && this.expectedFrequencies.rows) {
+        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+            if (this.expectedFrequencies.getFreq(i) === 1) {
+                positions.push(i);
+            }
+        }
+    } else {
+        console.warn("Tabla de frecuencias no inicializada; usando truePositions vacías.");
+    }
+    return positions;
+  }
+
+  getGeneratorData(algorithm: string): any {
+    switch (algorithm) {
+      case 'grenoble':
+        return {
+          "type": "GRENOBLE",
+          "interestingRows": 3,
+          "physicalAngle": 45.0,
+          "parallel": true,
+          "splitted": false
+        };
+      case 'grover':
+        return {
+          "type": "GROVER",
+          "truePositions": this.getTruePositions()
+        };
+      case 'originalGR':
+        return {
+          "type": "GROVER_RUDOLPH",
+          "positionValue": {
+              "0": 5, 
+              "1": 2, 
+              "2": 8, 
+              "3": 1, 
+              "4": 9
+          }
+        };
+      default:
+        return {}; 
+    }
+  }
+  
+  mapAlgorithmToRequiredType(algorithm: string): string {
+     switch (algorithm) {
+        case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
+        case 'grover': return 'edu.uclm.reper.model.Grover';
+        case 'originalGR': return 'edu.uclm.reper.model.GroverRudolph';
+        default: return '';
+     }
+  }
+
+  quirkURL? : SafeResourceUrl
+
+  guardarProyecto(): void {
+    if (!this.circuitName || this.circuitName.trim().length === 0) return;
+    
+    const generatorData = this.getGeneratorData(this.selectedAlgorithm);
+
+    const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
+        name: `UserExpr${index + 1}`,
+        expr: expr,
+        description: `User Expression ${index + 1}`,
+        type: this.selectedAlgorithm
+    }));
+
+    let quirkCircuitData: any = {};
+    /*if (this.quirkURL) {
+      const urlString = this.sanitizer.sanitize(4, this.quirkURL) as string;
+      const match = urlString.match(/circuit=(.*)/);
+      if (match && match[1]) {
+        try {
+          quirkCircuitData = JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+          console.error("Error al parsear JSON del quirkURL:", e);
+        }
+      }
+    }*/
+
+    if (this.responseReceived && this.responseReceived["QUIRK"] && this.responseReceived["QUIRK"].length > 0) {
+        quirkCircuitData = this.responseReceived["QUIRK"][0]; 
+    }
+
+    let finalQuirkPayload: any = quirkCircuitData;
+
+    if (finalQuirkPayload.cols) {
+        finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
+             if (col.some(item => item === "…")) {
+                 return col;
+             }
+             
+             let lastSignificantIndex = col.length - 1;
+             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+                 lastSignificantIndex--;
+             }
+             
+             return col.slice(0, lastSignificantIndex + 1);
+        });
+    }
+
+    if (!finalQuirkPayload.cols && !finalQuirkPayload.gates) {
+        finalQuirkPayload = { cols: [] };
+    }
+
+    console.log('Final quirk payload to be sent:', finalQuirkPayload);
+
+    const qProgram: QProgram = {
+      id: this.circuitName,
+      qubits: this.qubits,
+      expressions: qProgramExpressions,
+      shots: 0,
+      generator: generatorData,
+      qcodes: [{ platform: "AerSimulator", code: this.qiskitCode.lines.join('\n') || "No qiskit code generated." }],
+      inputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
+      outputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
+      qCircuit: { 
+        id: this.circuitName, 
+        qbits: this.qubits, 
+        quirkCode: finalQuirkPayload
+      }
+    };
+    
+    const projectDtoForMapping: any = {
+        id: this.circuitName,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail,
+
+        mutantCycles: [], 
+        testSuite: null
+    };
+    
+    const finalPayload: any = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+    
+    console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
+
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: () => {
+        alert('Project "' + this.circuitName + '" saved successfully!');
+        this.loadProjectNames();
+      },
+      error: (error: any) => {
+        console.error('Error saving project:', error);
+        alert('Error saving project (Code 400).');
+      }
+    });
   }
 }
