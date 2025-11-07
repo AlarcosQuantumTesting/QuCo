@@ -10,12 +10,18 @@ import { AccessibilityService } from './accessibility.service';
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'quco - Quantum Code Generation';
 
-  ngOnInit(): void {
-    this.loadSettings();
-  }
-
   menuAbierto = false;
   mostrarInicio = true;
+  tokenStored: string | null = localStorage.getItem('userToken');
+
+  ngOnInit(): void {
+    this.loadSettings();
+    /*if (this.tokenStored) {
+      this.obtenerEmailUsuario(this.tokenStored);
+    }*/
+    this.checkTokenValidity();
+    
+  }
 
   constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2) {
     this.router.events.subscribe(event => {
@@ -408,17 +414,24 @@ export class AppComponent implements AfterViewInit, OnInit {
             },
             body: JSON.stringify({ token: token })
         });
-
+        
         if (response.ok) {
             const email = await response.text(); 
             console.log("Email del usuario:", email);
-            localStorage.setItem('userEmail', email);
+            localStorage.setItem('email', email);
             return email;
         } else {
-            throw new Error("Token inválido o expirado.");
+          this.mensajeError = `Session expired. Please log in again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
+          throw new Error("Token inválido o expirado.");
         }
     } catch (error) {
+      console.log("Buscando email con token:", token);
         console.error("Error al obtener el usuario:", error);
+        this.mensajeError = `Session expired. Please log in again.`; 
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
         return null;
     }
   }
@@ -464,6 +477,72 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   cerrarModalLogoutConfirmacion(): void {
       this.mostrarModalLogoutConfirmacion = false;
+  }
+
+  errorToken: string = '';
+
+  async checkTokenValidity(): Promise<boolean> {
+    const sToken = localStorage.getItem('userToken');
+    const email = localStorage.getItem('userEmail');
+
+    this.errorToken = ''; // Limpiamos el error previo
+
+    if (!sToken || !email) {
+        return false;
+    }
+
+    const validationData = {
+        token: sToken,
+        email: email
+    };
+
+    try {
+        const response = await fetch(`${this.URL_BASE}/tokens/validate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(validationData)
+        });
+
+        if (response.ok) {
+            console.log("Token válido y activo.");
+            return true;
+        } 
+        
+        if (response.status === 403) {
+          this.errorToken = "Session Expired. Please log in again.";
+          console.error("Token expirado o inválido.");
+          this.mensajeError = `Session expired. Please log in again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
+            
+          localStorage.removeItem('userToken');
+          localStorage.removeItem('userEmail'); 
+          
+          location.reload();
+
+        } else if (response.status === 400) {
+             this.errorToken = "Authentication error.";
+             this.mensajeError = `Authentication error.`; 
+            this.mostrarMensajeError = true;
+            this.limpiarMensajeExito(2000);
+              console.error("Error de autenticación al validar el token.");
+        } else {
+            this.errorToken = `Server error during token validation. Status: ${response.status}`;
+            this.mensajeError = `Server error during token validation. Please try again.`; 
+            this.mostrarMensajeError = true;
+            this.limpiarMensajeExito(2000);
+            console.error("Error del servidor al validar el token. Estado:", response.status);
+        }
+        
+        return false;
+        
+    } catch (error) {
+        console.error("Fallo de conexión al validar token:", error);
+        this.errorToken = "Connection error. Could not verify session status.";
+        return false;
+    }
   }
 
 }

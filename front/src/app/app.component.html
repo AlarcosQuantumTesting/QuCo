@@ -90,7 +90,8 @@
               routerLinkActive="active" 
               (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()"
           >
-              <i class="fas fa-circle-user" title="Usuario"></i>
+              <i class="fas fa-circle-user" title="Log in" *ngIf="!isLoggedIn()"></i>
+              <i class="fas fa-sign-out-alt" title="Log out" *ngIf="isLoggedIn()"></i>
               
               <span *ngIf="menuAbierto">
                   {{ isLoggedIn() ? 'Log out' : 'Log in' }}
