@@ -210,14 +210,14 @@
                 </span>
             </div>
 
-            <div class="form-group" *ngIf="currentUserEmail && projects && projects.length > 0">
+            <div class="form-group" *ngIf="projectList && projectList.length > 0">
                 <div class="label-container">
-                    <label for="projectSelector">Load Project:</label>
+                    <label for="projectSelector">Load project:</label>
                 </div>
                 <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
-                    <option value="" disabled selected>--- Select project ---</option>
-                    <option *ngFor="let project of projects" [value]="project.id">
-                        {{ project.name }} (ID: {{ project.id }})
+                    <option value="" disabled>Select project</option>
+                    <option *ngFor="let project of projectList" [value]="project.id">
+                        {{ project.name }}
                     </option>
                 </select>
             </div>
@@ -239,7 +239,7 @@
     <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
     
     <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
-        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="currentUserEmail && currentUserToken">
+        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
             <i class="fas fa-save"></i> Save project
         </button>
     </div>

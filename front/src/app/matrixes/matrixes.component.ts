@@ -146,8 +146,13 @@ export class MatrixesComponent implements AfterViewInit  {
 
   projects: StoredProject[] = [];
   selectedProjectId: string = '';
-  readonly currentUserEmail: string = localStorage.getItem('userEmail') || '';
-  readonly currentUserToken: string = localStorage.getItem('userToken') || '';
+
+  projectList: ProjectListItem[] = []; 
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  REQUIRED_GENERATOR_TYPE: string = 'edu.uclm.reper.model.Matrix';
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
@@ -724,9 +729,10 @@ export class MatrixesComponent implements AfterViewInit  {
 
   ngOnInit() {
 
-    console.log("User email in matrixes:", this.currentUserEmail);
-    console.log("User token in matrixes:", this.currentUserToken);
-    this.loadUserProjects();
+    console.log("User email in matrixes:", this.userEmail);
+    console.log("User token in matrixes:", this.userToken);
+
+    this.loadProjectNames();
 
     this.validateInputs();
 
@@ -1650,12 +1656,12 @@ export class MatrixesComponent implements AfterViewInit  {
         id: this.circuitName,
         name: this.circuitName,
         qProgram: qProgram,
-        userEmail: this.currentUserEmail
+        userEmail: this.userEmail
     };
     
     const finalPayload: any = {
         circuit: projectDtoForMapping, 
-        user: { id: this.currentUserEmail } 
+        user: { id: this.userEmail } 
     };
 
     console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
@@ -1672,47 +1678,76 @@ export class MatrixesComponent implements AfterViewInit  {
     });
   }
 
-  loadUserProjects(): void {
-    if (this.currentUserEmail) {
-        this.projectService.getProjectsByUser(this.currentUserEmail).subscribe({
-            next: (data: StoredProject[]) => {
-                this.projects = data;
-                console.log('Proyectos cargados:', this.projects);
+
+
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+
+    if (projectId) {
+        body.projectId = projectId;
+    }
+    return body;
+  }
+
+  loadProjectNames(): void {
+    if (this.userEmail && this.userToken) {
+        const requestBody = this.getAuthRequestBody();
+
+        this.projectService.getProjectsName(requestBody).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(project => 
+                    project.type === this.REQUIRED_GENERATOR_TYPE
+                );
+                console.log('Nombres de proyectos cargados:', this.projectList);
             },
             error: (err) => {
-                console.error('Error al cargar proyectos del usuario:', err);
+                console.error('Error al cargar nombres de proyectos:', err);
+                this.projectList = []; 
             }
         });
     }
   }
 
   onProjectSelected(): void {
-    if (this.selectedProjectId) {
-        const project = this.projects.find(p => p.id === this.selectedProjectId);
-        
-        if (project) {
-            this.loadProject(project);
-        }
-    } else {
-        this.resetValues();
+    if (!this.selectedProjectId) {
+        return;
     }
+
+    const requestBody = this.getAuthRequestBody(this.selectedProjectId);
+
+    this.projectService.getProject(requestBody).subscribe({
+        next: (project: StoredProject) => {
+            alert(`Proyecto "${project.name}" cargando...`);
+            this.loadProjectDataToComponent(project);
+        },
+        error: (err) => {
+            console.error('Error al cargar detalles del proyecto:', err);
+            alert('❌ Error al cargar los detalles del proyecto.');
+        }
+    });
   }
 
-  loadProject(project: StoredProject): void {
+
+  loadProjectDataToComponent(project: StoredProject): void {
     if (!project.qProgram) {
-        console.error('El proyecto seleccionado no contiene datos de qProgram.');
-        alert('This project does not have valid circuit data.');
+        console.error('El proyecto no contiene datos de qProgram.');
         return;
     }
 
     const qp = project.qProgram;
 
-    this.circuitName = project.name;
-    this.inputQubits = qp.qubits - qp.outputQubits;
-    this.outputQubits = qp.outputQubits;
+    this.circuitName = project.name; 
+    this.inputQubits = qp.qubits - qp.outputQubits.length; 
+    this.outputQubits = qp.outputQubits.length; 
 
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
-
     this.fillTableWithUserExpressions();
     
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
@@ -1757,4 +1792,10 @@ interface StoredProject {
   id: string;
   name: string;
   qProgram: any;
+}
+
+interface ProjectListItem {
+  id: string;
+  name: string;
+  type: string;
 }

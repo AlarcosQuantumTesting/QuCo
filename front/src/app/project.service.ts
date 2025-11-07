@@ -19,4 +19,12 @@ export class ProjectService {
     const requestBody = { email: userEmail };
     return this.http.post(`${this.baseUrl}/getAllByUser`, requestBody);
   }
+
+  getProjectsName(requestBody: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/getProjectsName`, requestBody);
+  }
+
+  getProject(requestBody: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/getProject`, requestBody);
+  }
 }
