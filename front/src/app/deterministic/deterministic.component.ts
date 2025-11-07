@@ -1855,7 +1855,23 @@ export class DeterministicComponent extends GroverStyle {
         generator.truePositions.forEach((pos: number) => {
             this.expectedFrequencies.setFreq(pos, 1);
         });
-    } 
+    } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
+        const positions = generator.positionValue;
+        
+        if (positions) {
+            for (const key in positions) {
+                if (positions.hasOwnProperty(key)) {
+                    const rowIndex = parseInt(key, 10);
+                    const frequencyValue = positions[key];
+                    this.expectedFrequencies.setFreq(rowIndex, frequencyValue);
+                }
+            }
+        }
+        
+        if (generator.physicalAngle !== undefined) this.physicalAngle = generator.physicalAngle;
+        if (generator.parallel !== undefined) this.inParallel = generator.parallel;
+        if (generator.splitted !== undefined) this.splitCircuits = generator.splitted;
+    }
     
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
 
@@ -1906,15 +1922,42 @@ export class DeterministicComponent extends GroverStyle {
     return positions;
   }
 
+  getInterestingRowsCount(): number {
+    let count = 0;
+    if (this.expectedFrequencies && this.expectedFrequencies.rows > 0) {
+        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+            if (this.expectedFrequencies.getFreq(i) > 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+  }
+
+  getPositionValueData(): { [key: number]: number } {
+    const positionValue: { [key: number]: number } = {};
+    
+    if (this.expectedFrequencies && this.expectedFrequencies.rows > 0) {
+        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+            let frequency = this.expectedFrequencies.getFreq(i);
+            
+            if (frequency > 0) {
+                positionValue[i] = Math.round(frequency);
+            }
+        }
+    }
+    return positionValue;
+}
+
   getGeneratorData(algorithm: string): any {
     switch (algorithm) {
       case 'grenoble':
         return {
           "type": "GRENOBLE",
-          "interestingRows": 3,
-          "physicalAngle": 45.0,
-          "parallel": true,
-          "splitted": false
+          "interestingRows": this.getInterestingRowsCount(),
+          "physicalAngle": this.physicalAngle,
+          "parallel": this.inParallel,
+          "splitted": this.splitCircuits
         };
       case 'grover':
         return {
@@ -1924,13 +1967,7 @@ export class DeterministicComponent extends GroverStyle {
       case 'originalGR':
         return {
           "type": "GROVER_RUDOLPH",
-          "positionValue": {
-              "0": 5, 
-              "1": 2, 
-              "2": 8, 
-              "3": 1, 
-              "4": 9
-          }
+          "positionValue": this.getPositionValueData(),
         };
       default:
         return {}; 
@@ -1941,7 +1978,7 @@ export class DeterministicComponent extends GroverStyle {
      switch (algorithm) {
         case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
         case 'grover': return 'edu.uclm.reper.model.Grover';
-        case 'originalGR': return 'edu.uclm.reper.model.GroverRudolph';
+        case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
         default: return '';
      }
   }
