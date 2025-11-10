@@ -85,9 +85,9 @@
             </a>
         </li>
 
-        <li class="user">
+        <li class="user" style="cursor: default;">
           <a 
-              routerLinkActive="active" 
+              routerLinkActive="active" style="cursor: pointer;"
               (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()"
           >
               <i class="fas fa-circle-user" title="Log in" *ngIf="!isLoggedIn()"></i>

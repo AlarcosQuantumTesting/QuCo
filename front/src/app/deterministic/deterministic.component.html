@@ -137,19 +137,18 @@
 
  
 
-  <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative;">
-
-    <div style="display: flex; align-items: center;">
-
-      <h2 *ngIf="mostrarTabla" style="margin-top: 10px;">Table</h2>
-
-      <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
-        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
-            <i class="fas fa-save"></i> Save project
-        </button>
-      </div>
+  <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px;">
+        <div style="width: 150px;"></div>
+        <h2 style="margin: 10px 0;">Table</h2>
+        <div style="width: 150px; display: flex; justify-content: flex-end;">        
+            <button (click)="openSaveProjectModal()" 
+                class="btn-confirm-save" 
+                *ngIf="userEmail && userToken">
+                <i class="fas fa-save"></i> Save project
+            </button>
+        </div>
     </div>
-
   </div>
 
  
@@ -1307,11 +1306,11 @@
     <div class="modal" *ngIf="mostrarModalGuardarProyecto">
       <div class="modal-content">
         <div class="modal-header">
-            <h2 class="title-modal">Save Project</h2>
+            <h2 class="title-modal">Save project</h2>
             <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
         </div>
         <div class="info-form">
-            <h3>Enter Project Name (Mandatory)</h3>
+            <h3>Enter project name</h3>
             <div class="input-button-row">
                 <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
                 <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
