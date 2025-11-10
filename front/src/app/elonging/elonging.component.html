@@ -11,11 +11,29 @@
       <h1>Genetic algorithm</h1>
     </div>
 
-    <div class="tabs">
+    <!-- <div class="tabs">
         <button class="tab active" data-tab="0">Data</button>
         <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
         <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
             <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
+                <i class="fas fa-save"></i> Save project
+            </button>
+        </div>
+    </div> -->
+
+    <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+
+        <div style="display: flex;">
+            <button class="tab active" data-tab="0">Data</button>
+            <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">        
+            <button 
+                (click)="mostrarModalGuardarProyecto = true" 
+                class="btn-confirm-save" 
+                *ngIf="userEmail && userToken"
+            >
                 <i class="fas fa-save"></i> Save project
             </button>
         </div>
