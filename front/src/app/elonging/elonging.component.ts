@@ -694,8 +694,11 @@ export class ElongingComponent extends EvolutionaryComponent {
               code: this.code || "No qiskit code generated."
           }
       ],
-      inputQubits: Array.from({length: this.pc.inputConfiguration.qubits}, (_, i) => i).join(','),
-      outputQubits: Array.from({length: this.pc.inputConfiguration.qubits}, (_, i) => i).join(','),
+      inputQubits: Array.from({length: this.pc.inputConfiguration.qubits || 0}, (_, i) => i).join(','),
+      outputQubits: this.pc.inputConfiguration.outputs
+          .map((selected, index) => selected ? index : -1)
+          .filter(index => index !== -1)
+          .join(','),
       qCircuit: {
           id: this.circuitName,
           qbits: this.pc.inputConfiguration.qubits,
