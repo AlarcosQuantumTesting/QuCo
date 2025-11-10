@@ -12,6 +12,13 @@ import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { BlockColumn } from './BlockColumn';
 import { min } from 'rxjs';
+import { ProjectService } from '../project.service';
+
+interface QProgramExpression { name: string; expr: string; description: string; type: string; }
+interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
+interface ProjectListItem { id: string; name: string; type: string; }
+interface StoredProject { id: string; name: string; qProgram: any; }
+interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
 
@@ -46,9 +53,23 @@ export class BlocksComponent extends EvolutionaryComponent {
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
 
+  projectList: ProjectListItem[] = []; 
+  selectedProjectId: string = '';
+
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic'; 
+  REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
+
+  responseReceived? : any
+
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
-    public transpileService: TranspileService) {
+    public transpileService: TranspileService, private projectService: ProjectService) {
     super(blocksService, "blocks")
     this.pc.inputConfiguration.minNumberOfColumns = 1
     this.pc.inputConfiguration.maxNumberOfColumns = 4

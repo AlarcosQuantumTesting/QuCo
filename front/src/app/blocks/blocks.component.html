@@ -10,9 +10,27 @@
       <h1>Blocks genetic algorithm</h1>
     </div>
 
-    <div class="tabs">
+    <!-- <div class="tabs">
         <button class="tab active" data-tab="0">Data</button>
         <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
+    </div> -->
+
+    <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+
+        <div style="display: flex;">
+            <button class="tab active" data-tab="0">Data</button>
+            <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">        
+            <button 
+                (click)="mostrarModalGuardarProyecto = true" 
+                class="btn-confirm-save" 
+                *ngIf="userEmail && userToken"
+            >
+                <i class="fas fa-save"></i> Save project
+            </button>
+        </div>
     </div>
 
     <div class="tab-content active" id="tab-0">
@@ -36,7 +54,8 @@
             <div class="info1">
                 <div>
                     Available templates:
-                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;"
+                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" 
+                    style="margin-right: 20px; margin-left: 10px; min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"
                     [ngClass]="{'is-invalid': templateSelected === false}">
                         <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
                             {{ template.fileName }}
@@ -45,7 +64,7 @@
                 </div>
 
                 <div>
-                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
+                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px; margin-left: 10px;">Delete files</span>
                 </div>
 
                 
@@ -688,6 +707,31 @@
             </div>
         </div>
     </div>
+
+    <!-- <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Save project</h2>
+                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+            </div>
+            <div class="info-form">
+                <h3>Enter project name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                    
+                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                        <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarSaveModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="saveError">{{ saveError }}</div>
+            </div>
+        </div>
+    </div> -->
 </body>
 
 
