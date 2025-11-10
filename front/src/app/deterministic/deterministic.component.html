@@ -108,7 +108,7 @@
                     <label for="projectSelector">Load Project:</label>
                 </div>
                 <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
-                    <option value="" disabled selected>--- Select project ---</option>
+                    <option value="" disabled selected>Select project</option>
                     <option *ngFor="let project of projectList" [value]="project.id">
                         {{ project.name }}
                     </option>
