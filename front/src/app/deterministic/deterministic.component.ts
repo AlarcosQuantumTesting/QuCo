@@ -1883,6 +1883,8 @@ export class DeterministicComponent extends GroverStyle {
     this.goToTable();
 
     alert(`Proyecto "${project.name}" cargado con éxito.`);
+
+    
   }
   
   openSaveProjectModal(): void {

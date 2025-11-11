@@ -1670,6 +1670,7 @@ export class MatrixesComponent implements AfterViewInit  {
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
         alert('Project "' + this.circuitName + '" saved successfully!');
+        this.loadProjectNames();
       },
       error: (error: any) => {
         console.error('Error al guardar el proyecto:', error);
@@ -1753,7 +1754,11 @@ export class MatrixesComponent implements AfterViewInit  {
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
     alert(`Proyecto "${project.name}" cargado con éxito.`);
-  }
+
+    setTimeout(() => {
+        location.reload();
+      }, 100);
+    }
 
 }
 

@@ -726,6 +726,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
         alert('Project "' + this.circuitName + '" saved successfully!');
+        this.loadProjectNames();
       },
       error: (error: any) => {
         console.error('Error al guardar el proyecto:', error);
