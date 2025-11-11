@@ -1799,7 +1799,6 @@ export class DeterministicComponent extends GroverStyle {
         this.projectService.getProjectsName(requestBody).subscribe({
             next: (data: ProjectListItem[]) => {
                 const requiredType = this.mapAlgorithmToRequiredType(this.selectedAlgorithm);
-                
                 this.projectList = data.filter(project => 
                     project.type === requiredType
                 );
@@ -1855,7 +1854,8 @@ export class DeterministicComponent extends GroverStyle {
         generator.truePositions.forEach((pos: number) => {
             this.expectedFrequencies.setFreq(pos, 1);
         });
-    } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
+    // } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
+    } else if (generator.type === 'GRENOBLE') {
         const positions = generator.positionValue;
         
         if (positions) {
@@ -1950,35 +1950,55 @@ export class DeterministicComponent extends GroverStyle {
 }
 
   getGeneratorData(algorithm: string): any {
+    const interestingRows = this.getInterestingRowsCount();
+    const positionValueData: { [key: number]: number } = {};
+    const rawData = this.getPositionValueData();
+    for (const key in rawData) {
+        if (rawData.hasOwnProperty(key)) {
+            positionValueData[Number(key)] = rawData[key];
+        }
+    }
+
     switch (algorithm) {
       case 'grenoble':
+      case 'originalGR':
         return {
           "type": "GRENOBLE",
-          "interestingRows": this.getInterestingRowsCount(),
+          "interestingRows": interestingRows,
           "physicalAngle": this.physicalAngle,
           "parallel": this.inParallel,
-          "splitted": this.splitCircuits
+          "splitted": this.splitCircuits,
+          "positionValue": positionValueData,
         };
       case 'grover':
         return {
           "type": "GROVER",
           "truePositions": this.getTruePositions()
         };
-      case 'originalGR':
+      /*case 'originalGR':
         return {
           "type": "GROVER_RUDOLPH",
           "positionValue": this.getPositionValueData(),
-        };
+        };*/
       default:
         return {}; 
     }
   }
   
   mapAlgorithmToRequiredType(algorithm: string): string {
-     switch (algorithm) {
+     /*switch (algorithm) {
         case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
         case 'grover': return 'edu.uclm.reper.model.Grover';
-        case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
+        case 'originalGR': return 'edu.uclm.reper.model.Grenoble';*/
+        // case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
+        //default: return '';
+     //}
+     switch (algorithm) {
+        case 'grenoble':
+        case 'originalGR': 
+            return 'edu.uclm.reper.model.Grenoble';
+        case 'grover': 
+            return 'edu.uclm.reper.model.Grover';
         default: return '';
      }
   }
@@ -1994,7 +2014,7 @@ export class DeterministicComponent extends GroverStyle {
         name: `UserExpr${index + 1}`,
         expr: expr,
         description: `User Expression ${index + 1}`,
-        type: this.selectedAlgorithm
+        type: generatorData.type.toUpperCase()
     }));
 
     let quirkCircuitData: any = {};
