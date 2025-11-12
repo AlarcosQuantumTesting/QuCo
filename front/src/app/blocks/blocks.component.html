@@ -344,9 +344,17 @@
                 </div>
                 <div class="section gatesContainer">
                     <div class="form-group">
-                        <label style="font-size: 16px; font-weight: bold; display: block; margin-bottom: 8px; text-align: center;">
+                        <label style="font-size: 16px; font-weight: bold; display: flex; margin-bottom: 8px; text-align: center; align-items: center; width: 100%; justify-content: center;">
                             Available gates
-                            <input type="checkbox" [checked]="areAllSelected(5)" (change)="toggleSelectGates(5)" title="Select/Deselect all">
+                            <!-- <input type="checkbox" [checked]="areAllSelected(5)" (change)="toggleSelectGates(5)" title="Select/Deselect all"> -->
+                             <input
+                                type="checkbox"
+                                [checked]="areAllSelected(5)"
+                                (change)="toggleSelectGates(5)"
+                                title="Select/Deselect all"
+                                class="hidden-checkbox" 
+                                >
+                                <span style="margin-left: 6px;" class="custom-toggle-switch" aria-hidden="true"></span>
                         </label>
                         <small style="display: block; text-align: center; margin-bottom: 8px;">
                             (Select at least one gate of each type: 1, 2, 3 and 4 or more affected qubits)
@@ -356,13 +364,21 @@
                                 <div style="display: flex; align-items: center; margin: 12px 0;">
                                     <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
                                     <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        1 affected qubit
-                                        <input type="checkbox" [checked]="areAllSelected(1)" (change)="toggleSelectGates(1)" title="Select/Deselect all">
+                                        <i>1 affected qubit</i>
+                                        <!-- <input type="checkbox" [checked]="areAllSelected(1)" (change)="toggleSelectGates(1)" title="Select/Deselect all"> -->
+                                         <input
+                                            type="checkbox"
+                                            [checked]="areAllSelected(1)"
+                                            (change)="toggleSelectGates(1)"
+                                            title="Select/Deselect all"
+                                            class="hidden-checkbox" 
+                                        >
+                                        <span class="custom-toggle-switch" aria-hidden="true"></span>
                                     </label>
                                     <div style="flex: 1; height: 1px; background-color: #aaa; max-width: 10px;"></div>
                                 </div>
 
-                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; justify-content: left; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
                                 <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits == 1">
                                     <label style="display: flex; align-items: center; gap: 4px;">
@@ -378,12 +394,20 @@
                                 <div style="display: flex; align-items: center; margin: 12px 0;">
                                     <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
                                     <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        2 affected qubits
-                                        <input type="checkbox" [checked]="areAllSelected(2)" (change)="toggleSelectGates(2)" title="Select/Deselect all">
+                                        <i>2 affected qubits</i>
+                                        <!-- <input type="checkbox" [checked]="areAllSelected(2)" (change)="toggleSelectGates(2)" title="Select/Deselect all"> -->
+                                         <input
+                                            type="checkbox"
+                                            [checked]="areAllSelected(2)"
+                                            (change)="toggleSelectGates(2)"
+                                            title="Select/Deselect all"
+                                            class="hidden-checkbox" 
+                                        >
+                                        <span class="custom-toggle-switch" aria-hidden="true"></span>
                                     </label>
                                     <div style="flex: 1; height: 1px; background-color: #aaa; max-width: 10px;"></div>
                                 </div>
-                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; justify-content: left; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
                                 <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits == 2">
                                     <label style="display: flex; align-items: center; gap: 4px;">
@@ -400,14 +424,22 @@
                                     <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
 
                                     <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        3 affected qubits
-                                        <input type="checkbox" [checked]="areAllSelected(3)" (change)="toggleSelectGates(3)" title="Select/Deselect all">
+                                        <i>3 affected qubits</i>
+                                        <!-- <input type="checkbox" [checked]="areAllSelected(3)" (change)="toggleSelectGates(3)" title="Select/Deselect all"> -->
+                                         <input
+                                            type="checkbox"
+                                            [checked]="areAllSelected(3)"
+                                            (change)="toggleSelectGates(3)"
+                                            title="Select/Deselect all"
+                                            class="hidden-checkbox" 
+                                        >
+                                        <span class="custom-toggle-switch" aria-hidden="true"></span>
                                     </label>
 
                                     <div style="flex: 1; height: 1px; background-color: #aaa; max-width: 10px;"></div>
                                 </div>
 
-                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; justify-content: left; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
                                     <ng-container *ngFor="let gate of gates">
                                         <ng-container *ngIf="gate.affectedQubits == 3">
                                         <label style="display: flex; align-items: center; gap: 4px;">
@@ -423,13 +455,21 @@
                                 <div style="display: flex; align-items: center; margin: 12px 0;">
                                     <div style="flex: 1; height: 1px; background-color: #aaa;"></div>
                                     <label style="margin: 0 8px; font-size: 16px; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        4 or more affected qubits
-                                        <input type="checkbox" [checked]="areAllSelected(4)" (change)="toggleSelectGates(4)" title="Select/Deselect all">
+                                        <i>4 or more affected qubits</i>
+                                        <!-- <input type="checkbox" [checked]="areAllSelected(4)" (change)="toggleSelectGates(4)" title="Select/Deselect all"> -->
+                                         <input
+                                            type="checkbox"
+                                            [checked]="areAllSelected(4)"
+                                            (change)="toggleSelectGates(4)"
+                                            title="Select/Deselect all"
+                                            class="hidden-checkbox" 
+                                        >
+                                        <span class="custom-toggle-switch" aria-hidden="true"></span>
                                     </label>
                                     <div style="flex: 1; height: 1px; background-color: #aaa; max-width: 10px;"></div>
                                 </div>
 
-                                <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
+                                <div style="display: flex; justify-content: left; align-items: center; width: 100%; gap: 8px; flex-wrap: wrap;">
                                     <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits >= 4">
                                         <label style="display: flex; align-items: center; gap: 6px;">

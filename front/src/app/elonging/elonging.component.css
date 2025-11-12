@@ -1425,3 +1425,55 @@ input[type="checkbox"] {
     font-size: 14px;
     cursor: pointer;
   }
+
+
+
+
+
+.hidden-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.group-toggle-label-better {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.custom-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+}
+
+.custom-toggle-switch::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.hidden-checkbox:checked + .custom-toggle-switch {
+    background-color: #2FA3AC;
+}
+
+.hidden-checkbox:checked + .custom-toggle-switch::before {
+    transform: translateX(16px);
+}
+
+.hidden-checkbox:focus + .custom-toggle-switch {
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
