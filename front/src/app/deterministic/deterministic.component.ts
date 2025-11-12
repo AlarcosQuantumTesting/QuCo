@@ -1944,7 +1944,8 @@ export class DeterministicComponent extends GroverStyle {
             let frequency = this.expectedFrequencies.getFreq(i);
             
             if (frequency > 0) {
-                positionValue[i] = Math.round(frequency);
+                //positionValue[i] = Math.round(frequency);
+                positionValue[i] =frequency;
             }
         }
     }

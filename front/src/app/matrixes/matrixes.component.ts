@@ -1727,6 +1727,10 @@ export class MatrixesComponent implements AfterViewInit  {
         next: (project: StoredProject) => {
             alert(`Proyecto "${project.name}" cargando...`);
             this.loadProjectDataToComponent(project);
+            /*this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => { this.mensajeTemporal2 = ''; }, 1500);
+            setTimeout(() => { this.loadProjectDataToComponent(project); }, 1500);*/
+            
         },
         error: (err) => {
             console.error('Error al cargar detalles del proyecto:', err);
@@ -1755,9 +1759,14 @@ export class MatrixesComponent implements AfterViewInit  {
 
     alert(`Proyecto "${project.name}" cargado con éxito.`);
 
+    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
+    setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);*/
+
     setTimeout(() => {
         location.reload();
+        
       }, 100);
+    
     }
 
 }
