@@ -725,11 +725,15 @@ export class ElongingComponent extends EvolutionaryComponent {
     
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
-        alert('Project "' + this.circuitName + '" saved successfully!');
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => {
+          this.mensajeTemporal2 = '';
+        }, 1000);
         this.loadProjectNames();
       },
       error: (error: any) => {
-        console.error('Error al guardar el proyecto:', error);
+        console.error('Errorl saving project: ', error);
         alert('Error saving project (Code 400). Check the console and the API documentation.');
       }
     });
@@ -748,7 +752,7 @@ export class ElongingComponent extends EvolutionaryComponent {
                 console.log("Project names loaded.", this.projectList);
             },
             error: (err) => {
-                console.error('Error al cargar nombres de proyectos:', err);
+                console.log('Error loading project names', err);
                 this.projectList = []; 
             }
         });
@@ -762,19 +766,26 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     this.projectService.getProject(requestBody).subscribe({
         next: (project: StoredProject) => {
-            alert(`Proyecto "${project.name}" cargando...`);
-            this.loadProjectDataToComponent(project);
-            const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
-            const contents = document.querySelectorAll<HTMLElement>(".tab-content");
-            tabs[0].classList.add("active");
-            contents[0].classList.add("active");
-            tabs[1].classList.remove("active");
-            contents[1].classList.remove("active");
+            //alert(`Proyecto "${project.name}" cargando...`);
+            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => {
+              this.mensajeTemporal2 = '';
+            }, 1000);
+            setTimeout(() => {
+              this.loadProjectDataToComponent(project);
+              const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+              const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+              tabs[0].classList.add("active");
+              contents[0].classList.add("active");
+              tabs[1].classList.remove("active");
+              contents[1].classList.remove("active");
+            }, 1000);
+            
 
         },
         error: (err) => {
-            console.error('Error al cargar detalles del proyecto:', err);
-            alert('❌ Error al cargar los detalles del proyecto.');
+            console.log('Error loading project details', err);
+            alert('Error loading project details. Check console for details.');
         }
     });
   }
@@ -823,7 +834,11 @@ export class ElongingComponent extends EvolutionaryComponent {
     
     this.notBuilt = false;
     
-    alert(`Proyecto "${project.name}" cargado con éxito.`);
+    //alert(`Proyecto "${project.name}" cargado con éxito.`);
+    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    setTimeout(() => {
+      this.mensajeTemporal2 = '';
+    }, 1000);
   }
 
   getAuthRequestBody(projectId?: string): any {

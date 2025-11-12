@@ -177,7 +177,9 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
 
-    this.onAlgorithmChange(this.selectedAlgorithm);
+    //this.setInfoLocal();
+
+    this.onAlgorithmChange2(this.selectedAlgorithm);
     
     /*this.isGrover = this.selectedAlgorithm === 'grover';
     this.isGrenoble = this.selectedAlgorithm === 'grenoble';
@@ -964,6 +966,7 @@ export class DeterministicComponent extends GroverStyle {
       this.inParallel = false;
     }
   }
+
   onAlgorithmChange(algorithm: string): void {
     this.selectedAlgorithm = algorithm;
     /*if(this.selectedAlgorithm === 'grover') {
@@ -1010,6 +1013,33 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.removeItem('processedExpressionsDeterministic');
 
     
+    
+  }
+
+
+  onAlgorithmChange2(algorithm: string): void {
+    this.selectedAlgorithm = algorithm;
+    if (this.selectedAlgorithm === 'grover') {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+      this.expressionToSave.type = 'grover';
+    } else {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grenoble' };
+      this.expressionToSave.type = 'grenoble';
+    }
+
+    if (this.selectedAlgorithm === 'grover') {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grover' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grover');
+      });
+    } else {
+      this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'grenoble' };
+      this.expService.getExpressions().subscribe((data: Expression[]) => {
+        this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
+      });
+    }
+
+    localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     
   }
 
@@ -1831,13 +1861,20 @@ export class DeterministicComponent extends GroverStyle {
 
     this.projectService.getProject(requestBody).subscribe({
         next: (project: StoredProject) => {
-            alert(`Proyecto "${project.name}" cargando...`);
-            this.loadProjectDataToComponent(project);
+            //alert(`Proyecto "${project.name}" cargando...`);
+            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => {
+              this.mensajeTemporal2 = '';
+            }, 1000);
+            setTimeout(() => {
+              this.loadProjectDataToComponent(project);
+            }, 1000);
+            
             this.mostrarTabla = true;
         },
         error: (err) => {
             console.error('Error al cargar detalles del proyecto:', err);
-            alert('❌ Error al cargar los detalles del proyecto.');
+            alert(`Error loading project details.`);
         }
     });
   }
@@ -1891,11 +1928,39 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarTabla = true; 
     this.goToTable();
 
-    alert(`Proyecto "${project.name}" cargado con éxito.`);
+    //alert(`Proyecto "${project.name}" cargado con éxito.`);
+    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    setTimeout(() => {
+      this.mensajeTemporal2 = '';
+    }, 1000);
 
-    
+    this.saveInLocal();
+  }
+
+  saveInLocal(): void {
+    localStorage.setItem('processedExpressionsDeterministic', JSON.stringify(this.userExpressions));
+    localStorage.setItem('deterministicFrequencies', JSON.stringify(this.expectedFrequencies));
+    localStorage.setItem('qubits', this.qubits.toString());
+    localStorage.setItem('deterministicPhysicalAngle', this.physicalAngle.toString());
+    localStorage.setItem('deterministicInParallel', this.inParallel.toString());
+    localStorage.setItem('deterministicSplitCircuits', this.splitCircuits.toString());
+    localStorage.setItem('deterministicSelectedAlgorithm', this.selectedAlgorithm);
   }
   
+  setInfoLocal(): void {
+    this.userExpressions = JSON.parse(localStorage.getItem('processedExpressionsDeterministic') || '[]');
+    this.expectedFrequencies = JSON.parse(localStorage.getItem('deterministicFrequencies') || '{}');
+    this.qubits = parseInt(localStorage.getItem('qubits') || '3', 10);
+    this.physicalAngle = parseFloat(localStorage.getItem('deterministicPhysicalAngle') || '0');
+    this.inParallel = localStorage.getItem('deterministicInParallel') === 'false';
+    this.splitCircuits = localStorage.getItem('deterministicSplitCircuits') === 'false';
+    if(this.selectedAlgorithm === 'grover') {
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
+    } else {
+      this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
+    }
+  }
+
   openSaveProjectModal(): void {
     this.saveError = '';
     this.mostrarModalGuardarProyecto = true;
@@ -2104,7 +2169,11 @@ export class DeterministicComponent extends GroverStyle {
 
     this.projectService.saveProject(finalPayload).subscribe({
       next: () => {
-        alert('Project "' + this.circuitName + '" saved successfully!');
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => {
+          this.mensajeTemporal2 = '';
+        }, 2000);
         this.loadProjectNames();
       },
       error: (error: any) => {

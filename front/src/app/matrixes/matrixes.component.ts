@@ -722,10 +722,8 @@ export class MatrixesComponent implements AfterViewInit  {
     }
   }
 
-
-
-
   isInvalid: boolean = true;
+  projectLoaded: boolean = false;
 
   ngOnInit() {
 
@@ -777,6 +775,17 @@ export class MatrixesComponent implements AfterViewInit  {
           }
         }, 50);
 
+    }
+
+    this.projectLoaded = localStorage.getItem('projectLoadedMatrices') === 'true';
+
+    if (this.projectLoaded == true) {
+      this.mensajeTemporal2 = 'Project loaded successfully!';
+      setTimeout(() => {
+        this.mensajeTemporal2 = '';
+        this.projectLoaded = false;
+        localStorage.setItem('projectLoadedMatrices', 'false');
+      }, 1000);
     }
 
   }
@@ -1669,7 +1678,9 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
-        alert('Project "' + this.circuitName + '" saved successfully!');
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
         this.loadProjectNames();
       },
       error: (error: any) => {
@@ -1725,11 +1736,11 @@ export class MatrixesComponent implements AfterViewInit  {
 
     this.projectService.getProject(requestBody).subscribe({
         next: (project: StoredProject) => {
-            alert(`Proyecto "${project.name}" cargando...`);
-            this.loadProjectDataToComponent(project);
-            /*this.mensajeTemporal2 = `Loading project "${project.name}"...`;
-            setTimeout(() => { this.mensajeTemporal2 = ''; }, 1500);
-            setTimeout(() => { this.loadProjectDataToComponent(project); }, 1500);*/
+            /*alert(`Proyecto "${project.name}" cargando...`);
+            this.loadProjectDataToComponent(project);*/
+            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
+            setTimeout(() => { this.loadProjectDataToComponent(project); }, 1000);
             
         },
         error: (err) => {
@@ -1757,18 +1768,17 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
-    alert(`Proyecto "${project.name}" cargado con éxito.`);
+    //alert(`Proyecto "${project.name}" cargado con éxito.`);
 
-    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
-    setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);*/
+    //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
+    this.projectLoaded = true;
+    localStorage.setItem('projectLoadedMatrices', 'true');
+    
 
     setTimeout(() => {
-        location.reload();
-        
-      }, 100);
-    
-    }
-
+      location.reload();
+    }, 100);
+  }
 }
 
 
