@@ -1007,7 +1007,16 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
+    localStorage.removeItem('processedExpressionsDeterministic');
+
     
+    
+  }
+
+  reloadChange() {
+    setTimeout(() => {
+      location.reload();
+    }, 100);
   }
 
   onQuirkChange(index: number): void {
