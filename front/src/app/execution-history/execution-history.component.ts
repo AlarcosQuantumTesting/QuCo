@@ -119,7 +119,6 @@ export class ExecutionHistoryComponent implements OnInit {
     
     const query = this.searchQuery.trim();
 
-    // 1. BUSCAR LOCALMENTE (por ID o nombre)
     const foundLocal = this.executionWorks.find(e => 
         e.name.toLowerCase() === query.toLowerCase() || 
         e.id === query
@@ -151,7 +150,7 @@ export class ExecutionHistoryComponent implements OnInit {
                 id: id,
                 name: `${id}`,
                 creationDateTime: result.started_at || new Date().toISOString(),
-                status: 'UNKNOWN',
+                status: result.state.toUpperCase(),
                 details: {
                     started_at: result.started_at,
                     finished_at: result.finished_at,

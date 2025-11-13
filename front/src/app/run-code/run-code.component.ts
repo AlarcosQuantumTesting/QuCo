@@ -33,6 +33,9 @@ export class RunCodeComponent implements OnInit {
   batchId? : string
 
   cerrarModal(): void {
+    if(this.batchId) {
+      this.batchId = '';
+    }
     this.cerrar.emit();
   }
   options = ["1. Just simulator", "2. Just fake_backends", "3. Simulator and fake_backends", "4. Just actual_backends", "5. All options"];
