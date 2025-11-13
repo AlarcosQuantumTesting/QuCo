@@ -440,6 +440,25 @@ export class MatrixesComponent implements AfterViewInit  {
     )
   }
 
+  drawAllQuirk2(matrix : any[]) {
+    this.reset()
+    let info = {
+      matrix : matrix,
+      inputQubits : this.inputQubits,
+      qubits : this.inputQubits + this.outputQubits,
+      reduce : this.reduceQuirk,
+      domain : this.domain
+    }
+
+    this.quirkService.getAllQuirk(info).subscribe(
+      result => {
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        this.quirkURL = url
+        //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+      }
+    )
+  }
+
   getUnitaryMatrix(matrix : any[], rowIndex? : number) {
     this.reset()
     let info = {
@@ -458,7 +477,6 @@ export class MatrixesComponent implements AfterViewInit  {
   }
 
 
-  //mio
   mostrarModalNombreFuncion = false;
   nombreFuncion = '';
   matrixTmp: any[] = [];
@@ -489,7 +507,8 @@ export class MatrixesComponent implements AfterViewInit  {
       functionName : functionName
     }
     if (rowIndex!=undefined)
-      info.matrix = matrix[rowIndex]
+      info.matrix = [matrix[rowIndex]];
+      //info.matrix = matrix[rowIndex]
     this.qiskitService.getCode(info).subscribe({
       next: result => {
         this.isLoadingQiskitCode = true;
@@ -503,7 +522,6 @@ export class MatrixesComponent implements AfterViewInit  {
 
         }
 
-        // Mostrar modal solo si el usuario ingresó un nombre válido
         if (asFunction) {
           this.mostrarModal = true;
         }
@@ -512,21 +530,16 @@ export class MatrixesComponent implements AfterViewInit  {
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
-        //this.isLoadingQiskitCode = false;
 
         this.error   = err.error?.message || err.message;
         
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
-        /*this.mensajeTemporal = 'Error generating code';
-        setTimeout(() => {
-            this.mensajeTemporal = '';
-        }, 2000);*/
 
         this.modalError = true;
       },
       complete: () => {
-        this.isLoadingQiskitCode = false; // ← finaliza carga
+        this.isLoadingQiskitCode = false;
       }
     });
   }
@@ -1565,8 +1578,13 @@ export class MatrixesComponent implements AfterViewInit  {
 
       this.mostrarModalGuardarProyecto = false;
       this.saveError = '';
+
+      this.drawAllQuirk2(this.matrix!);
+      this.getQiskitCode(this.matrix!, false);
+      setTimeout(() => {
+        this.guardarProyecto();
+      }, 100);
       
-      this.guardarProyecto();
   }
 
   guardarProyecto(): void {
