@@ -138,9 +138,16 @@
  
 
   <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%; padding: 0px; margin: 0px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div style="width: 150px;"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
+            <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal">
+                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+            </button>
+        </div>
+
         <h2 style="margin: 10px 0;">Table</h2>
+
         <div style="width: 150px; display: flex; justify-content: flex-end;">        
             <button (click)="openSaveProjectModal()" 
                 class="btn-confirm-save" 
@@ -1326,5 +1333,7 @@
         </div>
     </div>
   </div>
+
+  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
 
 </body>

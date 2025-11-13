@@ -151,6 +151,8 @@ export class DeterministicComponent extends GroverStyle {
   mostrarModalGuardarProyecto: boolean = false;
   saveError: string = '';
 
+  mostrarNotasModal: boolean = false;
+
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
      public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService, 

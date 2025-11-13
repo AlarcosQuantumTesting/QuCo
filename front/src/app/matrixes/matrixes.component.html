@@ -234,7 +234,13 @@
 
 <div *ngIf="matrix" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px; position: relative; margin-bottom: 10px;">
     
-    <div style="width: 200px;"></div>
+    
+    <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
+        <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal">
+            <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+            {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+        </button>
+    </div>
     
     <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
     
@@ -789,5 +795,7 @@
             </div>
         </div>
     </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
   
 </body>

@@ -154,6 +154,10 @@ export class MatrixesComponent implements AfterViewInit  {
 
   REQUIRED_GENERATOR_TYPE: string = 'edu.uclm.reper.model.Matrix';
 
+  mostrarNotasModal: boolean = false;
+
+  nombreComponente: string = 'Matrices';
+
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
     private projectService: ProjectService) {}

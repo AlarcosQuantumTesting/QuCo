@@ -1,0 +1,53 @@
+<div class="modal redimensionar" *ngIf="mostrarModal">
+    <div class="modal-content redimensionar"
+    cdkDrag
+    cdkDragRootElement=".modal-content"
+             style="max-height: 90%;">
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal"><i class="fas fa-clipboard-list"></i> Project notes</h2>
+            <button class="close"><i class="close-i" (click)="cerrarModal.emit()">&times;</i></button>
+        </div>
+
+        <div class="notes-section-modal">
+            <div class="new-note-container">
+                <textarea
+                    id="noteInput"
+                    [(ngModel)]="currentNoteText"
+                    placeholder="Add your note..."
+                    rows="3"
+                    class="note-textarea"
+                ></textarea>
+                <button
+                    (click)="addNote()"
+                    [disabled]="!currentNoteText || currentNoteText.trim().length === 0"
+                    class="btn-add-note"
+                >
+                    <i class="fas fa-plus"></i> Add note
+                </button>
+            </div>
+
+            <div class="notes-list-container">
+                <div *ngIf="notes.length === 0" class="no-notes-message">
+                    No notes yet. Start your project progress register!
+                </div>
+
+                <div *ngFor="let note of notes.slice().reverse(); let reversedIndex = index" class="note-card">
+                    <div class="note-content">
+                        {{ note.text }}
+                    </div>
+                    <div class="note-footer">
+                        <button 
+                            class="btn-delete-note" 
+                            title="Delete note"
+                            (click)="deleteNote(notes.length - 1 - reversedIndex)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <div class="note-timestamp">
+                            <i class="far fa-clock"></i> {{ note.timestamp | date:'short' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
