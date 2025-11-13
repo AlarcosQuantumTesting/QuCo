@@ -402,7 +402,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
-    if (!this.validarGates()) return true;
+    //if (!this.validarGates()) return true;
 
     return false;
   }

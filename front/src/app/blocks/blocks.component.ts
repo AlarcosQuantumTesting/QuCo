@@ -342,7 +342,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     if (this.validarStartingColumns()) return true;
     if (this.validarProbabilities()) return true;
 
-    if (!this.validarGates()) return true;
+    //if (!this.validarGates()) return true;
 
     
     return false;
