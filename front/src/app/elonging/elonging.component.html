@@ -11,16 +11,6 @@
       <h1>Genetic algorithm</h1>
     </div>
 
-    <!-- <div class="tabs">
-        <button class="tab active" data-tab="0">Data</button>
-        <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
-        <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
-            <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
-                <i class="fas fa-save"></i> Save project
-            </button>
-        </div>
-    </div> -->
-
     <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
 
         <div style="display: flex;">
@@ -28,7 +18,11 @@
             <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
         </div>
 
-        <div style="display: flex; justify-content: flex-end;">        
+        <div style="display: flex; justify-content: flex-end;"> 
+            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+            </button>      
             <button 
                 (click)="mostrarModalGuardarProyecto = true" 
                 class="btn-confirm-save" 
@@ -56,37 +50,6 @@
                     You must select a template.
                 </small>
             </div>
-            <!-- <div class="info1">
-
-                <div class="form-group" *ngIf="projectList && projectList.length > 0">
-                    <div class="label-container">
-                        <label for="projectSelector">Load Project:</label>
-                    </div>
-                    <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
-                        <option value="" disabled selected>Select project</option>
-                        <option *ngFor="let project of projectList" [value]="project.id">
-                            {{ project.name }}
-                        </option>
-                    </select>
-                </div>
-
-                <div>
-                    Available templates:
-                    <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" style="margin-right: 20px; margin-left: 10px;"
-                    [ngClass]="{'is-invalid': templateSelected === false}">
-                        <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])" [ngValue]="template">
-                            {{ template.fileName }}
-                        </option>
-                    </select>
-                </div>
-
-                <div>
-                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px;">Delete files</span>
-                </div>
-
-                
-                <button class="btn primary" (click)="buildActions()" [disabled]="validarDatos() || running" style="margin-left: 20px;">Build</button>
-            </div> -->
             <div class="info1">
 
                 <div class="form-group" 
@@ -732,5 +695,7 @@
             </div>
         </div>
     </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
 
 </body>

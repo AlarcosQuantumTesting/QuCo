@@ -10,11 +10,6 @@
       <h1>Blocks genetic algorithm</h1>
     </div>
 
-    <!-- <div class="tabs">
-        <button class="tab active" data-tab="0">Data</button>
-        <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
-    </div> -->
-
     <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
 
         <div style="display: flex;">
@@ -22,7 +17,11 @@
             <button class="tab" data-tab="1" [disabled]="notBuilt">Generation</button>
         </div>
 
-        <div style="display: flex; justify-content: flex-end;">        
+        <div style="display: flex; justify-content: flex-end;">   
+            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+            </button>     
             <button 
                 (click)="mostrarModalGuardarProyecto = true" 
                 class="btn-confirm-save" 
@@ -748,30 +747,8 @@
         </div>
     </div>
 
-    <!-- <div class="modal" *ngIf="mostrarModalGuardarProyecto">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="title-modal">Save project</h2>
-                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
-            </div>
-            <div class="info-form">
-                <h3>Enter project name</h3>
-                <div class="input-button-row">
-                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
-                    
-                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
-                        <i class="fa fa-check" aria-hidden="true"></i> Save
-                    </button>
-                </div>
-                <div class="modal-buttons-function">
-                    <button class="btn-cancel" (click)="cancelarSaveModal()">
-                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
-                    </button>
-                </div>
-                <div class="error" *ngIf="saveError">{{ saveError }}</div>
-            </div>
-        </div>
-    </div> -->
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
+
 </body>
 
 

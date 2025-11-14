@@ -66,6 +66,8 @@ export class BlocksComponent extends EvolutionaryComponent {
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
 
   responseReceived? : any
+  mostrarNotasModal: boolean = false;
+  nombreComponente: string = 'Blocks';
 
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,

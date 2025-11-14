@@ -48,6 +48,8 @@ export class ElongingComponent extends EvolutionaryComponent {
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
 
   responseReceived? : any
+  mostrarNotasModal: boolean = false;
+  nombreComponente: string = 'Genetic';
 
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
      public transpileService: TranspileService, private projectService: ProjectService) {

@@ -1533,7 +1533,24 @@ input[type="checkbox"] {
     transform: scale(1.05);
   }
 
-
+.btn-notes {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 70px;
+    margin-top: 5px;
+    margin-left: 10px;
+    background-color: #17555A;
+    color: white;
+  }
+  
+  .btn-notes:hover {
+    background-color: #31797e;
+    transform: scale(1.05);
+  }
 
 
   .info-form {
