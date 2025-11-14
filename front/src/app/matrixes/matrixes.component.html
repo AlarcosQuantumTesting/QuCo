@@ -236,7 +236,7 @@
     
     
     <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
-        <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal">
+        <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
             <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
             {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
         </button>
