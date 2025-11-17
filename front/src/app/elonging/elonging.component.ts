@@ -133,39 +133,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       }
     } else {
       console.log('No hay plantilla seleccionada');
-    }
-
-    /*const savedConfig = localStorage.getItem('qucoConfiguration');
-    if (savedConfig) {
-      try {
-        const conf = JSON.parse(savedConfig);
-        const config = this.pc.inputConfiguration;
-
-        config.qubits = conf.qubits;
-        config.populationSize = conf.populationSize;
-        config.maxPopulationSize = conf.maxPopulationSize;
-        config.minNumberOfColumns = 4;
-        config.maxNumberOfColumns = 20;
-        config.deleteFiles = conf.deleteFiles;
-        config.shots = conf.shots;
-        config.outputs = conf.outputs;
-        config.expectedFrequencies = conf.expectedFrequencies;
-        config.startWithH = conf.startWithH;
-
-
-        if (conf.blockCircuit) {
-          config.blockCircuit = { ...conf.blockCircuit };
-        }
-
-      } catch (error) {
-        console.error('Error al parsear configuración desde localStorage:', error);
-      }
-    }
-    
-    if(!savedConfig) {
-      console.log('No hay configuración guardada en localStorage');
-    }*/
-    
+    }    
 
     this.validarDatos()
     this.tieneFrecuenciasEsperadas()

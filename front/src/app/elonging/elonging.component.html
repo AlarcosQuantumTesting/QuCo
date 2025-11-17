@@ -117,14 +117,18 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
+                                <th align="left">
+                                    <label for="numberOfQubits"><u (click)="pc.inputConfiguration.toggleOutputQubits()">Output qubits:</u></label>
+                                </th>
                                 <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
                                     <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
                                         (change)="updateOutputs();">
                                 </td>
                             </tr>
                             <tr>
-                                <th align="left"><label for="numberOfQubits">Start with Hadamard:</label></th>
+                                <th align="left">
+                                    <label for="numberOfQubits"><u (click)="pc.inputConfiguration.startAllWithHadamard()">Start with Hadamard:</u></label>
+                                </th>
                                 <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
                                     <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.startWithH[qubitIndex]" (change)="updateOutputs()">
                                 </td>

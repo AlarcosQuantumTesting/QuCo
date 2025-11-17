@@ -11,6 +11,7 @@ import edu.uclm.tp3.http.TextLogger;
 @Component
 public class Manager {
 	private JSONObject configuration;
+	private String urlProxyAOtro;
 	
 	private Manager() {
 		String s;
@@ -19,6 +20,7 @@ public class Manager {
 			JSONObject jso = new JSONObject(s);
 			TextLogger.DEBUG = jso.optBoolean("DEBUG");
 			String environment = jso.getString("environment");
+			this.urlProxyAOtro = jso.getString("proxyAOtro");
 			for (int i=0; i<jso.getJSONArray("environments").length(); i++) {
 				if (jso.getJSONArray("environments").getJSONObject(i).getString("name").equals(environment))
 					this.configuration = jso.getJSONArray("environments").getJSONObject(i);
@@ -26,6 +28,10 @@ public class Manager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getUrlProxyAOtro() {
+		return urlProxyAOtro;
 	}
 	
 	public JSONObject getConfiguration() {
