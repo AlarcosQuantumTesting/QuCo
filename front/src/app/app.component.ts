@@ -13,12 +13,10 @@ export class AppComponent implements AfterViewInit, OnInit {
   menuAbierto = false;
   mostrarInicio = true;
   tokenStored: string | null = localStorage.getItem('userToken');
+  URL_BASE = "http://localhost:80";
 
   ngOnInit(): void {
     this.loadSettings();
-    /*if (this.tokenStored) {
-      this.obtenerEmailUsuario(this.tokenStored);
-    }*/
     this.checkTokenValidity();
     
   }
@@ -61,7 +59,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   navigateAndReload(route: string) {
-    // Si ya estamos en la ruta, forzamos reload
     if (this.router.url === '/' + route) {
       this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
         this.router.navigate([route]);
@@ -108,7 +105,6 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.grayscale = settings.grayscale || false;
       this.zoomLevel = settings.zoomLevel || 1;
 
-      // Aplicar estilos guardados
       this.renderer.setStyle(document.body, 'background-color', this.bgColor);
 
       document.querySelectorAll('.content').forEach(el => {
@@ -307,9 +303,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.errorRegistro = '';
   }
 
-
-  URL_BASE = "http://localhost:80";
-
   async registrarUsuario(): Promise<boolean> {
 
     this.errorRegistro = '';
@@ -485,7 +478,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     const sToken = localStorage.getItem('userToken');
     const email = localStorage.getItem('userEmail');
 
-    this.errorToken = ''; // Limpiamos el error previo
+    this.errorToken = '';
 
     if (!sToken || !email) {
         return false;
