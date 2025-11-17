@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ProxyAOtroApp",
+            "request": "launch",
+            "mainClass": "edu.uclm.proxy.ProxyAOtroApp",
+            "projectName": ""
+        },
+        {
+            "type": "java",
             "name": "BinaryTree",
             "request": "launch",
             "mainClass": "edu.uclm.tp3.common.deterministic.BinaryTree",
