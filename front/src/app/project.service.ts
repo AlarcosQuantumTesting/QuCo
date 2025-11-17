@@ -1,0 +1,30 @@
+// project.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ProjectService {
+  private baseUrl = 'http://localhost:8081/projects'; 
+
+  constructor(private http: HttpClient) { }
+
+  saveProject(projectData: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/save`, projectData);
+  }
+
+  getProjectsByUser(userEmail: string): Observable<any> {
+    const requestBody = { email: userEmail };
+    return this.http.post(`${this.baseUrl}/getAllByUser`, requestBody);
+  }
+
+  getProjectsName(requestBody: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/getProjectsName`, requestBody);
+  }
+
+  getProject(requestBody: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/getProject`, requestBody);
+  }
+}

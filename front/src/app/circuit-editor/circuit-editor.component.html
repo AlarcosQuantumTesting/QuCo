@@ -133,58 +133,14 @@
 
                             <div class="table-scroll-wrapper">
                                 <div class="table-wrapper">
-                                    <!-- <table *ngIf="qubitsConfiguration">
-                                      <thead>
-                                        <tr>
-                                          <th></th>
-                                          <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
-                                            {{ i }}
-                                             <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i class="fas fa-ruler"></i></sub>
-                                          </th>
-                                          <th>
-                                            <div class="buttons-column-container">
-                                              <button title="Add column" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i class="fas fa-plus"></i></button>
-                                              <button title="Remove last column" class="remove-column-btn" (click)="removeColumn()" *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i class="fas fa-minus"></i></button>
-                                            </div>
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
-                                          <th>q<sub>{{ i }}</sub></th>
-                                          <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
-                                                [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
-                                                (click)="removeGate(i, j)">
-                                              <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
-                                            </td>
-
-                                            <td *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
-                                                </td>
-
-                                            <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
-                                          </ng-container>
-                                          <td class="physicalQubits">
-                                            {{ getPhysicalQubit(i) }}
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table> -->
                                     <table *ngIf="qubitsConfiguration" [ngClass]="{'circuit-expanded': isGridExpanded}">
                                       <thead>
                                           <tr>
                                               <th>
-                                                  <!-- <button 
-                                                      class="btn-toggle-grid" 
-                                                      title="{{ isGridExpanded ? 'Minimize' : 'Expand' }} circuit view"
-                                                      (click)="toggleCircuitView()">
-                                                      <i class="fas" [ngClass]="{'fa-compress-alt': isGridExpanded, 'fa-expand-alt': !isGridExpanded}"></i>
-                                                  </button> -->
                                                   <button 
                                                       class="btn-toggle-grid" 
                                                       title="Open Floating Circuit View" 
                                                       (click)="openFloatingCircuit()">
-                                                      <!-- <i class="fas fa-external-link-alt"></i> -->
                                                       <i class="fas fa-expand-alt"></i>
                                                   </button>
                                               </th>

@@ -8,6 +8,14 @@ import { CodeTemplate } from '../templates/CodeTemplate';
 import { NotificationService } from '../notification.service';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { ProjectService } from '../project.service';
+
+
+interface QProgramExpression { name: string; expr: string; description: string; type: string; }
+interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
+interface ProjectListItem { id: string; name: string; type: string; }
+interface StoredProject { id: string; name: string; qProgram: any; }
+interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
 
@@ -27,8 +35,24 @@ export class ElongingComponent extends EvolutionaryComponent {
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
 
+  projectList: ProjectListItem[] = []; 
+  selectedProjectId: string = '';
+
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic'; 
+  REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
+
+  responseReceived? : any
+  mostrarNotasModal: boolean = false;
+  nombreComponente: string = 'Genetic';
+
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
-     public transpileService: TranspileService) {
+     public transpileService: TranspileService, private projectService: ProjectService) {
     super(evolutionaryService, "elonging")
   }
 
@@ -57,7 +81,8 @@ export class ElongingComponent extends EvolutionaryComponent {
   ngOnInit () {
 
     localStorage.removeItem('qucoConfigurationBlocks');
-    localStorage.removeItem('qucoConfiguration');    
+    localStorage.removeItem('qucoConfiguration');
+    this.loadProjectNames();
 
     for (let i=0; i<this.remoteFitnessers.length; i++) {
       if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
@@ -347,7 +372,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       this.pc.probOfNQubitGates
     ];
     if (porcentajes.some(p => p == null || p < 0 || p > 100)) return true;
-    if (!this.validarGates()) return true;
+    //if (!this.validarGates()) return true;
 
     return false;
   }
@@ -527,6 +552,278 @@ export class ElongingComponent extends EvolutionaryComponent {
     } else {
       return false;
     }
+  }
+
+
+
+
+  getGeneratorData(): any {
+    const config = this.pc.inputConfiguration;
+    const selectedGateNames = this.gates
+        .filter(g => g.selected)
+        .map(g => g.name);
+
+    return {
+        "type": "GENETIC",
+        
+        "hadamards": config.startWithH,
+        "minColumns": config.minNumberOfColumns,
+        "maxColumns": config.maxNumberOfColumns,
+        "initPopSize": config.populationSize,
+        "maxPopSize": config.maxPopulationSize,
+        "desiredError": this.pc.desiredError,
+        "gates": selectedGateNames
+    };
+  }
+
+  openSaveProjectModal(): void {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal(): void {
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.circuitName = ''; 
+  }
+
+  confirmarGuardarProyecto(): void {
+      if (!this.circuitName || this.circuitName.trim().length === 0) {
+          this.saveError = "The project name is mandatory.";
+          return;
+      }
+
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      
+      this.guardarProyecto();
+  }
+
+  guardarProyecto(): void {
+
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+        console.error("No se puede guardar: el nombre del circuito es obligatorio.");
+        this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
+        return;
+    }
+    
+    /*let quirkCircuitData: any = {};
+    if (this.quirkURL) {
+      const urlString = this.sanitizer.sanitize(4, this.quirkURL) as string;
+      const match = urlString.match(/circuit=(.*)/);
+      if (match && match[1]) {
+        try {
+          quirkCircuitData = JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+          console.error("Error al parsear JSON del quirkURL:", e);
+        }
+      }
+    }*/
+
+    let quirkCircuitData: any = {};
+
+    if (this.responseReceived && this.responseReceived["QUIRK"] && this.responseReceived["QUIRK"].length > 0) {
+        quirkCircuitData = this.responseReceived["QUIRK"][0]; 
+    }
+
+    let finalQuirkPayload: any = quirkCircuitData;
+
+    if (finalQuirkPayload.cols) {
+        finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
+             if (col.some(item => item === "…")) {
+                 return col;
+             }
+             
+             let lastSignificantIndex = col.length - 1;
+             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+                 lastSignificantIndex--;
+             }
+             
+             return col.slice(0, lastSignificantIndex + 1);
+        });
+    }
+
+    if (!finalQuirkPayload.cols && !finalQuirkPayload.gates) {
+        finalQuirkPayload = { cols: [] };
+    }
+
+    console.log('Final quirk payload to be sent:', finalQuirkPayload);
+
+    const generatorData = this.getGeneratorData();
+    const qProgramExpressions: QProgramExpression[] = [];
+
+    const qProgram: QProgram = {
+      id: this.circuitName,
+      qubits: this.pc.inputConfiguration.qubits,
+      expressions: qProgramExpressions,
+      shots: this.pc.inputConfiguration.shots,
+      generator: generatorData,
+      qcodes: [
+          {
+              platform: "AerSimulator",
+              code: this.code || "No qiskit code generated."
+          }
+      ],
+      inputQubits: Array.from({length: this.pc.inputConfiguration.qubits || 0}, (_, i) => i).join(','),
+      outputQubits: this.pc.inputConfiguration.outputs
+          .map((selected, index) => selected ? index : -1)
+          .filter(index => index !== -1)
+          .join(','),
+      qCircuit: {
+          id: this.circuitName,
+          qbits: this.pc.inputConfiguration.qubits,
+          quirkCode: finalQuirkPayload 
+      }
+    };
+    
+    const projectDtoForMapping: any = {
+        id: this.circuitName,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail,
+        mutantCycles: [], 
+        testSuite: null
+    };
+    
+    const finalPayload: any = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+
+    console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
+
+    
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: (response: unknown) => {
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => {
+          this.mensajeTemporal2 = '';
+        }, 1000);
+        this.loadProjectNames();
+      },
+      error: (error: any) => {
+        console.error('Errorl saving project: ', error);
+        alert('Error saving project (Code 400). Check the console and the API documentation.');
+      }
+    });
+  }
+
+
+  loadProjectNames(): void {
+    if (this.userEmail && this.userToken) {
+        const requestBody = this.getAuthRequestBody();
+
+        this.projectService.getProjectsName(requestBody).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(project => 
+                    project.type === this.REQUIRED_GENERATOR_TYPE
+                );
+                console.log("Project names loaded.", this.projectList);
+            },
+            error: (err) => {
+                console.log('Error loading project names', err);
+                this.projectList = []; 
+            }
+        });
+    }
+  }
+
+  onProjectSelected(): void {
+    if (!this.selectedProjectId) return;
+
+    const requestBody = this.getAuthRequestBody(this.selectedProjectId);
+
+    this.projectService.getProject(requestBody).subscribe({
+        next: (project: StoredProject) => {
+            //alert(`Proyecto "${project.name}" cargando...`);
+            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => {
+              this.mensajeTemporal2 = '';
+            }, 1000);
+            setTimeout(() => {
+              this.loadProjectDataToComponent(project);
+              const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+              const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+              tabs[0].classList.add("active");
+              contents[0].classList.add("active");
+              tabs[1].classList.remove("active");
+              contents[1].classList.remove("active");
+            }, 1000);
+            
+
+        },
+        error: (err) => {
+            console.log('Error loading project details', err);
+            alert('Error loading project details. Check console for details.');
+        }
+    });
+  }
+
+  loadProjectDataToComponent(project: StoredProject): void {
+    if (!project.qProgram) return;
+
+    const qp = project.qProgram;
+    const generator = qp.generator;
+    const config = this.pc.inputConfiguration;
+    
+    this.circuitName = project.name; 
+
+    config.qubits = qp.qubits;
+    const outputQubitsString = qp.outputQubits ? qp.outputQubits.toString() : '';
+    
+    const outputIndices: number[] = outputQubitsString 
+        .split(',')
+        .map((s: string) => parseInt(s.trim(), 10))
+        .filter((n: number) => !isNaN(n));
+    
+    config.outputs = Array(qp.qubits).fill(false);
+    outputIndices.forEach(i => {
+        if (i >= 0 && i < qp.qubits) {
+            config.outputs[i] = true;
+        }
+    });
+    
+    if (generator.type === 'GENETIC') {
+        config.startWithH = generator.hadamards;
+        config.minNumberOfColumns = generator.minColumns;
+        config.maxNumberOfColumns = generator.maxColumns;
+        config.populationSize = generator.initPopSize;
+        config.maxPopulationSize = generator.maxPopSize;
+        this.pc.desiredError = generator.desiredError;
+        
+        const savedGates: string[] = generator.gates || [];
+        this.gates.forEach(g => {
+            g.selected = savedGates.includes(g.name!);
+        });
+        this.saveGates();
+    }
+
+    this.updateExpectedFrequencies();
+    this.validarDatos(); 
+    
+    this.notBuilt = false;
+    
+    //alert(`Proyecto "${project.name}" cargado con éxito.`);
+    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    setTimeout(() => {
+      this.mensajeTemporal2 = '';
+    }, 1000);
+  }
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+
+    if (projectId) {
+        body.projectId = projectId;
+    }
+    return body;
   }
   
 

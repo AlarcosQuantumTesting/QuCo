@@ -295,7 +295,7 @@ label {
     white-space: pre-wrap;
     word-wrap: break-word;
     border-radius: 5px;
-    margin: 20px;
+    /*margin: 20px;*/
   }
   
   .info-block input {
@@ -864,6 +864,11 @@ th, td {
     transform: scale(1.05);
 }
 
+.apply-button:disabled {
+    background-color: #8ca9aa;
+    transform: scale(1);
+    cursor: not-allowed;
+}
 
 .mensaje-temporal2 {
   position: fixed;

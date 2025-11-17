@@ -10,12 +10,16 @@ import { AccessibilityService } from './accessibility.service';
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'quco - Quantum Code Generation';
 
-  ngOnInit(): void {
-    this.loadSettings();
-  }
-
   menuAbierto = false;
   mostrarInicio = true;
+  tokenStored: string | null = localStorage.getItem('userToken');
+  URL_BASE = "http://localhost:80";
+
+  ngOnInit(): void {
+    this.loadSettings();
+    this.checkTokenValidity();
+    
+  }
 
   constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2) {
     this.router.events.subscribe(event => {
@@ -55,7 +59,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   navigateAndReload(route: string) {
-    // Si ya estamos en la ruta, forzamos reload
     if (this.router.url === '/' + route) {
       this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
         this.router.navigate([route]);
@@ -65,22 +68,6 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.router.navigate([route]);
     }
   }
-
-  /*
-  // Para confirmar la recarga de la página
-  ngOnInit(): void {
-    window.addEventListener('beforeunload', this.confirmExit);
-  }
-
-  ngOnDestroy(): void {
-    window.removeEventListener('beforeunload', this.confirmExit);
-  }
-
-  confirmExit = (event: BeforeUnloadEvent): void => {
-    event.preventDefault();
-    event.returnValue = '';
-  };
-  */
 
   showAccessibility = false;
   darkMode = false;
@@ -95,63 +82,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   closeAccessibilityPanel() {
     this.showAccessibility = false;
   }
-
-  /*stoggleDarkMode() {
-    this.darkMode = !this.darkMode;
-    if (this.darkMode) {
-      this.highContrast = false;
-      this.setBgColor('#121212');
-    } else {
-      this.setBgColor('');
-    }
-  }
-
-  toggleHighContrast() {
-    this.highContrast = !this.highContrast;
-    if (this.highContrast) {
-      this.darkMode = false;
-      this.setBgColor('#000000');
-    } else {
-      this.setBgColor('');
-    }
-  }
-
-  pickBgColor(event: any) {
-    const color = event.target.value;
-    this.setBgColor(color);
-  }
-
-  setBgColor(event: any) {
-    const color = event.target.value;
-    this.bgColor = color;
-    this.renderer.setStyle(document.body, 'background-color', color);
-    this.setTextColor(color, document.body);
-  }
-
-  setContainerColor(event: any) {
-    const color = event.target.value;
-    this.containerColor = color;
-    const mainContainers = document.querySelectorAll('.container');
-    mainContainers.forEach(el => {
-      (el as HTMLElement).style.backgroundColor = color;
-      this.setTextColor(color, el as HTMLElement);
-    });
-  }
-
-  private setTextColor(bgColor: string, element: HTMLElement) {
-    const c = bgColor.substring(1);
-    const rgb = parseInt(c, 16);
-    const r = (rgb >> 16) & 0xff;
-    const g = (rgb >> 8) & 0xff;
-    const b = rgb & 0xff;
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-
-    const textColor = brightness > 128 ? '#000000' : '#ffffff';
-    this.renderer.setStyle(element, 'color', textColor);
-  }*/
-
-
-
 
   private saveSettings() {
     const settings = {
@@ -175,7 +105,6 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.grayscale = settings.grayscale || false;
       this.zoomLevel = settings.zoomLevel || 1;
 
-      // Aplicar estilos guardados
       this.renderer.setStyle(document.body, 'background-color', this.bgColor);
 
       document.querySelectorAll('.content').forEach(el => {
@@ -191,20 +120,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       }
 
       this.updateZoom();
-
-      // Esperar a que los h1 estén en el DOM
-      /*setTimeout(() => {
-        document.querySelectorAll('h1').forEach(el => {
-          (el as HTMLElement).style.backgroundColor = this.sidebarColor;
-        });
-      }, 50);*/
     }
   }
-  
-
-
-
-
 
   bgColor = '#ffffff';
   containerColor = '#f5f5f5';
@@ -212,7 +129,6 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   grayscale = false;
 
-  // Forzar tonos pastel
   private ensurePastel(hex: string): string {
     const c = hex.substring(1);
     const rgb = parseInt(c, 16);
@@ -220,7 +136,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     let g = (rgb >> 8) & 0xff;
     let b = rgb & 0xff;
 
-    // Forzar a que los valores estén entre 150 y 255 → tonos claros
     r = Math.max(150, r);
     g = Math.max(150, g);
     b = Math.max(150, b);
@@ -250,9 +165,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     document.querySelectorAll('.sidebar').forEach(el => {
       (el as HTMLElement).style.backgroundColor = color;
     });
-    /*document.querySelectorAll('h1').forEach(el => {
-      (el as HTMLElement).style.backgroundColor = color;
-    });*/
     this.saveSettings();
   }
 
@@ -268,21 +180,6 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
     this.saveSettings();
   }
-
-  /*toggleGrayscale() {
-    this.grayscale = !this.grayscale;
-    const mainContainer = document.querySelector('html') as HTMLElement;
-
-    if (this.grayscale) {
-      this.renderer.setStyle(mainContainer, 'filter', 'grayscale(100%) brightness(90%)');
-      this.renderer.setStyle(mainContainer, 'transition', 'filter 0.3s ease');
-    } else {
-      this.renderer.removeStyle(mainContainer, 'filter');
-      this.renderer.setStyle(mainContainer, 'background-color', this.bgColor);
-    }
-    this.saveSettings();
-  }*/
-
 
   resetColors() {
     this.bgColor = '#ffffff';
@@ -343,36 +240,302 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
 
 
+  mostrarModalLogin = false;
+  emailUsuario: string = '';
+  passwordUsuario: string = '';
+  errorLogin: string = '';
 
-
-  /*letra
-  fontSize = 100;
-  minFont = 80; 
-  maxFont = 120;
-  step = 10;
-
-  updateFontSize() {
-    document.documentElement.style.setProperty('--font-scale', this.fontSize + '%');
+  toggleLogin() {
+    this.mostrarModalLogin = true;
   }
 
-  increaseFontSize() {
-    if (this.fontSize < this.maxFont) {
-      this.fontSize += this.step;
-      this.updateFontSize();
-    }
+  isLoginDisabled(): boolean {
+    return !this.emailUsuario || !this.passwordUsuario;
   }
 
-  decreaseFontSize() {
-    if (this.fontSize > this.minFont) {
-      this.fontSize -= this.step;
-      this.updateFontSize();
-    }
-  }
-
-  resetFontSize() {
-    this.fontSize = 100;
-    this.updateFontSize();
+  /*iniciarSesion(): void {
+    console.log('Intentando iniciar sesión con:', this.emailUsuario);
   }*/
 
+  cerrarModalLogin(): void {
+    this.mostrarModalLogin = false;
+    this.emailUsuario = '';
+    this.passwordUsuario = '';
+    this.errorLogin = '';
+  }
+
+  // Para el Registro
+  mostrarModalRegistro: boolean = false;
+  emailRegistro: string = '';
+  passwordRegistro: string = '';
+  passwordConfirmacion: string = '';
+  errorRegistro: string = '';
+  mensajeExito: string = '';
+  mostrarMensajeExito: boolean = false;
+  passwordMismatchError: string = '';
+  mensajeError: string = ''; 
+  mostrarMensajeError: boolean = false;
+
+  abrirRegistro(): void {
+    this.cerrarModalLogin();
+    this.mostrarModalRegistro = true;
+  }
+
+  isRegisterDisabled(): boolean {
+      return !this.emailRegistro || 
+            !this.passwordRegistro || 
+            !this.passwordConfirmacion || 
+            (this.passwordRegistro !== this.passwordConfirmacion);
+  }
+
+  get passwordMismatchMessage(): string {
+    if (this.passwordConfirmacion && this.passwordRegistro !== this.passwordConfirmacion) {
+        return "Passwords do not match.";
+    }
+    return '';
+  }
+
+  cerrarModalRegistro(): void {
+    this.mostrarModalRegistro = false;
+    this.emailRegistro = '';
+    this.passwordRegistro = '';
+    this.passwordConfirmacion = '';
+    this.errorRegistro = '';
+  }
+
+  async registrarUsuario(): Promise<boolean> {
+
+    this.errorRegistro = '';
+    this.mostrarMensajeExito = false;
+
+    if (this.passwordRegistro !== this.passwordConfirmacion) {
+        this.errorRegistro = 'Las contraseñas no coinciden.';
+        return false;
+    }
+
+      const userData = {
+        email: this.emailRegistro,
+        pwd: this.passwordRegistro
+      };
+
+    let body =  JSON.stringify(userData)
+    console.log("Intentando iniciar sesión con:", body);
+
+      try {
+          const response = await fetch(`${this.URL_BASE}/users/create`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(userData)
+          });
+
+          if (response.ok) {
+              console.log("Usuario registrado con éxito.");
+              this.mostrarModalRegistro = false;
+              this.mensajeExito = `Registered successfully! You can now log in, ${this.emailRegistro}!`; 
+              this.mostrarMensajeExito = true;
+              this.limpiarMensajeExito(2000);
+              return true;
+          } else if (response.status === 409) {
+              const error = await response.text();
+              throw new Error(`Error de registro: ${error}`);
+          } else {
+              throw new Error(`Error al registrar. Estado: ${response.status}`);
+          }
+      } catch (error) {
+          this.mensajeError = `User registration failed. Please try again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
+          console.error("Fallo en la comunicación:", error);
+          return false;
+      }
+  }
+
+
+  async iniciarSesion(): Promise<string | null> {
+    this.errorLogin = '';
+    this.mostrarMensajeExito = false;
+
+    const loginData = {
+        email: this.emailUsuario,
+        pwd: this.passwordUsuario
+    };
+
+    try {
+        const response = await fetch(`${this.URL_BASE}/users/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        if (response.ok) {
+            const token = await response.text(); 
+            console.log("Login exitoso. Token recibido:", token);
+            localStorage.setItem('userToken', token);
+            this.mostrarModalLogin = false;
+            this.mensajeExito = `Logged successfully! Welcome, ${this.emailUsuario}!`;
+            localStorage.setItem('userEmail', this.emailUsuario);
+            this.mostrarMensajeExito = true;
+            this.limpiarMensajeExito(2000);
+
+            location.reload();
+            return token;
+        } else if (response.status === 403) {
+            throw new Error("Credenciales inválidas (email o contraseña incorrectos).");
+        } else {
+            throw new Error(`Error al iniciar sesión. Estado: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Fallo en la comunicación o credenciales:", error);
+        this.mensajeError = `User log in failed. Please try again.`; 
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
+        return null;
+    }
+  }
+
+
+  async obtenerEmailUsuario(token: string) {
+    try {
+        const response = await fetch(`${this.URL_BASE}/tokens/getUser`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token: token })
+        });
+        
+        if (response.ok) {
+            const email = await response.text(); 
+            console.log("Email del usuario:", email);
+            localStorage.setItem('email', email);
+            return email;
+        } else {
+          this.mensajeError = `Session expired. Please log in again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
+          throw new Error("Token inválido o expirado.");
+        }
+    } catch (error) {
+      console.log("Buscando email con token:", token);
+        console.error("Error al obtener el usuario:", error);
+        this.mensajeError = `Session expired. Please log in again.`; 
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
+        return null;
+    }
+  }
+
+  limpiarMensajeExito(duration: number = 3000): void {
+    setTimeout(() => {
+        this.mostrarMensajeExito = false;
+        this.mensajeExito = '';
+        this.mostrarMensajeError = false;
+        this.mensajeError = '';
+    }, duration);
+  }
+
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('userToken');
+  }
+
+  mostrarModalLogoutConfirmacion: boolean = false;
+
+  cerrarSesion(): void {
+    if (this.isLoggedIn()) {
+        this.mostrarModalLogoutConfirmacion = true;
+    } else {
+        console.log("No hay sesión activa para cerrar.");
+    }
+  }
+
+  confirmarCerrarSesion(): void {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userEmail');
+    console.log("Sesión cerrada.");
+    
+    this.mostrarModalLogoutConfirmacion = false;
+    
+    this.mensajeExito = `Logged out successfully! See you soon!`; 
+    this.mostrarMensajeExito = true;
+    this.limpiarMensajeExito(3000); 
+
+    location.reload();
+
+  }
+
+  cerrarModalLogoutConfirmacion(): void {
+      this.mostrarModalLogoutConfirmacion = false;
+  }
+
+  errorToken: string = '';
+
+  async checkTokenValidity(): Promise<boolean> {
+    const sToken = localStorage.getItem('userToken');
+    const email = localStorage.getItem('userEmail');
+
+    this.errorToken = '';
+
+    if (!sToken || !email) {
+        return false;
+    }
+
+    const validationData = {
+        token: sToken,
+        email: email
+    };
+
+    try {
+        const response = await fetch(`${this.URL_BASE}/tokens/validate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(validationData)
+        });
+
+        if (response.ok) {
+            console.log("Token válido y activo.");
+            return true;
+        } 
+        
+        if (response.status === 403) {
+          this.errorToken = "Session Expired. Please log in again.";
+          console.error("Token expirado o inválido.");
+          this.mensajeError = `Session expired. Please log in again.`; 
+          this.mostrarMensajeError = true;
+          this.limpiarMensajeExito(2000);
+            
+          localStorage.removeItem('userToken');
+          localStorage.removeItem('userEmail'); 
+          
+          location.reload();
+
+        } else if (response.status === 400) {
+             this.errorToken = "Authentication error.";
+             this.mensajeError = `Authentication error.`; 
+            this.mostrarMensajeError = true;
+            this.limpiarMensajeExito(2000);
+              console.error("Error de autenticación al validar el token.");
+        } else {
+            this.errorToken = `Server error during token validation. Status: ${response.status}`;
+            this.mensajeError = `Server error during token validation. Please try again.`; 
+            this.mostrarMensajeError = true;
+            this.limpiarMensajeExito(2000);
+            console.error("Error del servidor al validar el token. Estado:", response.status);
+        }
+        
+        return false;
+        
+    } catch (error) {
+        console.error("Fallo de conexión al validar token:", error);
+        this.errorToken = "Connection error. Could not verify session status.";
+        return false;
+    }
+  }
 
 }

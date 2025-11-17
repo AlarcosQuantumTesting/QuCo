@@ -162,7 +162,8 @@
     <div class="modal ejemplos" *ngIf="executionSelected && modalDetails">
         <div class="modal-content ejemplos"
             cdkDrag
-            cdkDragRootElement=".modal-content.ejecuciones">
+            cdkDragRootElement=".modal-content.ejecuciones"
+             style="max-height: 90%;">
 
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Execution specifications: {{ executionSelected.name }}</h2>
@@ -209,7 +210,7 @@
                     </div>
                 </div>
                 
-                <div class="details-viewer">
+                <div class="details-viewer" *ngIf="enLocal == true">
                     
                     <p class="section-title">Execution parameters</p>
                     
@@ -232,63 +233,9 @@
                         </div>
                     </div>
                     
-                    <!-- <hr>
-                    <p class="section-title">Server paths & logs</p>
-                    
-                    <div class="log-paths">
-                        <p *ngIf="executionSelected.details?.stdout_path" class="log-line">
-                            <label>Stdout path:</label> 
-                            <span>{{ executionSelected.details?.stdout_path }}</span>
-                            <i class="fas fa-file-alt" title="Standard Output"></i>
-                            <button class="apply-button" title="Download STDOUT Log" (click)="downloadStdout(executionSelected!.id)" style="margin-left: 10px; padding: 5px 10px;">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </p>
-                        <p *ngIf="executionSelected.details?.stderr_path" class="log-line">
-                            <label>Stderr path:</label>
-                            <span>{{ executionSelected.details?.stderr_path }}</span>
-                            <i class="fas fa-exclamation-triangle" title="Standard Error"></i>
-                            <button class="apply-button" title="Download STDERR Log" (click)="downloadStderr(executionSelected!.id)" style="margin-left: 10px; padding: 5px 10px;">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </p>
-                    </div>
-                    
-                    <p *ngIf="executionSelected.status === 'ERROR' && !executionSelected.details?.stderr_path" class="error-note">
-                        No stderr path available. Check server console for generic errors.
-                    </p> -->
                 </div>
-                <div class="details-viewer">
+                <div class="details-viewer" style="margin-top: 20px;">
                     <p class="section-title">Server files</p>
-                    
-                    <!-- <div class="log-paths">
-                        
-                        <p class="guide-text" style="margin-bottom: 5px;">Files generated in batch directory:</p>
-
-                        <div *ngFor="let file of executionSelected.details?.files" class="param-line file-line">
-                            <label class="file-name-label">{{ file.name }}</label>
-                            <span class="file-size-info">({{ (file.size / 1024) | number:'1.0-2' }} KB)</span>
-                            
-                            <div class="file-download-actions">
-                                
-                                <ng-container *ngIf="executionSelected.status === 'FINISHED'">
-                                    
-                                    <button class="apply-button download-btn" 
-                                            title="Download {{ file.name }}"
-                                            (click)="downloadGenericFile(executionSelected!.id, file.name)"
-                                            style="padding: 5px 10px; margin-left: 10px;">
-                                        
-                                        <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
-                                        <i *ngIf="file.name.endsWith('.txt')" class="fas fa-file-alt"></i>
-                                        <i *ngIf="!file.name.endsWith('.csv') && !file.name.endsWith('.txt')" class="fas fa-download"></i>
-                                        
-                                    </button>
-
-                                </ng-container>
-                            </div>
-                        </div>
-
-                    </div> -->
                     <div class="log-paths" [class]="getFileListColorClass()">
     
                         <p class="guide-text" style="margin-bottom: 5px;">Files generated in batch directory:</p>

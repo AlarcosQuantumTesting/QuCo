@@ -210,6 +210,18 @@
                 </span>
             </div>
 
+            <div class="form-group" *ngIf="projectList && projectList.length > 0">
+                <div class="label-container">
+                    <label for="projectSelector">Load project:</label>
+                </div>
+                <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
+                    <option value="" disabled>Select project</option>
+                    <option *ngFor="let project of projectList" [value]="project.id">
+                        {{ project.name }}
+                    </option>
+                </select>
+            </div>
+
             <div class="matrixTitle-container" style="margin-top: 25px;">
                 <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
                 <button class="btn-reset" style="margin-top: 10px;" *ngIf="matrix" (click)="resetValues()">
@@ -220,39 +232,24 @@
     </div>
 </div>
 
-<div *ngIf="matrix" style="display: flex; justify-content: center; align-items: center; position: relative;">
-    <div style="display: flex; align-items: center;">
-        <h2 *ngIf="matrix" style="margin-top: 10px;">Table</h2>
-        <!-- <div style="position: relative;">
-            <button class="editTable-button" title="Table specifications" (click)="toggleTooltipTable($event)">
-              <i class="fa fa-edit"></i>
-            </button>
-            <div class="custom-tooltip" *ngIf="tooltipTableVisible" style="position: absolute; top: 0; left: 100%; margin-left: 10px; z-index: 100;">
-
-              <div>
-                <p class="radioTitle">Select domain:</p>
-                <label class="custom-radio">
-                  <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
-                </label>
-                <label class="custom-radio">
-                  <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
-                </label>
-              </div>
-
-                <div>
-                    <p class="radioTitle">Available templates:</p>
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-                        <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes'])" [ngValue]="template">
-                            {{ template.fileName }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-        </div> -->
+<div *ngIf="matrix" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px; position: relative; margin-bottom: 10px;">
+    
+    
+    <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
+        <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+            <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+            {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+        </button>
     </div>
-
+    
+    <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
+    
+    <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
+        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
+            <i class="fas fa-save"></i> Save project
+        </button>
+    </div>
 </div>
-
 
 <div *ngIf="matrix" class="matrix-editor-container">
     <div class="table-button-container">
@@ -359,10 +356,10 @@
                             
                             <i class="fas fa-microchip"></i>
                         </button>
-                        <button class="action-icon" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false)">
+                        <button class="action-icon" title="Get Qiskit code (program)" (click)="mostrarModal = true; getQiskitCode(matrix, false, rowIndex)">
                             <i class="fa fa-code"></i>
                         </button>
-                        <button class="action-icon" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true)">
+                        <button class="action-icon" title="Get Qiskit code (function)" style="font-weight: bold;" (click)="getQiskitCode(matrix, true, rowIndex)">
                             
                             f(x)
                         </button>
@@ -491,7 +488,7 @@
     </div>
     <div class="modal-content ejemplos"
     cdkDrag
-    cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
+    cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode" style="height: fit-content; max-height: 90%;">
         <!-- Botón para cerrar el modal -->
         <div class="modal-header" cdkDragHandle>
             <h2 class="title-modal">Qiskit Code</h2>
@@ -558,7 +555,6 @@
 <!-- <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" style="width: 100%; height: 100%;"></app-run-code> -->
 <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="qiskitCode || ''" ></app-run-code>
 
-    <!-- Modal para ingresar el nombre de la función -->
     <div class="modal" *ngIf="mostrarModalNombreFuncion">
         <div class="modal-content">
             <div class="modal-header">
@@ -585,13 +581,11 @@
 
     <div class="modal" *ngIf="mostrarModalCrearExp">
         <div class="modal-content">
-            <!-- Botón para cerrar el modal -->
             <div class="modal-header">
                 <h2 class="title-modal">Create expression</h2>
                 <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false; cerrarModal()">&times;</i></button>
             </div>
     
-            <!-- Contenido del modal -->
             <div class="expression-output">
 
                 <div class="expressionsContainer">
@@ -634,26 +628,18 @@
                     <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarModal()">Cancel</button>
                 </div>
             </div>
-    
-            <!-- Botón para copiar el código -->
-            <!-- <div class="modal-footer">
-                <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
-            </div> -->
         </div>
     </div>
 
     <div class="modal" *ngIf="mostrarModalVerExp">
         <div class="modal-content">
-            <!-- Encabezado del modal -->
             <div class="modal-header">
                 <div class="header-with-button">
                     <h2 class="title-modal">Manage expressions</h2>
-                    <!-- <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button> -->
                 </div>
                 <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false; cerrarModal()">&times;</i></button>
             </div>
             
-            <!-- Tabla de expresiones -->
             <div class="table-container-expressions">
                 <table class="expressions-table">
                     <thead>
@@ -674,7 +660,6 @@
                                     <i class="fas fa-edit edit-expression-icon"></i>
                                 </button>
                                 <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
-                                    <!-- <button class="delete-expression-btn" title="Delete expression" (click)="deleteExpression(expression.expressionName, i)"> -->
                                     <i class="fas fa-trash"></i> 
                                 </button>
                             </td>
@@ -683,19 +668,14 @@
                 </table>
             </div>
     
-            <!-- Botón de cerrar -->
            
             <div class="modal-footer">
-                <!-- <div class="help-actions" style="margin-bottom: 15px;">
-                    <button class="action-btn" (click)="mostrarModalVerExp = false; cerrarModal()">Got it!</button>
-                </div> -->
                 <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
             </div>
             
         </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
     <div *ngIf="showDeleteModal" class="modal-delete">
         <div class="modal-content-delete">
             <div class="modal-header" style="background-color: rgb(201, 46, 46);">
@@ -723,7 +703,6 @@
                 <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
             </div>
 
-            <!-- Contenido del modal -->
             <div class="intructions-content" style="justify-content: center; display: flex;">
                 <div class="form-row" style="justify-content: center; width: 100%;">
                 <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
@@ -785,12 +764,38 @@
                 </div>
 
                 <div class="help-actions">
-                    <!-- <button class="btn-cancel" (click)="modalError = false">Close</button> -->
                     <button class="btn-confirm" (click)="modalError = false">Got it!</button>
                 </div>
             </div>
             
         </div>
     </div>
+
+    <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Save project</h2>
+                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+            </div>
+            <div class="info-form">
+                <h3>Enter project name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                    
+                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                        <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarSaveModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="saveError">{{ saveError }}</div>
+            </div>
+        </div>
+    </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
   
 </body>
