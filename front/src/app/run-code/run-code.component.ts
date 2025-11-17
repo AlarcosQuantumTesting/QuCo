@@ -77,6 +77,10 @@ export class RunCodeComponent implements OnInit {
     
     const overwriteValue = override ? 'y' : 'n';
 
+    if (this.batchId) {
+      this.batchId = '';
+    }
+
     let url = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
