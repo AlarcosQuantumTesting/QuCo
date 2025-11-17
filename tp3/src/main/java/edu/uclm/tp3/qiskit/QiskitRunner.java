@@ -1,16 +1,25 @@
 package edu.uclm.tp3.qiskit;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import edu.uclm.tp3.Manager;
+import edu.uclm.tp3.common.model.Circuit;
 import edu.uclm.tp3.common.model.ProblemConfiguration;
 import edu.uclm.tp3.common.services.EvolutionaryService;
+import edu.uclm.tp3.common.utils.Files;
 import edu.uclm.tp3.genetic.fitnessers.Fitnesser;
+import edu.uclm.tp3.http.HttpClient;
 import edu.uclm.tp3.http.SseEmitters;
 import edu.uclm.tp3.http.TextLogger;
 import edu.uclm.tp3.parallel.TaskData;
@@ -42,7 +51,7 @@ public class QiskitRunner implements TaskReceptor {
 		TextLogger.write(gt, 5, "processDirectory: " + processDirectory + "\n");
 	}
 
-	public TaskData runAll(ProblemConfiguration pc, Fitnesser fitnesser, HWSession hw) throws Exception {
+	public TaskData runAll(ProblemConfiguration pc, Fitnesser fitnesser, HWSession hw, boolean runInLocal) throws Exception {
 		TextLogger.write(gt, 4, "QiskitRunner::runAll(pc, fitnesser, hw)\n");
 		this.executionResults.clear();
 
@@ -55,9 +64,107 @@ public class QiskitRunner implements TaskReceptor {
 		
 		TextLogger.write(gt, 4, "files= " + files + "\n");
 		
+		if (runInLocal)
+			return getResultInLocal(fileNames);
+		else
+			return getResultInRemote(fileNames);
+	}
+
+	private TaskData getResultInRemote(String[] fileNames) throws Exception {
+		int files = fileNames.length;
+		JSONArray codes = new JSONArray();
+		List<Integer> circuitLengths = new ArrayList<>();
+		for (int i=0; i<files; i++) {
+			String wholeFileName = this.getProcessDirectory() + fileNames[i];
+			codes.put(this.read(wholeFileName));
+			circuitLengths.add(this.getCircuitLength(wholeFileName));
+		}
+		//String url = "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1";
+		String url = Manager.get().getUrlProxyAOtro() + "/run_code";
+		HttpClient remoteRunner = new HttpClient();
+		JSONArray headers = new JSONArray();
+		headers.put("Content-Type:application/json");
+		String response = remoteRunner.sendPost(url, headers, codes);
+
+		JSONObject jsoResponse = new JSONObject(response);
+		if (jsoResponse.has("results")) {
+			JSONArray jsaResults = jsoResponse.getJSONArray("results");
+			for (int i=0; i<jsaResults.length(); i++) {
+				JSONObject jsoProblemResult = jsaResults.getJSONObject(i);
+				if (jsoProblemResult.getInt("returncode")==0) {
+					List<Integer> obtainedFrequencies = buildObtainedFrequencies(jsoProblemResult);
+					this.setResults(i, obtainedFrequencies, circuitLengths.get(i));
+				}
+			}
+		}
+
+		List<List<Integer>> frequencies = this.executionResults.entrySet().stream()
+				.sorted(Comparator.comparing(Map.Entry::getKey, Comparator.naturalOrder()))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toList());
+
+		circuitLengths = this.circuitLengths.entrySet().stream()
+				.sorted(Comparator.comparing(Map.Entry::getKey, Comparator.naturalOrder()))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toList());
+
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("frequencies", frequencies);
+		resultMap.put("circuitLengths", circuitLengths);
+		TaskData result = new TaskData();
+		result.setData(resultMap);
+		result.setSize(frequencies.size());
+		return result;
+	}
+
+	private int getCircuitLength(String wholeFileName) throws Exception {
+		String circFileName = wholeFileName.substring(0, wholeFileName.length()-2) + "circ";
+		Circuit circuit = Files.readCircuit(circFileName);
+		return circuit.getGates().size();
+	}
+
+	private List<Integer> buildObtainedFrequencies(JSONObject jsoProblemResult) {
+		List<Integer> obtainedFrequencies = this.buildEmptyResult();
+		String line = jsoProblemResult.getString("stdout");
+		String[] tokens = line.split(",");
+
+		for (int j=0; j<tokens.length; j++) {
+			int posDosPuntos = tokens[j].indexOf(':');
+			String sOrder = tokens[j].substring(1, posDosPuntos);
+			String sFrequency = tokens[j].substring(posDosPuntos+1, tokens[j].length()-1);
+			if (sFrequency.endsWith(")"))
+				sFrequency = sFrequency.substring(0, sFrequency.length()-1);
+
+			int order = Integer.parseInt(sOrder);
+			obtainedFrequencies.set(order, Integer.parseInt(sFrequency));
+		}
+		return obtainedFrequencies;
+	}
+
+	private List<Integer> buildEmptyResult() {
+		List<Integer> emptyResults = new ArrayList<>();
+		int max = (int) Math.pow(2, this.numberOfOutputs);
+		for (int i=0; i<max; i++) 
+			emptyResults.add(0);
+		return emptyResults;
+	}
+
+	private String read(String wholeFileName) {
+		try(FileInputStream fis = new FileInputStream(wholeFileName)) {
+			byte[] data = new byte[fis.available()];
+			fis.read(data);
+			return new String(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private TaskData getResultInLocal(String[] fileNames) throws IOException, InterruptedException {
+		int files = fileNames.length;
 		int cores = Runtime.getRuntime().availableProcessors();
 		cores = cores*2;
-		if (files<cores)
+		if (fileNames.length<cores)
 			cores = files;
 		
 		TextLogger.write(gt, 4, "cores= " + cores + "\n");
@@ -77,8 +184,6 @@ public class QiskitRunner implements TaskReceptor {
 				TextLogger.write(this.gt, 5, "tt[" + j + "] = new Thread(runner);\n");
 				tt[j].start();
 				TextLogger.write(this.gt, 5, "tt[" + j + "].start();\n");
-				/*if (cont%10==0 || cont==files-1)
-					hw.send("Executing " + (cont+1) + "/" + files);*/
 				if (cont%10==0 || cont==files-1)
 					emitters.sendMessage("Executing " + (cont+1) + "/" + files);
 			}
@@ -94,8 +199,6 @@ public class QiskitRunner implements TaskReceptor {
 			cont++;
 			tt[j] = new Thread(runner);
 			tt[j].start();
-			/*if (cont%10==0 || cont==files-1)
-				hw.send("Executing " + (cont+1) + "/" + files);*/
 			if (cont%10==0 || cont==files-1)
 				emitters.sendMessage("Executing " + (cont+1) + "/" + files);
 		}

@@ -36,12 +36,10 @@ public class QiskitSimpleRunner implements Runnable {
 		try {
 			TextLogger.write(this.runner.getGt(), 6, "run()\n");
 			int circuitLength = 0;
-			//if (fitnesser!=null && fitnesser.isCircuitLengthRequired()) {
-				String circFileName = this.fileName.substring(0, this.fileName.length()-2) + "circ";
-				circFileName = this.runner.getProcessDirectory() + circFileName;
-				Circuit circuit = Files.readCircuit(circFileName);
-				circuitLength = circuit.getGates().size();
-			//}
+			String circFileName = this.fileName.substring(0, this.fileName.length()-2) + "circ";
+			circFileName = this.runner.getProcessDirectory() + circFileName;
+			Circuit circuit = Files.readCircuit(circFileName);
+			circuitLength = circuit.getGates().size();
 			
 			TextLogger.write(this.runner.getGt(), 7, "circFileName=" + circFileName + "\n");
 			TextLogger.write(this.runner.getGt(), 7, "circuitLength=" + circuitLength + "\n");

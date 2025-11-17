@@ -190,6 +190,11 @@ form {
   color: #008b95;
 }
 
+.http-label:hover {
+  cursor: pointer;
+  color: #045f66 !important;
+}
+
 .http-label-group .http-value {
   font-family: monospace;
   font-size: 14px;

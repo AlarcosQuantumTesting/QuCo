@@ -1,0 +1,472 @@
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.modal-content {
+    background-color: #fff;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    position: relative;
+    font-family: Arial, sans-serif;
+}
+
+.modal-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #008b95;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+.title-modal {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+    padding-left: 20px;
+}
+
+
+.modal.instrucciones {
+    position: fixed;
+    z-index: 1000;
+    background-color: transparent;
+    pointer-events: none;
+}
+  
+.modal-content.instrucciones {
+    pointer-events: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 600px;
+    max-width: none;
+    max-height: none;
+    overflow-y: auto;
+    position: relative;
+
+    resize: both;
+    overflow: auto;
+
+    min-width: 300px;
+    min-height: 200px;
+    border: 1px solid #ccc;
+}
+
+
+.modal.redimensionar {
+  position: fixed;
+  z-index: 1000;
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.modal-content.redimensionar {
+  pointer-events: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 60%;
+  height: fit-content;
+  max-width: none;
+  max-height: fit-content;
+  overflow-y: auto;
+  position: relative;
+
+  resize: both;
+  overflow: auto;
+
+  min-width: 300px;
+  min-height: 200px;
+
+  border: 1px solid #ccc;
+}
+
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding-left: 80px;
+    padding-right: 10px;
+    background: none;
+    border: none;
+}
+
+.close:hover {
+  background: none;
+  cursor: default;
+  color: white;
+}
+
+.close-i:hover {
+    color: #ccc;
+    cursor: pointer;
+}
+
+.modal-content.notas-content {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    padding: 0;
+    width: 90%;
+    max-width: 650px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+}
+
+.action-btn {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.notes-section-modal {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.new-note-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+}
+
+.note-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 1em;
+    min-height: 80px;
+}
+
+.btn-add-note {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    align-self: flex-end;
+    max-width: 200px;
+}
+
+.btn-add-note:hover:not([disabled]) {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.btn-add-note:disabled {
+    background-color: #90d39e;
+    cursor: not-allowed;
+}
+
+.notes-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.note-card {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #2B8B95;
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.note-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.note-content {
+    font-size: 1em;
+    color: #333;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    flex-grow: 1;
+}
+
+.note-timestamp {
+    font-size: 0.85em;
+    color: #6c757d;
+    text-align: right;
+    border-top: 1px dashed #eee;
+    padding-top: 5px;
+}
+
+.note-timestamp i {
+    margin-right: 5px;
+}
+
+.no-notes-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+}
+
+.note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #eee;
+    padding-top: 5px;
+}
+
+.btn-delete-note {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 5px;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn-delete-note:hover {
+    opacity: 1;
+    color: #c82333;
+    transform: scale(1.1);
+}
+
+.history-toggle-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 5px 0;
+    border-bottom: 2px solid #ddd;
+}
+
+.notes-history-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495D;
+    margin: 0;
+}
+
+.btn-toggle-history {
+    background: none;
+    border: none;
+    color: #34495D;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.btn-toggle-history:hover {
+    background-color: #e9ecef;
+}
+
+.note-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-edit-note {
+    background: none;
+    border: none;
+    color: #17555A;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 5px;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn-edit-note:hover {
+    opacity: 1;
+    color: #0c2e30;
+    transform: scale(1.1);
+}
+
+.edit-mode-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.note-edit-textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 1em;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-save-edit, .btn-cancel-edit {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-save-edit {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-save-edit:hover:not([disabled]) {
+    background-color: #218838;
+}
+
+.btn-save-edit:disabled {
+    background-color: #90d39e;
+    cursor: not-allowed;
+}
+
+.btn-cancel-edit {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-cancel-edit:hover {
+    background-color: #5a6268;
+}
+
+.modal.modal-delete-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content.modal-content-delete-confirm {
+    background-color: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-message-delete {
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-message-delete p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-delete-modal, .btn-cancel-delete-modal {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-delete-modal {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.btn-delete-modal:hover {
+    background-color: #c82333;
+}
+
+.btn-cancel-delete-modal {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-cancel-delete-modal:hover {
+    background-color: #5a6268;
+}
+
+.btn-delete-all {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    font-size: 0.9em;
+}
+
+.btn-delete-all:hover {
+    background-color: #f8d7da;
+    color: #a71d2a;
+}

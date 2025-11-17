@@ -87,6 +87,22 @@ div, section, article, main, aside, header, footer, p, span, h1, h2, h3, li, a, 
    .sidebar-menu .ajustes {
       margin-top: auto;
     }
+    
+    .sidebar-menu .user {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      width: 100%;
+
+      padding-left: 10px;
+    }
+
+    .sidebar-menu .user:hover {
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0);
+    }
+    
       
    /* Botón para abrir/cerrar el menú */
    .toggle-btn {
@@ -724,11 +740,11 @@ input:checked + .slider:after {
     position: fixed;
     z-index: 1000;
     background-color: transparent;
-    pointer-events: none; /* Permite hacer clic fuera del modal */
+    pointer-events: none;
 }
   
 .modal-content.instrucciones {
-    pointer-events: auto; /* Solo el contenido del modal es interactivo */
+    pointer-events: auto;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -738,13 +754,357 @@ input:checked + .slider:after {
     overflow-y: auto;
     position: relative;
 
-    /* 🪟 Estilo de ventana emergente */
     resize: both;
     overflow: auto;
 
     min-width: 360px;
     min-height: 200px;
 
-    /* Opcional: borde para dar sensación de "ventana" */
     border: 1px solid #ccc;
+}
+
+
+.modal-login, .modal-register {
+    position: fixed; 
+    z-index: 1000; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-login-content, .modal-register-content {
+    background-color: #fff;
+    /* padding: 25px; */
+    border-radius: 8px;
+    max-width: 450px; 
+    width: 90%; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); 
+    position: relative; 
+}
+
+.modal-login-header, .modal-register-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.modal-login-title, .modal-register-title {
+    margin: 15px;
+    font-size: 1.5em;
+    color: white;
+}
+
+.modal-login-close-btn, .modal-register-close-btn {
+  margin: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: white;
+    line-height: 1;
+}
+
+.modal-login-close-btn.i:hover, .modal-register-close-btn.i:hover {
+    color: #777;
+}
+
+.modal.login-info-form {
+    text-align: left;
+    padding: 0 25px 25px 25px;
+}
+
+.modal-login-info-form h3, .modal-register-info-form h3 {
+    margin-top: 0;
+    color: #555;
+}
+
+.modal-login-input-row, .modal-register-input-row {
+    margin-bottom: 15px;
+}
+
+.modal-login-input-row label, .modal-register-input-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.modal-login-input-field, .modal-register-input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.modal-register-buttons {
+    display: flex;
+    justify-content: flex-end; 
+    gap: 10px; 
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.modal-login-buttons {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-login-action-group {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-login-btn-confirm, .modal-login-btn-cancel, .modal-register-btn-confirm, .modal-register-btn-cancel {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.modal-login-buttons.i.fa-sign-in:hover, .modal-register-buttons.i.fa-user-plus:hover {
+    transform: scale(1) !important;
+}
+
+.modal-login-btn-confirm, .modal-register-btn-confirm {
+    background-color: #13989D;
+    color: white;
+}
+
+.modal-login-btn-confirm:hover:not([disabled]), .modal-register-btn-confirm:hover:not([disabled]) {
+    background-color: #136062;
+    transform: scale(1.05);
+}
+
+.modal-login-btn-confirm[disabled], .modal-register-btn-confirm[disabled] {
+    background-color: #9fd3d4;
+    cursor: not-allowed;
+}
+
+.modal-login-btn-cancel, .modal-register-btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.modal-login-btn-cancel:hover, .modal-register-btn-cancel:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}
+
+
+.modal-login-error, .modal-register-error {
+    color: #dc3545; 
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.login-spec-link {
+    font-size: 0.9em;
+    color: #6197cf;
+    text-align: right;
+    
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.login-spec-link:hover {
+    color: #0056b3;
+}
+
+
+.notification-success {
+    position: fixed; 
+    z-index: 2000;
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 1.5em;
+    color: #28a745;
+}
+
+.notification-success p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.notification-error {
+    position: fixed; 
+    z-index: 2000;
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    
+    background-color: rgb(207, 156, 156);
+    color: #ffffff;
+    border: 1px solid #e6c3c3;
+    border-radius: 5px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 1.5em;
+    color: #a72828;
+}
+
+.notification-error p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.modal-logout-confirm {
+    position: fixed; 
+    z-index: 1000; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif; 
+}
+
+.modal-logout-content {
+    background-color: #fff;
+    border-radius: 8px;
+    max-width: 350px;
+    width: 90%; 
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); 
+    position: relative; 
+    overflow: hidden; 
+}
+
+.modal-logout-header {
+    background-color: #C92E2F;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-logout-title {
+    margin: 0;
+    font-size: 1.2em;
+    color: white;
+}
+
+.modal-logout-close-btn {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+
+}
+
+.modal-logout-close-btn:hover {
+    color: rgb(177, 170, 170);
+    cursor: pointer;
+}
+
+.modal-logout-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-logout-body p {
+    margin: 0;
+    font-size: 1em;
+}
+
+.modal-logout-buttons {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 25px; 
+}
+
+.modal-logout-btn-cancel,
+.modal-logout-btn-confirm {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    font-size: 0.9em;
+}
+
+.modal-logout-btn-cancel {
+    background-color: #6c757d; 
+    color: white;
+}
+
+.modal-logout-btn-confirm {
+    background-color: #dc3545; 
+    color: white;
+}
+
+.modal-logout-btn-confirm:hover {
+    background-color: #961926;
+    transform: scale(1.05);
+}
+
+.modal-logout-btn-cancel:hover {
+    background-color: #41484d;
+    transform: scale(1.05);
+}
+.input-error-message {
+    color: #C92E2F; 
+    font-size: 0.85em; 
+    margin-top: 5px; 
+    font-weight: normal; 
 }
