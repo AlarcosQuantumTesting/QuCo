@@ -77,7 +77,8 @@ public class NewQiskitCoder {
 	}
 
 	private String prepareCodeAsAFunction(int qubits, StringBuilder sbCalculus, String functionName) {
-		StringBuilder function = new StringBuilder("def get" + functionName + "() : \n");
+		functionName = functionName.replace(" ", "_");
+		StringBuilder function = new StringBuilder("def " + functionName + "() : \n");
 		function.append("\tU = QuantumCircuit(" + qubits + ")\n");
 		String[] lines = sbCalculus.toString().split("\n");
 		for (String line : lines) {
@@ -91,7 +92,9 @@ public class NewQiskitCoder {
 			function.setLength(function.length() - 1);
 		
 		function.append("\n\treturn U.to_gate()\n");        
-		return function.toString();
+		String r = function.toString();
+		r = r.replace("circuits[0]", "U");
+		return r;
 	}
 
 	private final String prepareCodeAsAProgram(int inputQubits, int qubits, StringBuilder sbCalculus, CodeTemplate template) {
