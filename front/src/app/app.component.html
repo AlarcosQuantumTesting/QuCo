@@ -85,6 +85,20 @@
             </a>
         </li>
 
+        <li class="user" style="cursor: default;">
+          <a 
+              routerLinkActive="active" style="cursor: pointer;"
+              (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()"
+          >
+              <i class="fas fa-circle-user" title="Log in" *ngIf="!isLoggedIn()"></i>
+              <i class="fas fa-sign-out-alt" title="Log out" *ngIf="isLoggedIn()"></i>
+              
+              <span *ngIf="menuAbierto">
+                  {{ isLoggedIn() ? 'Log out' : 'Log in' }}
+              </span>
+          </a>
+        </li>
+
         <li class="ajustes">
           <a (click)="toggleAccessibilityPanel()" class="accessibility-link">
             <i  class="fas fa-cog" title="Settings"></i>
@@ -165,57 +179,164 @@
   </div>
 
 
-  <!-- Interfaz de accesibilidad -->
-  <!-- <div class="accessibility-modal" *ngIf="showAccessibility">
-    <div class="accessibility-content">
-      <h2>Accesibility and settings</h2>
+  <div class="modal-login" *ngIf="mostrarModalLogin">
+    <div class="modal-login-content">
+        <div class="modal-header" style="border-top-left-radius: 8px; border-top-right-radius: 8px">
+            <h2 class="modal-login-title">Log in</h2>
+            <button class="modal-login-close-btn" (click)="cerrarModalLogin()">
+                <i class="close-i">&times;</i>
+            </button>
+        </div>
+        <div class="modal-login-info-form" style="margin: 15px;">
+            
+            <div class="modal-login-input-row">
+                <label for="email">Email</label>
+                <input 
+                    id="email" 
+                    class="modal-login-input-field" 
+                    type="email" 
+                    [(ngModel)]="emailUsuario" 
+                    placeholder="example@email.com"
+                >
+            </div>
 
-      <button (click)="toggleHighContrast()">
-        <i class="fas fa-adjust"></i> High contrast
-      </button>
+            <div class="modal-login-input-row">
+                <label for="password">Password</label>
+                <input 
+                    id="password" 
+                    class="modal-login-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordUsuario" 
+                    placeholder="password"
+                >
+            </div>
 
-      <label>
-        🌈 Background color
-          <input type="color" [value]="bgColor" (input)="setBgColor($event)">
-      </label>
+            
 
-      <label>
-        🎨 Main containers color
-        <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
-      </label>
-
-      <button (click)="accessibility.increaseFontSize()">
-        <i class="fas fa-search-plus"></i> Increase font size
-      </button>
-
-      <button (click)="accessibility.decreaseFontSize()">
-        <i class="fas fa-search-minus"></i> Reduce font size
-      </button>
-
-      <button (click)="accessibility.resetFontSize()">
-        <i class="fas fa-undo"></i> Default font size
-      </button>
-
-      <button (click)="toggleDarkMode()">
-        <i class="fas fa-moon"></i> Dark mode
-      </button>
-
-      <div class="accessibility-panel">
-        <label>
-          🌈 Background color
-          <input type="color" [value]="bgColor" (input)="setBgColor($event)">
-        </label>
-
-        <label>
-          🎨 Main containers color
-          <input type="color" [value]="containerColor" (input)="setContainerColor($event)">
-        </label>
-      </div>
-
-      <button (click)="closeAccessibilityPanel()">
-        <i class="fas fa-times"></i> Close
-      </button>
+            <div class="modal-login-buttons">
+              <p class="login-spec-link" (click)="abrirRegistro()">
+                Don't have an account? Register here.
+              </p>
+              <div class="modal-login-action-group">
+                <button 
+                  class="modal-login-btn-confirm" 
+                  (click)="iniciarSesion()" 
+                  [disabled]="isLoginDisabled()" 
+                >
+                  Login
+                </button>
+                  
+                <button class="modal-login-btn-cancel" (click)="cerrarModalLogin()">
+                  Cancel
+                </button>
+              </div>
+              
+            </div>
+            
+            <div class="modal-login-error" *ngIf="errorLogin">{{ errorLogin }}</div>
+        </div>
     </div>
-  </div> -->
+  </div>
+
+
+  <div class="modal-register" *ngIf="mostrarModalRegistro">
+    <div class="modal-register-content">
+        <div class="modal-header" style="border-top-left-radius: 8px; border-top-right-radius: 8px">
+            <h2 class="modal-register-title">Register</h2>
+            <button class="modal-register-close-btn" (click)="cerrarModalRegistro()">
+                <i class="close-i">&times;</i>
+            </button>
+        </div>
+        
+        <div class="modal-register-info-form" style="margin: 15px;">
+            <div class="modal-register-input-row">
+                <label for="register-email">Email</label>
+                <input 
+                    id="register-email" 
+                    class="modal-register-input-field" 
+                    type="email" 
+                    [(ngModel)]="emailRegistro" 
+                    placeholder="example@email.com"
+                >
+            </div>
+
+            <div class="modal-register-input-row">
+                <label for="register-password">Password</label>
+                <input 
+                    id="register-password" 
+                    class="modal-register-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordRegistro" 
+                    placeholder="password"
+                >
+            </div>
+            
+            <div class="modal-register-input-row">
+                <label for="register-confirm-password">Confirm password</label>
+                <input 
+                    id="register-confirm-password" 
+                    class="modal-register-input-field" 
+                    type="password" 
+                    [(ngModel)]="passwordConfirmacion" 
+                    placeholder="confirm password"
+                >
+                <div *ngIf="passwordMismatchMessage" class="input-error-message">
+                    {{ passwordMismatchMessage }}
+                </div>
+            </div>
+
+            <div class="modal-register-buttons">
+                <button 
+                    class="modal-register-btn-confirm" 
+                    (click)="registrarUsuario()" 
+                    [disabled]="isRegisterDisabled()" 
+                >
+                    Register
+                </button>
+                
+                <button class="modal-register-btn-cancel" (click)="cerrarModalRegistro()">
+                    Cancel
+                </button>
+            </div>
+            
+            <div class="modal-register-error" *ngIf="errorRegistro">{{ errorRegistro }}</div>
+        </div>
+    </div>
+  </div>
+
+  <div class="modal-logout-confirm" *ngIf="mostrarModalLogoutConfirmacion">
+    <div class="modal-logout-content">
+        
+        <div class="modal-logout-header">
+            <h3 class="modal-logout-title">Log out</h3>
+            <button class="modal-logout-close-btn" (click)="cerrarModalLogoutConfirmacion()">
+                &times;
+            </button>
+        </div>
+
+        <div class="modal-logout-body">
+            <p>Are you sure you want to log out?</p>
+        </div>
+
+        <div class="modal-logout-buttons">
+            <button class="modal-logout-btn-cancel" (click)="cerrarModalLogoutConfirmacion()">
+                Cancel
+            </button>
+            <button class="modal-logout-btn-confirm" (click)="confirmarCerrarSesion()">
+                Log out
+            </button>
+        </div>
+    </div>
+  </div>
+
+  <div class="notification-success" *ngIf="mostrarMensajeExito">
+    <i class="fas fa-check-circle success-icon"></i>
+    <p>{{ mensajeExito }}</p>
+  </div>
+
+  <div class="notification-error" *ngIf="mostrarMensajeError">
+    <i class="fas fa-times-circle fail-icon"></i>
+    <p style="color: white;">{{ mensajeError }}</p>
+  </div>
   
 </body>

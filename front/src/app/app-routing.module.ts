@@ -22,9 +22,8 @@ const routes: Routes = [
   { path: "templates", component: TemplatesComponent },
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "transpilation", component: TranspilationComponent },
-
-  { path: "home", component: HomeComponent },
   { path: 'execution-history', component: ExecutionHistoryComponent },
+  { path: "home", component: HomeComponent },
 
 ];
 

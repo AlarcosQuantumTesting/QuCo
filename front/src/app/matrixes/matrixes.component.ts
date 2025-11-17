@@ -10,12 +10,14 @@ import { Expression } from './Expression';
 import { EditorComponent } from '../editor/editor.component';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { ProjectService } from '../project.service';
 
 @Component({
   selector: 'app-matrixes',
   templateUrl: './matrixes.component.html',
   styleUrls: ['./matrixes.component.css']
 })
+
 export class MatrixesComponent implements AfterViewInit  {
 
   @ViewChild(EditorComponent) editor!: EditorComponent;
@@ -139,10 +141,26 @@ export class MatrixesComponent implements AfterViewInit  {
   modalError: boolean = false;
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
 
+  projects: StoredProject[] = [];
+  selectedProjectId: string = '';
+
+  projectList: ProjectListItem[] = []; 
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  REQUIRED_GENERATOR_TYPE: string = 'edu.uclm.reper.model.Matrix';
+
+  mostrarNotasModal: boolean = false;
+
+  nombreComponente: string = 'Matrices';
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
-    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService) {}
+    public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
+    private projectService: ProjectService) {}
 
   addUserExpression(): void {
     console.log('Añadir expresión de usuario');
@@ -426,6 +444,25 @@ export class MatrixesComponent implements AfterViewInit  {
     )
   }
 
+  drawAllQuirk2(matrix : any[]) {
+    this.reset()
+    let info = {
+      matrix : matrix,
+      inputQubits : this.inputQubits,
+      qubits : this.inputQubits + this.outputQubits,
+      reduce : this.reduceQuirk,
+      domain : this.domain
+    }
+
+    this.quirkService.getAllQuirk(info).subscribe(
+      result => {
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        this.quirkURL = url
+        //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+      }
+    )
+  }
+
   getUnitaryMatrix(matrix : any[], rowIndex? : number) {
     this.reset()
     let info = {
@@ -444,7 +481,6 @@ export class MatrixesComponent implements AfterViewInit  {
   }
 
 
-  //mio
   mostrarModalNombreFuncion = false;
   nombreFuncion = '';
   matrixTmp: any[] = [];
@@ -475,7 +511,8 @@ export class MatrixesComponent implements AfterViewInit  {
       functionName : functionName
     }
     if (rowIndex!=undefined)
-      info.matrix = matrix[rowIndex]
+      info.matrix = [matrix[rowIndex]];
+      //info.matrix = matrix[rowIndex]
     this.qiskitService.getCode(info).subscribe({
       next: result => {
         this.isLoadingQiskitCode = true;
@@ -489,7 +526,6 @@ export class MatrixesComponent implements AfterViewInit  {
 
         }
 
-        // Mostrar modal solo si el usuario ingresó un nombre válido
         if (asFunction) {
           this.mostrarModal = true;
         }
@@ -498,21 +534,16 @@ export class MatrixesComponent implements AfterViewInit  {
       },
       error: err => {
         console.error('Error generando código Qiskit', err);
-        //this.isLoadingQiskitCode = false;
 
         this.error   = err.error?.message || err.message;
         
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
-        /*this.mensajeTemporal = 'Error generating code';
-        setTimeout(() => {
-            this.mensajeTemporal = '';
-        }, 2000);*/
 
         this.modalError = true;
       },
       complete: () => {
-        this.isLoadingQiskitCode = false; // ← finaliza carga
+        this.isLoadingQiskitCode = false;
       }
     });
   }
@@ -708,13 +739,16 @@ export class MatrixesComponent implements AfterViewInit  {
     }
   }
 
-
-
-
   isInvalid: boolean = true;
+  projectLoaded: boolean = false;
 
   ngOnInit() {
-    // Valida cuando se inicializan los valores
+
+    console.log("User email in matrixes:", this.userEmail);
+    console.log("User token in matrixes:", this.userToken);
+
+    this.loadProjectNames();
+
     this.validateInputs();
 
     this.transpileService.getBackends().subscribe(backends => {
@@ -758,6 +792,17 @@ export class MatrixesComponent implements AfterViewInit  {
           }
         }, 50);
 
+    }
+
+    this.projectLoaded = localStorage.getItem('projectLoadedMatrices') === 'true';
+
+    if (this.projectLoaded == true) {
+      this.mensajeTemporal2 = 'Project loaded successfully!';
+      setTimeout(() => {
+        this.mensajeTemporal2 = '';
+        this.projectLoaded = false;
+        localStorage.setItem('projectLoadedMatrices', 'false');
+      }, 1000);
     }
 
   }
@@ -1518,4 +1563,285 @@ export class MatrixesComponent implements AfterViewInit  {
     return true;
   }
 
+  openSaveProjectModal(): void {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal(): void {
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.circuitName = ''; 
+  }
+
+  confirmarGuardarProyecto(): void {
+      if (!this.circuitName || this.circuitName.trim().length === 0) {
+          this.saveError = "The project name is mandatory.";
+          return;
+      }
+
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+
+      this.drawAllQuirk2(this.matrix!);
+      this.getQiskitCode(this.matrix!, false);
+      setTimeout(() => {
+        this.guardarProyecto();
+      }, 100);
+      
+  }
+
+  guardarProyecto(): void {
+
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+        console.error("No se puede guardar: el nombre del circuito es obligatorio.");
+        this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
+        return;
+    }
+
+    let interestingRows = 0; 
+    const positionValue: { [key: number]: number } = {};
+    
+    if (this.matrix && this.matrix.length > 0) {
+        for (let i = 0; i < this.matrix.length; i++) {
+            const row = this.matrix[i];
+            const outputQubitsValues = row.slice(this.inputQubits, this.inputQubits + this.outputQubits);
+            
+            let outputDecimalValue = 0;
+            for (let j = 0; j < outputQubitsValues.length; j++) {
+                outputDecimalValue += outputQubitsValues[j] * Math.pow(2, this.outputQubits - 1 - j);
+            }
+            
+            if (outputDecimalValue !== 0) {
+                positionValue[i] = outputDecimalValue; 
+            }
+        }
+        interestingRows = Object.keys(positionValue).length;
+    } else {
+        interestingRows = 0;
+        positionValue["0"] = 0;
+    }
+    
+    const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
+        name: `UserExpr${index + 1}`,
+        expr: expr,
+        description: `User Expression ${index + 1}`,
+        type: 'matrixes'
+    }));
+    
+    let quirkCircuitData: any = {};
+    if (this.quirkURL) {
+      const urlString = this.sanitizer.sanitize(4, this.quirkURL) as string;
+      const match = urlString.match(/circuit=(.*)/);
+      if (match && match[1]) {
+        try {
+          quirkCircuitData = JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+          console.error("Error al parsear JSON del quirkURL:", e);
+        }
+      }
+    }
+
+    let quirkCodeFinal: any = {};
+    if (quirkCircuitData.cols) {
+        quirkCodeFinal.cols = quirkCircuitData.cols.map((col: any[]) => {
+             if (col.some(item => item === "…")) {
+                 return col;
+             }
+             
+             let lastSignificantIndex = col.length - 1;
+             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+                 lastSignificantIndex--;
+             }
+             
+             return col.slice(0, lastSignificantIndex + 1);
+        });
+    }
+    
+    const qProgram: QProgram = {
+      id: this.circuitName,
+      qubits: this.inputQubits + this.outputQubits,
+      expressions: qProgramExpressions,
+      shots: 0,
+      generator: {
+          type: "MATRIX",
+          interestingRows: interestingRows,
+          positionValue: positionValue
+      },
+      qcodes: [
+          {
+              platform: "AerSimulator",
+              code: this.qiskitCode || "No qiskit code generated."
+          }
+      ],
+      inputQubits: Array.from({length: this.inputQubits}, (_, i) => i).join(','),
+      outputQubits: Array.from({length: this.outputQubits}, (_, i) => i + this.inputQubits).join(','),
+      qCircuit: {
+          id: this.circuitName,
+          qbits: this.inputQubits + this.outputQubits,
+          quirkCode: quirkCodeFinal 
+      }
+    };
+    
+    const projectDtoForMapping: any = {
+        id: this.circuitName,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail
+    };
+    
+    const finalPayload: any = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+
+    console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
+
+    
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: (response: unknown) => {
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+        this.loadProjectNames();
+      },
+      error: (error: any) => {
+        console.error('Error al guardar el proyecto:', error);
+        alert('Error saving project (Code 400). Check the console and the API documentation.');
+      }
+    });
+  }
+
+
+
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+
+    if (projectId) {
+        body.projectId = projectId;
+    }
+    return body;
+  }
+
+  loadProjectNames(): void {
+    if (this.userEmail && this.userToken) {
+        const requestBody = this.getAuthRequestBody();
+
+        this.projectService.getProjectsName(requestBody).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(project => 
+                    project.type === this.REQUIRED_GENERATOR_TYPE
+                );
+                console.log('Nombres de proyectos cargados:', this.projectList);
+            },
+            error: (err) => {
+                console.error('Error al cargar nombres de proyectos:', err);
+                this.projectList = []; 
+            }
+        });
+    }
+  }
+
+  onProjectSelected(): void {
+    if (!this.selectedProjectId) {
+        return;
+    }
+
+    const requestBody = this.getAuthRequestBody(this.selectedProjectId);
+
+    this.projectService.getProject(requestBody).subscribe({
+        next: (project: StoredProject) => {
+            /*alert(`Proyecto "${project.name}" cargando...`);
+            this.loadProjectDataToComponent(project);*/
+            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+            setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
+            setTimeout(() => { this.loadProjectDataToComponent(project); }, 1000);
+            
+        },
+        error: (err) => {
+            console.error('Error al cargar detalles del proyecto:', err);
+            alert('❌ Error al cargar los detalles del proyecto.');
+        }
+    });
+  }
+
+
+  loadProjectDataToComponent(project: StoredProject): void {
+    if (!project.qProgram) {
+        console.error('El proyecto no contiene datos de qProgram.');
+        return;
+    }
+
+    const qp = project.qProgram;
+
+    this.circuitName = project.name; 
+    this.inputQubits = qp.qubits - qp.outputQubits.length; 
+    this.outputQubits = qp.outputQubits.length; 
+
+    this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
+    this.fillTableWithUserExpressions();
+    
+    this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
+
+    //alert(`Proyecto "${project.name}" cargado con éxito.`);
+
+    //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
+    this.projectLoaded = true;
+    localStorage.setItem('projectLoadedMatrices', 'true');
+    
+
+    setTimeout(() => {
+      location.reload();
+    }, 100);
+  }
+}
+
+
+interface QProgramExpression {
+  name: string;
+  expr: string;
+  description: string;
+  type: string;
+}
+
+interface QProgram {
+    id: string;
+    qubits: number;
+    expressions: QProgramExpression[];
+    shots: number;
+    generator: any;
+    qcodes: { platform: string, code: string }[];
+    inputQubits: string;
+    outputQubits: string;
+    qCircuit: any;
+}
+
+interface Circuit {
+    id: string;
+    name: string;
+    qProgram: string;
+}
+
+interface SaveProjectData {
+    circuit: Circuit;
+    user: { id: string };
+}
+
+interface StoredProject {
+  id: string;
+  name: string;
+  qProgram: any;
+}
+
+interface ProjectListItem {
+  id: string;
+  name: string;
+  type: string;
 }

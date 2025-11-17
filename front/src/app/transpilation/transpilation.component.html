@@ -111,15 +111,22 @@
                 </div>
 
                 <div class="info-block">
-                    <button class="apply-button" title="Copy code" (click)="copiarCodigo()"><i class="fas fa-copy"></i></button>
+                    <button class="apply-button" title="Copy code" [disabled]="!transpiledCode" (click)="copiarCodigo()"><i class="fas fa-copy"></i></button>
                 </div>
 
             </div>
                     
-                
-            <pre class="template-code">
-                
-                {{ transpiledCode }}</pre>
+            <div *ngIf="transpiledCode" style="width: 100%; margin: 0px !important;">
+                <pre class="template-code">
+                    {{ transpiledCode }}
+                </pre>
+            </div>
+            <div *ngIf="!transpiledCode" style="width: 100%; margin: 0px !important;">
+                <a class="template-code" style="display: flex; justify-content: left; align-items: center; font-size: medium;">
+                    <i>No code generated.</i>
+                </a>
+            </div>
+            
         </div>
     </div>
 

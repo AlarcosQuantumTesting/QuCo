@@ -29,7 +29,7 @@
 
         <br>
 
-        <small style="font-size: 14px;">Grover, Grover and Rudolph, Greenoble</small>
+        <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
 
       </h1>
 
@@ -89,11 +89,11 @@
 
                 </div>
 
-                <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event)">
+                <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event); reloadChange()">
 
                   <option value="grover">Grover</option>
 
-                  <option value="grenoble">Greenoble</option>
+                  <option value="grenoble">Grenoble</option>
 
                   <option value="originalGR">Original Grover & Rudolph</option>
 
@@ -102,16 +102,18 @@
                 </select>             
 
               </div>
-
-             
-
-              <!-- <div class="form-actions">
-
-                  <button (click)="buildMatrixActions()" class="btn btn-primary">Build</button>
-
-              </div> -->
-
  
+              <div class="form-group" *ngIf="projectList && projectList.length > 0">
+                <div class="label-container">
+                    <label for="projectSelector">Load Project:</label>
+                </div>
+                <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
+                    <option value="" disabled selected>Select project</option>
+                    <option *ngFor="let project of projectList" [value]="project.id">
+                        {{ project.name }}
+                    </option>
+                </select>
+              </div>
 
               <div class="matrixTitle-container" style="margin-top: 25px;">
 
@@ -135,14 +137,25 @@
 
  
 
-  <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative;">
+  <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%; padding: 0px; margin: 0px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
+            <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+            </button>
+        </div>
 
-    <div style="display: flex; align-items: center;">
+        <h2 style="margin: 10px 0;">Table</h2>
 
-      <h2 *ngIf="mostrarTabla" style="margin-top: 10px;">Table</h2>
-
+        <div style="width: 150px; display: flex; justify-content: flex-end;">        
+            <button (click)="openSaveProjectModal()" 
+                class="btn-confirm-save" 
+                *ngIf="userEmail && userToken">
+                <i class="fas fa-save"></i> Save project
+            </button>
+        </div>
     </div>
-
   </div>
 
  
@@ -1297,6 +1310,30 @@
         </div>
     </div>
 
- 
+    <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="title-modal">Save project</h2>
+            <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+        </div>
+        <div class="info-form">
+            <h3>Enter project name</h3>
+            <div class="input-button-row">
+                <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                    <i class="fa fa-check" aria-hidden="true"></i> Save
+                </button>
+            </div>
+            <div class="modal-buttons-function">
+                <button class="btn-cancel" (click)="cancelarSaveModal()">
+                    <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                </button>
+            </div>
+            <div class="error" *ngIf="saveError">{{ saveError }}</div>
+        </div>
+    </div>
+  </div>
+
+  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
 
 </body>

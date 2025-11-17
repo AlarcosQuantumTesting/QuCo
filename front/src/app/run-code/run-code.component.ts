@@ -33,6 +33,9 @@ export class RunCodeComponent implements OnInit {
   batchId? : string
 
   cerrarModal(): void {
+    if(this.batchId) {
+      this.batchId = '';
+    }
     this.cerrar.emit();
   }
   options = ["1. Just simulator", "2. Just fake_backends", "3. Simulator and fake_backends", "4. Just actual_backends", "5. All options"];
@@ -73,6 +76,10 @@ export class RunCodeComponent implements OnInit {
     const runnerNumber = optionMatch ? optionMatch[0] : '1';
     
     const overwriteValue = override ? 'y' : 'n';
+
+    if (this.batchId) {
+      this.batchId = '';
+    }
 
     let url = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 

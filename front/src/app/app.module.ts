@@ -19,6 +19,7 @@ import { HomeComponent } from './home/home.component';
 import { TranspilationComponent } from './transpilation/transpilation.component';
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { RunCodeComponent } from "./run-code/run-code.component";
+import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 
 const appRoutes : Routes = [
   { path : 'matrixes', component : MatrixesComponent },
@@ -51,7 +52,8 @@ const appRoutes : Routes = [
     DragDropModule,
     RouterModule.forRoot(appRoutes),
     ModalDescargaComponent,
-    RunCodeComponent
+    RunCodeComponent,
+    NotesModalComponent
 ],
   providers: [ ],
   bootstrap: [AppComponent]
