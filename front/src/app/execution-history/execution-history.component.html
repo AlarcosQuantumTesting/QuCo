@@ -210,7 +210,7 @@
                     </div>
                 </div>
                 
-                <div class="details-viewer">
+                <div class="details-viewer" *ngIf="enLocal == true">
                     
                     <p class="section-title">Execution parameters</p>
                     
@@ -234,7 +234,7 @@
                     </div>
                     
                 </div>
-                <div class="details-viewer">
+                <div class="details-viewer" style="margin-top: 20px;">
                     <p class="section-title">Server files</p>
                     <div class="log-paths" [class]="getFileListColorClass()">
     

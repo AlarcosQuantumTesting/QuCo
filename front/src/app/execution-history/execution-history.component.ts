@@ -42,6 +42,7 @@ export class ExecutionHistoryComponent implements OnInit {
   mensajeTemporal: string = '';
   modalDelete = false;
   modalDetails = false;
+  enLocal: boolean = true;
   
   private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit'; 
 
@@ -74,7 +75,6 @@ export class ExecutionHistoryComponent implements OnInit {
   refreshAllStatuses(): void {
     if (this.executionWorks.length > 0) {
       this.isLoading = true;
-      // this.showMessage(`Fetching real status for ${this.executionWorks.length} batches...`);
       this.showMessage(`Refreshing executions...`);
 
       this.executionWorks.forEach(execution => {
@@ -83,7 +83,6 @@ export class ExecutionHistoryComponent implements OnInit {
       setTimeout(() => this.isLoading = false, 2000); 
 
     } else {
-      //this.showMessage(`No execution batches found locally.`);
       this.isLoading = false;
     }
   }
@@ -97,18 +96,6 @@ export class ExecutionHistoryComponent implements OnInit {
       e.id.includes(this.searchQuery)
     );
   }
-
-  /*searchExecution(): void {
-    const found = this.executionWorks.find(e => e.name === this.searchQuery || e.id === this.searchQuery);
-    if (found) {
-      this.selectExecution(found);
-      this.modalDetails = true;
-    } else {
-      this.showMessage(`No execution found with name or ID: ${this.searchQuery}`);
-      this.executionSelected = null;
-    }
-  }*/
-
 
   searchExecution(): void {
     if (!this.searchQuery) {
@@ -127,14 +114,13 @@ export class ExecutionHistoryComponent implements OnInit {
     if (foundLocal) {
         this.selectExecution(foundLocal);
     } else {
-        
-        if (query && !isNaN(Number(query))) {
-            this.searchRemoteExecution(query);
-        } else {
-            this.showMessage(`No local execution found for: ${query}. Please search by ID.`);
-            this.executionSelected = null;
-            this.modalDetails = false;
-        }
+      if (query && !isNaN(Number(query))) {
+        this.searchRemoteExecution(query);
+      } else {
+        this.showMessage(`No local execution found for: ${query}. Please search by ID.`);
+        this.executionSelected = null;
+        this.modalDetails = false;
+      }
     }
   }
 
@@ -143,6 +129,7 @@ export class ExecutionHistoryComponent implements OnInit {
     this.showMessage(`Searching server for Batch ID ${id}...`);
     
     const statusUrl = `${this.serverUrl}/status/${id}`;
+    this.enLocal = false;
     
     this.http.post(statusUrl, null).subscribe({
         next: (result: any) => {
@@ -152,10 +139,16 @@ export class ExecutionHistoryComponent implements OnInit {
                 creationDateTime: result.started_at || new Date().toISOString(),
                 status: result.state.toUpperCase(),
                 details: {
-                    started_at: result.started_at,
-                    finished_at: result.finished_at,
-                    stderr_path: result.stderr_path,
-                    stdout_path: result.stdout_path,
+                  runner: result.runner,
+                  iterations: result.iterations,
+                  optionSelected: result.optionSelected,
+                  ibm_token_provided: result.ibm_token_provided,
+                  ibm_instance_provided: result.ibm_instance_provided,
+                  files: result.files,
+                  started_at: result.started_at,
+                  finished_at: result.finished_at,
+                  stderr_path: result.stderr_path,
+                  stdout_path: result.stdout_path,
                 }
             };
             
