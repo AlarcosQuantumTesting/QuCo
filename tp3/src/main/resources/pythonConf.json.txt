@@ -1,5 +1,5 @@
 {
-	"environment" : "Mac de Maco",
+	"environment" : "Mac de Patri",
 	"DEBUG" : false,
 	"proxyAOtro" : "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/",
 	"proxyAOtro en desarrollo" : "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/",

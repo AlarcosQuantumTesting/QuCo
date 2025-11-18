@@ -15,7 +15,6 @@ interface ExecutionHistory {
     optionSelected?: string;
     ibm_token_provided?: boolean;
     ibm_instance_provided?: boolean;
-    //backend_status?: string;
     files?: { name: string; size: number }[];
     started_at?: string;
     finished_at?: string;
@@ -43,6 +42,8 @@ export class ExecutionHistoryComponent implements OnInit {
   modalDelete = false;
   modalDetails = false;
   enLocal: boolean = true;
+  modalShare = false;
+  generatedShareId: string = '';
   
   private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit'; 
 
@@ -55,7 +56,6 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   loadExecutionHistory(): void {
-    // Clave correcta
     const historyJson = localStorage.getItem('execution_batches'); 
     if (historyJson) {
       this.executionWorks = JSON.parse(historyJson).reverse(); 
@@ -114,7 +114,8 @@ export class ExecutionHistoryComponent implements OnInit {
     if (foundLocal) {
         this.selectExecution(foundLocal);
     } else {
-      if (query && !isNaN(Number(query))) {
+      // if (query && !isNaN(Number(query))) {
+      if (query) {
         this.searchRemoteExecution(query);
       } else {
         this.showMessage(`No local execution found for: ${query}. Please search by ID.`);
@@ -124,7 +125,7 @@ export class ExecutionHistoryComponent implements OnInit {
     }
   }
 
-  searchRemoteExecution(id: string): void {
+  /*searchRemoteExecution(id: string): void {
     this.isLoading = true;
     this.showMessage(`Searching server for Batch ID ${id}...`);
     
@@ -167,13 +168,12 @@ export class ExecutionHistoryComponent implements OnInit {
             this.isLoading = false;
         }
     });
-  }
+  }*/
 
   selectExecution(execution: ExecutionHistory): void {
     this.executionSelected = execution;
     this.searchQuery = execution.name;
     this.modalDetails = true;
-    //this.showMessage(`Execution ${execution.id} selected.`);
     this.checkStatus(execution.id); 
   }
 
@@ -219,8 +219,6 @@ export class ExecutionHistoryComponent implements OnInit {
             if (this.executionSelected?.id === id) {
                 this.executionSelected = {...execution}; 
             }
-
-            //this.showMessage(`Status for ID ${id} fetched. Current Status: ${execution.status}`);
         },
         error: (err) => {
             execution.status = 'ERROR'; 
@@ -489,5 +487,105 @@ export class ExecutionHistoryComponent implements OnInit {
     }
 
     return '';
+  }
+
+  searchRemoteExecution(id: string): void { 
+    this.isLoading = true;
+    this.showMessage(`Searching server for Batch ID ${id}...`);
+
+    const realExecutionId = this.resolveShareId(id);
+    
+    const statusUrl = `${this.serverUrl}/status/${realExecutionId}`;
+    this.enLocal = false;
+    
+    this.http.post(statusUrl, null).subscribe({
+        next: (result: any) => {
+            const remoteExecution: ExecutionHistory = {
+                id: id,
+                name: `${id}`,
+                creationDateTime: result.started_at || new Date().toISOString(),
+                status: result.state.toUpperCase(),
+                details: {
+                  runner: result.runner,
+                  iterations: result.iterations,
+                  optionSelected: result.optionSelected,
+                  ibm_token_provided: result.ibm_token_provided,
+                  ibm_instance_provided: result.ibm_instance_provided,
+                  files: result.files,
+                  started_at: result.started_at,
+                  finished_at: result.finished_at,
+                  stderr_path: result.stderr_path,
+                  stdout_path: result.stdout_path,
+                }
+            };
+            
+            this.selectExecution(remoteExecution);
+
+            this.checkStatus(id); 
+            this.isLoading = false;
+            
+        },
+        error: (err) => {
+            if (err.status === 404) {
+                this.showMessage(`Error: Execution ID ${id} not found on the server.`, true);
+            } else {
+                this.showMessage(`Error connecting to server. Code: ${err.status}`, true);
+            }
+            this.isLoading = false;
+        }
+    });
+  }
+
+  generateShareId(execution: ExecutionHistory): string {
+    const secretSalt = "MyIdExecutionShare"; 
+    const dataToEncode = `${secretSalt}_${execution.id}`;
+    
+    try {
+        const shareId = btoa(dataToEncode);
+        console.log("ID Codificado:", shareId);
+        return shareId;
+    } catch (e) {
+        console.error('Error al codificar el ID en Base64:', e);
+        return '';
+    }
+  }
+
+  private resolveShareId(shareId: string): string | null {
+    try {
+        const secretSalt = "MyIdExecutionShare"; 
+        const decodedData = atob(shareId);
+        if (decodedData.startsWith(secretSalt + '_')) {
+            const realExecutionId = decodedData.split(secretSalt + '_')[1];
+            
+            if (/^\d+$/.test(realExecutionId)) {
+              console.log("Id inicial", realExecutionId)
+                return realExecutionId;
+            }
+        }
+        return null; 
+    } catch (e) {
+        return null;
+    }
+  }
+
+  openShareModal(execution: ExecutionHistory): void {
+    this.generatedShareId = this.generateShareId(execution);
+    this.modalShare = true;
+  }
+
+  copyShareId(): void {
+    if (this.generatedShareId) {
+      navigator.clipboard.writeText(this.generatedShareId).then(() => {
+        this.showMessage('ID copied to clipboard!', false);
+      }).catch(err => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = this.generatedShareId;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        this.showMessage('ID copied to clipboard!', false);
+      });
+    }
   }
 }

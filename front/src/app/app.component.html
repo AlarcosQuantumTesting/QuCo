@@ -46,16 +46,16 @@
             <span *ngIf="menuAbierto">Blocks genetic algorithm</span>
           </a>
         </li>
-        <li class="separador">
-          <a class="separador">
-            <i *ngIf="!menuAbierto">——</i>
-            <span *ngIf="menuAbierto">CONFIGURATON</span>
-          </a>
-        </li>
         <li>
           <a routerLink="editor" routerLinkActive="active" (click)="navigateAndReload('editor')">
             <i class="fas fa-microchip" title="Circuits editor"></i>
             <span *ngIf="menuAbierto">Circuits editor</span>
+          </a>
+        </li>
+        <li class="separador">
+          <a class="separador">
+            <i *ngIf="!menuAbierto">——</i>
+            <span *ngIf="menuAbierto">CONFIGURATON</span>
           </a>
         </li>
         <li>
