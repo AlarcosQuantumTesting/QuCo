@@ -41,7 +41,7 @@ export class ExecutionHistoryComponent implements OnInit {
   mensajeTemporal: string = '';
   modalDelete = false;
   modalDetails = false;
-  enLocal: boolean = true;
+  enLocal: boolean = false;
   modalShare = false;
   generatedShareId: string = '';
   
@@ -116,6 +116,7 @@ export class ExecutionHistoryComponent implements OnInit {
     } else {
       // if (query && !isNaN(Number(query))) {
       if (query) {
+        this.enLocal = false;
         this.searchRemoteExecution(query);
       } else {
         this.showMessage(`No local execution found for: ${query}. Please search by ID.`);
@@ -174,6 +175,7 @@ export class ExecutionHistoryComponent implements OnInit {
     this.executionSelected = execution;
     this.searchQuery = execution.name;
     this.modalDetails = true;
+    this.enLocal = true;
     this.checkStatus(execution.id); 
   }
 
@@ -329,6 +331,7 @@ export class ExecutionHistoryComponent implements OnInit {
 
   clearSelection(): void {
     this.executionSelected = null;
+    this.enLocal = false;
   }
 
   calculateExecutionTime(): string | null {
@@ -489,14 +492,14 @@ export class ExecutionHistoryComponent implements OnInit {
     return '';
   }
 
-  searchRemoteExecution(id: string): void { 
+  searchRemoteExecution(id: string): void {
+    this.enLocal = false;
     this.isLoading = true;
     this.showMessage(`Searching server for Batch ID ${id}...`);
 
     const realExecutionId = this.resolveShareId(id);
     
     const statusUrl = `${this.serverUrl}/status/${realExecutionId}`;
-    this.enLocal = false;
     
     this.http.post(statusUrl, null).subscribe({
         next: (result: any) => {

@@ -282,7 +282,7 @@
                 </div>
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer" *ngIf="this.enLocal===true">
                 <button class="delete-local-btn" title="Delete execution" (click)="deleteModalConfirm(executionSelected!)">
                     <i class="bi bi-trash3-fill" style="margin-right: 5px;"></i> Delete from local
                 </button>
