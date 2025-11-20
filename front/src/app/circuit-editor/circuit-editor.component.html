@@ -53,6 +53,22 @@
             
                 </div>
 
+                 <div class="form-group" 
+                            *ngIf="projectList && projectList.length > 0"
+                            style="max-width: 350px; margin-right: 15px;"> 
+                            
+                            Load project:
+                            <select id="projectSelector" 
+                                    [(ngModel)]="selectedProjectId" 
+                                    (change)="onProjectSelected()"
+                                    style="min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"> 
+                                <option value="" disabled selected>Select project</option>
+                                <option *ngFor="let project of projectList" [value]="project.id">
+                                    {{ project.name }}
+                                </option>
+                            </select>
+                        </div>
+
                 <div class="input-group">
                   <label>Available templates:</label>
                   <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" [disabled]="selectedQubitsConfigurationName==null">
@@ -113,7 +129,7 @@
                     </div>
 
                     <div class="inline-config-row">
-                      <div class="input-group" *ngIf="circuit">
+                      <!-- <div class="input-group" *ngIf="circuit">
                         <label>Circuit name: </label>
                         <input style="min-width: 230px; padding: 8px;" type="text" [(ngModel)]="circuit.name" placeholder="Circuit name...">
                         <button title="Save circuit" class="save-circuit-btn" (click)="saveCircuit(circuit)"
@@ -127,6 +143,20 @@
                                 <option [ngValue]="null" disabled selected>Select a circuit</option>
                                 <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
                               </select>    
+                        </div> -->
+                       
+                        <div style="display: flex; justify-content: flex-end;" class="input-group"> 
+                            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+                                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+                                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+                            </button>     
+                            <button 
+                                (click)="mostrarModalGuardarProyecto = true" 
+                                class="btn-confirm-save" 
+                                *ngIf="userEmail && userToken"
+                            >
+                                <i class="fas fa-save"></i> Save project
+                            </button>
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
                             
@@ -651,5 +681,34 @@
       </div>
     </div>
   </div>
+
+
+
+  <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Save project</h2>
+                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+            </div>
+            <div class="info-form">
+                <h3>Enter project name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                    
+                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                        <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarSaveModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="saveError">{{ saveError }}</div>
+            </div>
+        </div>
+    </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
 
 </body>

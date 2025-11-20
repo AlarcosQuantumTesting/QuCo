@@ -10,6 +10,14 @@ import { EdCircuitsService } from '../ed-circuits.service';
 
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { ProjectService } from '../project.service';
+
+interface QProgramExpression { name: string; expr: string; description: string; type: string; }
+interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; qCircuit: any; }
+interface ProjectListItem { id: string; name: string; type: string; }
+interface StoredProject { id: string; name: string; qProgram: any; }
+interface FinalPayload { circuit: any; user: { id: string }; }
+interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; }
 
 @Component({
   selector: 'app-circuit-editor',
@@ -66,6 +74,22 @@ export class CircuitEditorComponent {
   qubitsConsecutivos: boolean = false;
   mostrarEjecucionRemote = false;
 
+  projectList: ProjectListItem[] = []; 
+  selectedProjectId: string = '';
+
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  EDITOR_GENERATOR_FQCN = 'edu.uclm.reper.model.Editor'; 
+  REQUIRED_GENERATOR_TYPE = this.EDITOR_GENERATOR_FQCN;
+
+  responseReceived? : any
+  mostrarNotasModal: boolean = false;
+  nombreComponente: string = 'Blocks';
+
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',
     QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
@@ -74,7 +98,7 @@ export class CircuitEditorComponent {
   };
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
-    private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
+    private circuitsService : EdCircuitsService, public transpileService: TranspileService, private projectService: ProjectService) {
     this.qiskitService.getCustomizedGates().subscribe(
       gates => {
         for (let i=0; i<gates.length; i++) {
@@ -111,16 +135,6 @@ export class CircuitEditorComponent {
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.manager.selectedTemplate = this.manager.templates[0];
-    /*this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
-        qubitsConfiguration => {
-          this.selectedQubitsConfigurationName = qubitsConfiguration[0];
-          
-          if (this.selectedQubitsConfigurationName) {
-            this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName);
-            this.searchQuery = this.selectedQubitsConfigurationName;
-          }
-            
-    })*/
 
       const savedTemplateFileName = localStorage.getItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
       if (savedTemplateFileName) {
@@ -150,33 +164,8 @@ export class CircuitEditorComponent {
           }
       });
     
+      this.loadProjectNames();
   }
-
-  /*measureColumn(column : number)  {
-    if (!this.circuit) 
-      return
-    let occupied = false
-    for (let i=0; i<this.circuit.qubits.length; i++) {
-      let gate = this.circuit.qubits[i].gates[column]
-      if (gate.name!='I' && gate.name!='0') {
-        occupied = true
-        break
-      }
-    }
-    if (occupied) {
-      let option = confirm("There are gates in this column. Do you want to remove them?")
-      if (!option)
-        return
-      for (let i=0; i<this.circuit.qubits.length; i++) 
-        this.circuit.qubits[i].gates[column] = new EdGate('I', 1)
-    } else {
-      for (let i=0; i<this.circuit.qubits.length; i++) {
-        let gate = new EdGate('M', 1)
-        gate.columnIndex = column
-        this.circuit.qubits[i].gates[column] = gate
-      }
-    }
-  }*/
 
   measureColumn(column : number) {
     if (!this.circuit) 
@@ -1147,6 +1136,216 @@ export class CircuitEditorComponent {
       localStorage.removeItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
     }
   }
+
+  
+  
+  openSaveProjectModal() {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal() {
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+    this.circuitName = '';
+  }
+
+  confirmarGuardarProyecto() {
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+      this.saveError = "The project name is mandatory.";
+      return;
+    }
+    this.mostrarModalGuardarProyecto = false;
+    this.guardarProyecto();
+  }
+
+  guardarProyecto() {
+    if (!this.circuit) return;
+
+    this.generateCode();
+
+    const gatesPayload = this.gateRegistry.map(g => ({
+        id: g.id,
+        column: g.column,
+        name: g.name,
+        qubits: g.qubits,
+        parentQubit: g.parentQubit,
+        transactionId: g.transactionId
+    }));
+
+    const generatorData = {
+        "type": "EDITOR",
+        "columns": this.circuit.columns,
+        "gates": gatesPayload
+    };
+
+    const editorState = {
+        columns: this.circuit.columns,
+        qubitsCount: this.circuit.qubits.length,
+        gateRegistry: this.gateRegistry,
+        qubitsConfigName: this.selectedQubitsConfigurationName
+    };
+    
+    const serializedState = JSON.stringify(editorState);
+    const codeWithState = (this.code || "") + "\n\n# --- EDITOR_STATE_BEGIN ---\n# " + serializedState + "\n# --- EDITOR_STATE_END ---";
+
+    const qubitsArray = Array.from({length: this.circuit.qubits.length}, (_, i) => i);
+    const qubitsString = qubitsArray.join(',');
+
+    const qProgram: QProgram = {
+      id: this.circuitName,
+      qubits: this.circuit.qubits.length,
+      expressions: [],
+      shots: 1024,
+      generator: generatorData,
+      qcodes: [{ platform: "AerSimulator", code: codeWithState }],
+      qCircuit: { 
+          id: this.circuitName, 
+          qbits: this.circuit.qubits.length, 
+          quirkCode: {cols: []} 
+      }
+    };
+
+    const projectDtoForMapping: any = {
+        id: this.circuitName,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail,
+        
+        mutantCycles: [], 
+        testSuite: null
+    };
+
+    const finalPayload: FinalPayload = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+
+    console.log('Objeto JSON a guardar (EDITOR):', JSON.stringify(finalPayload, null, 2));
+
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: () => {
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
+        this.loadProjectNames();
+      },
+      error: (err) => {
+        console.error('Error saving project:', err);
+        alert('Error saving project (Code 400). Check console.');
+      }
+    });
+  }
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+    if (projectId) body.projectId = projectId;
+    return body;
+  }
+
+  loadProjectNames() {
+    if (this.userEmail && this.userToken) {
+        this.projectService.getProjectsName(this.getAuthRequestBody()).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(p => p.type === this.EDITOR_GENERATOR_FQCN);
+                console.log("Editor projects loaded:", this.projectList);
+            },
+            error: (err) => console.error('Error loading projects:', err)
+        });
+    }
+  }
+
+  onProjectSelected() {
+    if (!this.selectedProjectId) return;
+
+    this.projectService.getProject(this.getAuthRequestBody(this.selectedProjectId)).subscribe({
+        next: (project: StoredProject) => {
+            this.mensajeTemporal2 = `Loading "${project.name}"...`;
+            setTimeout(() => this.mensajeTemporal2 = '', 1000);
+            this.loadProjectDataToComponent(project);
+        },
+        error: (err) => {
+            console.error('Error loading project:', err);
+            alert('Error loading project details.');
+        }
+    });
+  }
+
+  loadProjectDataToComponent(project: StoredProject) {
+    if (!project || !project.qProgram) {
+        console.error("Invalid project structure: qProgram missing");
+        return;
+    }
+
+    const qProgramAny = project.qProgram as any;
+    const qcodesList = qProgramAny.QCodes || qProgramAny.qcodes || [];
+
+    if (!qcodesList || qcodesList.length === 0) {
+        console.error("Invalid project structure: No QCodes found");
+        alert("Error: The loaded project has no code associated.");
+        return;
+    }
+
+    this.circuitName = project.name;
+    const fullCode = qcodesList[0].code;
+
+    const stateRegex = /# --- EDITOR_STATE_BEGIN ---\n# (.*)\n# --- EDITOR_STATE_END ---/;
+    const match = fullCode.match(stateRegex);
+
+    if (match && match[1]) {
+        try {
+            const editorState = JSON.parse(match[1]);
+            
+            if (editorState.qubitsConfigName) {
+                this.qubitsConfigurationService.getQubitsConfiguration(editorState.qubitsConfigName).subscribe({
+                    next: (config) => {
+                        this.qubitsConfiguration = new QubitsConfiguration();
+                        this.qubitsConfiguration.name = config.name;
+                        this.qubitsConfiguration.matrix = config.matrix;
+                        this.qubitsConfiguration.qubits = config.qubits;
+
+                        this.selectedQubitsConfigurationName = config.name;
+                        
+                        this.circuit = new EdCircuit();
+                        this.circuit.name = this.circuitName;
+                        this.circuit.columns = editorState.columns || 10;
+                        
+                        this.circuit.resizeTo(editorState.qubitsCount);
+                        
+                        this.gateRegistry = editorState.gateRegistry || [];
+                        
+                        setTimeout(() => {
+                             this.restoreGatesFromRegistry();
+                        }, 100);
+                        
+                        this.code = fullCode.replace(stateRegex, '').trim();
+                        
+                        this.saveState();
+                        this.mensajeTemporal2 = `Project "${project.name}" loaded!`;
+                        setTimeout(() => this.mensajeTemporal2 = '', 2000);
+                    },
+                    error: (err) => {
+                        console.error("Error loading qubit config:", err);
+                        alert("Error loading qubit configuration for this project.");
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error parsing editor state:", e);
+            alert("Error restoring circuit state. The file might be corrupted.");
+            this.code = fullCode;
+        }
+    } else {
+        this.code = fullCode;
+        alert("Project loaded (Code only). Circuit layout could not be restored.");
+    }
+  }
+
+
 }
 
 interface CircuitGate {
