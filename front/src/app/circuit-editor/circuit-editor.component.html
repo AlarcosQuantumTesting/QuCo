@@ -53,22 +53,6 @@
             
                 </div>
 
-                 <div class="form-group" 
-                            *ngIf="projectList && projectList.length > 0"
-                            style="max-width: 350px; margin-right: 15px;"> 
-                            
-                            Load project:
-                            <select id="projectSelector" 
-                                    [(ngModel)]="selectedProjectId" 
-                                    (change)="onProjectSelected()"
-                                    style="min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"> 
-                                <option value="" disabled selected>Select project</option>
-                                <option *ngFor="let project of projectList" [value]="project.id">
-                                    {{ project.name }}
-                                </option>
-                            </select>
-                        </div>
-
                 <div class="input-group">
                   <label>Available templates:</label>
                   <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" [disabled]="selectedQubitsConfigurationName==null">
@@ -144,6 +128,22 @@
                                 <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
                               </select>    
                         </div> -->
+
+                         <div 
+                            *ngIf="projectList && projectList.length > 0"
+                            style="max-width: 350px; margin-right: 15px;"> 
+                            
+                            Load project:
+                            <select id="projectSelector" 
+                                    [(ngModel)]="selectedProjectId" 
+                                    (change)="onProjectSelected()"
+                                    style="min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"> 
+                                <option value="" disabled selected>Select project</option>
+                                <option *ngFor="let project of projectList" [value]="project.id">
+                                    {{ project.name }}
+                                </option>
+                            </select>
+                        </div>
                        
                         <div style="display: flex; justify-content: flex-end;" class="input-group"> 
                             <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">

@@ -1800,3 +1800,42 @@ table {
   background-color: rgba(255, 255, 255, 0);
   height: 100%;
 }
+
+
+.btn-confirm-save {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 70px;
+    margin-top: 5px;
+    margin-left: 10px;
+    background-color: #008b95;
+    color: white;
+  }
+  
+  .btn-confirm-save:hover {
+    background-color: #0f5d63;
+    transform: scale(1.05);
+  }
+
+.btn-notes {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 70px;
+    margin-top: 5px;
+    margin-left: 10px;
+    background-color: #17555A;
+    color: white;
+  }
+  
+  .btn-notes:hover {
+    background-color: #31797e;
+    transform: scale(1.05);
+  }
