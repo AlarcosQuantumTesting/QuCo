@@ -51,6 +51,21 @@
                 </small>
             </div>
             <div class="info1">
+                <div class="form-group" 
+                    *ngIf="projectList && projectList.length > 0"
+                    style="max-width: 350px; margin-right: 15px;"> 
+                    
+                    Load project:
+                    <select id="projectSelector" 
+                            [(ngModel)]="selectedProjectId" 
+                            (change)="onProjectSelected()"
+                            style="min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"> 
+                        <option value="" disabled selected>Select project</option>
+                        <option *ngFor="let project of projectList" [value]="project.id">
+                            {{ project.name }}
+                        </option>
+                    </select>
+                </div>
                 <div>
                     Available templates:
                     <select [disabled]="running" [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" 
@@ -743,6 +758,31 @@
 
             <div class="modal-footer">
                 <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="title-modal">Save project</h2>
+                <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+            </div>
+            <div class="info-form">
+                <h3>Enter project name</h3>
+                <div class="input-button-row">
+                    <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+                    
+                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                        <i class="fa fa-check" aria-hidden="true"></i> Save
+                    </button>
+                </div>
+                <div class="modal-buttons-function">
+                    <button class="btn-cancel" (click)="cancelarSaveModal()">
+                        <i class="fa fa-times" aria-hidden="true"></i> Cancel
+                    </button>
+                </div>
+                <div class="error" *ngIf="saveError">{{ saveError }}</div>
             </div>
         </div>
     </div>
