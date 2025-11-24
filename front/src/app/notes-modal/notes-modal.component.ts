@@ -7,6 +7,7 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 interface ProjectNote {
   text: string;
   timestamp: Date;
+  type: string;
 }
 
 @Component({
@@ -22,10 +23,22 @@ export class NotesModalComponent implements OnInit {
   @Output() cerrarModal = new EventEmitter<void>();
 
   @Input() contextIdentifier: any;
+
+  readonly FIXED_TYPES: string[] = [
+    'Genetic', 
+    'Blocks', 
+    'Matrices', 
+    'Editor', 
+    'Grover', 
+    'Grenoble', 
+    'Originalgr'
+  ];
   
+  allNotes: ProjectNote[] = [];
   notes: ProjectNote[] = [];
   currentNoteText: string = '';
   private storageKey: string = 'project_notes';
+  private noteType: string = 'global_default';
   editingIndex: number | null = null;
   editedText: string = '';
   showNotesHistory: boolean = false;
@@ -33,12 +46,37 @@ export class NotesModalComponent implements OnInit {
   noteToDeleteIndex: number | null = null;
   mostrarConfirmDeleteAll: boolean = false;
 
-  constructor() { }
+  //availableTypes: string[] = [];
+  availableTypes: string[] = ['all', ...this.FIXED_TYPES];
+  filterType: string = 'all';
+  sortOrder: 'newest' | 'oldest' = 'newest';
+
+  constructor() { } 
 
   ngOnInit(): void {
-    this.setStorageKey();
+    this.setNoteType();
     
     this.loadNotesFromStorage();
+  }
+
+  setNoteType(): void {
+    let identifier = 'global_default';
+
+    if (typeof this.contextIdentifier === 'string' && this.contextIdentifier.trim().length > 0) {
+      identifier = this.contextIdentifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+    }
+
+    else if (this.contextIdentifier && this.contextIdentifier.constructor && this.contextIdentifier.constructor.annotations) {
+      const componentMetadata = this.contextIdentifier.constructor.annotations.find((annotation: any) => annotation.selector);
+      if (componentMetadata && componentMetadata.selector) {
+        identifier = componentMetadata.selector; 
+      } else {
+        identifier = this.contextIdentifier.constructor.name || 'unknown_component';
+      }
+    }
+
+    this.noteType = identifier; 
+    console.log(`Tipo de nota (identifier) definido: ${this.noteType}`);
   }
 
   setStorageKey(): void {
@@ -68,12 +106,14 @@ export class NotesModalComponent implements OnInit {
     if (text) {
       const newNote: ProjectNote = {
         text: text,
-        timestamp: new Date()
+        timestamp: new Date(),
+        type: this.noteType 
       };
       
-      this.notes.push(newNote);
+      this.allNotes.push(newNote);
       this.currentNoteText = '';
       this.saveNotesToStorage();
+      this.applyFiltersAndSort();
 
       if (!this.showNotesHistory) {
           this.showNotesHistory = true;
@@ -114,9 +154,16 @@ export class NotesModalComponent implements OnInit {
 
   confirmDeleteNote(): void {
     if (this.noteToDeleteIndex !== null) {
-      this.notes.splice(this.noteToDeleteIndex, 1);
+      const noteToDel = this.notes[this.noteToDeleteIndex];
+      const allNotesIndex = this.allNotes.findIndex(n => n === noteToDel);
+      
+      if (allNotesIndex > -1) {
+          this.allNotes.splice(allNotesIndex, 1);
+      }
+      
       this.saveNotesToStorage();
       this.cancelEdit();
+      this.applyFiltersAndSort();
     }
     this.cancelDelete();
   }
@@ -130,9 +177,15 @@ export class NotesModalComponent implements OnInit {
   }
 
   confirmDeleteAllNotes(): void {
-    this.notes = [];
+    if (this.filterType === 'all') {
+        this.allNotes = [];
+    } else {
+        this.allNotes = this.allNotes.filter(note => note.type !== this.filterType);
+    }
+
     this.saveNotesToStorage();
     this.cancelEdit();
+    this.applyFiltersAndSort();
     this.mostrarConfirmDeleteAll = false;
   }
 
@@ -140,17 +193,59 @@ export class NotesModalComponent implements OnInit {
     this.mostrarConfirmDeleteAll = false;
   }
 
-  saveNotesToStorage(): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.notes));
+  updateAvailableTypes(): void {
+    //this.availableTypes = ['all', ...new Set(this.allNotes.map(n => n.type))];
+    this.availableTypes = ['all', ...this.FIXED_TYPES];
   }
 
   loadNotesFromStorage(): void {
     const storedNotes = localStorage.getItem(this.storageKey);
+    
     if (storedNotes) {
-      this.notes = JSON.parse(storedNotes).map((note: any) => ({
+      const parsedNotes: ProjectNote[] = JSON.parse(storedNotes).map((note: any) => ({
         text: note.text,
-        timestamp: new Date(note.timestamp)
+        timestamp: new Date(note.timestamp),
+        type: note.type || 'global_default' 
       }));
+
+      this.allNotes = parsedNotes;
+      this.availableTypes = ['all', ...this.FIXED_TYPES];
+      this.updateAvailableTypes();
+
+      this.applyFiltersAndSort();
+    } else {
+      this.allNotes = [];
+      this.notes = [];
+      //this.availableTypes = ['all'];
+      this.availableTypes = ['all', ...this.FIXED_TYPES];
     }
+  }
+  
+  saveNotesToStorage(): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.allNotes));
+  }
+
+
+  applyFiltersAndSort(): void {
+    let filteredNotes = [...this.allNotes];
+
+    if (this.filterType !== 'all') {
+      const normalizedFilter = this.filterType.toLowerCase();
+      
+      filteredNotes = filteredNotes.filter(note => String(note.type).toLowerCase() === normalizedFilter);
+    }
+    
+    filteredNotes.sort((a, b) => {
+      const dateA = (a.timestamp instanceof Date ? a.timestamp : new Date(a.timestamp)).getTime();
+      const dateB = (b.timestamp instanceof Date ? b.timestamp : new Date(b.timestamp)).getTime();
+      
+      if (this.sortOrder === 'newest') {
+        return dateB - dateA;
+      } else {
+        return dateA - dateB;
+      }
+    });
+
+    this.notes = filteredNotes;
   }
 }

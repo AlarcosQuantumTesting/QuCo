@@ -79,18 +79,34 @@
               <div class="form-row">
                     <div class="section qubitsContainer">
                       <div class="form-group">
-                        <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
+                        <!-- <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
                           <div class="template-buttons">
-                            <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"><i class="fa fa-plus"></i></button>
+                            <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-plus" style="cursor: pointer !important;" (click)="createCustomizedGate()"></i></button>
                           </div>
-                          <div style="width: 100%; position: absolute; text-align: center;">
+                          <div style="width: auto; position: absolute; display: column; text-align: center; justify-content: center;">
                             <label style="font-size: 16px; font-weight: bold;">Gates 
-                              <i style="margin-left: 5px;" title="Show instructions" (click)="showInstructions = true" class="fa fa-info-circle"></i></label>
+                              <i style="margin-left: 5px; cursor: pointer;" title="Show instructions" (click)="showInstructions = true" class="fa fa-info-circle"></i>
+                            </label>
                           </div>
 
                           <div class="template-buttons">
-                            <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp"><i class="fa fa-edit"></i></button>
+                            <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-edit" style="cursor: pointer;"></i></button>
                           </div>
+                        </div> -->
+                        <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; padding: 8px;">
+                            <div class="template-buttons">
+                                <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-plus" style="cursor: pointer !important;" (click)="createCustomizedGate()"></i></button>
+                            </div>
+
+                            <div style="width: auto; text-align: center;">
+                                <label style="font-size: 16px; font-weight: bold;">Gates 
+                                    <i style="margin-left: 5px; cursor: pointer;" title="Show instructions" (click)="showInstructions = true" class="fa fa-info-circle"></i>
+                                </label>
+                            </div>
+
+                            <div class="template-buttons">
+                                <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-edit" style="cursor: pointer;"></i></button>
+                            </div>
                         </div>
 
                         <div *ngIf="customizedGates.length > 0" class="gates-container">
@@ -113,21 +129,6 @@
                     </div>
 
                     <div class="inline-config-row">
-                      <!-- <div class="input-group" *ngIf="circuit">
-                        <label>Circuit name: </label>
-                        <input style="min-width: 230px; padding: 8px;" type="text" [(ngModel)]="circuit.name" placeholder="Circuit name...">
-                        <button title="Save circuit" class="save-circuit-btn" (click)="saveCircuit(circuit)"
-                        [disabled]="circuit.name.trim() === ''"
-                        >Save</button>
-                      </div>
-                        <div class="input-group" style="gap: 10px; margin: 10px;">
-                              <label>Existing circuits: </label>
-                              <select [(ngModel)]="selectedCircuitName" (ngModelChange)="onCircuitChange($event)" 
-                              [disabled]="selectedQubitsConfigurationName==null">
-                                <option [ngValue]="null" disabled selected>Select a circuit</option>
-                                <option *ngFor="let circuit of circuitNames" [ngValue]="circuit">{{ circuit }}</option>
-                              </select>    
-                        </div> -->
 
                          <div 
                             *ngIf="projectList && projectList.length > 0"
@@ -137,7 +138,7 @@
                             <select id="projectSelector" 
                                     [(ngModel)]="selectedProjectId" 
                                     (change)="onProjectSelected()"
-                                    style="min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"> 
+                                    style="min-width: 200px !important; font-size: 14px; padding: 4px; border-radius: 5px; border: 1px solid #ccc;"> 
                                 <option value="" disabled selected>Select project</option>
                                 <option *ngFor="let project of projectList" [value]="project.id">
                                     {{ project.name }}
@@ -146,13 +147,14 @@
                         </div>
                        
                         <div style="display: flex; justify-content: flex-end;" class="input-group"> 
-                            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
+                            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important; margin-top: 0px !important">
                                 <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
                                 {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
                             </button>     
                             <button 
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
+                                style="margin-top: 0px !important"
                                 *ngIf="userEmail && userToken"
                             >
                                 <i class="fas fa-save"></i> Save project
@@ -372,7 +374,7 @@
                 <h2 class="title-modal">Qiskit Code</h2>
 
                 <!-- <button class="close"><i class="close-i" (click)="modalCodigoGate = false; selectedGate = undefined">&times;</i></button> -->
-                 <button class="close"><i class="close-i" (click)="modalCodigoGate = false">&times;</i></button>
+                 <button class="close"><i class="close-i" (click)="modalCodigoGate = false; selectedGate = undefined">&times;</i></button>
             </div>
 
             <div class="code-output">
@@ -393,7 +395,7 @@
       <div class="modal-content-delete">
           <div class="modal-header" style="background-color: rgb(201, 46, 46);">
               <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete gate</h2>
-              <button class="close"><i class="close-i" (click)="showDeleteModal = false">&times;</i></button>
+              <button class="close"><i class="close-i" (click)="showDeleteModal = false; selectedGate = undefined">&times;</i></button>
           </div>
           <div class="modal-message-delete">
               <p>Are you sure you want to delete the gate <strong>{{gateToDelete?.name}}</strong>?</p>

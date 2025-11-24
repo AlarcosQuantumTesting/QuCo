@@ -88,7 +88,7 @@ export class CircuitEditorComponent {
 
   responseReceived? : any
   mostrarNotasModal: boolean = false;
-  nombreComponente: string = 'Blocks';
+  nombreComponente: string = 'Editor';
 
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',

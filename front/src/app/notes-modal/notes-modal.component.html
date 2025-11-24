@@ -28,13 +28,13 @@
             <div class="history-toggle-container">
                 <h3 class="notes-history-title">
                     <button 
-                        *ngIf="notes.length > 0"
+                        *ngIf="allNotes.length > 0"
                         class="btn-delete-all" 
                         title="Delete all notes" 
                         (click)="deleteAllNotes()">
-                        <i class="fas fa-trash-can"></i>
+                        <i class="fas fa-trash-can"></i> Delete All
                     </button>
-                    Notes history ({{ notes.length }})
+                    Notes history ({{ notes.length }} / {{ allNotes.length }})
                 </h3>
                 
                 <button class="btn-toggle-history" (click)="showNotesHistory = !showNotesHistory">
@@ -44,14 +44,41 @@
                     </i>
                 </button>
             </div>
+            
+            <div class="notes-filter-bar" *ngIf="showNotesHistory && allNotes.length > 0">
+                
+                <div class="filter-group">
+                    <label for="typeFilter">Filter by type:</label>
+                    <select 
+                        id="typeFilter" 
+                        [(ngModel)]="filterType" 
+                        (change)="applyFiltersAndSort()"
+                        class="filter-select">
+                        <option *ngFor="let type of availableTypes" [value]="type">{{ type | titlecase }}</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="sortOrder">Sort by date:</label>
+                    <select 
+                        id="sortOrder" 
+                        [(ngModel)]="sortOrder" 
+                        (change)="applyFiltersAndSort()"
+                        class="filter-select">
+                        <option value="newest">Newest first</option>
+                        <option value="oldest">Oldest first</option>
+                    </select>
+                </div>
+            </div>
             <div class="notes-list-container" *ngIf="showNotesHistory">
                 <div *ngIf="notes.length === 0" class="no-notes-message">
-                    No notes yet. Start your project progress register!
+                    No notes match the current filters.
                 </div>
 
-                <div *ngFor="let note of notes.slice().reverse(); let reversedIndex = index" class="note-card">
-                    <ng-container *ngIf="notes.length > 0">
-                        <div class="edit-mode-container" *ngIf="editingIndex === (notes.length - 1 - reversedIndex)">
+                <div *ngFor="let note of notes; let originalIndex = index" class="note-card">
+                    
+                    <ng-container *ngIf="editingIndex === originalIndex">
+                        <div class="edit-mode-container">
                             <textarea 
                                 [(ngModel)]="editedText" 
                                 class="note-edit-textarea" 
@@ -65,34 +92,34 @@
                                 </button>
                             </div>
                         </div>
-
-                        <ng-container *ngIf="editingIndex !== (notes.length - 1 - reversedIndex)">
-                            <div class="note-content">
-                                {{ note.text }}
-                            </div>
-                            <div class="note-footer">
+                    </ng-container>
+                    <ng-container *ngIf="editingIndex !== originalIndex">
+                        <div class="note-type-label">Type: {{ note.type }}</div>
+                        <div class="note-content">
+                            {{ note.text }}
+                        </div>
+                        <div class="note-footer">
+                            
+                            <div class="note-actions">
+                                <button 
+                                    class="btn-edit-note" 
+                                    title="Edit note"
+                                    (click)="editNote(originalIndex, note.text)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
                                 
-                                <div class="note-actions">
-                                    <button 
-                                        class="btn-edit-note" 
-                                        title="Edit note"
-                                        (click)="editNote(notes.length - 1 - reversedIndex, note.text)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    
-                                    <button 
-                                        class="btn-delete-note" 
-                                        title="Delete note"
-                                        (click)="deleteNote(notes.length - 1 - reversedIndex)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="note-timestamp">
-                                    <i class="far fa-clock"></i> {{ note.timestamp | date:'short' }}
-                                </div>
+                                <button 
+                                    class="btn-delete-note" 
+                                    title="Delete note"
+                                    (click)="deleteNote(originalIndex)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
-                        </ng-container>
+                            
+                            <div class="note-timestamp">
+                                <i class="far fa-clock"></i> {{ note.timestamp | date:'short' }}
+                            </div>
+                        </div>
                     </ng-container>
                 </div>
             </div>
