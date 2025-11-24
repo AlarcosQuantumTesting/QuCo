@@ -18,7 +18,7 @@ import { Block } from './Block';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -69,6 +69,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Blocks';
+  storedNotesStr = localStorage.getItem('project_notes');
 
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
@@ -762,6 +763,39 @@ export class BlocksComponent extends EvolutionaryComponent {
           quirkCode: {cols: []} 
       }
     };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = this.storedNotesStr;
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+
+
+          /* CON FILTRO DE TIPO
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+          */
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
     
     const projectDtoForMapping: any = {
         id: this.circuitName,
@@ -769,7 +803,8 @@ export class BlocksComponent extends EvolutionaryComponent {
         qProgram: qProgram,
         userEmail: this.userEmail,
         mutantCycles: [], 
-        testSuite: null
+        testSuite: null,
+        notas: notesPayload
     };
     
     const finalPayload: FinalPayload = {
@@ -859,6 +894,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.circuitName = project.name; 
 
     config.qubits = qp.qubits;
+
+    
     const outputQubitsString = qp.outputQubits ? qp.outputQubits.toString() : '';
     const outputIndices: number[] = outputQubitsString 
         .split(',')
@@ -869,6 +906,22 @@ export class BlocksComponent extends EvolutionaryComponent {
     outputIndices.forEach(i => {
         if (i >= 0 && i < qp.qubits) config.outputs[i] = true;
     });
+
+    if (project.notes && Array.isArray(project.notes)) {
+        
+        const notesForStorage = project.notes.map((n: any) => ({
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+        
+        console.log(`Loaded ${notesForStorage.length} notes from project.`);
+        console.log("Notes content:", notesForStorage);
+    } else {
+        // localStorage.removeItem('project_notes');
+    }
     
     if (generator.type === 'BLOCKS') {
         config.minNumberOfColumns = generator.minNumberColumns;

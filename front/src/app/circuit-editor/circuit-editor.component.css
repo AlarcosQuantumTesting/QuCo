@@ -1848,3 +1848,54 @@ table {
     background-color: #31797e;
     transform: scale(1.05);
   }
+
+  .info-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+  }
+
+  .input-button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 60%;
+  }
+  
+  .input-function {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .input-function:hover {
+    border-color: #2980b9;
+  }
+
+  .input-function:focus {
+    border-color: #2980b9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+  }
+  
+  .modal-buttons-function {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .modal-buttons-function button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }

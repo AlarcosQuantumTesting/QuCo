@@ -15,7 +15,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; }
 
@@ -90,6 +90,8 @@ export class CircuitEditorComponent {
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Editor';
 
+  storedNotesStr = localStorage.getItem('project_notes');
+
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',
     QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
@@ -130,6 +132,7 @@ export class CircuitEditorComponent {
       this.availableBackends = backends;
     });
     
+    console.log("Notas:", this.storedNotesStr);
     
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
@@ -1206,6 +1209,39 @@ export class CircuitEditorComponent {
       }
     };
 
+    let notesPayload: any[] = [];
+    const allNotesSaved = this.storedNotesStr;
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+
+
+          /* CON FILTRO DE TIPO
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+          */
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
+
     const projectDtoForMapping: any = {
         id: this.circuitName,
         name: this.circuitName,
@@ -1213,7 +1249,8 @@ export class CircuitEditorComponent {
         userEmail: this.userEmail,
         
         mutantCycles: [], 
-        testSuite: null
+        testSuite: null,
+        notes: notesPayload
     };
 
     const finalPayload: FinalPayload = {
@@ -1265,8 +1302,12 @@ export class CircuitEditorComponent {
     this.projectService.getProject(this.getAuthRequestBody(this.selectedProjectId)).subscribe({
         next: (project: StoredProject) => {
             this.mensajeTemporal2 = `Loading "${project.name}"...`;
-            setTimeout(() => this.mensajeTemporal2 = '', 1000);
-            this.loadProjectDataToComponent(project);
+            setTimeout(() => {
+              this.mensajeTemporal2 = '';
+              this.loadProjectDataToComponent(project);
+              location.reload();
+            }, 1000);
+            
         },
         error: (err) => {
             console.error('Error loading project:', err);
@@ -1292,6 +1333,22 @@ export class CircuitEditorComponent {
 
     this.circuitName = project.name;
     const fullCode = qcodesList[0].code;
+
+    if (project.notes && Array.isArray(project.notes)) {
+        
+        const notesForStorage = project.notes.map((n: any) => ({
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+        
+        console.log(`Loaded ${notesForStorage.length} notes from project.`);
+        console.log("Notes content:", notesForStorage);
+    } else {
+        // localStorage.removeItem('project_notes');
+    }
 
     const stateRegex = /# --- EDITOR_STATE_BEGIN ---\n# (.*)\n# --- EDITOR_STATE_END ---/;
     const match = fullCode.match(stateRegex);
