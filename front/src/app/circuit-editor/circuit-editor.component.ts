@@ -1210,7 +1210,7 @@ export class CircuitEditorComponent {
     };
 
     let notesPayload: any[] = [];
-    const allNotesSaved = this.storedNotesStr;
+    const allNotesSaved = localStorage.getItem('project_notes');
     
     if (allNotesSaved) {
         try {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -18,7 +18,7 @@ interface ProjectNote {
   styleUrl: './notes-modal.component.scss'
 })
 
-export class NotesModalComponent implements OnInit {
+export class NotesModalComponent implements OnInit, OnChanges {
   @Input() mostrarModal: boolean = false;
   @Output() cerrarModal = new EventEmitter<void>();
 
@@ -57,6 +57,16 @@ export class NotesModalComponent implements OnInit {
     this.setNoteType();
     
     this.loadNotesFromStorage();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mostrarModal']) {
+      if (changes['mostrarModal'].currentValue === true) {
+        this.setNoteType();
+        //this.setStorageKey();
+        this.loadNotesFromStorage();
+      }
+    }
   }
 
   setNoteType(): void {

@@ -651,7 +651,12 @@ export class BlocksComponent extends EvolutionaryComponent {
 
 
 
+  /*private mapColumnsToStrings(columns: BlockColumn[]): string[][] {
+    return columns.map(col => col.gates.map(g => g.name || "I"));
+  }*/
+
   private mapColumnsToStrings(columns: BlockColumn[]): string[][] {
+    if (!columns) return [];
     return columns.map(col => col.gates.map(g => g.name || "I"));
   }
 
@@ -765,7 +770,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     };
 
     let notesPayload: any[] = [];
-    const allNotesSaved = this.storedNotesStr;
+    const allNotesSaved = localStorage.getItem('project_notes');
     
     if (allNotesSaved) {
         try {
@@ -779,18 +784,6 @@ export class BlocksComponent extends EvolutionaryComponent {
                     type: n.type,
                     timestamp: n.timestamp
                 }));
-
-
-          /* CON FILTRO DE TIPO
-            notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
-                .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
-                    text: n.text,
-                    type: n.type,
-                    timestamp: n.timestamp
-                }));
-          */
                 
         } catch (e) {
             console.error("Error procesando las notas del localStorage", e);
@@ -804,7 +797,7 @@ export class BlocksComponent extends EvolutionaryComponent {
         userEmail: this.userEmail,
         mutantCycles: [], 
         testSuite: null,
-        notas: notesPayload
+        notes: notesPayload
     };
     
     const finalPayload: FinalPayload = {
@@ -870,7 +863,6 @@ export class BlocksComponent extends EvolutionaryComponent {
 
              setTimeout(() => {
                  this.loadProjectDataToComponent(project);
-                 // Cambiar a la pestaña de Data
                  const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
                  const contents = document.querySelectorAll<HTMLElement>(".tab-content");
                  tabs.forEach((t, i) => t.classList.toggle("active", i === 0));
@@ -908,19 +900,17 @@ export class BlocksComponent extends EvolutionaryComponent {
     });
 
     if (project.notes && Array.isArray(project.notes)) {
-        
-        const notesForStorage = project.notes.map((n: any) => ({
-            text: n.text,
-            type: n.type,
-            timestamp: n.timestamp
-        }));
+      const notesForStorage = project.notes.map((n: any) => ({
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
 
-        localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
-        
-        console.log(`Loaded ${notesForStorage.length} notes from project.`);
-        console.log("Notes content:", notesForStorage);
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
     } else {
-        // localStorage.removeItem('project_notes');
+      // localStorage.removeItem('project_notes');
     }
     
     if (generator.type === 'BLOCKS') {
@@ -947,21 +937,49 @@ export class BlocksComponent extends EvolutionaryComponent {
             newBlockCircuit.numberOfStartColumns = bcData.numberOfStartColumns;
             newBlockCircuit.numberOfBlocks = bcData.numberOfBlocks;
 
-            newBlockCircuit.startingColumns = this.mapStringsToColumns(bcData.startingColumns, qubits);
+            //newBlockCircuit.startingColumns = this.mapStringsToColumns(bcData.startingColumns, qubits);
 
-            if (bcData.blocks && bcData.blocks.length > 0) {
-                const blockData = bcData.blocks[0];
-                const newBlock = new Block(qubits);
-                
-                newBlock.numberOfLeftColumns = blockData.numberOfLeftColumns;
-                newBlock.numberOfRightColumns = blockData.numberOfRightColumns;
-                
-                newBlock.leftColumns = this.mapStringsToColumns(blockData.leftColumns, qubits);
-                newBlock.rightColumns = this.mapStringsToColumns(blockData.rightColumns, qubits);
-
-                newBlockCircuit.block = newBlock;
+            if (bcData.startingColumns) {
+              newBlockCircuit.startingColumns = this.mapStringsToColumns(bcData.startingColumns, qubits);
             }
-            
+
+            //if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
+            if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
+                
+                const blockData = bcData.blocks[0]; // Tomamos el primer bloque
+                
+                if (blockData) { // Validación extra por si el elemento es nulo
+                    console.log("Loading Block Data:", blockData);
+
+                    const newBlock = new Block(qubits);
+                    
+                    // Asignamos propiedades con valores por defecto si fallan
+                    newBlock.numberOfLeftColumns = blockData.numberOfLeftColumns || 0;
+                    newBlock.numberOfRightColumns = blockData.numberOfRightColumns || 0;
+                    
+                    if (blockData.leftColumns) {
+                        newBlock.leftColumns = this.mapStringsToColumns(blockData.leftColumns, qubits);
+                    } else {
+                        newBlock.leftColumns = []; // Inicializar vacío si no hay datos
+                    }
+
+                    if (blockData.rightColumns) {
+                        newBlock.rightColumns = this.mapStringsToColumns(blockData.rightColumns, qubits);
+                    } else {
+                        newBlock.rightColumns = []; // Inicializar vacío si no hay datos
+                    }
+
+                    newBlockCircuit.block = newBlock;
+                } else {
+                    console.warn("Block data at index 0 is undefined or null.");
+                }
+
+            } else {
+                // Si no hay bloques, creamos uno por defecto para evitar errores en la UI
+                console.warn("No 'blocks' array found or it is empty in blockCircuit data. Creating default block.");
+                const defaultBlock = new Block(qubits);
+                newBlockCircuit.block = defaultBlock;
+            }
             this.pc.inputConfiguration.blockCircuit = newBlockCircuit;
         }
     }

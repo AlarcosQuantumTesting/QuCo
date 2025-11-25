@@ -1494,3 +1494,38 @@ input[type="checkbox"] {
 .hidden-checkbox:focus + .custom-toggle-switch {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
 }
+
+
+.btn-confirm-project {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-width: 100px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.btn-confirm-project {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-confirm-project:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.btn-confirm-project:disabled {
+    background-color: #8f929073;
+    cursor: not-allowed;
+    transform: none;
+}

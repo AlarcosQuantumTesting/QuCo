@@ -14,7 +14,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -50,6 +50,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Genetic';
+  storedNotesStr = localStorage.getItem('project_notes');
 
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
      public transpileService: TranspileService, private projectService: ProjectService) {
@@ -675,6 +676,28 @@ export class ElongingComponent extends EvolutionaryComponent {
           quirkCode: finalQuirkPayload 
       }
     };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
     
     const projectDtoForMapping: any = {
         id: this.circuitName,
@@ -682,7 +705,8 @@ export class ElongingComponent extends EvolutionaryComponent {
         qProgram: qProgram,
         userEmail: this.userEmail,
         mutantCycles: [], 
-        testSuite: null
+        testSuite: null,
+        notes: notesPayload
     };
     
     const finalPayload: any = {
@@ -783,6 +807,20 @@ export class ElongingComponent extends EvolutionaryComponent {
             config.outputs[i] = true;
         }
     });
+
+    if (project.notes && Array.isArray(project.notes)) {
+      const notesForStorage = project.notes.map((n: any) => ({
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
+    } else {
+      // localStorage.removeItem('project_notes');
+    }
     
     if (generator.type === 'GENETIC') {
         config.startWithH = generator.hadamards;

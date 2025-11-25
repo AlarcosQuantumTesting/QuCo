@@ -19,7 +19,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -152,6 +152,7 @@ export class DeterministicComponent extends GroverStyle {
   saveError: string = '';
 
   mostrarNotasModal: boolean = false;
+  storedNotesStr = localStorage.getItem('project_notes');
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
@@ -1895,6 +1896,20 @@ export class DeterministicComponent extends GroverStyle {
     this.qubits = qp.qubits;
     this.expectedFrequencies = new FreqTable();
     this.expectedFrequencies.setQubits(this.qubits);
+    
+    if (project.notes && Array.isArray(project.notes)) {
+      const notesForStorage = project.notes.map((n: any) => ({
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
+    } else {
+      // localStorage.removeItem('project_notes');
+    }
 
     const generator = qp.generator;
 
@@ -2151,6 +2166,28 @@ export class DeterministicComponent extends GroverStyle {
         quirkCode: finalQuirkPayload
       }
     };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    
+    if (allNotesSaved) {
+      try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.selectedAlgorithm.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+                
+
+      } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+      }
+    }
     
     const projectDtoForMapping: any = {
         id: this.circuitName,
@@ -2159,7 +2196,8 @@ export class DeterministicComponent extends GroverStyle {
         userEmail: this.userEmail,
 
         mutantCycles: [], 
-        testSuite: null
+        testSuite: null,
+        notes: notesPayload
     };
     
     const finalPayload: any = {

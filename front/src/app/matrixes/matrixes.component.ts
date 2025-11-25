@@ -1682,12 +1682,36 @@ export class MatrixesComponent implements AfterViewInit  {
           quirkCode: quirkCodeFinal 
       }
     };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    
+    if (allNotesSaved) {
+      try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .map((n: any, index: number) => ({
+                    id: `note_${Date.now()}_${index}`,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+                
+
+      } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+      }
+    }
+    
     
     const projectDtoForMapping: any = {
         id: this.circuitName,
         name: this.circuitName,
         qProgram: qProgram,
-        userEmail: this.userEmail
+        userEmail: this.userEmail,
+        notes: notesPayload
     };
     
     const finalPayload: any = {
@@ -1790,6 +1814,20 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
+    if (project.notes && Array.isArray(project.notes)) {
+      const notesForStorage = project.notes.map((n: any) => ({
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
+    } else {
+      // localStorage.removeItem('project_notes');
+    }
+
     //alert(`Proyecto "${project.name}" cargado con éxito.`);
 
     //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
@@ -1838,6 +1876,7 @@ interface StoredProject {
   id: string;
   name: string;
   qProgram: any;
+  notes?: any[];
 }
 
 interface ProjectListItem {

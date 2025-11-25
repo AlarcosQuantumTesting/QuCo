@@ -565,7 +565,7 @@
                 <h3>Enter function name</h3>
                 <div class="input-button-row">
                     <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
-                    <button class="btn-confirm" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
+                    <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
                         <i class="fa fa-check" aria-hidden="true"></i> Confirm
                     </button>
                 </div>
@@ -782,7 +782,7 @@
                 <div class="input-button-row">
                     <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
                     
-                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                    <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
                         <i class="fa fa-check" aria-hidden="true"></i> Save
                     </button>
                 </div>
