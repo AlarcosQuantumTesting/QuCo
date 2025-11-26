@@ -8,6 +8,13 @@
             <button class="close"><i class="close-i" (click)="cerrarModal.emit()">&times;</i></button>
         </div>
         <div class="notes-section-modal">
+            <textarea
+                    id="noteInput"
+                    [(ngModel)]="currentNoteTitle"
+                    placeholder="Note title here..."
+                    rows="3"
+                    class="note-title"
+            ></textarea>
             <div class="new-note-container">
                 <textarea
                     id="noteInput"

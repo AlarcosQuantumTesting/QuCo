@@ -45,7 +45,7 @@ public class ElongingController extends EvolutionaryController {
 	
 	@PutMapping("/generateInitialPopulation") @ResponseBody
 	public long generateInitialPopulation(HttpSession session, @RequestBody ProblemConfiguration pc) {
-		try {
+		/*try {
 			if (pc.getSelected1QubitGates().isEmpty() && pc.getProbOf1QubitGates()>0)
 				throw new Exception("There are no selected 1 qubit gates, but you specificy a chance of " + pc.getProbOf1QubitGates());
 			if (pc.getSelected2QubitGates().isEmpty() && pc.getProbOf2QubitGates()>0)
@@ -56,7 +56,7 @@ public class ElongingController extends EvolutionaryController {
 				throw new Exception("There are no selected gates of 3 or more qubits, but you specificy a chance of " + pc.getProbOfNQubitGates());
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
+		}*/
 		return super.generateInitialPopulation(session, pc, pc.getInputConfiguration().getMinNumberOfColumns());
 	}
 	

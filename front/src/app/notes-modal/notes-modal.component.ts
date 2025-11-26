@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 
 interface ProjectNote {
+  title: string;
   text: string;
   timestamp: Date;
   type: string;
@@ -37,6 +38,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
   allNotes: ProjectNote[] = [];
   notes: ProjectNote[] = [];
   currentNoteText: string = '';
+  currentNoteTitle: string = '';
   private storageKey: string = 'project_notes';
   private noteType: string = 'global_default';
   editingIndex: number | null = null;
@@ -113,8 +115,10 @@ export class NotesModalComponent implements OnInit, OnChanges {
 
   addNote(): void {
     const text = this.currentNoteText.trim();
-    if (text) {
+    const title = this.currentNoteTitle.trim();
+    if (text && title) {
       const newNote: ProjectNote = {
+        title: text,
         text: text,
         timestamp: new Date(),
         type: this.noteType 
@@ -122,6 +126,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
       
       this.allNotes.push(newNote);
       this.currentNoteText = '';
+      this.currentNoteTitle = '';
       this.saveNotesToStorage();
       this.applyFiltersAndSort();
 
