@@ -195,6 +195,33 @@
     margin-bottom: 10px;
 }
 
+.note-edit-title {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #008b95;
+}
+
+.note-edit-title:focus {
+    outline: none;
+    border-color: #0056b3;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
+}
+
+.note-card-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #008b95;
+    margin: 0 0 8px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #ddd;
+}
+
 
 .btn-add-note {
     background-color: #28a745;
@@ -245,7 +272,7 @@
     font-size: 1em;
     color: #333;
     margin-bottom: 10px;
-    white-space: pre-wrap;
+    //white-space: pre-wrap;
     flex-grow: 1;
 }
 

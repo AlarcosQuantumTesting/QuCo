@@ -15,7 +15,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; }
 
@@ -89,6 +89,7 @@ export class CircuitEditorComponent {
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Editor';
+  tipoLocal: string = 'quco_editor';
 
   storedNotesStr = localStorage.getItem('project_notes');
 
@@ -1165,6 +1166,8 @@ export class CircuitEditorComponent {
   guardarProyecto() {
     if (!this.circuit) return;
 
+    const idCircuit = crypto.randomUUID();
+
     this.generateCode();
 
     const gatesPayload = this.gateRegistry.map(g => ({
@@ -1196,14 +1199,14 @@ export class CircuitEditorComponent {
     const qubitsString = qubitsArray.join(',');
 
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.circuit.qubits.length,
       expressions: [],
       shots: 1024,
       generator: generatorData,
       qcodes: [{ platform: "AerSimulator", code: codeWithState }],
       qCircuit: { 
-          id: this.circuitName, 
+          id: idCircuit, 
           qbits: this.circuit.qubits.length, 
           quirkCode: {cols: []} 
       }
@@ -1217,25 +1220,15 @@ export class CircuitEditorComponent {
             const allNotes = JSON.parse(allNotesSaved);
             
             notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
                 .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
                     text: n.text,
                     type: n.type,
                     timestamp: n.timestamp
                 }));
-
-
-          /* CON FILTRO DE TIPO
-            notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
-                .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
-                    text: n.text,
-                    type: n.type,
-                    timestamp: n.timestamp
-                }));
-          */
                 
         } catch (e) {
             console.error("Error procesando las notas del localStorage", e);
@@ -1243,14 +1236,14 @@ export class CircuitEditorComponent {
     }
 
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
         
         mutantCycles: [], 
         testSuite: null,
-        notes: notesPayload
+        projectNotes: notesPayload
     };
 
     const finalPayload: FinalPayload = {
@@ -1305,7 +1298,7 @@ export class CircuitEditorComponent {
             setTimeout(() => {
               this.mensajeTemporal2 = '';
               this.loadProjectDataToComponent(project);
-              location.reload();
+              //location.reload();
             }, 1000);
             
         },
@@ -1334,7 +1327,7 @@ export class CircuitEditorComponent {
     this.circuitName = project.name;
     const fullCode = qcodesList[0].code;
 
-    if (project.notes && Array.isArray(project.notes)) {
+    /*if (project.notes && Array.isArray(project.notes)) {
         
         const notesForStorage = project.notes.map((n: any) => ({
             text: n.text,
@@ -1348,6 +1341,52 @@ export class CircuitEditorComponent {
         console.log("Notes content:", notesForStorage);
     } else {
         // localStorage.removeItem('project_notes');
+    }*/
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
     }
 
     const stateRegex = /# --- EDITOR_STATE_BEGIN ---\n# (.*)\n# --- EDITOR_STATE_END ---/;

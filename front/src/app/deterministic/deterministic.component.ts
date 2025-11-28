@@ -19,7 +19,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -1897,7 +1897,7 @@ export class DeterministicComponent extends GroverStyle {
     this.expectedFrequencies = new FreqTable();
     this.expectedFrequencies.setQubits(this.qubits);
     
-    if (project.notes && Array.isArray(project.notes)) {
+    /*if (project.notes && Array.isArray(project.notes)) {
       const notesForStorage = project.notes.map((n: any) => ({
         text: n.text,
         type: n.type,
@@ -1909,6 +1909,53 @@ export class DeterministicComponent extends GroverStyle {
       console.log("Notes content:", notesForStorage);
     } else {
       // localStorage.removeItem('project_notes');
+    }*/
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        const tipoLocal = 'quco_' + this.selectedAlgorithm;
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
     }
 
     const generator = qp.generator;
@@ -2101,7 +2148,8 @@ export class DeterministicComponent extends GroverStyle {
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
-    
+    const idCircuit = crypto.randomUUID();
+
     const generatorData = this.getGeneratorData(this.selectedAlgorithm);
 
     const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
@@ -2152,7 +2200,7 @@ export class DeterministicComponent extends GroverStyle {
     console.log('Final quirk payload to be sent:', finalQuirkPayload);
 
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.qubits,
       expressions: qProgramExpressions,
       shots: 0,
@@ -2161,7 +2209,7 @@ export class DeterministicComponent extends GroverStyle {
       inputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       outputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       qCircuit: { 
-        id: this.circuitName, 
+        id: idCircuit, 
         qbits: this.qubits, 
         quirkCode: finalQuirkPayload
       }
@@ -2169,35 +2217,37 @@ export class DeterministicComponent extends GroverStyle {
 
     let notesPayload: any[] = [];
     const allNotesSaved = localStorage.getItem('project_notes');
+    const tipoLocal = 'quco_' + this.selectedAlgorithm;
     
     if (allNotesSaved) {
-      try {
+        try {
             const allNotes = JSON.parse(allNotesSaved);
             
             notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.selectedAlgorithm.toLowerCase())
+                .filter((n: any) => n.type.toLowerCase() === tipoLocal.toLowerCase())
                 .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
                     text: n.text,
                     type: n.type,
                     timestamp: n.timestamp
                 }));
                 
-
-      } catch (e) {
+        } catch (e) {
             console.error("Error procesando las notas del localStorage", e);
-      }
+        }
     }
     
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
 
         mutantCycles: [], 
         testSuite: null,
-        notes: notesPayload
+        projectNotes: notesPayload
     };
     
     const finalPayload: any = {

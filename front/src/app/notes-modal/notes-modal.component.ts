@@ -43,6 +43,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
   private noteType: string = 'global_default';
   editingIndex: number | null = null;
   editedText: string = '';
+  editedTitle: string = '';
   showNotesHistory: boolean = false;
   mostrarConfirmDelete: boolean = false;
   noteToDeleteIndex: number | null = null;
@@ -87,7 +88,8 @@ export class NotesModalComponent implements OnInit, OnChanges {
       }
     }
 
-    this.noteType = identifier; 
+    //this.noteType = identifier;
+    this.noteType = 'quco_' + identifier;
     console.log(`Tipo de nota (identifier) definido: ${this.noteType}`);
   }
 
@@ -118,7 +120,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
     const title = this.currentNoteTitle.trim();
     if (text && title) {
       const newNote: ProjectNote = {
-        title: text,
+        title: title,
         text: text,
         timestamp: new Date(),
         type: this.noteType 
@@ -136,30 +138,53 @@ export class NotesModalComponent implements OnInit, OnChanges {
     }
   }
 
-  editNote(index: number, currentText: string): void {
+  editNote(index: number, currentText: string, currentTitle: string): void {
     this.editingIndex = index;
     this.editedText = currentText;
+    this.editedTitle = currentTitle;
   }
 
   saveEdit(): void {
     if (this.editingIndex !== null) {
       const originalIndex = this.editingIndex;
       const newText = this.editedText.trim();
+      const newTitle = this.editedTitle.trim();
       
-      if (newText.length > 0) {
+      /*if (newText.length > 0) {
         this.notes[originalIndex].text = newText;
         this.notes[originalIndex].timestamp = new Date();
         this.saveNotesToStorage();
+      }*/
+
+      if (newText.length > 0 && newTitle.length > 0) {
+        const editedNote = this.notes[originalIndex];
+        const allNotesIndex = this.allNotes.findIndex(n => n === editedNote);
+
+        if (allNotesIndex > -1) {
+            
+            this.allNotes[allNotesIndex].text = newText;
+            this.allNotes[allNotesIndex].title = newTitle;
+            this.allNotes[allNotesIndex].timestamp = new Date();
+            
+            this.notes[originalIndex].text = newText;
+            this.notes[originalIndex].title = newTitle;
+            this.notes[originalIndex].timestamp = this.allNotes[allNotesIndex].timestamp;
+            
+            this.saveNotesToStorage();
+        }
+
       }
       
       this.editingIndex = null;
       this.editedText = '';
+      this.editedTitle = '';
     }
   }
 
   cancelEdit(): void {
     this.editingIndex = null;
     this.editedText = '';
+    this.editedTitle = '';
   }
 
   deleteNote(notesIndex: number): void {
@@ -218,6 +243,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
     
     if (storedNotes) {
       const parsedNotes: ProjectNote[] = JSON.parse(storedNotes).map((note: any) => ({
+        title: note.title,
         text: note.text,
         timestamp: new Date(note.timestamp),
         type: note.type || 'global_default' 

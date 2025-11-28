@@ -157,6 +157,7 @@ export class MatrixesComponent implements AfterViewInit  {
   mostrarNotasModal: boolean = false;
 
   nombreComponente: string = 'Matrices';
+  tipoLocal: string = 'quco_matrices';
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
@@ -1599,6 +1600,8 @@ export class MatrixesComponent implements AfterViewInit  {
         return;
     }
 
+    const idCircuit = crypto.randomUUID();
+
     let interestingRows = 0; 
     const positionValue: { [key: number]: number } = {};
     
@@ -1659,7 +1662,7 @@ export class MatrixesComponent implements AfterViewInit  {
     }
     
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.inputQubits + this.outputQubits,
       expressions: qProgramExpressions,
       shots: 0,
@@ -1677,7 +1680,7 @@ export class MatrixesComponent implements AfterViewInit  {
       inputQubits: Array.from({length: this.inputQubits}, (_, i) => i).join(','),
       outputQubits: Array.from({length: this.outputQubits}, (_, i) => i + this.inputQubits).join(','),
       qCircuit: {
-          id: this.circuitName,
+          id: idCircuit,
           qbits: this.inputQubits + this.outputQubits,
           quirkCode: quirkCodeFinal 
       }
@@ -1687,31 +1690,33 @@ export class MatrixesComponent implements AfterViewInit  {
     const allNotesSaved = localStorage.getItem('project_notes');
     
     if (allNotesSaved) {
-      try {
+        try {
             const allNotes = JSON.parse(allNotesSaved);
             
             notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
                 .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
                     text: n.text,
                     type: n.type,
                     timestamp: n.timestamp
                 }));
                 
-
-      } catch (e) {
+        } catch (e) {
             console.error("Error procesando las notas del localStorage", e);
-      }
+        }
     }
     
     
+    
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
-        notes: notesPayload
+        projectNotes: notesPayload
     };
     
     const finalPayload: any = {
@@ -1814,18 +1819,50 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
-    if (project.notes && Array.isArray(project.notes)) {
-      const notesForStorage = project.notes.map((n: any) => ({
-        text: n.text,
-        type: n.type,
-        timestamp: n.timestamp
-      }));
+    const incomingNotes = project.projectNotes || project.projectNotes;
 
-      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
-      console.log(`Loaded ${notesForStorage.length} notes from project.`);
-      console.log("Notes content:", notesForStorage);
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
     } else {
-      // localStorage.removeItem('project_notes');
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
     }
 
     //alert(`Proyecto "${project.name}" cargado con éxito.`);
@@ -1876,7 +1913,7 @@ interface StoredProject {
   id: string;
   name: string;
   qProgram: any;
-  notes?: any[];
+  projectNotes: any[];
 }
 
 interface ProjectListItem {

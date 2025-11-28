@@ -14,7 +14,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -50,6 +50,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Genetic';
+  tipoLocal: string = 'quco_genetic';
   storedNotesStr = localStorage.getItem('project_notes');
 
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
@@ -608,6 +609,8 @@ export class ElongingComponent extends EvolutionaryComponent {
         return;
     }
     
+    const idCircuit = crypto.randomUUID();
+
     /*let quirkCircuitData: any = {};
     if (this.quirkURL) {
       const urlString = this.sanitizer.sanitize(4, this.quirkURL) as string;
@@ -654,7 +657,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     const qProgramExpressions: QProgramExpression[] = [];
 
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.pc.inputConfiguration.qubits,
       expressions: qProgramExpressions,
       shots: this.pc.inputConfiguration.shots,
@@ -671,7 +674,7 @@ export class ElongingComponent extends EvolutionaryComponent {
           .filter(index => index !== -1)
           .join(','),
       qCircuit: {
-          id: this.circuitName,
+          id: idCircuit,
           qbits: this.pc.inputConfiguration.qubits,
           quirkCode: finalQuirkPayload 
       }
@@ -685,14 +688,15 @@ export class ElongingComponent extends EvolutionaryComponent {
             const allNotes = JSON.parse(allNotesSaved);
             
             notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
                 .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
                     text: n.text,
                     type: n.type,
                     timestamp: n.timestamp
                 }));
-
                 
         } catch (e) {
             console.error("Error procesando las notas del localStorage", e);
@@ -700,13 +704,13 @@ export class ElongingComponent extends EvolutionaryComponent {
     }
     
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
         mutantCycles: [], 
         testSuite: null,
-        notes: notesPayload
+        projectNotes: notesPayload
     };
     
     const finalPayload: any = {
@@ -808,18 +812,50 @@ export class ElongingComponent extends EvolutionaryComponent {
         }
     });
 
-    if (project.notes && Array.isArray(project.notes)) {
-      const notesForStorage = project.notes.map((n: any) => ({
-        text: n.text,
-        type: n.type,
-        timestamp: n.timestamp
-      }));
+    const incomingNotes = project.projectNotes || project.projectNotes;
 
-      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
-      console.log(`Loaded ${notesForStorage.length} notes from project.`);
-      console.log("Notes content:", notesForStorage);
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
     } else {
-      // localStorage.removeItem('project_notes');
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
     }
     
     if (generator.type === 'GENETIC') {

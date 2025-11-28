@@ -18,7 +18,7 @@ import { Block } from './Block';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; notes?: any[]; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -69,6 +69,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Blocks';
+  tipoLocal: string = 'quco_blocks';
   storedNotesStr = localStorage.getItem('project_notes');
 
 
@@ -740,6 +741,7 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
+    const idCircuit = crypto.randomUUID();
     
     const generatorData = this.getGeneratorData();
     const qProgramExpressions: QProgramExpression[] = [];
@@ -749,7 +751,7 @@ export class BlocksComponent extends EvolutionaryComponent {
         .filter(index => index !== -1);
 
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.pc.inputConfiguration.qubits || 0,
       expressions: qProgramExpressions,
       shots: this.pc.inputConfiguration.shots,
@@ -763,7 +765,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       inputQubits: Array.from({length: this.pc.inputConfiguration.qubits || 0}, (_, i) => i).join(','),
       outputQubits: selectedOutputIndices.join(','),
       qCircuit: {
-          id: this.circuitName,
+          id: idCircuit,
           qbits: this.pc.inputConfiguration.qubits || 0,
           quirkCode: {cols: []} 
       }
@@ -777,9 +779,11 @@ export class BlocksComponent extends EvolutionaryComponent {
             const allNotes = JSON.parse(allNotesSaved);
             
             notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.nombreComponente.toLowerCase())
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
                 .map((n: any, index: number) => ({
-                    id: `note_${Date.now()}_${index}`,
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
                     text: n.text,
                     type: n.type,
                     timestamp: n.timestamp
@@ -791,13 +795,13 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
     
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
         mutantCycles: [], 
         testSuite: null,
-        notes: notesPayload
+        projectNotes: notesPayload
     };
     
     const finalPayload: FinalPayload = {
@@ -899,8 +903,9 @@ export class BlocksComponent extends EvolutionaryComponent {
         if (i >= 0 && i < qp.qubits) config.outputs[i] = true;
     });
 
-    if (project.notes && Array.isArray(project.notes)) {
-      const notesForStorage = project.notes.map((n: any) => ({
+    /*if (project.projectNotes && Array.isArray(project.projectNotes)) {
+      const notesForStorage = project.projectNotes.map((n: any) => ({
+        title: n.title,
         text: n.text,
         type: n.type,
         timestamp: n.timestamp
@@ -911,6 +916,52 @@ export class BlocksComponent extends EvolutionaryComponent {
       console.log("Notes content:", notesForStorage);
     } else {
       // localStorage.removeItem('project_notes');
+    }*/
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
     }
     
     if (generator.type === 'BLOCKS') {
@@ -946,27 +997,26 @@ export class BlocksComponent extends EvolutionaryComponent {
             //if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
             if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
                 
-                const blockData = bcData.blocks[0]; // Tomamos el primer bloque
+                const blockData = bcData.blocks[0];
                 
-                if (blockData) { // Validación extra por si el elemento es nulo
+                if (blockData) {
                     console.log("Loading Block Data:", blockData);
 
                     const newBlock = new Block(qubits);
                     
-                    // Asignamos propiedades con valores por defecto si fallan
                     newBlock.numberOfLeftColumns = blockData.numberOfLeftColumns || 0;
                     newBlock.numberOfRightColumns = blockData.numberOfRightColumns || 0;
                     
                     if (blockData.leftColumns) {
                         newBlock.leftColumns = this.mapStringsToColumns(blockData.leftColumns, qubits);
                     } else {
-                        newBlock.leftColumns = []; // Inicializar vacío si no hay datos
+                        newBlock.leftColumns = []; 
                     }
 
                     if (blockData.rightColumns) {
                         newBlock.rightColumns = this.mapStringsToColumns(blockData.rightColumns, qubits);
                     } else {
-                        newBlock.rightColumns = []; // Inicializar vacío si no hay datos
+                        newBlock.rightColumns = []; 
                     }
 
                     newBlockCircuit.block = newBlock;
@@ -975,7 +1025,6 @@ export class BlocksComponent extends EvolutionaryComponent {
                 }
 
             } else {
-                // Si no hay bloques, creamos uno por defecto para evitar errores en la UI
                 console.warn("No 'blocks' array found or it is empty in blockCircuit data. Creating default block.");
                 const defaultBlock = new Block(qubits);
                 newBlockCircuit.block = defaultBlock;

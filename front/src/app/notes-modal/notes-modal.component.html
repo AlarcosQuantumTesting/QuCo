@@ -8,13 +8,12 @@
             <button class="close"><i class="close-i" (click)="cerrarModal.emit()">&times;</i></button>
         </div>
         <div class="notes-section-modal">
-            <textarea
-                    id="noteInput"
-                    [(ngModel)]="currentNoteTitle"
-                    placeholder="Note title here..."
-                    rows="3"
-                    class="note-title"
-            ></textarea>
+            <input 
+                type="text"
+                [(ngModel)]="currentNoteTitle" 
+                class="note-title" 
+                placeholder="Note title here..."
+            />
             <div class="new-note-container">
                 <textarea
                     id="noteInput"
@@ -39,7 +38,7 @@
                         class="btn-delete-all" 
                         title="Delete all notes" 
                         (click)="deleteAllNotes()">
-                        <i class="fas fa-trash-can"></i> Delete all
+                        <i class="fas fa-trash-can"></i>
                     </button>
                     Notes history ({{ notes.length }} / {{ allNotes.length }})
                 </h3>
@@ -86,6 +85,12 @@
                     
                     <ng-container *ngIf="editingIndex === originalIndex">
                         <div class="edit-mode-container">
+                            <input 
+                                type="text"
+                                [(ngModel)]="editedTitle" 
+                                class="note-edit-title" 
+                                placeholder="Edit title..."
+                            />
                             <textarea 
                                 [(ngModel)]="editedText" 
                                 class="note-edit-textarea" 
@@ -102,6 +107,7 @@
                     </ng-container>
                     <ng-container *ngIf="editingIndex !== originalIndex">
                         <div class="note-type-label">Type: {{ note.type }}</div>
+                        <h4 class="note-card-title">{{ note.title }}</h4>
                         <div class="note-content">
                             {{ note.text }}
                         </div>
@@ -111,7 +117,7 @@
                                 <button 
                                     class="btn-edit-note" 
                                     title="Edit note"
-                                    (click)="editNote(originalIndex, note.text)">
+                                    (click)="editNote(originalIndex, note.text, note.title)">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 
