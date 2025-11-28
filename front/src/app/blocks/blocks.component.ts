@@ -162,6 +162,12 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
 
+    const savedProjectId = localStorage.getItem('selectedProjectId_blocks');
+    if (savedProjectId) {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+    }
+
     this.loadProjectNames();
 
   }
@@ -882,6 +888,12 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   loadProjectDataToComponent(project: StoredProject): void {
     if (!project.qProgram) return;
+
+    this.selectedProjectId = project.id;
+    this.circuitName = project.name; 
+    
+    localStorage.setItem('selectedProjectId_blocks', project.id);
+    localStorage.setItem('selectedProjectName_blocks', project.name);
 
     const qp = project.qProgram;
     const generator = qp.generator;
