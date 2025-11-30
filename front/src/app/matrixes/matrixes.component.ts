@@ -750,6 +750,12 @@ export class MatrixesComponent implements AfterViewInit  {
 
     this.loadProjectNames();
 
+    const savedProjectId = localStorage.getItem('selectedProjectId_matrices');
+    if (savedProjectId && this.userEmail && this.userToken) {
+        this.selectedProjectId = savedProjectId;
+        //this.onProjectSelected();
+    }
+
     this.validateInputs();
 
     this.transpileService.getBackends().subscribe(backends => {
@@ -1813,6 +1819,8 @@ export class MatrixesComponent implements AfterViewInit  {
     this.circuitName = project.name; 
     this.inputQubits = qp.qubits - qp.outputQubits.length; 
     this.outputQubits = qp.outputQubits.length; 
+
+    localStorage.setItem('selectedProjectId_matrices', project.id);
 
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
     this.fillTableWithUserExpressions();

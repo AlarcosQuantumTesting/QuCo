@@ -84,6 +84,13 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     localStorage.removeItem('qucoConfigurationBlocks');
     localStorage.removeItem('qucoConfiguration');
+
+    const savedProjectId = localStorage.getItem('selectedProjectId_genetic');
+    if (savedProjectId && this.userEmail && this.userToken) {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+    }
+
     this.loadProjectNames();
 
     for (let i=0; i<this.remoteFitnessers.length; i++) {
@@ -796,6 +803,8 @@ export class ElongingComponent extends EvolutionaryComponent {
     const config = this.pc.inputConfiguration;
     
     this.circuitName = project.name; 
+
+    localStorage.setItem('selectedProjectId_genetic', project.id);
 
     config.qubits = qp.qubits;
     const outputQubitsString = qp.outputQubits ? qp.outputQubits.toString() : '';

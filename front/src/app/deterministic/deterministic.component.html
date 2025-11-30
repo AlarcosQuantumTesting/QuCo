@@ -89,7 +89,7 @@
 
                 </div>
 
-                <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event); reloadChange()">
+                <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event); reloadChange(); removeSelectedProjectIdAlgorithm();">
 
                   <option value="grover">Grover</option>
 

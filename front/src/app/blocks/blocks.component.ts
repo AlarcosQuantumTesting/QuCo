@@ -163,7 +163,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('isGenetic', "false");
 
     const savedProjectId = localStorage.getItem('selectedProjectId_blocks');
-    if (savedProjectId) {
+    if (savedProjectId && this.userEmail && this.userToken) {
         this.selectedProjectId = savedProjectId;
         this.onProjectSelected();
     }
@@ -893,7 +893,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.circuitName = project.name; 
     
     localStorage.setItem('selectedProjectId_blocks', project.id);
-    localStorage.setItem('selectedProjectName_blocks', project.name);
+    //localStorage.setItem('selectedProjectName_blocks', project.name);
 
     const qp = project.qProgram;
     const generator = qp.generator;

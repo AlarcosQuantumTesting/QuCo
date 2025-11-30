@@ -172,8 +172,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
-    
-    this.loadProjectNames();
+
 
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
@@ -229,6 +228,32 @@ export class DeterministicComponent extends GroverStyle {
         this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
       });
     }
+
+
+    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
+
+    const savedProjectId = localStorage.getItem(nombreLocal);
+
+    if (savedProjectId && this.userEmail && this.userToken) {
+      if (this.selectedAlgorithm === 'grover' && nombreLocal === 'selectedProjectId_grover') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      } else if (this.selectedAlgorithm === 'grenoble' && nombreLocal === 'selectedProjectId_grenoble') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      } else if (this.selectedAlgorithm === 'originalgr' && nombreLocal === 'selectedProjectId_originalgr') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      }
+    }*/
+
+    const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
+    if (savedProjectId && this.userEmail && this.userToken) {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+    }
+    
+    this.loadProjectNames();
   }
 
   override tryFill(index: number): void {
@@ -1015,8 +1040,10 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     localStorage.removeItem('processedExpressionsDeterministic');
 
-    
-    
+  }
+
+  removeSelectedProjectIdAlgorithm() {
+    localStorage.removeItem('selectedProjectId_algorithm');
   }
 
 
@@ -1887,8 +1914,14 @@ export class DeterministicComponent extends GroverStyle {
 
     const qp = project.qProgram;
 
-    this.circuitName = project.name; 
+    this.circuitName = project.name;
+
+    localStorage.setItem('selectedProjectId_algorithm', project.id);
+
+    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
     
+    localStorage.setItem(nombreLocal, project.id);*/
+
     if (qp.generator && qp.generator.type) {
         this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
     }

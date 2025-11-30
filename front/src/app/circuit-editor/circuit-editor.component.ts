@@ -167,6 +167,12 @@ export class CircuitEditorComponent {
             this.searchQuery = this.selectedQubitsConfigurationName;
           }
       });
+
+      const savedProjectId = localStorage.getItem('selectedProjectId_editor');
+      if (savedProjectId && this.userEmail && this.userToken) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
+      }
     
       this.loadProjectNames();
   }
@@ -1326,6 +1332,8 @@ export class CircuitEditorComponent {
 
     this.circuitName = project.name;
     const fullCode = qcodesList[0].code;
+
+    localStorage.setItem('selectedProjectId_editor', project.id);
 
     /*if (project.notes && Array.isArray(project.notes)) {
         
