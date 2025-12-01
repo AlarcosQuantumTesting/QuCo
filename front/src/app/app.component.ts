@@ -456,6 +456,13 @@ export class AppComponent implements AfterViewInit, OnInit {
   confirmarCerrarSesion(): void {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
+    
+    localStorage.removeItem('selectedProjectId_blocks');
+    localStorage.removeItem('selectedProjectId_editor');
+    localStorage.removeItem('selectedProjectId_genetic');
+    localStorage.removeItem('selectedProjectId_algorithm');
+    localStorage.removeItem('selectedProjectId_matrices');
+
     console.log("Sesión cerrada.");
     
     this.mostrarModalLogoutConfirmacion = false;
@@ -511,7 +518,13 @@ export class AppComponent implements AfterViewInit, OnInit {
           this.limpiarMensajeExito(2000);
             
           localStorage.removeItem('userToken');
-          localStorage.removeItem('userEmail'); 
+          localStorage.removeItem('userEmail');
+
+          localStorage.removeItem('selectedProjectId_blocks');
+          localStorage.removeItem('selectedProjectId_editor');
+          localStorage.removeItem('selectedProjectId_genetic');
+          localStorage.removeItem('selectedProjectId_algorithm');
+          localStorage.removeItem('selectedProjectId_matrices');
           
           location.reload();
 

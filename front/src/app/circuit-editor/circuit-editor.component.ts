@@ -1335,22 +1335,6 @@ export class CircuitEditorComponent {
 
     localStorage.setItem('selectedProjectId_editor', project.id);
 
-    /*if (project.notes && Array.isArray(project.notes)) {
-        
-        const notesForStorage = project.notes.map((n: any) => ({
-            text: n.text,
-            type: n.type,
-            timestamp: n.timestamp
-        }));
-
-        localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
-        
-        console.log(`Loaded ${notesForStorage.length} notes from project.`);
-        console.log("Notes content:", notesForStorage);
-    } else {
-        // localStorage.removeItem('project_notes');
-    }*/
-
     const incomingNotes = project.projectNotes || project.projectNotes;
 
     if (incomingNotes && Array.isArray(incomingNotes)) {

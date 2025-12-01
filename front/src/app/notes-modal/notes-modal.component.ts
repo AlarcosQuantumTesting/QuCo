@@ -238,7 +238,7 @@ export class NotesModalComponent implements OnInit, OnChanges {
     this.availableTypes = ['all', ...this.FIXED_TYPES];
   }
 
-  loadNotesFromStorage(): void {
+  /*loadNotesFromStorage(): void {
     const storedNotes = localStorage.getItem(this.storageKey);
     
     if (storedNotes) {
@@ -257,7 +257,32 @@ export class NotesModalComponent implements OnInit, OnChanges {
     } else {
       this.allNotes = [];
       this.notes = [];
-      //this.availableTypes = ['all'];
+      this.availableTypes = ['all', ...this.FIXED_TYPES];
+    }
+  }*/
+
+  loadNotesFromStorage(): void {
+    const storedNotes = localStorage.getItem(this.storageKey);
+    
+    if (storedNotes) {
+      const parsedNotes: ProjectNote[] = JSON.parse(storedNotes).map((note: any) => ({
+        title: note.title || '(No title)',
+        text: note.text,
+        timestamp: new Date(note.timestamp),
+        type: note.type || 'global_default' 
+      }));
+      
+      const specificNotes = parsedNotes.filter(note => note.type === this.noteType);
+
+      this.allNotes = specificNotes;
+      
+      this.availableTypes = ['all', ...this.FIXED_TYPES];
+      this.updateAvailableTypes();
+
+      this.applyFiltersAndSort();
+    } else {
+      this.allNotes = [];
+      this.notes = [];
       this.availableTypes = ['all', ...this.FIXED_TYPES];
     }
   }
