@@ -791,6 +791,6 @@
       </div>
     </div>
 
-    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
 
 </body>

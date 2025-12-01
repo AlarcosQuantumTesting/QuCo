@@ -1414,7 +1414,8 @@ export class CircuitEditorComponent {
                 qubitsCount: editorState.qubitsCount,
                 gateRegistry: editorState.gateRegistry,
                 qubitsConfigName: editorState.qubitsConfigName,
-                selectedTemplateFileName: this.manager.selectedTemplate?.fileName
+                selectedTemplateFileName: this.manager.selectedTemplate?.fileName,
+                currentNotes: this.captureNotesState()
             });
             this.lastSavedCircuitState = stateToSave;
             this.isCircuitModified = false;
@@ -1475,7 +1476,8 @@ export class CircuitEditorComponent {
         qubitsCount: this.circuit.qubits.length,
         gateRegistry: this.gateRegistry,
         qubitsConfigName: this.selectedQubitsConfigurationName,
-        selectedTemplateFileName: this.manager.selectedTemplate?.fileName
+        selectedTemplateFileName: this.manager.selectedTemplate?.fileName,
+        currentNotes: this.captureNotesState()
     };
     return JSON.stringify(state);
   }
@@ -1556,6 +1558,41 @@ export class CircuitEditorComponent {
     this.selectedProjectId = ''; 
     this.circuitName = this.circuitName || 'New Project';
     this.mostrarModalGuardarProyecto = true;
+  }
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === this.tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
   }
 }
 
