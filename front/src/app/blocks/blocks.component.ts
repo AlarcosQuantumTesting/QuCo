@@ -72,6 +72,13 @@ export class BlocksComponent extends EvolutionaryComponent {
   tipoLocal: string = 'quco_blocks';
   storedNotesStr = localStorage.getItem('project_notes');
 
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
+
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
     public transpileService: TranspileService, private projectService: ProjectService) {
@@ -179,6 +186,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.pc.inputConfiguration.qubits = qubits
     this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits);
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+
+    this.saveState();
   }
 
   private findGate(e : any) : Gate | undefined {
@@ -203,6 +212,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.pc.inputConfiguration.blockCircuit.startingColumns[columnIndex].gates[qubitIndex] = gate
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
@@ -216,12 +226,14 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   updateNumberOfBlocks() {
     this.pc.inputConfiguration.blockCircuit.updateNumberOfBlocks(this.pc.inputConfiguration.outputs.filter(output => output).length)
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   override generateInitialPopulation() {
@@ -570,6 +582,7 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     // Guarda en localStorage (opcional)
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
   }
 
   updateColumnsFromInputLeft(side: string) {
@@ -583,6 +596,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       blockCircuit.block.leftColumns.splice(blockCircuit.block.leftColumns.length-1, 1)
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
         
   }
 
@@ -597,6 +611,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       blockCircuit.block.rightColumns.splice(blockCircuit.block.rightColumns.length-1, 1)
         
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
   }
 
   ngOnDestroy(): void {
@@ -747,7 +762,16 @@ export class BlocksComponent extends EvolutionaryComponent {
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
-    const idCircuit = crypto.randomUUID();
+
+    let idCircuit: string;
+
+    if (this.applyChanges) {
+      idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
+    } else {
+      idCircuit = crypto.randomUUID();
+    }
+    
     
     const generatorData = this.getGeneratorData();
     const qProgramExpressions: QProgramExpression[] = [];
@@ -819,7 +843,13 @@ export class BlocksComponent extends EvolutionaryComponent {
     
     this.projectService.saveProject(finalPayload).subscribe({
       next: () => {
-        alert('Project "' + this.circuitName + '" saved successfully!');
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
         this.loadProjectNames();
       },
       error: (error: any) => {
@@ -1049,10 +1079,168 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.validarDatos(); 
     this.notBuilt = false;
     
-    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
-    setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+    //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    setTimeout(() => {
+        this.lastSavedCircuitState = this.captureCircuitState(); 
+        this.isCircuitModified = false;
+        
+        this.updateExpectedFrequencies();
+        this.validarDatos(); 
+        this.notBuilt = false;
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+    }, 200);
+    //setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
   }
 
 
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === this.tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const config = this.pc.inputConfiguration;
+    const selectedGateNames = this.gates
+        .filter(g => g.selected)
+        .map(g => g.name)
+        .sort()
+        .join(',');
+    
+    const state = {
+        qubits: config.qubits,
+        shots: config.shots,
+        outputQubits: config.outputs ? config.outputs.map((o, i) => o ? i : -1).filter(i => i !== -1).join(',') : '',
+        gates: selectedGateNames,
+        
+        startCols: this.mapColumnsToStrings(config.blockCircuit.startingColumns),
+        leftCols: this.mapColumnsToStrings(config.blockCircuit.block.leftColumns),
+        rightCols: this.mapColumnsToStrings(config.blockCircuit.block.rightColumns),
+        
+        minColumns: config.minNumberOfColumns,
+        maxColumns: config.maxNumberOfColumns,
+        popSize: config.populationSize,
+        desiredError: this.pc.desiredError,
+        
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.lastSavedCircuitState) {
+        this.isCircuitModified = true;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    localStorage.setItem('blocksQubits', JSON.stringify(this.pc.inputConfiguration.qubits));
+      
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            
+            localStorage.removeItem('selectedProjectId_blocks');
+
+            this.reload(); 
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    if (isNew) {
+        this.selectedProjectId = '';
+        this.circuitName = this.circuitName || 'New Project';
+    } else if (!this.selectedProjectId) {
+        this.circuitName = '';
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
+  }
 
 }

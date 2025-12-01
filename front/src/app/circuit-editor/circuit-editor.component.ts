@@ -1187,6 +1187,7 @@ export class CircuitEditorComponent {
 
     if (this.applyChanges === true) {
       idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
     } else {
       idCircuit = crypto.randomUUID();
     }

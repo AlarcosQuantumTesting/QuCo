@@ -8,6 +8,14 @@
 
     <div class="titulo">
       <h1>Blocks genetic algorithm</h1>
+      <span 
+          *ngIf="selectedProjectId && isCircuitModified" 
+          class="unsaved-indicator pulsing-dot"
+          title="Unsaved changes detected"
+          style="cursor: default !important;"
+      >
+          <i class="fas fa-circle"></i> 
+      </span>
     </div>
 
     <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -22,12 +30,32 @@
                 <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
                 {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
             </button>     
-            <button 
+            <!-- <button 
                 (click)="mostrarModalGuardarProyecto = true" 
                 class="btn-confirm-save" 
                 *ngIf="userEmail && userToken"
             >
                 <i class="fas fa-save"></i> Save project
+            </button> -->
+            <button 
+                *ngIf="!selectedProjectId"
+                (click)="openSaveOrSaveAsNewModal(false)" 
+                class="btn-confirm-save">
+                <i class="fas fa-save"></i> Save
+            </button>
+            
+            <button 
+                *ngIf="selectedProjectId && isCircuitModified"
+                (click)="openApplyChangesModal()" 
+                class="btn-confirm-save update-btn">
+                <i class="fas fa-pen"></i> Update
+            </button>
+            
+            <button 
+                *ngIf="selectedProjectId"
+                (click)="openSaveOrSaveAsNewModal(true)" 
+                class="btn-confirm-save">
+                <i class="fas fa-save"></i> Save as new
             </button>
         </div>
     </div>
@@ -65,6 +93,15 @@
                             {{ project.name }}
                         </option>
                     </select>
+                    <button 
+                        *ngIf="selectedProjectId"
+                        (click)="openDeleteProjectModal()" 
+                        class="btn-delete-project" 
+                        title="Delete Selected Project"
+                        style="margin-left: 10px; padding: 5px 8px;"
+                    >
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
                 <div>
                     Available templates:
@@ -78,7 +115,7 @@
                 </div>
 
                 <div>
-                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles"><span style="margin-top: 2px; margin-left: 10px;">Delete files</span>
+                    <input type="checkbox" [disabled]="running" [(ngModel)]="pc.inputConfiguration!.deleteFiles" (change)="saveState()"><span style="margin-top: 2px; margin-left: 10px;">Delete files</span>
                 </div>
 
                 
@@ -135,7 +172,7 @@
                                             max="24"
                                             step="1"
                                             [(ngModel)]="pc.inputConfiguration!.qubits"
-                                            (change)="updateExpectedFrequencies(); updateNumberOfQubits()"
+                                            (change)="updateExpectedFrequencies(); updateNumberOfQubits(); saveState()"
                                             (keydown)="disableTyping($event)"
                                             [ngClass]="{
                                                 'is-invalid': pc.inputConfiguration!.qubits === null || pc.inputConfiguration!.qubits < 1 || pc.inputConfiguration!.qubits > 24
@@ -155,7 +192,7 @@
                                         <th align="left"><label for="numberOfQubits">Output qubits:</label></th>
                                         <td *ngFor="let i of [].constructor(pc.inputConfiguration!.qubits); let qubitIndex = index">
                                             <input [disabled]="running" type="checkbox" [(ngModel)]="pc.inputConfiguration!.outputs[qubitIndex]"
-                                                (change)="updateOutputs()">
+                                                (change)="updateOutputs(); saveState()">
                                         </td>
                                     </tr>
                                 </table>
@@ -166,16 +203,17 @@
                         <div style="gap: 10px; margin: 10px;">
                             Starting columns: 
                             <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfStartColumns" 
-                                (change)="updateColumnsFromInput()">
+                                (change)="updateColumnsFromInput(); saveState()">
                             Number of blocks: 
-                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks">
+                            <input [disabled]="running" style="margin-right: 10px;" type="number" min="0" step="1" [(ngModel)]="pc.inputConfiguration.blockCircuit.numberOfBlocks"
+                            (change)="saveState()">
                         
                             Number of columns in the block: between 
                             <input [disabled]="running" type="number" min="1" [max]="pc.inputConfiguration.maxNumberOfColumns"
-                            [(ngModel)]="pc.inputConfiguration.minNumberOfColumns"> 
+                            [(ngModel)]="pc.inputConfiguration.minNumberOfColumns" (change)="saveState()"> 
                             and 
                             <input [disabled]="running" type="number" min="1" [min]="pc.inputConfiguration.minNumberOfColumns"
-                            [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns">
+                            [(ngModel)]="pc.inputConfiguration.maxNumberOfColumns" (change)="saveState()">
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
                             <div class="table-scroll-wrapper">
@@ -192,7 +230,7 @@
                                             <td *ngFor="let j of [].constructor(pc.inputConfiguration.blockCircuit.numberOfStartColumns); let colIndex = index">
                                                 <ng-container *ngIf="pc.inputConfiguration.blockCircuit.startingColumns[colIndex]">
                                                     <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.startingColumns[colIndex].gates[qubitIndex].name"
-                                                            (change)="setGate(qubitIndex, colIndex, $event)">
+                                                            (change)="setGate(qubitIndex, colIndex, $event); saveState()">
                                                         <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
                                                     </select>
 
@@ -239,7 +277,7 @@
                                         <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfLeftColumns)); let columnIndex = index">
                                             <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex]">
                                                 <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.leftColumns[columnIndex].gates[qubitIndex].name"
-                                                        (change)="setBlockGate('left', columnIndex, qubitIndex, $event)">
+                                                        (change)="setBlockGate('left', columnIndex, qubitIndex, $event); saveState()">
                                                     <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
                                                 </select>
                                             </ng-container>
@@ -247,7 +285,7 @@
                                         <td *ngFor="let i of [].constructor(math.max(1, pc.inputConfiguration.blockCircuit.block.numberOfRightColumns)); let columnIndex = index">
                                             <ng-container *ngIf="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex]">
                                                 <select [disabled]="running" [(ngModel)]="pc.inputConfiguration.blockCircuit.block.rightColumns[columnIndex].gates[qubitIndex].name"
-                                                        (change)="setBlockGate('right', columnIndex, qubitIndex, $event)">
+                                                        (change)="setBlockGate('right', columnIndex, qubitIndex, $event); saveState()">
                                                     <option *ngFor="let gate of availableGates" [value]="gate">{{ gate }}</option>
                                                 </select>
                                         </ng-container>
@@ -275,7 +313,7 @@
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Initial population size:</label>
                                             <input [disabled]="running" type="number" class="form-control" min="2" step="2" [(ngModel)]="pc.inputConfiguration!.populationSize"
-                                            [ngClass]="{'is-invalid': validarInputPopSizeInit()}">
+                                            [ngClass]="{'is-invalid': validarInputPopSizeInit()}" (change)="saveState()">
                                         </div>
 
                                         <small *ngIf="validarInputPopSizeInit()" class="text-danger">
@@ -292,7 +330,7 @@
                                             <label>Desired error (%):</label>
                                             <input type="number" class="form-control" min="0" step="0.025"
                                                 [(ngModel)]="pc.desiredError" [disabled]="running"
-                                                (change)="updateDesiredError()"
+                                                (change)="updateDesiredError(); saveState()"
                                                 [ngClass]="{'is-invalid': validarInputError()}">
                                         </div>
 
@@ -316,7 +354,7 @@
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Apply after</label>
                                             <input [disabled]="running" class="form-control" type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.fallsThreshold" 
-                                            [ngClass]="{'is-invalid': validarDatosInputThreshold()}">
+                                            [ngClass]="{'is-invalid': validarDatosInputThreshold()}" (change)="saveState()">
 
                                             <div style="display: flex; gap: 8px;">
                                                 <label>falls of the </label>
@@ -324,8 +362,8 @@
                                         </div>
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                           <div style="display: flex; gap: 8px;">
-                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls"><label>best fitness</label>
-                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls"><label>mean fitness</label>
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenBestFitnessFalls" (change)="saveState()"><label>best fitness</label>
+                                                <input [disabled]="running" type="checkbox" [(ngModel)]="pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls" (change)="saveState()"><label>mean fitness</label>
                                             </div>
                                         </div>
 
@@ -335,7 +373,7 @@
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Apply when the best indivudal reaches a fitness of </label>
                                             <input [disabled]="running" class="form-control" type="number" min="0" step="0.05" [(ngModel)]="pc.massiveMutationPolicy.fitnessPercentage"
-                                            [ngClass]="{'is-invalid': validarDatosInputFitnessPercentage()}">
+                                            [ngClass]="{'is-invalid': validarDatosInputFitnessPercentage()}" (change)="saveState()">
                                         </div>
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -348,7 +386,8 @@
 
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <label>Maximum times of consecutive massive mutations:</label>
-                                            <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"> 
+                                            <input [disabled]="running" class="form-control"  type="number" min="0" [(ngModel)]="pc.massiveMutationPolicy.maxConsecutiveApplications"
+                                             (change)="saveState()"> 
                                         </div>
                                     </div>
                                 </td>
@@ -364,7 +403,7 @@
                              <input
                                 type="checkbox"
                                 [checked]="areAllSelected(5)"
-                                (change)="toggleSelectGates(5)"
+                                (change)="toggleSelectGates(5); saveState()"
                                 title="Select/Deselect all"
                                 class="hidden-checkbox" 
                                 >
@@ -383,7 +422,7 @@
                                          <input
                                             type="checkbox"
                                             [checked]="areAllSelected(1)"
-                                            (change)="toggleSelectGates(1)"
+                                            (change)="toggleSelectGates(1); saveState()"
                                             title="Select/Deselect all"
                                             class="hidden-checkbox" 
                                         >
@@ -396,7 +435,7 @@
                                 <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits == 1">
                                     <label style="display: flex; align-items: center; gap: 4px;">
-                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates(); saveState()" title="Select/Deselect gate"> 
                                         {{ gate.name }}
                                     </label>
                                     </ng-container>
@@ -413,7 +452,7 @@
                                          <input
                                             type="checkbox"
                                             [checked]="areAllSelected(2)"
-                                            (change)="toggleSelectGates(2)"
+                                            (change)="toggleSelectGates(2); saveState()"
                                             title="Select/Deselect all"
                                             class="hidden-checkbox" 
                                         >
@@ -425,7 +464,7 @@
                                 <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits == 2">
                                     <label style="display: flex; align-items: center; gap: 4px;">
-                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates(); saveState()" title="Select/Deselect gate"> 
                                         {{ gate.name }}
                                     </label>
                                     </ng-container>
@@ -443,7 +482,7 @@
                                          <input
                                             type="checkbox"
                                             [checked]="areAllSelected(3)"
-                                            (change)="toggleSelectGates(3)"
+                                            (change)="toggleSelectGates(3); saveState()"
                                             title="Select/Deselect all"
                                             class="hidden-checkbox" 
                                         >
@@ -457,7 +496,7 @@
                                     <ng-container *ngFor="let gate of gates">
                                         <ng-container *ngIf="gate.affectedQubits == 3">
                                         <label style="display: flex; align-items: center; gap: 4px;">
-                                            <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                            <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates(); saveState()" title="Select/Deselect gate"> 
                                             {{ gate.name }}
                                         </label>
                                         </ng-container>
@@ -474,7 +513,7 @@
                                          <input
                                             type="checkbox"
                                             [checked]="areAllSelected(4)"
-                                            (change)="toggleSelectGates(4)"
+                                            (change)="toggleSelectGates(4); saveState()"
                                             title="Select/Deselect all"
                                             class="hidden-checkbox" 
                                         >
@@ -487,7 +526,7 @@
                                     <ng-container *ngFor="let gate of gates">
                                     <ng-container *ngIf="gate.affectedQubits >= 4">
                                         <label style="display: flex; align-items: center; gap: 6px;">
-                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates()" title="Select/Deselect gate"> 
+                                        <input [disabled]="running" type="checkbox" [(ngModel)]="gate.selected" (change)="saveGates(); saveState()" title="Select/Deselect gate"> 
                                         {{ gate.name }}
                                         </label>
                                     </ng-container>
@@ -787,7 +826,41 @@
         </div>
     </div>
 
-    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
+    <div *ngIf="showDeleteProjectModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+              <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
+              <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to delete the project <strong>"{{ circuitName }}"</strong>?</p>
+              <p>This action cannot be undone.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: #008b95;">
+              <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
+              <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ circuitName }}"</strong> with the current circuit configuration?</p>
+              <p>This will permanently overwrite the previously saved version.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
 
 </body>
 
