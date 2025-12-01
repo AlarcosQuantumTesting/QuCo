@@ -15,6 +15,10 @@ export class ProjectService {
     return this.http.put(`${this.baseUrl}/save`, projectData);
   }
 
+  deleteProject(requestBody: { projectId: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/delete`, requestBody);
+  }
+
   getProjectsByUser(userEmail: string): Observable<any> {
     const requestBody = { email: userEmail };
     return this.http.post(`${this.baseUrl}/getAllByUser`, requestBody);

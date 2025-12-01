@@ -93,6 +93,12 @@ export class CircuitEditorComponent {
 
   storedNotesStr = localStorage.getItem('project_notes');
 
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',
     QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
@@ -319,6 +325,9 @@ export class CircuitEditorComponent {
           }
           
           this.saveState();
+          if (!isLoadingFromStorage && this.selectedProjectId) {
+              this.isCircuitModified = true; 
+          }
         },
         error => { 
           this.error = error.error.message
@@ -1145,6 +1154,8 @@ export class CircuitEditorComponent {
     } else {
       localStorage.removeItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
     }
+
+    this.checkForChanges();
   }
 
   
@@ -1172,7 +1183,13 @@ export class CircuitEditorComponent {
   guardarProyecto() {
     if (!this.circuit) return;
 
-    const idCircuit = crypto.randomUUID();
+    let idCircuit: string;
+
+    if (this.applyChanges === true) {
+      idCircuit = this.selectedProjectId;
+    } else {
+      idCircuit = crypto.randomUUID();
+    }
 
     this.generateCode();
 
@@ -1261,6 +1278,10 @@ export class CircuitEditorComponent {
 
     this.projectService.saveProject(finalPayload).subscribe({
       next: () => {
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
         this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
         setTimeout(() => this.mensajeTemporal2 = '', 3000);
         this.loadProjectNames();
@@ -1387,6 +1408,16 @@ export class CircuitEditorComponent {
     if (match && match[1]) {
         try {
             const editorState = JSON.parse(match[1]);
+
+            const stateToSave = JSON.stringify({
+                columns: editorState.columns,
+                qubitsCount: editorState.qubitsCount,
+                gateRegistry: editorState.gateRegistry,
+                qubitsConfigName: editorState.qubitsConfigName,
+                selectedTemplateFileName: this.manager.selectedTemplate?.fileName
+            });
+            this.lastSavedCircuitState = stateToSave;
+            this.isCircuitModified = false;
             
             if (editorState.qubitsConfigName) {
                 this.qubitsConfigurationService.getQubitsConfiguration(editorState.qubitsConfigName).subscribe({
@@ -1428,12 +1459,104 @@ export class CircuitEditorComponent {
             this.code = fullCode;
         }
     } else {
+        this.lastSavedCircuitState = ''; 
+        this.isCircuitModified = true;
+
         this.code = fullCode;
         alert("Project loaded (Code only). Circuit layout could not be restored.");
     }
   }
 
+  private captureCircuitState(): string {
+    if (!this.circuit || !this.qubitsConfiguration) return '';
 
+    const state = {
+        columns: this.circuit.columns,
+        qubitsCount: this.circuit.qubits.length,
+        gateRegistry: this.gateRegistry,
+        qubitsConfigName: this.selectedQubitsConfigurationName,
+        selectedTemplateFileName: this.manager.selectedTemplate?.fileName
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.lastSavedCircuitState) {
+        this.isCircuitModified = true;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+
+            if (this.qubitsConfiguration) {
+                 this.circuit = new EdCircuit()
+                 this.circuit.columns = 10
+                 this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+                 this.gateRegistry = [];
+                 this.saveState();
+            }
+            localStorage.removeItem('selectedProjectId_editor');
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  applyChanges: boolean = false;
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  openSaveAsNewModal() {
+    this.saveError = '';
+    this.selectedProjectId = ''; 
+    this.circuitName = this.circuitName || 'New Project';
+    this.mostrarModalGuardarProyecto = true;
+  }
 }
 
 interface CircuitGate {

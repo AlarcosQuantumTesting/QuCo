@@ -19,6 +19,14 @@
 
     <div class="titulo">
         <h1>Circuits editor</h1>
+        <span 
+          *ngIf="selectedProjectId && isCircuitModified" 
+          class="unsaved-indicator pulsing-dot"
+          title="Unsaved changes detected"
+          style="cursor: default !important;"
+        >
+          <i class="fas fa-circle"></i> 
+        </span>
     </div>
 
     <div class="container search-container">
@@ -144,6 +152,15 @@
                                     {{ project.name }}
                                 </option>
                             </select>
+                            <button 
+                                *ngIf="selectedProjectId"
+                                (click)="openDeleteProjectModal()" 
+                                class="btn-delete-project" 
+                                title="Delete Selected Project"
+                                style="margin-left: 10px; padding: 5px 8px;"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                        
                         <div style="display: flex; justify-content: flex-end;" class="input-group"> 
@@ -151,13 +168,42 @@
                                 <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
                                 {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
                             </button>     
-                            <button 
+                            <!-- <button 
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
                                 style="margin-top: 0px !important"
                                 *ngIf="userEmail && userToken"
                             >
                                 <i class="fas fa-save"></i> Save project
+                            </button> -->
+                            
+                            <button 
+                                (click)="openSaveProjectModal()" 
+                                class="btn-confirm-save" 
+                                style="margin-top: 0px !important"
+                                *ngIf="userEmail && userToken && !selectedProjectId"
+                                [disabled]="!circuit"
+                            >
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            
+                            <button 
+                                (click)="openApplyChangesModal()" 
+                                class="btn-confirm-save update-btn" 
+                                style="margin-top: 0px !important"
+                                *ngIf="userEmail && userToken && selectedProjectId && isCircuitModified"
+                            >
+                                <i class="fas fa-pen"></i> Update
+                            </button>
+                            
+                            <button 
+                                (click)="openSaveAsNewModal()" 
+                                class="btn-confirm-save" 
+                                style="margin-top: 0px !important; margin-left: 5px;"
+                                *ngIf="userEmail && userToken && selectedProjectId"
+                                title="Save the current circuit state as a new project"
+                            >
+                                <i class="fas fa-save"></i> Save as new
                             </button>
                         </div>
                         <div class="circuit-block-container" style="width: 100%; display: flex; justify-content: center; align-items: center;">
@@ -709,6 +755,40 @@
                 <div class="error" *ngIf="saveError">{{ saveError }}</div>
             </div>
         </div>
+    </div>
+
+    <div *ngIf="showDeleteProjectModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+              <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
+              <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to delete the project <strong>"{{ circuitName }}"</strong>?</p>
+              <p>This action cannot be undone.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: #008b95;">
+              <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
+              <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ circuitName }}"</strong> with the current circuit configuration?</p>
+              <p>This will permanently overwrite the previously saved version.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
+              </div>
+          </div>
+      </div>
     </div>
 
     <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
