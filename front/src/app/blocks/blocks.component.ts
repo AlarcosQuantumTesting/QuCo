@@ -1223,7 +1223,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.saveError = '';
     
     if (isNew) {
-        this.selectedProjectId = '';
+        //this.selectedProjectId = '';
         this.circuitName = this.circuitName || 'New Project';
     } else if (!this.selectedProjectId) {
         this.circuitName = '';

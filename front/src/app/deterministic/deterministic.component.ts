@@ -154,6 +154,13 @@ export class DeterministicComponent extends GroverStyle {
   mostrarNotasModal: boolean = false;
   storedNotesStr = localStorage.getItem('project_notes');
 
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
+
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
      public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService, 
@@ -310,11 +317,14 @@ export class DeterministicComponent extends GroverStyle {
       } else if (result)
         this.expectedFrequencies.setFreq(i, result)
     }
+
     this.updateOutputs()
 
     this.updateTotalSelectedElements();
 
     localStorage.setItem('processedExpressionsDeterministic', JSON.stringify(this.userExpressions));
+
+    this.saveState();
   }
 
   private replaceQ(expr: string, row: string) {
@@ -714,6 +724,8 @@ export class DeterministicComponent extends GroverStyle {
     this.calculateShots()
     this.updateOutputs()
     this.updateTotalSelectedElements();
+
+    this.saveState();
   }
 
   random(factor : number) {
@@ -899,6 +911,7 @@ export class DeterministicComponent extends GroverStyle {
     this.onAlgorithmChange(this.selectedAlgorithm);
     this.goToTable();
     // this.clearExpressions();
+    this.saveState();
   }
 
   goToTable(): void {
@@ -1119,6 +1132,7 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     this.updateTotalSelectedElements();
+    this.saveState();
   }
 
 
@@ -1141,10 +1155,12 @@ export class DeterministicComponent extends GroverStyle {
       }
     }
     this.updateTotalSelectedElements();
+    this.saveState();
   }
 
   clearExpressions() {
     this.userExpressions = [];
+    this.saveState();
   }
 
 
@@ -1185,6 +1201,8 @@ export class DeterministicComponent extends GroverStyle {
 
     // Limpiar el campo de texto
     this.currentUserExpression = "";
+
+    this.saveState();
   }
 
   openTextArea(c : DeterministicComponent, e : Event, title : string, elementIndex? : number) {
@@ -1302,6 +1320,7 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     caja.parentElement.appendChild(this.dialogo);
+    this.saveState();
   }
 
   onSearchInput() {
@@ -1912,6 +1931,9 @@ export class DeterministicComponent extends GroverStyle {
   loadProjectDataToComponent(project: StoredProject): void {
     if (!project.qProgram) return;
 
+    this.lastSavedCircuitState = ''; 
+    this.isCircuitModified = false;
+
     const qp = project.qProgram;
 
     this.circuitName = project.name;
@@ -2025,11 +2047,21 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarTabla = true; 
     this.goToTable();
 
-    //alert(`Proyecto "${project.name}" cargado con éxito.`);
-    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
     setTimeout(() => {
       this.mensajeTemporal2 = '';
-    }, 1000);
+    }, 1000);*/
+
+    setTimeout(() => {
+        this.updateOutputs();
+        this.updateTotalSelectedElements();
+        
+        this.lastSavedCircuitState = this.captureCircuitState(); 
+        this.isCircuitModified = false;
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+    }, 200);
 
     this.saveInLocal();
   }
@@ -2181,8 +2213,15 @@ export class DeterministicComponent extends GroverStyle {
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
-    const idCircuit = crypto.randomUUID();
-
+    //const idCircuit = crypto.randomUUID();
+    let idCircuit: string;
+    if (this.applyChanges) {
+        idCircuit = this.selectedProjectId;
+        this.applyChanges = false;
+    } else {
+        idCircuit = crypto.randomUUID();
+    }
+    
     const generatorData = this.getGeneratorData(this.selectedAlgorithm);
 
     const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
@@ -2208,6 +2247,10 @@ export class DeterministicComponent extends GroverStyle {
     if (this.responseReceived && this.responseReceived["QUIRK"] && this.responseReceived["QUIRK"].length > 0) {
         quirkCircuitData = this.responseReceived["QUIRK"][0]; 
     }
+
+    const generatedCode = this.qiskitCode && this.qiskitCode.lines 
+                            ? this.qiskitCode.lines.join('\n') 
+                            : "No Qiskit code generated yet.";
 
     let finalQuirkPayload: any = quirkCircuitData;
 
@@ -2238,7 +2281,7 @@ export class DeterministicComponent extends GroverStyle {
       expressions: qProgramExpressions,
       shots: 0,
       generator: generatorData,
-      qcodes: [{ platform: "AerSimulator", code: this.qiskitCode.lines.join('\n') || "No qiskit code generated." }],
+      qcodes: [{ platform: "AerSimulator", code: generatedCode }],
       inputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       outputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       qCircuit: { 
@@ -2293,16 +2336,157 @@ export class DeterministicComponent extends GroverStyle {
     this.projectService.saveProject(finalPayload).subscribe({
       next: () => {
         //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
         this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
         setTimeout(() => {
           this.mensajeTemporal2 = '';
         }, 2000);
         this.loadProjectNames();
+        localStorage.setItem('selectedProjectId_algorithm', idCircuit);
       },
       error: (error: any) => {
         console.error('Error saving project:', error);
         alert('Error saving project (Code 400).');
       }
     });
+  }
+
+
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const tipoLocal = 'quco_' + this.selectedAlgorithm;
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const state = {
+        qubits: this.qubits,
+        algorithm: this.selectedAlgorithm,
+        physicalAngle: this.physicalAngle,
+        inParallel: this.inParallel,
+        splitCircuits: this.splitCircuits,
+        frequencies: JSON.stringify(this.expectedFrequencies),
+        expressions: this.userExpressions.slice().sort().join('|'),
+        template: this.manager.selectedTemplate.fileName,
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.selectedProjectId || !this.lastSavedCircuitState) {
+        this.isCircuitModified = false;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    this.saveInLocal();
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            localStorage.removeItem('selectedProjectId_algorithm');
+
+            this.resetValues();
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    if (isNew) {
+        //this.selectedProjectId = '';
+        this.circuitName = this.circuitName || `New ${this.selectedAlgorithm} Project`;
+    } else if (this.selectedProjectId) {
+        this.circuitName = this.circuitName || '';
+    } else {
+        this.circuitName = '';
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
   }
 }

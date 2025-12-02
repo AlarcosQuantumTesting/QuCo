@@ -1556,7 +1556,7 @@ export class CircuitEditorComponent {
 
   openSaveAsNewModal() {
     this.saveError = '';
-    this.selectedProjectId = ''; 
+    //this.selectedProjectId = ''; 
     this.circuitName = this.circuitName || 'New Project';
     this.mostrarModalGuardarProyecto = true;
   }

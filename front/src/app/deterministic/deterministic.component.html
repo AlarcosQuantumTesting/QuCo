@@ -33,72 +33,54 @@
 
       </h1>
 
+      <span 
+          *ngIf="selectedProjectId && isCircuitModified" 
+          class="unsaved-indicator pulsing-dot"
+          title="Unsaved changes detected"
+          style="cursor: default !important;"
+      >
+        <i class="fas fa-circle"></i> 
+      </span>
+
   </div>
 
  
 
   <div class="container matrix-container">
-
-      <div class="form-row">
-
+    <div class="form-row">
           <div class="section buildText">
-
               <p>
-
                   In this section you can build a table with the desired number of qubits.
-
                   To do so, fill the number of qubits and press the button to build the matrix.
-
                   The table shows only the first {{ maxRows}} rows.
-
               </p>
-
           </div>
 
           <div class="section qubitsContainer">
-
-              <div class="form-group">
-
+            <div class="project-load-controls">
+              <div class="form-group" >
                   <div class="label-container">
-
                       <label for="numberOfQubits">Number of  qubits:</label>
-
                       <small class="input-hint">[1 - 24]</small>
-
                   </div>
 
- 
-
-                  <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs()" (change)="cambioInput = true; updateOutputs()" class="form-control">
+                  <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs()" 
+                  (change)="cambioInput = true; updateOutputs()" class="form-control">
 
                   <span *ngIf="qubits !== null && (qubits < 1 || qubits > 24)" class="error-text">
-
                       Must be between 1 and 24
-
                   </span>
-
               </div>
 
- 
-
               <div class="form-group">
-
                 <div class="label-container">
-
                   <label for="numberOfQubits">Select an algorithm:</label>
-
                 </div>
 
                 <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event); reloadChange(); removeSelectedProjectIdAlgorithm();">
-
                   <option value="grover">Grover</option>
-
                   <option value="grenoble">Grenoble</option>
-
                   <option value="originalGR">Original Grover & Rudolph</option>
-
-                  <!--<option value="hamming">Hamming (this algorithm is under development and test)</option>-->
-
                 </select>             
 
               </div>
@@ -107,33 +89,35 @@
                 <div class="label-container">
                     <label for="projectSelector">Load Project:</label>
                 </div>
-                <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
+                <div style="display: flex; align-items: center;">
+                  <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
                     <option value="" disabled selected>Select project</option>
                     <option *ngFor="let project of projectList" [value]="project.id">
                         {{ project.name }}
                     </option>
-                </select>
+                  </select>
+                  <button *ngIf="selectedProjectId"
+                    (click)="openDeleteProjectModal()" 
+                    class="btn-delete-project" 
+                    title="Delete Selected Project"
+                    style="margin-left: 10px; padding: 5px 8px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                
+                
               </div>
 
               <div class="matrixTitle-container" style="margin-top: 25px;">
-
-                <!-- <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button> -->
-
                 <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
-
                 <button class="btn-reset" style="margin-top: 10px;" *ngIf="mostrarTabla" (click)="resetValues()">
-
                     <i class="fa fa-refresh" title="Reset all"></i>
-
                 </button>
-
             </div>
-
           </div>
-
+        </div>
       </div>
-
-  </div>
+    </div>
 
  
 
@@ -148,11 +132,31 @@
 
         <h2 style="margin: 10px 0;">Table</h2>
 
-        <div style="width: 150px; display: flex; justify-content: flex-end;">        
-            <button (click)="openSaveProjectModal()" 
+        <div style="display: flex; justify-content: flex-end;">        
+            <!-- <button (click)="openSaveProjectModal()" 
                 class="btn-confirm-save" 
                 *ngIf="userEmail && userToken">
                 <i class="fas fa-save"></i> Save project
+            </button> -->
+            <button *ngIf="!selectedProjectId"
+                (click)="openSaveOrSaveAsNewModal(false)" 
+                class="btn-confirm-save">
+                <i class="fas fa-save"></i> Save
+            </button>
+            
+            <button 
+                *ngIf="selectedProjectId && isCircuitModified"
+                (click)="openApplyChangesModal()" 
+                class="btn-confirm-save update-btn">
+                <i class="fas fa-pen"></i> Update
+            </button>
+            
+            <button 
+                *ngIf="selectedProjectId"
+                (click)="openSaveOrSaveAsNewModal(true)" 
+                class="btn-confirm-save"
+                style="margin-left: 5px;">
+                <i class="fas fa-save"></i> Save as new
             </button>
         </div>
     </div>
@@ -200,9 +204,9 @@
 
                     </select>
 
-                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel">Parallel circuit
+                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel" (change)="saveState()">Parallel circuit
 
-                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits">Split in several circuits
+                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits" (change)="saveState()">Split in several circuits
 
                   </div>
 
@@ -216,7 +220,7 @@
 
                       <input id="angle" type="number" min="0" max="3.1416" step="0.0625"
 
-                             [(ngModel)]="physicalAngle">(radians)
+                             [(ngModel)]="physicalAngle" (change)="saveState()">(radians)
 
                     </div>
 
@@ -499,7 +503,7 @@
 
                 [class.grover-row]="isGroverOption()"
 
-                (click)="changeRowValue(currentOffset + rowIndex, $event)">
+                (click)="changeRowValue(currentOffset + rowIndex, $event);">
 
               <td>
 
@@ -515,7 +519,7 @@
 
                       [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
 
-                      (change)="setFreq($event, currentOffset + rowIndex)">
+                      (change)="setFreq($event, currentOffset + rowIndex); saveState()">
 
                 <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset + rowIndex) }} </label>
 
@@ -523,15 +527,15 @@
 
               <td *ngIf="!isGroverOption()">
 
-                <span>{{ expectedFrequencies.getRelativeFreq(currentOffset + rowIndex, 2) }}%</span>
+                <span (change)="saveState()">{{ expectedFrequencies.getRelativeFreq(currentOffset + rowIndex, 2) }}%</span>
 
               </td>
 
               <td *ngIf="isGroverOption()">
 
-                <span *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
+                <span (change)="saveState()" *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
 
-                <span *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
+                <span (change)="saveState()" *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
 
               </td>
 
@@ -1334,6 +1338,40 @@
     </div>
   </div>
 
-  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
+  <div *ngIf="showDeleteProjectModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+              <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
+              <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to delete the project <strong>"{{ circuitName }}"</strong>?</p>
+              <p>This action cannot be undone.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: #008b95;">
+              <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
+              <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ circuitName }}"</strong> with the current circuit configuration?</p>
+              <p>This will permanently overwrite the previously saved version.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)" [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
 
 </body>
