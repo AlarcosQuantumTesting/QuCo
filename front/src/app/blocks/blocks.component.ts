@@ -1078,13 +1078,19 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.updateExpectedFrequencies();
     this.validarDatos(); 
     this.notBuilt = false;
+
+    this.lastSavedCircuitState = ''; 
+    this.isCircuitModified = false;
     
     //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
     setTimeout(() => {
+
+        this.updateExpectedFrequencies();
+
         this.lastSavedCircuitState = this.captureCircuitState(); 
         this.isCircuitModified = false;
         
-        this.updateExpectedFrequencies();
+        
         this.validarDatos(); 
         this.notBuilt = false;
         
@@ -1140,7 +1146,18 @@ export class BlocksComponent extends EvolutionaryComponent {
         popSize: config.populationSize,
         desiredError: this.pc.desiredError,
         
-        currentNotes: this.captureNotesState()
+        currentNotes: this.captureNotesState(),
+
+        massiveMutationPolicy: {
+            fallsThreshold: this.pc.massiveMutationPolicy.fallsThreshold,
+            applicableWhenBestFitnessFalls: this.pc.massiveMutationPolicy.applicableWhenBestFitnessFalls,
+            applicableWhenMeanFitnessFalls: this.pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls,
+            fitnessPercentage: this.pc.massiveMutationPolicy.fitnessPercentage,
+            maxConsecutiveApplications: this.pc.massiveMutationPolicy.maxConsecutiveApplications,
+        },
+
+        //deleteFiles: this.pc.inputConfiguration!.deleteFiles,
+        numberOfBlocks: this.pc.inputConfiguration!.blockCircuit.numberOfBlocks
     };
     return JSON.stringify(state);
   }
