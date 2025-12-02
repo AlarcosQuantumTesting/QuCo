@@ -53,6 +53,13 @@ export class ElongingComponent extends EvolutionaryComponent {
   tipoLocal: string = 'quco_genetic';
   storedNotesStr = localStorage.getItem('project_notes');
 
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
+
   constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
      public transpileService: TranspileService, private projectService: ProjectService) {
     super(evolutionaryService, "elonging")
@@ -616,7 +623,15 @@ export class ElongingComponent extends EvolutionaryComponent {
         return;
     }
     
-    const idCircuit = crypto.randomUUID();
+    //const idCircuit = crypto.randomUUID();
+    let idCircuit: string;
+
+    if (this.applyChanges) {
+      idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
+    } else {
+      idCircuit = crypto.randomUUID();
+    }
 
     /*let quirkCircuitData: any = {};
     if (this.quirkURL) {
@@ -736,6 +751,8 @@ export class ElongingComponent extends EvolutionaryComponent {
           this.mensajeTemporal2 = '';
         }, 1000);
         this.loadProjectNames();
+        this.selectedProjectId = idCircuit;
+        this.isCircuitModified = false;
       },
       error: (error: any) => {
         console.error('Errorl saving project: ', error);
@@ -887,11 +904,22 @@ export class ElongingComponent extends EvolutionaryComponent {
     
     this.notBuilt = false;
     
-    //alert(`Proyecto "${project.name}" cargado con éxito.`);
-    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
     setTimeout(() => {
       this.mensajeTemporal2 = '';
-    }, 1000);
+    }, 1000);*/
+
+    setTimeout(() => {
+        this.updateExpectedFrequencies();
+        this.validarDatos(); 
+        this.notBuilt = false;
+
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
+    }, 200);
   }
 
   getAuthRequestBody(projectId?: string): any {
@@ -909,5 +937,148 @@ export class ElongingComponent extends EvolutionaryComponent {
     return body;
   }
   
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const tipoLocal = 'quco_' + this.nombreComponente.toLowerCase();
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
+            .map((n: any) => ({ title: n.title, text: n.text, type: n.type }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const config = this.pc.inputConfiguration;
+    const selectedGateNames = this.gates
+        .filter(g => g.selected)
+        .map(g => g.name)
+        .sort()
+        .join(',');
+    
+    const state = {
+        qubits: config.qubits,
+        minColumns: config.minNumberOfColumns,
+        maxColumns: config.maxNumberOfColumns,
+        initPopSize: config.populationSize,
+        maxPopSize: config.maxPopulationSize,
+        desiredError: this.pc.desiredError,
+        startWithH: config.startWithH,
+        outputs: config.outputs.map(o => o ? 1 : 0).join(','),
+        
+        frequencies: JSON.stringify(config.expectedFrequencies), 
+
+        prob1Q: this.pc.probOf1QubitGates,
+        prob2Q: this.pc.probOf2QubitGates,
+        prob3Q: this.pc.probOf3QubitGates,
+        probNQ: this.pc.probOfNQubitGates,
+
+        gates: selectedGateNames,
+        template: this.manager.selectedTemplate.fileName,
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.selectedProjectId || !this.lastSavedCircuitState) {
+        this.isCircuitModified = false;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            localStorage.removeItem('selectedProjectId_genetic');
+
+            this.reload(); 
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true; 
+    this.guardarProyecto();
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    this.applyChanges = !isNew && !!this.selectedProjectId; 
+    
+    if (isNew || !this.selectedProjectId) {
+        this.circuitName = this.circuitName || `New ${this.nombreComponente} Project`;
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
+  }
 
 }
