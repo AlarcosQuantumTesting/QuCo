@@ -146,6 +146,7 @@ export class MatrixesComponent implements AfterViewInit  {
 
   projects: StoredProject[] = [];
   selectedProjectId: string = '';
+  selectedProjectName: string = '';
 
   projectList: ProjectListItem[] = []; 
   
@@ -158,6 +159,13 @@ export class MatrixesComponent implements AfterViewInit  {
 
   nombreComponente: string = 'Matrices';
   tipoLocal: string = 'quco_matrices';
+
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
 
   constructor(private quirkService : QuirkService, private qiskitService : QiskitService, private fillingService : FillingService,
     public sanitizer : DomSanitizer, public manager : ManagerService, public service : ExpressionsService, public transpileService: TranspileService, 
@@ -173,8 +181,9 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.userExpressions.push(this.currentUserExpression)
 
-    // Limpiar el campo de texto
     this.currentUserExpression = "";
+
+    this.saveState();
   }
 
   openTextArea(c : MatrixesComponent, e : Event, title : string, elementIndex? : number) {
@@ -202,11 +211,9 @@ export class MatrixesComponent implements AfterViewInit  {
         this.dialogo.style.position = "relative";
         this.dialogo.style.border = "2px solid #007d86";
 
-        // Crear y configurar el título
         let label = document.createElement("strong")
         label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
 
-        // Crear y configurar la "X" para cerrar el modal
         let a = document.createElement("u")
         a.innerHTML = "&times;"
         a.style.fontSize = "24px";
@@ -222,13 +229,11 @@ export class MatrixesComponent implements AfterViewInit  {
             selfCaja.focus()
         }
 
-        // Agregar el título y la "X" al modal
         this.dialogo.appendChild(label)
         this.dialogo.appendChild(a)
 
         this.dialogo.appendChild(document.createElement("br"))
 
-        // Crear y configurar el textarea
         textArea = document.createElement("textarea");
         textArea.style.width = "95%";
         textArea.style.height = "150px";
@@ -250,7 +255,6 @@ export class MatrixesComponent implements AfterViewInit  {
             textArea.value = "q3 = q0\nq4 = q1\nq5 = (q0&&q1)^q2\n"
         }
 
-        // Crear y configurar el botón "Add"
         let addButton = document.createElement("button");
         addButton.innerHTML = "Add";
         addButton.style.marginTop = "10px";
@@ -296,7 +300,8 @@ export class MatrixesComponent implements AfterViewInit  {
 
 
   removeUserExpression(index : number) {
-    this.userExpressions.splice(index, 1)
+    this.userExpressions.splice(index, 1);
+    this.saveState();
   }
 
   fillTableWithUserExpressions() {
@@ -316,10 +321,8 @@ export class MatrixesComponent implements AfterViewInit  {
     const maxQubit = this.inputQubits + this.outputQubits - 1;
 
 
-    // Calculamos el valor de qn
     const qnValue = `q${this.inputQubits + this.outputQubits - 1}`;
 
-    // Reemplazamos todas las ocurrencias de "qn" en cada expresión
     const processedExpressions = this.userExpressions.map(expr =>
         expr.replace(/\bqn\b/g, qnValue)
     );
@@ -330,12 +333,10 @@ export class MatrixesComponent implements AfterViewInit  {
     for (const expr of processedExpressions) {
         let match;
         while ((match = qubitRegex.exec(expr)) !== null) {
-            const qubitNumber = parseInt(match[1], 10); // Extrae el número de qubit
+            const qubitNumber = parseInt(match[1], 10);
 
-            // Comprueba si está fuera del rango permitido
             if (qubitNumber < 0 || qubitNumber > maxQubit) {
                 isValid = false;
-                // alert(`Invalid qubit: q${qubitNumber}. Allowed range: q0 to q${maxQubit}`);
                 this.mensajeTemporal = `Invalid qubit: q${qubitNumber}. Allowed range: q0 to q${maxQubit}`;
                 setTimeout(() => {
                     this.mensajeTemporal = '';
@@ -370,6 +371,8 @@ export class MatrixesComponent implements AfterViewInit  {
         }, 2000);
       }
     }
+
+    this.saveState();
   }
 
   tryFill(index : number) {
@@ -385,6 +388,8 @@ export class MatrixesComponent implements AfterViewInit  {
     localStorage.setItem('rows', JSON.stringify(this.rows));
 
     this.javaExamples[index].attempted = true;
+
+    this.saveState();
   }
 
   private reset() {
@@ -727,6 +732,8 @@ export class MatrixesComponent implements AfterViewInit  {
     for (let i=this.inputQubits; i<row.length; i++)
       r = r + row[i] * Math.pow(2, cont--)
     this.decimals![rowIndex] = r
+
+    this.saveState();
   }
 
   updateOutputQubits(rowIndex : number) {
@@ -738,6 +745,8 @@ export class MatrixesComponent implements AfterViewInit  {
     for (let i = this.inputQubits; i<this.inputQubits + this.outputQubits; i++) {
       this.matrix![rowIndex][i] = parseInt(s[i-this.inputQubits])
     }
+
+    this.saveState();
   }
 
   isInvalid: boolean = true;
@@ -751,8 +760,10 @@ export class MatrixesComponent implements AfterViewInit  {
     this.loadProjectNames();
 
     const savedProjectId = localStorage.getItem('selectedProjectId_matrices');
-    if (savedProjectId && this.userEmail && this.userToken) {
+    const savedProjectName = localStorage.getItem('selectedProjectName_matrices');
+    if (savedProjectId && this.userEmail && this.userToken && savedProjectName) {
         this.selectedProjectId = savedProjectId;
+        this.selectedProjectName = savedProjectName;
         //this.onProjectSelected();
     }
 
@@ -775,12 +786,10 @@ export class MatrixesComponent implements AfterViewInit  {
     });
     
 
-    // Recuperar valores desde localStorage con valores por defecto
     this.inputQubits = JSON.parse(localStorage.getItem('inputQubits') || '3');
     this.outputQubits = JSON.parse(localStorage.getItem('outputQubits') || '3');
 
 
-    // Verificar si hay datos guardados
     const savedInputQubits = localStorage.getItem('inputQubits');
     const savedOutputQubits = localStorage.getItem('outputQubits');
     const savedUserExpressions = localStorage.getItem('processedExpressions');
@@ -810,8 +819,14 @@ export class MatrixesComponent implements AfterViewInit  {
         this.projectLoaded = false;
         localStorage.setItem('projectLoadedMatrices', 'false');
       }, 1000);
+      this.selectedProjectId = localStorage.getItem('selectedProjectId_matrices') || '';
+      
+      //this.lastSavedCircuitState = this.captureCircuitState();
     }
 
+    //this.lastSavedCircuitState = this.captureCircuitState();
+
+    console.log("last saved: ", this.lastSavedCircuitState);
   }
 
   validateInputs() {
@@ -833,21 +848,16 @@ export class MatrixesComponent implements AfterViewInit  {
       return;
     }
 
-    // Si todo está correcto
     this.error = '';
     this.isInvalid = false;
   }
 
   onTemplateChange(selected: CodeTemplate) {
-    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "");
+    this.saveState();
   }
 
-
-
-
-
   goToTable(): void {
-    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
     const table = document.getElementById('myTable');
     if (table) {
       table.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -944,6 +954,8 @@ export class MatrixesComponent implements AfterViewInit  {
     // this.goToSpecifications();
     this.goToTable();
     this.clearExpressions();
+
+    this.saveState()
   }
 
 
@@ -1600,13 +1612,23 @@ export class MatrixesComponent implements AfterViewInit  {
 
   guardarProyecto(): void {
 
+    //const idCircuit = crypto.randomUUID();
+
+    let idCircuit: string;
+    
+    if (this.applyChanges) {
+        idCircuit = this.selectedProjectId;
+        this.circuitName = this.selectedProjectName;
+        this.applyChanges = false;
+    } else {
+        idCircuit = crypto.randomUUID();
+    }
+
     if (!this.circuitName || this.circuitName.trim().length === 0) {
         console.error("No se puede guardar: el nombre del circuito es obligatorio.");
         this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
         return;
     }
-
-    const idCircuit = crypto.randomUUID();
 
     let interestingRows = 0; 
     const positionValue: { [key: number]: number } = {};
@@ -1735,7 +1757,12 @@ export class MatrixesComponent implements AfterViewInit  {
     
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
-        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+        localStorage.setItem('selectedProjectId_matrices', idCircuit);
+        localStorage.setItem('selectedProjectName_matrices', this.circuitName);
+
         this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
         setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
         this.loadProjectNames();
@@ -1814,6 +1841,9 @@ export class MatrixesComponent implements AfterViewInit  {
         return;
     }
 
+    this.lastSavedCircuitState = ''; 
+    this.isCircuitModified = false;
+
     const qp = project.qProgram;
 
     this.circuitName = project.name; 
@@ -1821,9 +1851,11 @@ export class MatrixesComponent implements AfterViewInit  {
     this.outputQubits = qp.outputQubits.length; 
 
     localStorage.setItem('selectedProjectId_matrices', project.id);
+    localStorage.setItem('selectedProjectName_matrices', project.name);
 
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
     this.fillTableWithUserExpressions();
+    this.saveInLocal();
     
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
@@ -1876,13 +1908,183 @@ export class MatrixesComponent implements AfterViewInit  {
     //alert(`Proyecto "${project.name}" cargado con éxito.`);
 
     //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
-    this.projectLoaded = true;
+    /*this.projectLoaded = true;
     localStorage.setItem('projectLoadedMatrices', 'true');
     
 
     setTimeout(() => {
       location.reload();
-    }, 100);
+    }, 100);*/
+
+    setTimeout(() => {
+        this.selectedProjectId = project.id;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+        localStorage.setItem('selectedProjectId_matrices', project.id);
+        localStorage.setItem('selectedProjectName_matrices', project.name);
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
+        this.projectLoaded = true;
+        localStorage.setItem('projectLoadedMatrices', 'true');
+        setTimeout(() => {
+          location.reload();
+        }, 100);
+    }, 200);
+
+  }
+
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === this.tipoLocal.toLowerCase())
+            .map((n: any) => ({ title: n.title, text: n.text }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const state = {
+        inputQubits: this.inputQubits,
+        outputQubits: this.outputQubits,
+        domain: this.domain,
+        reduceQuirk: this.reduceQuirk,
+        reduceQuiskit: this.reduceQuiskit,
+        template: this.manager.selectedTemplate.fileName,
+
+        matrix: JSON.stringify(this.matrix), 
+        expressions: this.userExpressions.slice().sort().join('|'),
+        qiskitCodeSnippet: this.qiskitCode ? this.qiskitCode.substring(0, 100) : '',
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    /*if (!this.selectedProjectId || !this.lastSavedCircuitState) {
+        this.isCircuitModified = false;
+        return;
+    }*/
+    if (!this.selectedProjectId) {
+        this.isCircuitModified = false;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    this.saveInLocal();
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            localStorage.removeItem('selectedProjectId_matrices');
+            localStorage.removeItem('selectedProjectName_matrices');
+
+            this.resetValues();
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true; 
+    this.guardarProyecto();
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    this.applyChanges = !isNew && !!this.selectedProjectId;
+    
+    if (isNew || !this.selectedProjectId) {
+        this.circuitName = this.circuitName || `New ${this.nombreComponente} Project`;
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
+  }
+
+  saveInLocal(): void {
+    localStorage.setItem('matrixMatrixes', JSON.stringify(this.matrix));
+    localStorage.setItem('inputQubits', JSON.stringify(this.inputQubits));
+    localStorage.setItem('outputQubits', JSON.stringify(this.outputQubits));
+    
+    localStorage.setItem('processedExpressions', JSON.stringify(this.userExpressions));
+    
+    localStorage.setItem('reduceQuirk', JSON.stringify(this.reduceQuirk));
+    localStorage.setItem('reduceQuiskit', JSON.stringify(this.reduceQuiskit));
+    localStorage.setItem('domain', this.domain);
+    
+    if (this.manager.selectedTemplate) {
+        localStorage.setItem('matrixesSelectedTemplateFileName', this.manager.selectedTemplate.fileName);
+    }
+  }
+
+  onConfigurationChange() {
+    this.saveState();
   }
 }
 
