@@ -21,14 +21,17 @@ import { ModalDescargaComponent } from './modal-descarga/modal-descarga.componen
 import { RunCodeComponent } from "./run-code/run-code.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 
-const appRoutes : Routes = [
-  { path : 'matrixes', component : MatrixesComponent },
-  { path : 'elonging', component : ElongingComponent },
-  { path : 'blocks', component : BlocksComponent },
-  { path : 'home', component : HomeComponent },
+const appRoutes: Routes = [
+  { path: 'matrixes', component: MatrixesComponent },
+  { path: 'elonging', component: ElongingComponent },
+  { path: 'blocks', component: BlocksComponent },
+  { path: 'home', component: HomeComponent },
   // { path : 'quco', component : AppComponent }
-  { path : '', redirectTo : '/', pathMatch : 'full'}
+  { path: '', redirectTo: '/', pathMatch: 'full' }
 ]
+
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -48,14 +51,15 @@ const appRoutes : Routes = [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule,
     DragDropModule,
     RouterModule.forRoot(appRoutes),
     ModalDescargaComponent,
     RunCodeComponent,
     NotesModalComponent
-],
-  providers: [ ],
+  ],
+  providers: [
+    provideHttpClient(withInterceptors([authInterceptor]))
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

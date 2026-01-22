@@ -1,6 +1,8 @@
 import { Component, AfterViewInit, ElementRef, Renderer2, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,15 +15,16 @@ export class AppComponent implements AfterViewInit, OnInit {
   menuAbierto = false;
   mostrarInicio = true;
   tokenStored: string | null = localStorage.getItem('userToken');
-  URL_BASE = "http://localhost:80";
+  URL_BASE = "http://localhost:8081";
+  //URL_BASE = "https://c9x3lxf0-8080.uks1.devtunnels.ms";
 
   ngOnInit(): void {
     this.loadSettings();
     this.checkTokenValidity();
-    
+
   }
 
-  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2) {
+  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         // this.mostrarInicio = this.router.url === '/quco';
@@ -186,7 +189,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.containerColor = '#e7eeed00';
     this.sidebarColor = '#008b95';
     this.grayscale = false;
-    
+
 
     this.renderer.setStyle(document.body, 'background-color', this.bgColor);
     document.querySelectorAll('.content').forEach(el => {
@@ -199,45 +202,45 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.saveSettings();
   }
 
-    zoomLevel = 1;
-    minZoom = 0.8;
-    maxZoom = 1.2;
-    step = 0.1;
+  zoomLevel = 1;
+  minZoom = 0.8;
+  maxZoom = 1.2;
+  step = 0.1;
 
-    updateZoom() {
-      document.body.style.zoom = this.zoomLevel.toString();
-    }
+  updateZoom() {
+    document.body.style.zoom = this.zoomLevel.toString();
+  }
 
-    increaseZoom() {
-      if (this.zoomLevel < this.maxZoom) {
-        this.zoomLevel += this.step;
-        this.updateZoom();
-        this.saveSettings();
-      }
-    }
-
-    decreaseZoom() {
-      if (this.zoomLevel > this.minZoom) {
-        this.zoomLevel -= this.step;
-        this.updateZoom();
-        this.saveSettings();
-      }
-    }
-
-    isMaxZoom(): boolean {
-      return this.zoomLevel >= this.maxZoom;
-    }
-
-    isMinZoom(): boolean {
-      return this.zoomLevel <= this.minZoom;
-    }
-
-
-    resetZoom() {
-      this.zoomLevel = 1;
+  increaseZoom() {
+    if (this.zoomLevel < this.maxZoom) {
+      this.zoomLevel += this.step;
       this.updateZoom();
       this.saveSettings();
     }
+  }
+
+  decreaseZoom() {
+    if (this.zoomLevel > this.minZoom) {
+      this.zoomLevel -= this.step;
+      this.updateZoom();
+      this.saveSettings();
+    }
+  }
+
+  isMaxZoom(): boolean {
+    return this.zoomLevel >= this.maxZoom;
+  }
+
+  isMinZoom(): boolean {
+    return this.zoomLevel <= this.minZoom;
+  }
+
+
+  resetZoom() {
+    this.zoomLevel = 1;
+    this.updateZoom();
+    this.saveSettings();
+  }
 
 
   mostrarModalLogin = false;
@@ -273,7 +276,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   mensajeExito: string = '';
   mostrarMensajeExito: boolean = false;
   passwordMismatchError: string = '';
-  mensajeError: string = ''; 
+  mensajeError: string = '';
   mostrarMensajeError: boolean = false;
 
   abrirRegistro(): void {
@@ -282,15 +285,15 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   isRegisterDisabled(): boolean {
-      return !this.emailRegistro || 
-            !this.passwordRegistro || 
-            !this.passwordConfirmacion || 
-            (this.passwordRegistro !== this.passwordConfirmacion);
+    return !this.emailRegistro ||
+      !this.passwordRegistro ||
+      !this.passwordConfirmacion ||
+      (this.passwordRegistro !== this.passwordConfirmacion);
   }
 
   get passwordMismatchMessage(): string {
     if (this.passwordConfirmacion && this.passwordRegistro !== this.passwordConfirmacion) {
-        return "Passwords do not match.";
+      return "Passwords do not match.";
     }
     return '';
   }
@@ -309,47 +312,46 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.mostrarMensajeExito = false;
 
     if (this.passwordRegistro !== this.passwordConfirmacion) {
-        this.errorRegistro = 'Las contraseñas no coinciden.';
-        return false;
+      this.errorRegistro = 'Las contraseñas no coinciden.';
+      return false;
     }
 
-      const userData = {
-        email: this.emailRegistro,
-        pwd: this.passwordRegistro
-      };
+    const userData = {
+      email: this.emailRegistro,
+      pwd: this.passwordRegistro
+    };
 
-    let body =  JSON.stringify(userData)
+    let body = JSON.stringify(userData)
     console.log("Intentando iniciar sesión con:", body);
 
-      try {
-          const response = await fetch(`${this.URL_BASE}/users/create`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(userData)
-          });
+    try {
+      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/create`, userData, {
+        observe: 'response',
+        responseType: 'text'
+      }));
 
-          if (response.ok) {
-              console.log("Usuario registrado con éxito.");
-              this.mostrarModalRegistro = false;
-              this.mensajeExito = `Registered successfully! You can now log in, ${this.emailRegistro}!`; 
-              this.mostrarMensajeExito = true;
-              this.limpiarMensajeExito(2000);
-              return true;
-          } else if (response.status === 409) {
-              const error = await response.text();
-              throw new Error(`Error de registro: ${error}`);
-          } else {
-              throw new Error(`Error al registrar. Estado: ${response.status}`);
-          }
-      } catch (error) {
-          this.mensajeError = `User registration failed. Please try again.`; 
-          this.mostrarMensajeError = true;
-          this.limpiarMensajeExito(2000);
-          console.error("Fallo en la comunicación:", error);
-          return false;
+      if (response.ok) {
+        console.log("Usuario registrado con éxito.");
+        this.mostrarModalRegistro = false;
+        this.mensajeExito = `Registered successfully! You can now log in, ${this.emailRegistro}!`;
+        this.mostrarMensajeExito = true;
+        this.limpiarMensajeExito(2000);
+        return true;
+      } else {
+        throw new Error(`Error al registrar. Estado: ${response.status}`);
       }
+    } catch (error: any) {
+      if (error.status === 409) {
+        const errorMessage = error.error;
+        console.error("Error de registro:", errorMessage);
+      }
+
+      this.mensajeError = `User registration failed. Please try again.`;
+      this.mostrarMensajeError = true;
+      this.limpiarMensajeExito(2000);
+      console.error("Fallo en la comunicación:", error);
+      return false;
+    }
   }
 
 
@@ -358,83 +360,99 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.mostrarMensajeExito = false;
 
     const loginData = {
-        email: this.emailUsuario,
-        pwd: this.passwordUsuario
+      email: this.emailUsuario,
+      pwd: this.passwordUsuario
     };
 
     try {
-        const response = await fetch(`${this.URL_BASE}/users/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginData)
-        });
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+      console.log("Request headers:", headers);
 
-        if (response.ok) {
-            const token = await response.text(); 
-            console.log("Login exitoso. Token recibido:", token);
-            localStorage.setItem('userToken', token);
-            this.mostrarModalLogin = false;
-            this.mensajeExito = `Logged successfully! Welcome, ${this.emailUsuario}!`;
-            localStorage.setItem('userEmail', this.emailUsuario);
-            this.mostrarMensajeExito = true;
-            this.limpiarMensajeExito(2000);
+      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/login`, loginData, {
+        headers: headers,
+        observe: 'response',
+        responseType: 'text'
+      }));
 
-            location.reload();
-            return token;
-        } else if (response.status === 403) {
-            throw new Error("Credenciales inválidas (email o contraseña incorrectos).");
+      console.log("Response headers:");
+      response.headers.keys().forEach(key => console.log(`${key}: ${response.headers.get(key)}`));
+
+
+      if (response.ok) {
+        const token = response.body;
+        if (token) {
+          console.log("Login exitoso. Token recibido:", token);
+          localStorage.setItem('userToken', token);
+          this.mostrarModalLogin = false;
+          this.mensajeExito = `Logged successfully! Welcome, ${this.emailUsuario}!`;
+          localStorage.setItem('userEmail', this.emailUsuario);
+          this.mostrarMensajeExito = true;
+          this.limpiarMensajeExito(2000);
+
+          //location.reload();
+          return token;
         } else {
-            throw new Error(`Error al iniciar sesión. Estado: ${response.status}`);
+          throw new Error("Token vacío recibido.");
         }
-    } catch (error) {
-        console.error("Fallo en la comunicación o credenciales:", error);
-        this.mensajeError = `User log in failed. Please try again.`; 
-        this.mostrarMensajeError = true;
-        this.limpiarMensajeExito(2000);
-        return null;
+
+      } else {
+        throw new Error(`Error al iniciar sesión. Estado: ${response.status}`);
+      }
+
+    } catch (error: any) {
+      if (error.status === 403) {
+        console.error("Credenciales inválidas (email o contraseña incorrectos).");
+      }
+      console.error("Fallo en la comunicación o credenciales:", error);
+      this.mensajeError = `User log in failed. Please try again.`;
+      this.mostrarMensajeError = true;
+      this.limpiarMensajeExito(2000);
+      return null;
     }
   }
 
 
   async obtenerEmailUsuario(token: string) {
     try {
-        const response = await fetch(`${this.URL_BASE}/tokens/getUser`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token: token })
-        });
-        
-        if (response.ok) {
-            const email = await response.text(); 
-            console.log("Email del usuario:", email);
-            localStorage.setItem('email', email);
-            return email;
+      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/getUser`, { token: token }, {
+        observe: 'response',
+        responseType: 'text'
+      }));
+
+      if (response.ok) {
+        const email = response.body;
+        if (email) {
+          console.log("Email del usuario:", email);
+          localStorage.setItem('email', email);
+          return email;
         } else {
-          this.mensajeError = `Session expired. Please log in again.`; 
-          this.mostrarMensajeError = true;
-          this.limpiarMensajeExito(2000);
-          throw new Error("Token inválido o expirado.");
+          throw new Error("Email vacío recibido.");
         }
-    } catch (error) {
-      console.log("Buscando email con token:", token);
-        console.error("Error al obtener el usuario:", error);
-        this.mensajeError = `Session expired. Please log in again.`; 
+
+      } else {
+        this.mensajeError = `Session expired. Please log in again.`;
         this.mostrarMensajeError = true;
         this.limpiarMensajeExito(2000);
-        return null;
+        throw new Error("Token inválido o expirado.");
+      }
+    } catch (error) {
+      console.log("Buscando email con token:", token);
+      console.error("Error al obtener el usuario:", error);
+      this.mensajeError = `Session expired. Please log in again.`;
+      this.mostrarMensajeError = true;
+      this.limpiarMensajeExito(2000);
+      return null;
     }
   }
 
   limpiarMensajeExito(duration: number = 3000): void {
     setTimeout(() => {
-        this.mostrarMensajeExito = false;
-        this.mensajeExito = '';
-        this.mostrarMensajeError = false;
-        this.mensajeError = '';
+      this.mostrarMensajeExito = false;
+      this.mensajeExito = '';
+      this.mostrarMensajeError = false;
+      this.mensajeError = '';
     }, duration);
   }
 
@@ -447,16 +465,16 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   cerrarSesion(): void {
     if (this.isLoggedIn()) {
-        this.mostrarModalLogoutConfirmacion = true;
+      this.mostrarModalLogoutConfirmacion = true;
     } else {
-        console.log("No hay sesión activa para cerrar.");
+      console.log("No hay sesión activa para cerrar.");
     }
   }
 
   confirmarCerrarSesion(): void {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
-    
+
     localStorage.removeItem('selectedProjectId_blocks');
     localStorage.removeItem('selectedProjectId_editor');
     localStorage.removeItem('selectedProjectId_genetic');
@@ -464,19 +482,19 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('selectedProjectId_matrices');
 
     console.log("Sesión cerrada.");
-    
+
     this.mostrarModalLogoutConfirmacion = false;
-    
-    this.mensajeExito = `Logged out successfully! See you soon!`; 
+
+    this.mensajeExito = `Logged out successfully! See you soon!`;
     this.mostrarMensajeExito = true;
-    this.limpiarMensajeExito(3000); 
+    this.limpiarMensajeExito(3000);
 
     location.reload();
 
   }
 
   cerrarModalLogoutConfirmacion(): void {
-      this.mostrarModalLogoutConfirmacion = false;
+    this.mostrarModalLogoutConfirmacion = false;
   }
 
   errorToken: string = '';
@@ -488,66 +506,63 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.errorToken = '';
 
     if (!sToken || !email) {
-        return false;
+      return false;
     }
 
     const validationData = {
-        token: sToken,
-        email: email
+      token: sToken,
+      email: email
     };
 
     try {
-        const response = await fetch(`${this.URL_BASE}/tokens/validate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(validationData)
-        });
+      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/validate`, validationData, {
+        observe: 'response',
+        responseType: 'json'
+      }));
 
-        if (response.ok) {
-            console.log("Token válido y activo.");
-            return true;
-        } 
-        
-        if (response.status === 403) {
-          this.errorToken = "Session Expired. Please log in again.";
-          console.error("Token expirado o inválido.");
-          this.mensajeError = `Session expired. Please log in again.`; 
-          this.mostrarMensajeError = true;
-          this.limpiarMensajeExito(2000);
-            
-          localStorage.removeItem('userToken');
-          localStorage.removeItem('userEmail');
+      if (response.ok) {
+        console.log("Token válido y activo.");
+        return true;
+      }
 
-          localStorage.removeItem('selectedProjectId_blocks');
-          localStorage.removeItem('selectedProjectId_editor');
-          localStorage.removeItem('selectedProjectId_genetic');
-          localStorage.removeItem('selectedProjectId_algorithm');
-          localStorage.removeItem('selectedProjectId_matrices');
-          
-          location.reload();
+      return false;
 
-        } else if (response.status === 400) {
-             this.errorToken = "Authentication error.";
-             this.mensajeError = `Authentication error.`; 
-            this.mostrarMensajeError = true;
-            this.limpiarMensajeExito(2000);
-              console.error("Error de autenticación al validar el token.");
-        } else {
-            this.errorToken = `Server error during token validation. Status: ${response.status}`;
-            this.mensajeError = `Server error during token validation. Please try again.`; 
-            this.mostrarMensajeError = true;
-            this.limpiarMensajeExito(2000);
-            console.error("Error del servidor al validar el token. Estado:", response.status);
-        }
-        
-        return false;
-        
-    } catch (error) {
-        console.error("Fallo de conexión al validar token:", error);
-        this.errorToken = "Connection error. Could not verify session status.";
-        return false;
+    } catch (error: any) {
+      if (error.status === 403) {
+        this.errorToken = "Session Expired. Please log in again.";
+        console.error("Token expirado o inválido.");
+        this.mensajeError = `Session expired. Please log in again.`;
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
+
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userEmail');
+
+        localStorage.removeItem('selectedProjectId_blocks');
+        localStorage.removeItem('selectedProjectId_editor');
+        localStorage.removeItem('selectedProjectId_genetic');
+        localStorage.removeItem('selectedProjectId_algorithm');
+        localStorage.removeItem('selectedProjectId_matrices');
+
+        //location.reload();
+
+      } else if (error.status === 400) {
+        this.errorToken = "Authentication error.";
+        this.mensajeError = `Authentication error.`;
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
+        console.error("Error de autenticación al validar el token.");
+      } else {
+        this.errorToken = `Server error during token validation. Status: ${error.status}`;
+        this.mensajeError = `Server error during token validation. Please try again.`;
+        this.mostrarMensajeError = true;
+        this.limpiarMensajeExito(2000);
+        console.error("Error del servidor al validar el token. Estado:", error.status);
+      }
+
+      console.error("Fallo de conexión al validar token:", error);
+      this.errorToken = "Connection error. Could not verify session status.";
+      return false;
     }
   }
 
