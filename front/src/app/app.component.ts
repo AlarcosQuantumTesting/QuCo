@@ -15,7 +15,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   menuAbierto = false;
   mostrarInicio = true;
   tokenStored: string | null = localStorage.getItem('userToken');
-  URL_BASE = "http://localhost:8081";
+  //URL_BASE = "http://localhost:8081";
+  URL_BASE = "https://alarcosj.esi.uclm.es/qsauronback";
   //URL_BASE = "https://c9x3lxf0-8080.uks1.devtunnels.ms";
 
   ngOnInit(): void {
@@ -248,8 +249,11 @@ export class AppComponent implements AfterViewInit, OnInit {
   passwordUsuario: string = '';
   errorLogin: string = '';
 
+  // toggleLogin() {
+  //   this.mostrarModalLogin = true;
+  // }
   toggleLogin() {
-    this.mostrarModalLogin = true;
+    window.open('https://alarcosj.esi.uclm.es/qsauron', '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -392,6 +396,7 @@ export class AppComponent implements AfterViewInit, OnInit {
           this.limpiarMensajeExito(2000);
 
           //location.reload();
+          window.location.href = "https://alarcosj.esi.uclm.es/qsauron";
           return token;
         } else {
           throw new Error("Token vacío recibido.");
