@@ -511,7 +511,8 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.errorToken = '';
 
     if (!sToken || !email) {
-      return false;
+      console.log("No token in localStorage. Attempting to restore from cookie...");
+      return await this.restoreSessionFromCookie();
     }
 
     const validationData = {
@@ -533,42 +534,36 @@ export class AppComponent implements AfterViewInit, OnInit {
       return false;
 
     } catch (error: any) {
-      if (error.status === 403) {
-        this.errorToken = "Session Expired. Please log in again.";
-        console.error("Token expirado o inválido.");
-        this.mensajeError = `Session expired. Please log in again.`;
-        this.mostrarMensajeError = true;
-        this.limpiarMensajeExito(2000);
-
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('userEmail');
-
-        localStorage.removeItem('selectedProjectId_blocks');
-        localStorage.removeItem('selectedProjectId_editor');
-        localStorage.removeItem('selectedProjectId_genetic');
-        localStorage.removeItem('selectedProjectId_algorithm');
-        localStorage.removeItem('selectedProjectId_matrices');
-
-        //location.reload();
-
-      } else if (error.status === 400) {
-        this.errorToken = "Authentication error.";
-        this.mensajeError = `Authentication error.`;
-        this.mostrarMensajeError = true;
-        this.limpiarMensajeExito(2000);
-        console.error("Error de autenticación al validar el token.");
-      } else {
-        this.errorToken = `Server error during token validation. Status: ${error.status}`;
-        this.mensajeError = `Server error during token validation. Please try again.`;
-        this.mostrarMensajeError = true;
-        this.limpiarMensajeExito(2000);
-        console.error("Error del servidor al validar el token. Estado:", error.status);
-      }
-
-      console.error("Fallo de conexión al validar token:", error);
-      this.errorToken = "Connection error. Could not verify session status.";
-      return false;
+      console.log("Token validation failed or missing. Attempting to restore from cookie...");
+      return await this.restoreSessionFromCookie();
     }
   }
+
+  async restoreSessionFromCookie(): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/getUser`, {}, {
+        observe: 'response',
+        responseType: 'text'
+      }));
+
+      if (response.ok) {
+        const email = response.body;
+        if (email) {
+          console.log("Session restored from cookie. Email:", email);
+          localStorage.setItem('userEmail', email);
+          localStorage.setItem('userToken', 'COOKIE_SESSION');
+
+          this.mensajeExito = `Welcome back, ${email}!`;
+          this.mostrarMensajeExito = true;
+          this.limpiarMensajeExito(2000);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.log("Could not restore session from cookie:", error);
+    }
+    return false;
+  }
+
 
 }
