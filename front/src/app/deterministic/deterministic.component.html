@@ -6,668 +6,647 @@
 
 </head>
 
- 
+
 
 <body>
 
- 
 
-<div class="mensaje-temporal" *ngIf="mensajeTemporal">
 
-      {{ mensajeTemporal }}
+  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+
+    {{ mensajeTemporal }}
 
   </div>
   <div *ngIf="mensajeTemporal2" class="mensaje-temporal2">
     {{ mensajeTemporal2 }}
   </div>
 
- 
+
 
   <div class="titulo">
 
-      <h1>Algorithms
+    <h1>Algorithms
 
-        <br>
+      <br>
 
-        <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
+      <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
 
-      </h1>
+    </h1>
 
-      <span 
-          *ngIf="selectedProjectId && isCircuitModified" 
-          class="unsaved-indicator pulsing-dot"
-          title="Unsaved changes detected"
-          style="cursor: default !important;"
-      >
-        <i class="fas fa-circle"></i> 
-      </span>
+    <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
+      title="Unsaved changes detected" style="cursor: default !important;">
+      <i class="fas fa-circle"></i>
+    </span>
 
   </div>
 
- 
+
 
   <div class="container matrix-container">
     <div class="form-row">
-          <div class="section buildText">
-              <p>
-                  In this section you can build a table with the desired number of qubits.
-                  To do so, fill the number of qubits and press the button to build the matrix.
-                  The table shows only the first {{ maxRows}} rows.
-              </p>
+      <div class="section buildText">
+        <p>
+          In this section you can build a table with the desired number of qubits.
+          To do so, fill the number of qubits and press the button to build the matrix.
+          The table shows only the first {{ maxRows}} rows.
+        </p>
+      </div>
+
+      <div class="section qubitsContainer">
+        <div class="project-load-controls">
+          <div class="form-group">
+            <div class="label-container">
+              <label for="numberOfQubits">Number of qubits:</label>
+              <small class="input-hint">[1 - 24]</small>
+            </div>
+
+            <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs()"
+              (change)="cambioInput = true; updateOutputs()" class="form-control">
+
+            <span *ngIf="qubits !== null && (qubits < 1 || qubits > 24)" class="error-text">
+              Must be between 1 and 24
+            </span>
           </div>
 
-          <div class="section qubitsContainer">
-            <div class="project-load-controls">
-              <div class="form-group" >
-                  <div class="label-container">
-                      <label for="numberOfQubits">Number of  qubits:</label>
-                      <small class="input-hint">[1 - 24]</small>
-                  </div>
-
-                  <input id="numberOfQubits" type="number" min="1" max="24" [(ngModel)]="qubits" (input)="validateInputs()" 
-                  (change)="cambioInput = true; updateOutputs()" class="form-control">
-
-                  <span *ngIf="qubits !== null && (qubits < 1 || qubits > 24)" class="error-text">
-                      Must be between 1 and 24
-                  </span>
-              </div>
-
-              <div class="form-group">
-                <div class="label-container">
-                  <label for="numberOfQubits">Select an algorithm:</label>
-                </div>
-
-                <select [(ngModel)]="selectedAlgorithm" (ngModelChange)="onAlgorithmChange($event); reloadChange(); removeSelectedProjectIdAlgorithm();">
-                  <option value="grover">Grover</option>
-                  <option value="grenoble">Grenoble</option>
-                  <option value="originalGR">Original Grover & Rudolph</option>
-                </select>             
-
-              </div>
- 
-              <div class="form-group" *ngIf="projectList && projectList.length > 0">
-                <div class="label-container">
-                    <label for="projectSelector">Load Project:</label>
-                </div>
-                <div style="display: flex; align-items: center;">
-                  <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
-                    <option value="" disabled selected>Select project</option>
-                    <option *ngFor="let project of projectList" [value]="project.id">
-                        {{ project.name }}
-                    </option>
-                  </select>
-                  <button *ngIf="selectedProjectId"
-                    (click)="openDeleteProjectModal()" 
-                    class="btn-delete-project" 
-                    title="Delete Selected Project"
-                    style="margin-left: 10px; padding: 5px 8px;">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-                
-                
-              </div>
-
-              <div class="matrixTitle-container" style="margin-top: 25px;">
-                <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
-                <button class="btn-reset" style="margin-top: 10px;" *ngIf="mostrarTabla" (click)="resetValues()">
-                    <i class="fa fa-refresh" title="Reset all"></i>
-                </button>
+          <div class="form-group">
+            <div class="label-container">
+              <label for="numberOfQubits">Select an algorithm:</label>
             </div>
+
+            <select [(ngModel)]="selectedAlgorithm"
+              (ngModelChange)="onAlgorithmChange($event); reloadChange(); removeSelectedProjectIdAlgorithm();">
+              <option value="grover">Grover</option>
+              <option value="grenoble">Grenoble</option>
+              <option value="originalGR">Original Grover & Rudolph</option>
+            </select>
+
+          </div>
+
+          <div class="form-group" *ngIf="projectList && projectList.length > 0">
+            <div class="label-container">
+              <label for="projectSelector">Load Project:</label>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()"
+                class="form-control">
+                <option value="" disabled selected>Select project</option>
+                <option *ngFor="let project of projectList" [value]="project.id">
+                  {{ project.name }}
+                </option>
+              </select>
+              <button *ngIf="selectedProjectId" (click)="openDeleteProjectModal()" class="btn-delete-project"
+                title="Delete Selected Project" style="margin-left: 10px; padding: 5px 8px;">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+
+
+          </div>
+
+          <div class="matrixTitle-container" style="margin-top: 25px;">
+            <button (click)="buildMatrixActions()" [disabled]="isInvalid" class="btn btn-primary">Build</button>
+            <button class="btn-reset" style="margin-top: 10px;" *ngIf="mostrarTabla" (click)="resetValues()">
+              <i class="fa fa-refresh" title="Reset all"></i>
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
- 
 
-  <div *ngIf="mostrarTabla" style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%; padding: 0px; margin: 0px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
-            <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal" style="margin-left: 0px !important;">
-                <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
-                {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
-            </button>
-        </div>
 
-        <h2 style="margin: 10px 0;">Table</h2>
+  <div *ngIf="mostrarTabla"
+    style="display: flex; justify-content: center; align-items: center; position: relative; width: 100%; padding: 0px; margin: 0px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div style="display: flex; align-items: center; width: 200px; justify-content: flex-start;">
+        <button class="btn-confirm-save" (click)="mostrarNotasModal = !mostrarNotasModal"
+          style="margin-left: 0px !important;">
+          <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+          {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+        </button>
+      </div>
 
-        <div style="display: flex; justify-content: flex-end;">        
-            <!-- <button (click)="openSaveProjectModal()" 
+      <h2 style="margin: 10px 0;">Table</h2>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <!-- <button (click)="openSaveProjectModal()" 
                 class="btn-confirm-save" 
                 *ngIf="userEmail && userToken">
                 <i class="fas fa-save"></i> Save project
             </button> -->
-            <button *ngIf="!selectedProjectId"
-                (click)="openSaveOrSaveAsNewModal(false)" 
-                class="btn-confirm-save">
-                <i class="fas fa-save"></i> Save
-            </button>
-            
-            <button 
-                *ngIf="selectedProjectId && isCircuitModified"
-                (click)="openApplyChangesModal()" 
-                class="btn-confirm-save update-btn">
-                <i class="fas fa-pen"></i> Update
-            </button>
-            
-            <button 
-                *ngIf="selectedProjectId"
-                (click)="openSaveOrSaveAsNewModal(true)" 
-                class="btn-confirm-save"
-                style="margin-left: 5px;">
-                <i class="fas fa-save"></i> Save as new
-            </button>
-        </div>
+        <button *ngIf="!selectedProjectId" (click)="openSaveOrSaveAsNewModal(false)" class="btn-confirm-save">
+          <i class="fas fa-save"></i> Save
+        </button>
+
+        <button *ngIf="selectedProjectId && isCircuitModified" (click)="openApplyChangesModal()"
+          class="btn-confirm-save update-btn">
+          <i class="fas fa-pen"></i> Update
+        </button>
+
+        <button *ngIf="selectedProjectId" (click)="openSaveOrSaveAsNewModal(true)" class="btn-confirm-save"
+          style="margin-left: 5px;">
+          <i class="fas fa-save"></i> Save as new
+        </button>
+      </div>
     </div>
   </div>
 
- 
+
 
   <div *ngIf="mostrarTabla" class="matrix-editor-container">
 
     <div class="table-button-container">
 
-        <div class="table-container" *ngIf="mostrarTabla">
+      <div class="table-container" *ngIf="mostrarTabla">
 
-          <table border="1">
+        <table border="1">
 
-            <tr>
+          <tr>
 
-              <th colspan="5" class="config-cell">
+            <th colspan="5" class="config-cell">
 
-                <div class="config-container">
+              <div class="config-container">
 
-                  <div class="config-item checkbox" style="margin-bottom: 5px;">
+                <div class="config-item checkbox" style="margin-bottom: 5px;">
 
-                    Available templates:
+                  Available templates:
 
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="!isGroverOption()">
+                  <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)"
+                    *ngIf="!isGroverOption()">
 
-                      <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])" [ngValue]="template">
+                    <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])"
+                      [ngValue]="template">
 
-                        {{ template.fileName }}
+                      {{ template.fileName }}
 
-                      </option>
-
-                    </select>
-
-                
-
-                    <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)" *ngIf="isGroverOption()">
-
-                      <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
-
-                        {{ template.fileName }}
-
-                      </option>
-
-                    </select>
-
-                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel" (change)="saveState()">Parallel circuit
-
-                    <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits" (change)="saveState()">Split in several circuits
-
-                  </div>
-
-                  <div class="config-inputs-container" style="margin-top: 5px;">
-
-                    <div class="config-input" *ngIf="!isGroverOption()" style="margin-right: 8px;">
-
-                      <!-- <label for="angle">Physical angle:</label> -->
-
-                      Physical angle:
-
-                      <input id="angle" type="number" min="0" max="3.1416" step="0.0625"
-
-                             [(ngModel)]="physicalAngle" (change)="saveState()">(radians)
-
-                    </div>
-
-               
-
-                    <div class="config-input" *ngIf="!isGroverOption()" style="margin-left: 8px;">
-
-                      Functions' prefix:
-
-                      <input id="prefix" type="text" [(ngModel)]="prefix">
-
-                    </div>
-
- 
-
-                    <div *ngIf="isGroverOption()" class="config-input">
-
-                        <label class="custom-radio">
-
-                            <p class="pRadioTitle">Use:</p>
-
-                            <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
-
-                            <p class="pRadio">MCX</p>
-
-                        </label>
-
-                        <label class="custom-radio">
-
-                            <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">
-
-                            <p class="pRadio">H-MCZ-H</p>
-
-                        </label>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </th>
-
-             
-
-            </tr>
-
-            <tr>
-
-              <th rowspan="2">
-
-                
-
-                <!-- Paginación -->
-
-                <div style="text-align: center;">
-                        
-                      <small>
-                        <button class="paginador-btn" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1" [disabled]="pageIndex === 0">
-                          <i class="fas fa-chevron-left"></i>
-                        </button>
-
-                        <input
-                          class="inputPaginador"
-                          type="number"
-                          [min]="1"
-                          [max]="pageCount"
-                          [(ngModel)]="pageInput"
-                          style="text-align: center;"
-                          (ngModelChange)="goToPage()"
-                        />
-
-                        <span> / {{ pageCount }}</span>
-
-                        <button class="paginador-btn" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1" [disabled]="pageIndex >= pageCount - 1">
-                          <i class="fas fa-chevron-right"></i>
-                        </button>
-                      </small>
-
-                      </div>
-                <div class="header-with-button">
-                  <div style="margin-bottom: 5px;">
-                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-                      Output 
-                      <br>
-                    </div>
-                    <small style="margin-left: 5px;">
-                      ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{ maxRows }}</span>)
-                    </small>
-                  </div>
-                </div>
-
-                <!-- Fin de paginación -->
-
-              </th>
-
-              <th colspan="3">
-
-                <div class="header-with-button">
-
-                  <div style="margin-top: 5px; margin-bottom: 5px;">
-
-                    <div class="header-left-info" *ngIf="isGroverOption()">
-
-                      <i *ngIf="totalSelectedElements>0" style="font-family: cursive; font-weight: normal; font-size: 12px;">{{ totalSelectedElements }} elements selected </i>
-
-                      <i *ngIf="totalSelectedElements<=0" style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
-
-                    </div>
-
-                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-
-                      <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh" title="Reset values"></i></button>
-
-                 
-
-                      <span>Expected frequency <i>(p<sub>i</sub>)</i></span>
-
-                      <button title="Output info" (click)="toggleTooltip($event)" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
-
-                          <i class="fa fa-info-circle"></i>
-
-                      </button>
-
- 
-
-                      <div class="tooltip" *ngIf="tooltipVisible && isGroverOption()">
-
-                          <p>
-
-                              Do click on any row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
-
-                          </p>
-
-                          <div class="divider"><span>Or</span></div>
-
-                          <p>
-
-                              Write
-
-                              <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
-
-                                  JavaScript expressions
-
-                              </span>
-
-                              to mark the desired rows.
-
-                              <br>
-
-                          </p>
-
-                      </div>
-
- 
-
-                      <div class="tooltip" *ngIf="tooltipVisible && !isGroverOption()">
-
-                        <p>
-
-                          You can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in your program or circuit.
-
-                        </p>
-
-                        <div class="divider"><span>Or</span></div>
-
-                        <p>
-
-                            You can fill-in the absolute frequencies using
-
-                            <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
-
-                                JavaScript expressions.
-
-                            </span>
-
-                            <br>
-
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                 
-
-                  <div class="actions-container">
-
-                    <button *ngIf="!isGroverOption()"  class="action-icon-header" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit()">
-
-                      <i class="fa fa-code"></i>
-
-                    </button>
-
-                    <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code" (click)="getCircuit(true)">
-
-                      <i class="fa fa-code"></i>
-
-                    </button>
-
-                  </div>
-
-                </div>
-
-              </th>
-
-            </tr>
-
-            <tr>
-
-              <th colspan="6" class="probability-cell">
-
-                <div class="pi-label">
-
-                  <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq" (ngModelChange)="onOptionFreqChange($event)">
-
-                    <option [ngValue]="'none'">Reset</option>
-
-                    <option [ngValue]="'random'">Random</option>
-
-                    <option [ngValue]="'random10'" *ngIf="!isGroverOption()">Random ×10</option>
-
-                    <option [ngValue]="'zeroTo2N'" *ngIf="!isGroverOption()">0 to 2⁽ⁿ⁻¹⁾</option>
-
-                    <option [ngValue]="'probabilityOf0'" *ngIf="!isGroverOption()">Probability of 0</option>
-
-                    <option [ngValue]="'amountOfValues'">This amount of values</option>
+                    </option>
 
                   </select>
 
-                  <!-- <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button>  -->
 
- 
 
-                  <!-- <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;"> -->
+                  <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)"
+                    *ngIf="isGroverOption()">
 
-                      <span *ngIf="isProbabilityOf0" style="font-size: 13px;">
+                    <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
 
-                        Probability of 0:
+                      {{ template.fileName }}
 
-                        <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0">
+                    </option>
 
-                      </span>
+                  </select>
 
-                 
+                  <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel"
+                    (change)="saveState()">Parallel circuit
 
-                      <span *ngIf="isAmountOfValues" style="font-size: 13px;">
-
-                        This amount of values:
-
-                        <input type="number" step="1" min="1" [max]="expectedFrequencies.rows" [(ngModel)]="amountOfValues">
-
-                      </span>
-
-                      <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button>
-
-                  <!-- </div> -->
+                  <input type="checkbox" class="custom-checkbox" [(ngModel)]="splitCircuits"
+                    (change)="saveState()">Split in several circuits
 
                 </div>
 
- 
+                <div class="config-inputs-container" style="margin-top: 5px;">
 
-                <div class="prob-controls">
+                  <div class="config-input" *ngIf="!isGroverOption()" style="margin-right: 8px;">
+
+                    <!-- <label for="angle">Physical angle:</label> -->
+
+                    Physical angle:
+
+                    <input id="angle" type="number" min="0" max="3.1416" step="0.0625" [(ngModel)]="physicalAngle"
+                      (change)="saveState()">(radians)
+
+                  </div>
+
+
+
+                  <div class="config-input" *ngIf="!isGroverOption()" style="margin-left: 8px;">
+
+                    Functions' prefix:
+
+                    <input id="prefix" type="text" [(ngModel)]="prefix">
+
+                  </div>
+
+
+
+                  <div *ngIf="isGroverOption()" class="config-input">
+
+                    <label class="custom-radio">
+
+                      <p class="pRadioTitle">Use:</p>
+
+                      <input type="radio" [(ngModel)]="useMCX" [value]="true" name="useMCX">
+
+                      <p class="pRadio">MCX</p>
+
+                    </label>
+
+                    <label class="custom-radio">
+
+                      <input type="radio" [(ngModel)]="useMCX" [value]="false" name="useMCX">
+
+                      <p class="pRadio">H-MCZ-H</p>
+
+                    </label>
+
+                  </div>
 
                 </div>
 
-              </th>
+              </div>
 
-            </tr>
+            </th>
 
-            <!-- La tr de aquí abajo se ha cambiado para la paginación -->
 
-            <tr *ngFor="let i of createArray(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index"
 
-                align="center"
+          </tr>
 
-                [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(currentOffset + rowIndex) === 1"
+          <tr>
 
-                [class.grover-row]="isGroverOption()"
+            <th rowspan="2">
 
-                (click)="changeRowValue(currentOffset + rowIndex, $event);">
 
-              <td>
 
-                {{ currentOffset + rowIndex }}
+              <!-- Paginación -->
 
-                <sub>{{ (currentOffset + rowIndex).toString(2).padStart(qubits, '0') }}</sub>
+              <div style="text-align: center;">
 
-              </td>
+                <small>
+                  <button class="paginador-btn" (click)="pageIndex = pageIndex - 1; pageInput = pageInput - 1"
+                    [disabled]="pageIndex === 0">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
 
-              <td>
+                  <input class="inputPaginador" type="number" [min]="1" [max]="pageCount" [(ngModel)]="pageInput"
+                    style="text-align: center;" (ngModelChange)="goToPage()" />
 
-                <input *ngIf="!isGroverOption()" type="number" min="0" step="1"
+                  <span> / {{ pageCount }}</span>
 
-                      [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
+                  <button class="paginador-btn" (click)="pageIndex = pageIndex + 1; pageInput = pageIndex + 1"
+                    [disabled]="pageIndex >= pageCount - 1">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </small>
 
-                      (change)="setFreq($event, currentOffset + rowIndex); saveState()">
+              </div>
+              <div class="header-with-button">
+                <div style="margin-bottom: 5px;">
+                  <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                    Output
+                    <br>
+                  </div>
+                  <small style="margin-left: 5px;">
+                    ({{expectedFrequencies.rows}} rows<span *ngIf="expectedFrequencies.rows>maxRows">, showing only {{
+                      maxRows }}</span>)
+                  </small>
+                </div>
+              </div>
 
-                <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset + rowIndex) }} </label>
+              <!-- Fin de paginación -->
 
-              </td>
+            </th>
 
-              <td *ngIf="!isGroverOption()">
+            <th colspan="3">
 
-                <span (change)="saveState()">{{ expectedFrequencies.getRelativeFreq(currentOffset + rowIndex, 2) }}%</span>
+              <div class="header-with-button">
 
-              </td>
+                <div style="margin-top: 5px; margin-bottom: 5px;">
 
-              <td *ngIf="isGroverOption()">
+                  <div class="header-left-info" *ngIf="isGroverOption()">
 
-                <span (change)="saveState()" *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
+                    <i *ngIf="totalSelectedElements>0"
+                      style="font-family: cursive; font-weight: normal; font-size: 12px;">{{ totalSelectedElements }}
+                      elements selected </i>
 
-                <span (change)="saveState()" *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
+                    <i *ngIf="totalSelectedElements<=0"
+                      style="font-family: cursive; font-weight: normal; font-size: 12px;">No elements selected </i>
 
-              </td>
+                  </div>
 
-            </tr>
+                  <div style="display: flex; justify-content: center; align-items: center; position: relative;">
 
- 
+                    <button class="reset-btn" (click)="reset()"><i class="fa fa-refresh"
+                        title="Reset values"></i></button>
 
-          </table>
 
-        </div>
+
+                    <span>Expected frequency <i>(p<sub>i</sub>)</i></span>
+
+                    <button title="Output info" (click)="toggleTooltip($event)"
+                      style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+
+                      <i class="fa fa-info-circle"></i>
+
+                    </button>
+
+
+
+                    <div class="tooltip" *ngIf="tooltipVisible && isGroverOption()">
+
+                      <p>
+
+                        Do click on any row to <span class="highlight">mark</span> or unmark it onto the Grover oracle
+
+                      </p>
+
+                      <div class="divider"><span>Or</span></div>
+
+                      <p>
+
+                        Write
+
+                        <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+
+                          JavaScript expressions
+
+                        </span>
+
+                        to mark the desired rows.
+
+                        <br>
+
+                      </p>
+
+                    </div>
+
+
+
+                    <div class="tooltip" *ngIf="tooltipVisible && !isGroverOption()">
+
+                      <p>
+
+                        You can fill-in the <i>p<sub>i</sub></i> column with the absolute frequencies you want to get in
+                        your program or circuit.
+
+                      </p>
+
+                      <div class="divider"><span>Or</span></div>
+
+                      <p>
+
+                        You can fill-in the absolute frequencies using
+
+                        <span (click)="mostrarInstrucciones = true; tooltipVisible = false;" class="instructions-link">
+
+                          JavaScript expressions.
+
+                        </span>
+
+                        <br>
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+
+                <div class="actions-container">
+
+                  <button *ngIf="!isGroverOption()" class="action-icon-header" class="generate-code-btn"
+                    title="Get Qiskit code" (click)="getCircuit()">
+
+                    <i class="fa fa-code"></i>
+
+                  </button>
+
+                  <button *ngIf="isGroverOption()" class="generate-code-btn" title="Get Qiskit code"
+                    (click)="getCircuit(true)">
+
+                    <i class="fa fa-code"></i>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </th>
+
+          </tr>
+
+          <tr>
+
+            <th colspan="6" class="probability-cell">
+
+              <div class="pi-label">
+
+                <select style="margin-left: 20px; margin-right: 10px;" [(ngModel)]="selectedOptionFreq"
+                  (ngModelChange)="onOptionFreqChange($event)">
+
+                  <option [ngValue]="'none'">Reset</option>
+
+                  <option [ngValue]="'random'">Random</option>
+
+                  <option [ngValue]="'random10'" *ngIf="!isGroverOption()">Random ×10</option>
+
+                  <option [ngValue]="'zeroTo2N'" *ngIf="!isGroverOption()">0 to 2⁽ⁿ⁻¹⁾</option>
+
+                  <option [ngValue]="'probabilityOf0'" *ngIf="!isGroverOption()">Probability of 0</option>
+
+                  <option [ngValue]="'amountOfValues'">This amount of values</option>
+
+                </select>
+
+                <!-- <button (click)="applyOption()" class="apply-button" *ngIf="!isProbabilityOf0 && !isAmountOfValues">Apply</button>  -->
+
+
+
+                <!-- <div *ngIf="isProbabilityOf0 || isAmountOfValues" style="margin-top: 5px;"> -->
+
+                <span *ngIf="isProbabilityOf0" style="font-size: 13px;">
+
+                  Probability of 0:
+
+                  <input type="number" step="0.1" min="0" max="0.9" [(ngModel)]="probOf0">
+
+                </span>
+
+
+
+                <span *ngIf="isAmountOfValues" style="font-size: 13px;">
+
+                  This amount of values:
+
+                  <input type="number" step="1" min="1" [max]="expectedFrequencies.rows" [(ngModel)]="amountOfValues">
+
+                </span>
+
+                <button style="margin-left: 10px;" class="apply-button" (click)="applyOption()">Apply</button>
+
+                <!-- </div> -->
+
+              </div>
+
+
+
+              <div class="prob-controls">
+
+              </div>
+
+            </th>
+
+          </tr>
+
+          <!-- La tr de aquí abajo se ha cambiado para la paginación -->
+
+          <tr *ngFor="let i of createArray(Math.min(expectedFrequencies.rows, maxRows)); let rowIndex = index"
+            align="center"
+            [class.true-row]="isGroverOption() && expectedFrequencies.getFreq(currentOffset + rowIndex) === 1"
+            [class.grover-row]="isGroverOption()" (click)="changeRowValue(currentOffset + rowIndex, $event);">
+
+            <td>
+
+              {{ currentOffset + rowIndex }}
+
+              <sub>{{ (currentOffset + rowIndex).toString(2).padStart(qubits, '0') }}</sub>
+
+            </td>
+
+            <td>
+
+              <input *ngIf="!isGroverOption()" type="number" min="0" step="1"
+                [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
+                (change)="setFreq($event, currentOffset + rowIndex); saveState()">
+
+              <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset +
+                rowIndex) }} </label>
+
+            </td>
+
+            <td *ngIf="!isGroverOption()">
+
+              <span (change)="saveState()">{{ expectedFrequencies.getRelativeFreq(currentOffset + rowIndex, 2)
+                }}%</span>
+
+            </td>
+
+            <td *ngIf="isGroverOption()">
+
+              <span (change)="saveState()"
+                *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
+
+              <span (change)="saveState()"
+                *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
+
+            </td>
+
+          </tr>
+
+
+
+        </table>
+
+      </div>
 
     </div>
 
     <div class="section half expressions-section">
 
-        <app-editor [parent]="this"></app-editor>
+      <app-editor [parent]="this"></app-editor>
 
     </div>
 
-</div>
+  </div>
 
- 
 
-<!-- Modales -->
 
- 
+  <!-- Modales -->
 
-<div class="modal ejemplos" *ngIf="mostrarEjemplos">
 
-  <div class="modal-content ejemplos"
 
-  cdkDrag
+  <div class="modal ejemplos" *ngIf="mostrarEjemplos">
 
-  cdkDragRootElement=".modal-content">
+    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
-          <h2 class="title-modal">Examples</h2>
+        <h2 class="title-modal">Examples</h2>
 
-          <button class="close"><i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
+        <button class="close"><i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
 
       </div>
 
       <div class="intructions-content">
 
-          <ol>
+        <ol>
 
-              <li *ngFor="let javaExample of javaExamples; let i = index">
+          <li *ngFor="let javaExample of javaExamples; let i = index">
 
-                  <div class="example-item">
+            <div class="example-item">
 
- 
 
-                      <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
 
-                          <i>{{ javaExample.explanation }}</i> →
+              <div *ngIf="javaExample.exprs.length==1" style="width: 100%;">
 
-                          <br>
+                <i>{{ javaExample.explanation }}</i> →
 
-                          <code class="examples-code" style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
+                <br>
 
-                      </div>
+                <code class="examples-code"
+                  style="display: inline-block; margin-top: 10px;">{{ javaExample.exprs[0] }}</code>
 
-                      <div class="button-container">
+              </div>
 
- 
+              <div class="button-container">
 
-                          <button *ngIf="javaExample.exprs.length==1"
 
-                              (click)="onAddExampleClick(i)"
 
-                              [ngClass]="{'btn-added': javaExample.attempted}"
+                <button *ngIf="javaExample.exprs.length==1" (click)="onAddExampleClick(i)"
+                  [ngClass]="{'btn-added': javaExample.attempted}" class="btn-addExample">
 
-                              class="btn-addExample">
+                  <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
 
-                                  <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                  {{ javaExample.attempted ? '' : 'Try' }}
 
-                                  {{ javaExample.attempted ? '' : 'Try' }}
+                </button>
 
-                          </button>
+              </div>
 
-                      </div>
 
- 
 
-                      <div class="button-container">
+              <div class="button-container">
 
- 
 
-                          <button *ngIf="javaExample.exprs.length>1"
 
-                                  (click)="onAddExampleClick(i)"
+                <button *ngIf="javaExample.exprs.length>1" (click)="onAddExampleClick(i)"
+                  [ngClass]="{'btn-added': javaExample.attempted}" class="btn-addExample">
 
-                                  [ngClass]="{'btn-added': javaExample.attempted}"
+                  <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
 
-                                  class="btn-addExample">
+                  {{ javaExample.attempted ? '' : 'Try' }}
 
-                                      <span *ngIf="javaExample.attempted" class="fa fa-redo"></span>
+                </button>
 
-                                      {{ javaExample.attempted ? '' : 'Try' }}
+              </div>
 
-                          </button>
+            </div>
 
-                      </div>
+          </li>
 
-                  </div>
+        </ol>
 
-              </li>
+        <div class="help-actions">
 
-          </ol>
+          <button class="action-btn" (click)="mostrarEjemplos = false">Got it!</button>
 
-          <div class="help-actions">
-
-              <button class="action-btn" (click)="mostrarEjemplos = false">Got it!</button>
-
-          </div>
+        </div>
 
       </div>
 
+    </div>
+
   </div>
 
-</div>
 
- 
 
-<div class="modal instrucciones" *ngIf="mostrarInstrucciones">
+  <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
 
-  <div class="modal-content instrucciones"
-
-    cdkDrag
-
-    cdkDragRootElement="modal-content">
+    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
@@ -685,7 +664,7 @@
 
           <span class="highlight">boolean</span> expressions. The rows for which at least one expression
 
-            is true are marked to be included in the Grover's oracle.
+          is true are marked to be included in the Grover's oracle.
 
         </p>
 
@@ -711,7 +690,8 @@
 
           <li>
 
-            <b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.
+            <b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal
+            value of a set of adjacent qubits.
 
           </li>
 
@@ -725,406 +705,416 @@
 
       </div>
 
+    </div>
+
   </div>
 
-</div>
 
- 
 
-<div [hidden]="hideExamples">
+  <div [hidden]="hideExamples">
 
-    <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one expression is true are marked to be included in the Grover's oracle.</p>
+    <p>The expressions you can introduce msut be JavaScript boolean expressions. The rows for which at least one
+      expression is true are marked to be included in the Grover's oracle.</p>
 
     <p>
 
-        You can use the following <i>reseved words:</i>
+      You can use the following <i>reseved words:</i>
 
     </p>
 
     <ul>
 
-        <li><b>q0</b>, <b>q1</b>...<b>q<i>x</i></b> to reference a given qubit.</li>
+      <li><b>q0</b>, <b>q1</b>...<b>q<i>x</i></b> to reference a given qubit.</li>
 
-        <li><b>input</b> to reference the decimal value of the input.</li>
+      <li><b>input</b> to reference the decimal value of the input.</li>
 
-        <li><b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal value of a set of adjacent qubits.</li>
+      <li><b>dv(0..2)</b>, <b>dv(5..6)</b> or, in general, <b>dv(<i>i</i>..<i>j</i>)</b>, to reference the decimal value
+        of a set of adjacent qubits.</li>
 
-    </ul>       
+    </ul>
 
     <strong>Examples of expressions to fill-in the table:</strong>
 
     <ol>
 
-        <li *ngFor="let javaExample of javaExamples; let i = index">
+      <li *ngFor="let javaExample of javaExamples; let i = index">
 
-            <span *ngIf="javaExample.exprs.length==1">
+        <span *ngIf="javaExample.exprs.length==1">
 
-                <code>{{ javaExample.exprs[0] }}</code>
+          <code>{{ javaExample.exprs[0] }}</code>
 
-                →
+          →
 
-                &nbsp;
+          &nbsp;
 
-                <i>{{ javaExample.explanation }}</i>
+          <i>{{ javaExample.explanation }}</i>
 
-                &nbsp;
+          &nbsp;
 
-                <a style="color: blue;" (click)="tryFill(i)">Try</a>
+          <a style="color: blue;" (click)="tryFill(i)">Try</a>
 
-            </span>
+        </span>
 
-            <span *ngIf="javaExample.exprs.length>1">
+        <span *ngIf="javaExample.exprs.length>1">
 
-                <i>{{ javaExample.explanation }}</i>
+          <i>{{ javaExample.explanation }}</i>
 
-                <ol *ngFor="let expr of javaExample.exprs; let j=index">
+          <ol *ngFor="let expr of javaExample.exprs; let j=index">
 
-                    <code>{{ expr }}</code>
+            <code>{{ expr }}</code>
 
-                    <span *ngIf="j==javaExample.exprs.length-1">
+            <span *ngIf="j==javaExample.exprs.length-1">
 
-                        &nbsp;<a style="color: blue;" (click)="tryFill(i)">Try</a>
-
-                    </span>
-
-                </ol>
+              &nbsp;<a style="color: blue;" (click)="tryFill(i)">Try</a>
 
             </span>
 
-        </li>
+          </ol>
+
+        </span>
+
+      </li>
 
     </ol>
 
-</div>
+  </div>
 
- 
 
-<!-- Crear y ver expresiones -->
 
- 
+  <!-- Crear y ver expresiones -->
 
-<div class="modal" *ngIf="mostrarModalCrearExp">
 
-  <div class="modal-content">
+
+  <div class="modal" *ngIf="mostrarModalCrearExp">
+
+    <div class="modal-content">
 
       <!-- Botón para cerrar el modal -->
 
       <div class="modal-header">
 
-          <h2 class="title-modal">Create expression</h2>
+        <h2 class="title-modal">Create expression</h2>
 
-          <button class="close"><i class="close-i" (click)="mostrarModalCrearExp = false; cerrarCrear()">&times;</i></button>
+        <button class="close"><i class="close-i"
+            (click)="mostrarModalCrearExp = false; cerrarCrear()">&times;</i></button>
 
       </div>
 
- 
+
 
       <!-- Contenido del modal -->
 
       <div class="expression-output">
 
- 
 
-          <div class="expressionsContainer">
 
-              <div class="form-group">
+        <div class="expressionsContainer">
 
-                  <div class="label-container">
+          <div class="form-group">
 
-                      <label for="expressionName">Expression name:</label>
+            <div class="label-container">
 
-                  </div>
+              <label for="expressionName">Expression name:</label>
 
- 
+            </div>
 
-                  <input id="expressionName" type="text" [disabled]="isNameDisabled"
 
-                  [(ngModel)]="expressionToSave.expressionName" class="form-control" (input)="validateSaveInputs()">
 
-              </div>
-
- 
-
-              <div class="form-group">
-
-                  <div class="label-container">
-
-                      <label for="jsExpression">Expression in javaScript:</label>
-
-                  </div>
-
-                  <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control" (input)="validateSaveInputs()">
-
-              </div>
-
- 
-
-              <div class="form-group">
-
-                  <div class="label-container">
-
-                      <label for="expressionDescription">Description:</label>
-
-                  </div>
-
-                  <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control" (input)="validateSaveInputs()">
-
-              </div>
-
- 
-
-              <div class="form-group">
-
-                  <div class="label-container">
-
-                      <label for="expressionDescription">Type:</label>
-
-                  </div>
-
-                  <input id="expDescription" type="text" [disabled]="isType"
-
-                  [(ngModel)]="expressionToSave.type" class="form-control">
-
-              </div>
+            <input id="expressionName" type="text" [disabled]="isNameDisabled"
+              [(ngModel)]="expressionToSave.expressionName" class="form-control" (input)="validateSaveInputs()">
 
           </div>
 
- 
 
-          <div class="help-actions">
 
-              <button (click)="save()" [disabled]="isInvalidSave" class="save-new-btn">Save</button>
+          <div class="form-group">
 
-              <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarCrear()">Cancel</button>
+            <div class="label-container">
+
+              <label for="jsExpression">Expression in javaScript:</label>
+
+            </div>
+
+            <input id="jsExpression" type="text" [(ngModel)]="expressionToSave.jsExpression" class="form-control"
+              (input)="validateSaveInputs()">
 
           </div>
+
+
+
+          <div class="form-group">
+
+            <div class="label-container">
+
+              <label for="expressionDescription">Description:</label>
+
+            </div>
+
+            <input id="expDescription" type="text" [(ngModel)]="expressionToSave.description" class="form-control"
+              (input)="validateSaveInputs()">
+
+          </div>
+
+
+
+          <div class="form-group">
+
+            <div class="label-container">
+
+              <label for="expressionDescription">Type:</label>
+
+            </div>
+
+            <input id="expDescription" type="text" [disabled]="isType" [(ngModel)]="expressionToSave.type"
+              class="form-control">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="help-actions">
+
+          <button (click)="save()" [disabled]="isInvalidSave" class="save-new-btn">Save</button>
+
+          <button class="cancel-btn" (click)="mostrarModalCrearExp = false; cerrarCrear()">Cancel</button>
+
+        </div>
 
       </div>
 
+    </div>
+
   </div>
 
-</div>
 
- 
 
-<div class="modal" *ngIf="mostrarModalVerExp">
+  <div class="modal" *ngIf="mostrarModalVerExp">
 
-  <div class="modal-content">
+    <div class="modal-content">
 
       <!-- Encabezado del modal -->
 
       <div class="modal-header">
 
-          <div class="header-with-button">
+        <div class="header-with-button">
 
-              <h2 class="title-modal">Manage expressions</h2>
+          <h2 class="title-modal">Manage expressions</h2>
 
-          </div>
+        </div>
 
-          <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false">&times;</i></button>
+        <button class="close"><i class="close-i" (click)="mostrarModalVerExp = false">&times;</i></button>
 
       </div>
 
-     
+
 
       <!-- Tabla de expresiones -->
 
       <div class="table-container-expressions">
 
-          <table class="expressions-table">
+        <table class="expressions-table">
 
-              <thead>
+          <thead>
 
-                  <tr>
+            <tr>
 
-                      <th>Name</th>
+              <th>Name</th>
 
-                      <th>JavaScript Expression</th>
+              <th>JavaScript Expression</th>
 
-                      <th>Description</th>
+              <th>Description</th>
 
-                      <th style="min-width: 100px;">Actions</th>
+              <th style="min-width: 100px;">Actions</th>
 
-                  </tr>
+            </tr>
 
-              </thead>
+          </thead>
 
-              <tbody>
+          <tbody>
 
-                  <tr *ngFor="let expression of expressions; let i = index">
+            <tr *ngFor="let expression of expressions; let i = index">
 
-                      <td>{{ expression.expressionName }}</td>
+              <td>{{ expression.expressionName }}</td>
 
-                      <td>{{ expression.jsExpression }}</td>
+              <td>{{ expression.jsExpression }}</td>
 
-                      <td>{{ expression.description }}</td>
+              <td>{{ expression.description }}</td>
 
-                      <td>
+              <td>
 
-                          <button class="update-btn" style="margin-right: 10px;" title="Edit expression" (click)="editExpression(expression, i)">
+                <button class="update-btn" style="margin-right: 10px;" title="Edit expression"
+                  (click)="editExpression(expression, i)">
 
-                              <i class="fas fa-edit edit-expression-icon"></i>
+                  <i class="fas fa-edit edit-expression-icon"></i>
 
-                          </button>
+                </button>
 
-                          <button class="delete-expression-btn" title="Delete expression" (click)="openDeleteModal(expression.expressionName, i)">
+                <button class="delete-expression-btn" title="Delete expression"
+                  (click)="openDeleteModal(expression.expressionName, i)">
 
-                              <i class="fas fa-trash"></i>
+                  <i class="fas fa-trash"></i>
 
-                          </button>
+                </button>
 
-                      </td>
+              </td>
 
-                  </tr>
+            </tr>
 
-              </tbody>
+          </tbody>
 
-          </table>
+        </table>
 
       </div>
 
- 
+
 
       <!-- Botón de cerrar -->
 
       <div class="modal-footer">
 
-          <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression" class="fa fa-plus edit-create-icon"></i></button>
+        <button (click)="create()" class="btn-createExp-edit"><i title="Create a new expression"
+            class="fa fa-plus edit-create-icon"></i></button>
 
       </div>
 
+    </div>
+
   </div>
 
-</div>
 
- 
 
-<div *ngIf="showDeleteModal" class="modal-delete">
+  <div *ngIf="showDeleteModal" class="modal-delete">
 
-  <div class="modal-content-delete">
+    <div class="modal-content-delete">
 
       <div class="modal-header" style="background-color: rgb(201, 46, 46);">
 
-          <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
+        <h2 class="title-modal"><small style="font-size: 25px;">⚠️</small> Delete expression</h2>
 
-          <button class="close"><i class="close-i" (click)="showDeleteModal = false">&times;</i></button>
+        <button class="close"><i class="close-i" (click)="showDeleteModal = false">&times;</i></button>
 
       </div>
 
       <div class="modal-message-delete">
 
-          <p>Are you sure you want to delete the expression <strong>{{expressionToDelete}}</strong>?</p>
+        <p>Are you sure you want to delete the expression <strong>{{expressionToDelete}}</strong>?</p>
 
-          <div class="modal-buttons">
+        <div class="modal-buttons">
 
-              <button class="btn btn-delete-modal" (click)="confirmDelete()">Yes, delete</button>
+          <button class="btn btn-delete-modal" (click)="confirmDelete()">Yes, delete</button>
 
-              <button class="btn btn-cancel-delete-modal" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelDelete()">Cancel</button>
 
-          </div>
+        </div>
 
       </div>
 
-     
+
+
+    </div>
 
   </div>
 
-</div>
 
- 
 
-<div class="modal ejemplos" *ngIf="mostrarModal">
+  <div class="modal ejemplos" *ngIf="mostrarModal">
 
-  <div class="modal-content" *ngIf="isLoadingQiskitCode">
+    <div class="modal-content" *ngIf="isLoadingQiskitCode">
 
       <div *ngIf="isLoadingQiskitCode" class="spinner-container">
 
-          <div class="spinner"></div>
+        <div class="spinner"></div>
 
-          <p>Generating Qiskit code...</p>
+        <p>Generating Qiskit code...</p>
 
-      </div>             
+      </div>
 
-  </div>
+    </div>
 
-  <div class="modal-content ejemplos"
-    cdkDrag
-    cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
+    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
 
       <!-- Botón para cerrar el modal -->
 
       <div class="modal-header" cdkDragHandle>
-          <h2 class="title-modal">Qiskit Code</h2>
-          <div class="enlaces-modal" *ngIf="quirkCodes.length>0">
-            <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()"><i class="fas fa-project-diagram"></i> Show tree</a>
-            &nbsp;
+        <h2 class="title-modal">Qiskit Code</h2>
+        <div class="enlaces-modal" *ngIf="quirkCodes.length>0">
+          <a (click)="mostrarModalTree = true" *ngIf="svgTree && !splitCircuits && !inParallel && !isGroverOption()"><i
+              class="fas fa-project-diagram"></i> Show tree</a>
+          &nbsp;
 
-            <a (click)="showQuirk()" *ngIf="quirkCodes.length==1"><i class="fas fa-microchip"></i> Show in Quirk</a>
+          <a (click)="showQuirk()" *ngIf="quirkCodes.length==1"><i class="fas fa-microchip"></i> Show in Quirk</a>
 
-            &nbsp;
+          &nbsp;
 
-            <a *ngIf="quirkCodes.length > 1" class="quirk-select">
+          <a *ngIf="quirkCodes.length > 1" class="quirk-select">
 
-              Select:
+            Select:
 
-              <select [(ngModel)]="selectedQuirk" (ngModelChange)="onQuirkChange($event)">
+            <select [(ngModel)]="selectedQuirk" (ngModelChange)="onQuirkChange($event)">
 
-                <option *ngFor="let quirkCode of quirkCodes; let i = index" [ngValue]="i">{{ i + 1 }}</option>
+              <option *ngFor="let quirkCode of quirkCodes; let i = index" [ngValue]="i">{{ i + 1 }}</option>
 
-              </select>
+            </select>
 
-              <button (click)="showQuirk(selectedQuirk)" class="btn-quirk">
+            <button (click)="showQuirk(selectedQuirk)" class="btn-quirk">
 
-                <i class="fas fa-microchip"></i> Show in Quirk
+              <i class="fas fa-microchip"></i> Show in Quirk
 
-              </button>
+            </button>
 
-            </a>
+          </a>
 
-           
 
-          </div>
 
-          <button class="close"><i class="close-i" (click)="mostrarModal = false">&times;</i></button>
+        </div>
+
+        <button class="close"><i class="close-i" (click)="mostrarModal = false">&times;</i></button>
 
       </div>
 
- 
+
 
       <!-- Contenido del modal -->
 
       <div class="intructions-content">
 
-          <div class="code-output">
+        <div class="code-output">
 
-              <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
+          <pre *ngFor="let line of qiskitCode.lines">{{ line }}</pre>
 
-          </div>
+        </div>
 
       </div>
 
- 
+
 
       <!-- Botón para copiar el código -->
 
       <div class="modal-footer">
-        <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute local</button>
-        <button class="execute-remote-code-btn" (click)="mostrarEjecucionRemote = true"><i class="fas fa-rocket"></i> Execute remote</button>
-        <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+        <button class="execute-code-btn" (click)="mostrarInstEjecucion = true"><i class="fas fa-rocket"></i> Execute
+          local</button>
+        <button class="execute-remote-code-btn" (click)="mostrarEjecucionRemote = true"><i class="fas fa-rocket"></i>
+          Execute remote</button>
+        <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
+          Transpile</button>
         <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
         <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
       </div>
 
+    </div>
+
   </div>
 
-</div>
+  <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false"
+    style="width: 100%; height: 100%;"></app-modal-descarga>
+  <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
+    [qiskitCode]="(qiskitCode?.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
 
-<app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false" style="width: 100%; height: 100%;"></app-modal-descarga>
-<app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="(qiskitCode?.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
+  <div class="modal" *ngIf="mostrarModalGuargarCode">
 
-<div class="modal" *ngIf="mostrarModalGuargarCode">
-
-  <div class="modal-content">
+    <div class="modal-content">
 
       <div class="modal-header">
 
@@ -1136,73 +1126,69 @@
 
       <div class="expressionsContainer">
 
-          <div class="form-group">
+        <div class="form-group">
 
-              <div class="label-container">
+          <div class="label-container">
 
-                  <label>Name:</label>
-
-              </div>
-
-              <input class="input-function" type="text" [(ngModel)]="qiskitCode.name" [disabled]="qiskitCode.lines.length==0" class="form-control">
+            <label>Name:</label>
 
           </div>
 
- 
+          <input class="input-function" type="text" [(ngModel)]="qiskitCode.name"
+            [disabled]="qiskitCode.lines.length==0" class="form-control">
 
-              <div class="form-group">
+        </div>
 
-                  <div class="label-container">
 
-                      <label>Description:</label>
 
-                  </div>
+        <div class="form-group">
 
-                  <input class="input-function" type="text" [(ngModel)]="qiskitCode.description" [disabled]="qiskitCode.lines.length==0" class="form-control">
+          <div class="label-container">
 
-              </div>
-
- 
-
-          <div class="modal-buttons-function">
-
-              <button class="btn-confirm" (click)="saveCode()" [disabled]="!qiskitCode.name.trim()">
-
-                <i class="fa fa-check" aria-hidden="true"></i> Save
-
-              </button>
-
-     
-
-              <button class="btn-cancel" (click)="mostrarModalGuargarCode = false">
-
-                <i class="fa fa-times" aria-hidden="true"></i> Cancel
-
-              </button>
+            <label>Description:</label>
 
           </div>
 
-     
+          <input class="input-function" type="text" [(ngModel)]="qiskitCode.description"
+            [disabled]="qiskitCode.lines.length==0" class="form-control">
 
-          <div class="error" *ngIf="error">{{ error }}</div>
+        </div>
+
+
+
+        <div class="modal-buttons-function">
+
+          <button class="btn-confirm" (click)="saveCode()" [disabled]="!qiskitCode.name.trim()">
+
+            <i class="fa fa-check" aria-hidden="true"></i> Save
+
+          </button>
+
+
+
+          <button class="btn-cancel" (click)="mostrarModalGuargarCode = false">
+
+            <i class="fa fa-times" aria-hidden="true"></i> Cancel
+
+          </button>
+
+        </div>
+
+
+
+        <div class="error" *ngIf="error">{{ error }}</div>
 
       </div>
 
- </div>
+    </div>
 
-</div>
+  </div>
 
- 
 
-<div class="modal instrucciones" *ngIf="mostrarModalTree">
 
-  <div class="modal-content instrucciones"
+  <div class="modal instrucciones" *ngIf="mostrarModalTree">
 
-    cdkDrag
-
-    cdkDragRootElement="modal-content"
-
-    style="min-width: 950px;">
+    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
 
       <div class="modal-header" cdkDragHandle>
 
@@ -1226,152 +1212,149 @@
 
       </div>
 
+    </div>
+
   </div>
 
-</div>
 
- 
 
-<div class="modal instrucciones" *ngIf="modalTranspile">
-        <div class="modal-content instrucciones"
-            cdkDrag
-            cdkDragRootElement="modal-content"
-            style="min-width: 950px;">
-            <div class="modal-header" cdkDragHandle>
-                <h2 class="title-modal">Transpile Code</h2>
-                <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
-            </div>
+  <div class="modal instrucciones" *ngIf="modalTranspile">
+    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+      <div class="modal-header" cdkDragHandle>
+        <h2 class="title-modal">Transpile Code</h2>
+        <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
+      </div>
 
-            <!-- Contenido del modal -->
-            <div class="intructions-content" style="justify-content: center; display: flex;">
-                <div class="form-row" style="justify-content: center; width: 100%;">
-                <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
-                <input
-                    id="circuitName"
-                    class="input-function form-control"
-                    type="text"
-                    [(ngModel)]="circuitName"
-                    placeholder="circuit name..."
-                    style="max-width: 40%;"
-                />
-                </div>
-            </div>
-            <div class="intructions-content">
-                <div class="form-row-backends">
-                    <div class="section contenedorBackends">
-                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
-                    <ul class="listaBackends">
-                        <li *ngFor="let backend of availableBackends" class="list-group-item">
-                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
-                        <button type="button" class="apply-button" (click)="selectBackend(backend)">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        </li>
-                    </ul>
-                    </div>
+      <!-- Contenido del modal -->
+      <div class="intructions-content" style="justify-content: center; display: flex;">
+        <div class="form-row" style="justify-content: center; width: 100%;">
+          <label style="color: black; margin-bottom: 0px;">Circuit name:</label>
+          <input id="circuitName" class="input-function form-control" type="text" [(ngModel)]="circuitName"
+            placeholder="circuit name..." style="max-width: 40%;" />
+        </div>
+      </div>
+      <div class="intructions-content">
+        <div class="form-row-backends">
+          <div class="section contenedorBackends">
+            <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Available Backends</h4>
+            <ul class="listaBackends">
+              <li *ngFor="let backend of availableBackends" class="list-group-item">
+                <div>{{ backend.name }} <small class="text-muted fst-italic"
+                    style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                <button type="button" class="apply-button" (click)="selectBackend(backend)">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
 
-                    <div class="section contenedorBackends">
-                    <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
-                    <ul class="listaBackends">
-                        <li *ngFor="let backend of selectedBackends" class="list-group-item">
-                        <div>{{ backend.name }} <small class="text-muted fst-italic" style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
-                        <button type="button" class="deselect-button" (click)="deselectBackend(backend)">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        </li>
-                    </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
-            </div>
+          <div class="section contenedorBackends">
+            <h4 class="text-center" style="width: 100%; justify-content: center; display: flex;">Selected Backends</h4>
+            <ul class="listaBackends">
+              <li *ngFor="let backend of selectedBackends" class="list-group-item">
+                <div>{{ backend.name }} <small class="text-muted fst-italic"
+                    style="font-style: italic; color: rgba(0, 0, 0, 0.73);">({{ backend.qubits }} qubits)</small></div>
+                <button type="button" class="deselect-button" (click)="deselectBackend(backend)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
-
-
-      <div *ngIf="modalError" class="modal-delete">
-        <div class="modal-content-delete">
-            <div class="modal-header" style="background-color: rgb(201, 46, 46);">
-                <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Error generating Qiskit code</h2>
-                <button class="close"><i class="close-i" (click)="modalError = false">&times;</i></button>
-            </div>
-            <div class="expressionsContainer">
-                <div class="modal-body">
-                    <p class="modal-message">
-                    Error generating Qiskit code. Please ensure at least one element is selected.
-                    </p>
-                </div>
-
-                <div class="help-actions">
-                    <!-- <button class="btn-cancel" (click)="modalError = false">Close</button> -->
-                    <button class="btn-confirm" (click)="modalError = false">Got it!</button>
-                </div>
-            </div>
-            
-        </div>
+      <div class="modal-footer">
+        <button class="transpile-code-btn" [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0"
+          (click)="transpile()"><i class="fas fa-exchange-alt"></i> Transpile</button>
+      </div>
     </div>
+  </div>
 
-    <div class="modal" *ngIf="mostrarModalGuardarProyecto">
-      <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="title-modal">Save project</h2>
-            <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+
+
+  <div *ngIf="modalError" class="modal-delete">
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+        <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Error generating Qiskit code</h2>
+        <button class="close"><i class="close-i" (click)="modalError = false">&times;</i></button>
+      </div>
+      <div class="expressionsContainer">
+        <div class="modal-body">
+          <p class="modal-message">
+            Error generating Qiskit code. Please ensure at least one element is selected.
+          </p>
         </div>
-        <div class="info-form">
-            <h3>Enter project name</h3>
-            <div class="input-button-row">
-                <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
-                <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
-                    <i class="fa fa-check" aria-hidden="true"></i> Save
-                </button>
-            </div>
-            <div class="modal-buttons-function">
-                <button class="btn-cancel" (click)="cancelarSaveModal()">
-                    <i class="fa fa-times" aria-hidden="true"></i> Cancel
-                </button>
-            </div>
-            <div class="error" *ngIf="saveError">{{ saveError }}</div>
+
+        <div class="help-actions">
+          <!-- <button class="btn-cancel" (click)="modalError = false">Close</button> -->
+          <button class="btn-confirm" (click)="modalError = false">Got it!</button>
         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="mostrarModalGuardarProyecto">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="title-modal">Save project</h2>
+        <button class="close"><i class="close-i" (click)="cancelarSaveModal()">&times;</i></button>
+      </div>
+      <div class="info-form">
+        <h3>Enter project name</h3>
+        <div class="input-button-row">
+          <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
+          <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarGuardarProyecto()"
+            [disabled]="!circuitName || circuitName.trim().length === 0">
+            <i class="fa fa-check" aria-hidden="true"></i> Save
+          </button>
+        </div>
+        <div class="modal-buttons-function">
+          <button class="btn-cancel" (click)="cancelarSaveModal()">
+            <i class="fa fa-times" aria-hidden="true"></i> Cancel
+          </button>
+        </div>
+        <div class="error" *ngIf="saveError">{{ saveError }}</div>
+      </div>
     </div>
   </div>
 
   <div *ngIf="showDeleteProjectModal" class="modal-delete" style="z-index: 1001;">
-      <div class="modal-content-delete">
-          <div class="modal-header" style="background-color: rgb(201, 46, 46);">
-              <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
-              <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
-          </div>
-          <div class="modal-message-delete">
-              <p>Are you sure you want to delete the project <strong>"{{ circuitName }}"</strong>?</p>
-              <p>This action cannot be undone.</p>
-              <div class="modal-buttons">
-                  <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
-                  <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
-              </div>
-          </div>
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+        <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
+        <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+        <p>Are you sure you want to delete the project <strong>"{{ circuitName }}"</strong>?</p>
+        <p>This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
-      <div class="modal-content-delete">
-          <div class="modal-header" style="background-color: #008b95;">
-              <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
-              <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
-          </div>
-          <div class="modal-message-delete">
-              <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ circuitName }}"</strong> with the current circuit configuration?</p>
-              <p>This will permanently overwrite the previously saved version.</p>
-              <div class="modal-buttons">
-                  <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
-                  <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
-              </div>
-          </div>
+  <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: #008b95;">
+        <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
+        <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+        <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ circuitName }}"</strong> with the
+          current circuit configuration?</p>
+        <p>This will permanently overwrite the previously saved version.</p>
+        <div class="modal-buttons">
+          <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
+        </div>
       </div>
     </div>
+  </div>
 
-  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)" [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
+  <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)"
+    [contextIdentifier]="this.selectedAlgorithm"> </app-notes-modal>
 
 </body>

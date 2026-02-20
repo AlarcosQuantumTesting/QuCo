@@ -3,9 +3,11 @@ package edu.uclm.tp3.common.model;
 import java.util.List;
 
 import edu.uclm.tp3.blocks.model.BlockCircuit;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class ProblemInputConfiguration {
-	
+
 	private int qubits;
 	private boolean[] outputs;
 	private List<Integer> expectedFrequencies;
@@ -15,12 +17,12 @@ public final class ProblemInputConfiguration {
 	private int maxNumberOfColumns;
 	private int numberOfOutputs;
 	private boolean deleteFiles;
-	
+
 	private boolean[] startWithH;
 
 	private int childrenPerCouple;
 	private BlockCircuit blockCircuit;
-	
+
 	public int getShots() {
 		int shots = 0;
 		for (Integer ef : this.expectedFrequencies)
@@ -51,7 +53,7 @@ public final class ProblemInputConfiguration {
 	public void setPopulationSize(int populationSize) {
 		this.populationSize = populationSize;
 	}
-	
+
 	public int getMinNumberOfColumns() {
 		return minNumberOfColumns;
 	}
@@ -75,19 +77,19 @@ public final class ProblemInputConfiguration {
 	public void setDeleteFiles(boolean deleteFiles) {
 		this.deleteFiles = deleteFiles;
 	}
-	
+
 	public boolean[] getOutputs() {
 		return outputs;
 	}
-	
+
 	public void setOutputs(boolean[] outputs) {
 		this.numberOfOutputs = 0;
 		this.outputs = outputs;
-		for (int i=0; i<outputs.length; i++)
+		for (int i = 0; i < outputs.length; i++)
 			if (outputs[i])
 				this.numberOfOutputs++;
 	}
-	
+
 	public int getNumberOfOutputs() {
 		return numberOfOutputs;
 	}
@@ -95,7 +97,7 @@ public final class ProblemInputConfiguration {
 	public int getChildrenPerCouple() {
 		return this.childrenPerCouple;
 	}
-	
+
 	public void setChildrenPerCouple(int childrenPerCouple) {
 		this.childrenPerCouple = childrenPerCouple;
 	}
@@ -103,23 +105,23 @@ public final class ProblemInputConfiguration {
 	public int getMaxPopulationSize() {
 		return maxPopulationSize;
 	}
-	
+
 	public void setMaxPopulationSize(int maxPopulationSize) {
 		this.maxPopulationSize = maxPopulationSize;
 	}
-	
+
 	public void setStartWithH(boolean[] startWithH) {
 		this.startWithH = startWithH;
 	}
-	
+
 	public boolean[] getStartWithH() {
 		return startWithH;
 	}
-	
+
 	public void setBlockCircuit(BlockCircuit blockCircuit) {
 		this.blockCircuit = blockCircuit;
 	}
-	
+
 	public BlockCircuit getBlockCircuit() {
 		return blockCircuit;
 	}

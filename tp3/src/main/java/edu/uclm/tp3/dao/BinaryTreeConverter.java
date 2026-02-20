@@ -1,7 +1,7 @@
 package edu.uclm.tp3.dao;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import edu.uclm.tp3.common.deterministic.BinaryTree;
 import edu.uclm.tp3.common.deterministic.GRCircuit;

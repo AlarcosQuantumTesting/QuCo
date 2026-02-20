@@ -476,7 +476,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     }
   }
 
-  confirmarCerrarSesion(): void {
+  clearUserStorage(): void {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
 
@@ -485,17 +485,32 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
+  }
 
-    console.log("Sesión cerrada.");
+  logout(): void {
+    this.http.post(`${this.URL_BASE}/users/logout`, {}, { withCredentials: true }).subscribe({
+      next: () => {
+        this.clearUserStorage();
+        console.log("Sesión cerrada.");
+        this.mensajeExito = `Logged out successfully! See you soon!`;
+        this.mostrarMensajeExito = true;
+        this.limpiarMensajeExito(3000);
+        location.reload();
+      },
+      error: () => {
+        this.clearUserStorage();
+        console.log("Sesión cerrada (con error en backend).");
+        this.mensajeExito = `Logged out successfully! See you soon!`;
+        this.mostrarMensajeExito = true;
+        this.limpiarMensajeExito(3000);
+        location.reload();
+      }
+    });
+  }
 
+  confirmarCerrarSesion(): void {
     this.mostrarModalLogoutConfirmacion = false;
-
-    this.mensajeExito = `Logged out successfully! See you soon!`;
-    this.mostrarMensajeExito = true;
-    this.limpiarMensajeExito(3000);
-
-    location.reload();
-
+    this.logout();
   }
 
   cerrarModalLogoutConfirmacion(): void {
@@ -562,6 +577,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     } catch (error) {
       console.log("Could not restore session from cookie:", error);
     }
+    this.clearUserStorage();
     return false;
   }
 
