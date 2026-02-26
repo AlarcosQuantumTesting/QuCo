@@ -174,6 +174,15 @@
 
 <div class="titulo">
     <h1>Matrices</h1>
+
+    <span 
+        *ngIf="selectedProjectId && isCircuitModified" 
+        class="unsaved-indicator pulsing-dot"
+        title="Unsaved changes detected"
+        style="cursor: default !important;"
+    >
+      <i class="fas fa-circle"></i> 
+    </span>
 </div>
 
 <div class="container matrix-container">
@@ -192,7 +201,8 @@
                     <small class="input-hint">[2 - 12]</small>
                 </div>
 
-                <input id="inputQubits" type="number" min="2" max="12" [(ngModel)]="inputQubits" (input)="validateInputs()" class="form-control">
+                <input id="inputQubits" type="number" min="2" max="12" [(ngModel)]="inputQubits" (input)="validateInputs()" class="form-control"
+                (change)="saveState()">
                 <span *ngIf="inputQubits !== null && (inputQubits < 2 || inputQubits > 12)" class="error-text">
                     Must be between 2 and 12
                 </span>
@@ -214,12 +224,21 @@
                 <div class="label-container">
                     <label for="projectSelector">Load project:</label>
                 </div>
-                <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
-                    <option value="" disabled>Select project</option>
-                    <option *ngFor="let project of projectList" [value]="project.id">
-                        {{ project.name }}
-                    </option>
-                </select>
+                <div style="display: flex; align-items: center;">
+                    <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()" class="form-control">
+                        <option value="" disabled>Select project</option>
+                        <option *ngFor="let project of projectList" [value]="project.id">
+                            {{ project.name }}
+                        </option>
+                    </select>
+                    <button *ngIf="selectedProjectId" style="margin-left: 5px;"
+                        (click)="openDeleteProjectModal()" 
+                        class="btn-delete-project" 
+                        title="Delete Selected Project">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
             </div>
 
             <div class="matrixTitle-container" style="margin-top: 25px;">
@@ -244,9 +263,31 @@
     
     <h2 *ngIf="matrix" style="margin: 0;">Table</h2>
     
-    <div style="display: flex; align-items: center; width: 200px; justify-content: flex-end;">        
-        <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
+    <div style="display: flex; align-items: center; justify-content: flex-end;">        
+        <!-- <button (click)="mostrarModalGuardarProyecto = true" class="btn-confirm-save" *ngIf="userEmail && userToken">
             <i class="fas fa-save"></i> Save project
+        </button> -->
+
+        <button 
+            *ngIf="!selectedProjectId"
+            (click)="openSaveOrSaveAsNewModal(false)" 
+            class="btn-confirm-save">
+            <i class="fas fa-save"></i> Save
+        </button>
+        
+        <button 
+            *ngIf="selectedProjectId && isCircuitModified"
+            (click)="openApplyChangesModal()" 
+            class="btn-confirm-save update-btn">
+            <i class="fas fa-pen"></i> Update
+        </button>
+        
+        <button 
+            *ngIf="selectedProjectId"
+            (click)="openSaveOrSaveAsNewModal(true)" 
+            class="btn-confirm-save"
+            style="margin-left: 5px;">
+            <i class="fas fa-save"></i> Save as new
         </button>
     </div>
 </div>
@@ -267,10 +308,10 @@
                                 </select>
                                 <p class="radioTitle">Select domain:</p>
                                 <label class="custom-radio">
-                                <input type="radio" [(ngModel)]="domain" value="amplitude"> Amplitude domain
+                                <input type="radio" [(ngModel)]="domain" value="amplitude" (change)="saveState()"> Amplitude domain
                                 </label>
                                 <label class="custom-radio">
-                                <input type="radio" [(ngModel)]="domain" value="phase"> Phase domain
+                                <input type="radio" [(ngModel)]="domain" value="phase" (change)="saveState()"> Phase domain
                                 </label>
                             </div>
                         </div>
@@ -310,7 +351,7 @@
                             <span>Reduce</span>
                             <label title="Reduce Qiskit and Quirk" style="color: white; font-weight: normal; font-size: small;">
                                 <input type="checkbox" class="custom-checkbox" [checked]="reduceQuiskit && reduceQuirk"
-                                    (change)="reduceQuiskit = $any($event.target).checked; reduceQuirk = $any($event.target).checked"/>
+                                    (change)="reduceQuiskit = $any($event.target).checked; reduceQuirk = $any($event.target).checked; saveState()"/>
                             </label>
                         </div>
                     </th>
@@ -340,14 +381,14 @@
                 <tr *ngFor="let row of matrix; let rowIndex = index" align="center">
                     <th>{{ rowIndex }}</th>
 
-                    <td *ngFor="let value of row; let colIndex = index" align="right" (click)="negate(rowIndex, colIndex)">
+                    <td *ngFor="let value of row; let colIndex = index" align="right" (click)="negate(rowIndex, colIndex)" (change)="saveState()">
                     <span *ngIf="colIndex < inputQubits" style="color: green">{{ value }}</span>
                     <span *ngIf="colIndex >= inputQubits" class="clickable-span">{{ value }}</span>
                     </td>
 
                     <td>
                     <input class="table-input" type="number" min="0"
-                            [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex)">
+                            [(ngModel)]="decimals![rowIndex]" (change)="updateOutputQubits(rowIndex); saveState()"/>
                     </td>
 
                     <!-- <td class="actions-cell" *ngIf="!actionsHidden"> -->
@@ -565,7 +606,7 @@
                 <h3>Enter function name</h3>
                 <div class="input-button-row">
                     <input class="input-function" type="text" [(ngModel)]="nombreFuncion" placeholder="Function name">
-                    <button class="btn-confirm" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
+                    <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarNombreFuncion()" [disabled]="isConfirmDisabled()">
                         <i class="fa fa-check" aria-hidden="true"></i> Confirm
                     </button>
                 </div>
@@ -782,7 +823,7 @@
                 <div class="input-button-row">
                     <input class="input-function" type="text" [(ngModel)]="circuitName" placeholder="Project name">
                     
-                    <button class="btn-confirm" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
+                    <button class="btn-confirm" style="margin-top: 0px !important;" (click)="confirmarGuardarProyecto()" [disabled]="!circuitName || circuitName.trim().length === 0">
                         <i class="fa fa-check" aria-hidden="true"></i> Save
                     </button>
                 </div>
@@ -796,6 +837,40 @@
         </div>
     </div>
 
-    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="mostrarNotasModal = false" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
+    <div *ngIf="showDeleteProjectModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+              <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Confirm deletion</h2>
+              <button class="close"><i class="close-i" (click)="cancelDeleteProject()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to delete the project <strong>"{{ selectedProjectName }}"</strong>?</p>
+              <p>This action cannot be undone.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-delete-modal" (click)="confirmDeleteProject()">Yes, delete</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteProject()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <div *ngIf="showApplyChangesModal" class="modal-delete" style="z-index: 1001;">
+      <div class="modal-content-delete">
+          <div class="modal-header" style="background-color: #008b95;">
+              <h2 class="title-modal"><i class="fas fa-pen-to-square"></i> Apply changes</h2>
+              <button class="close"><i class="close-i" (click)="cancelApplyChanges()">&times;</i></button>
+          </div>
+          <div class="modal-message-delete">
+              <p>Are you sure you want to <strong>update</strong> the project <strong>"{{ selectedProjectName }}"</strong> with the current circuit configuration?</p>
+              <p>This will permanently overwrite the previously saved version.</p>
+              <div class="modal-buttons">
+                  <button class="btn btn-confirm-modal" (click)="confirmApplyChanges()">Apply changes</button>
+                  <button class="btn btn-cancel-delete-modal" (click)="cancelApplyChanges()">Cancel</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
+    <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)" [contextIdentifier]= "nombreComponente"> </app-notes-modal>
   
 </body>

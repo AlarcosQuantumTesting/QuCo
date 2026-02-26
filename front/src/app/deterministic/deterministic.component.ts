@@ -19,7 +19,7 @@ import { ProjectService } from '../project.service';
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -152,6 +152,14 @@ export class DeterministicComponent extends GroverStyle {
   saveError: string = '';
 
   mostrarNotasModal: boolean = false;
+  storedNotesStr = localStorage.getItem('project_notes');
+
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
 
 
   constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
@@ -171,8 +179,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
-    
-    this.loadProjectNames();
+
 
     this.updateTotalSelectedElements();
     this.mostrarTabla = localStorage.getItem('mostrarTabla') === 'true';
@@ -228,6 +235,32 @@ export class DeterministicComponent extends GroverStyle {
         this.expressions = data.filter(exp => exp.type === 'grenoble' || exp.type === 'grover');
       });
     }
+
+
+    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
+
+    const savedProjectId = localStorage.getItem(nombreLocal);
+
+    if (savedProjectId && this.userEmail && this.userToken) {
+      if (this.selectedAlgorithm === 'grover' && nombreLocal === 'selectedProjectId_grover') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      } else if (this.selectedAlgorithm === 'grenoble' && nombreLocal === 'selectedProjectId_grenoble') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      } else if (this.selectedAlgorithm === 'originalgr' && nombreLocal === 'selectedProjectId_originalgr') {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+      }
+    }*/
+
+    const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
+    if (savedProjectId && this.userEmail && this.userToken) {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+    }
+    
+    this.loadProjectNames();
   }
 
   override tryFill(index: number): void {
@@ -284,11 +317,14 @@ export class DeterministicComponent extends GroverStyle {
       } else if (result)
         this.expectedFrequencies.setFreq(i, result)
     }
+
     this.updateOutputs()
 
     this.updateTotalSelectedElements();
 
     localStorage.setItem('processedExpressionsDeterministic', JSON.stringify(this.userExpressions));
+
+    this.saveState();
   }
 
   private replaceQ(expr: string, row: string) {
@@ -688,6 +724,8 @@ export class DeterministicComponent extends GroverStyle {
     this.calculateShots()
     this.updateOutputs()
     this.updateTotalSelectedElements();
+
+    this.saveState();
   }
 
   random(factor : number) {
@@ -873,6 +911,7 @@ export class DeterministicComponent extends GroverStyle {
     this.onAlgorithmChange(this.selectedAlgorithm);
     this.goToTable();
     // this.clearExpressions();
+    this.saveState();
   }
 
   goToTable(): void {
@@ -1014,8 +1053,10 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     localStorage.removeItem('processedExpressionsDeterministic');
 
-    
-    
+  }
+
+  removeSelectedProjectIdAlgorithm() {
+    localStorage.removeItem('selectedProjectId_algorithm');
   }
 
 
@@ -1091,6 +1132,7 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     this.updateTotalSelectedElements();
+    this.saveState();
   }
 
 
@@ -1113,10 +1155,12 @@ export class DeterministicComponent extends GroverStyle {
       }
     }
     this.updateTotalSelectedElements();
+    this.saveState();
   }
 
   clearExpressions() {
     this.userExpressions = [];
+    this.saveState();
   }
 
 
@@ -1157,6 +1201,8 @@ export class DeterministicComponent extends GroverStyle {
 
     // Limpiar el campo de texto
     this.currentUserExpression = "";
+
+    this.saveState();
   }
 
   openTextArea(c : DeterministicComponent, e : Event, title : string, elementIndex? : number) {
@@ -1274,6 +1320,7 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     caja.parentElement.appendChild(this.dialogo);
+    this.saveState();
   }
 
   onSearchInput() {
@@ -1884,10 +1931,19 @@ export class DeterministicComponent extends GroverStyle {
   loadProjectDataToComponent(project: StoredProject): void {
     if (!project.qProgram) return;
 
+    this.lastSavedCircuitState = ''; 
+    this.isCircuitModified = false;
+
     const qp = project.qProgram;
 
-    this.circuitName = project.name; 
+    this.circuitName = project.name;
+
+    localStorage.setItem('selectedProjectId_algorithm', project.id);
+
+    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
     
+    localStorage.setItem(nombreLocal, project.id);*/
+
     if (qp.generator && qp.generator.type) {
         this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
     }
@@ -1895,6 +1951,67 @@ export class DeterministicComponent extends GroverStyle {
     this.qubits = qp.qubits;
     this.expectedFrequencies = new FreqTable();
     this.expectedFrequencies.setQubits(this.qubits);
+    
+    /*if (project.notes && Array.isArray(project.notes)) {
+      const notesForStorage = project.notes.map((n: any) => ({
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
+    } else {
+      // localStorage.removeItem('project_notes');
+    }*/
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        const tipoLocal = 'quco_' + this.selectedAlgorithm;
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
+    }
 
     const generator = qp.generator;
 
@@ -1930,11 +2047,21 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarTabla = true; 
     this.goToTable();
 
-    //alert(`Proyecto "${project.name}" cargado con éxito.`);
-    this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
     setTimeout(() => {
       this.mensajeTemporal2 = '';
-    }, 1000);
+    }, 1000);*/
+
+    setTimeout(() => {
+        this.updateOutputs();
+        this.updateTotalSelectedElements();
+        
+        this.lastSavedCircuitState = this.captureCircuitState(); 
+        this.isCircuitModified = false;
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+    }, 200);
 
     this.saveInLocal();
   }
@@ -2086,6 +2213,14 @@ export class DeterministicComponent extends GroverStyle {
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
+    //const idCircuit = crypto.randomUUID();
+    let idCircuit: string;
+    if (this.applyChanges) {
+        idCircuit = this.selectedProjectId;
+        this.applyChanges = false;
+    } else {
+        idCircuit = crypto.randomUUID();
+    }
     
     const generatorData = this.getGeneratorData(this.selectedAlgorithm);
 
@@ -2113,6 +2248,10 @@ export class DeterministicComponent extends GroverStyle {
         quirkCircuitData = this.responseReceived["QUIRK"][0]; 
     }
 
+    const generatedCode = this.qiskitCode && this.qiskitCode.lines 
+                            ? this.qiskitCode.lines.join('\n') 
+                            : "No Qiskit code generated yet.";
+
     let finalQuirkPayload: any = quirkCircuitData;
 
     if (finalQuirkPayload.cols) {
@@ -2137,29 +2276,54 @@ export class DeterministicComponent extends GroverStyle {
     console.log('Final quirk payload to be sent:', finalQuirkPayload);
 
     const qProgram: QProgram = {
-      id: this.circuitName,
+      id: idCircuit,
       qubits: this.qubits,
       expressions: qProgramExpressions,
       shots: 0,
       generator: generatorData,
-      qcodes: [{ platform: "AerSimulator", code: this.qiskitCode.lines.join('\n') || "No qiskit code generated." }],
+      qcodes: [{ platform: "AerSimulator", code: generatedCode }],
       inputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       outputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
       qCircuit: { 
-        id: this.circuitName, 
+        id: idCircuit, 
         qbits: this.qubits, 
         quirkCode: finalQuirkPayload
       }
     };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    const tipoLocal = 'quco_' + this.selectedAlgorithm;
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === tipoLocal.toLowerCase())
+                .map((n: any, index: number) => ({
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
     
     const projectDtoForMapping: any = {
-        id: this.circuitName,
+        id: idCircuit,
         name: this.circuitName,
         qProgram: qProgram,
         userEmail: this.userEmail,
 
         mutantCycles: [], 
-        testSuite: null
+        testSuite: null,
+        projectNotes: notesPayload
     };
     
     const finalPayload: any = {
@@ -2172,16 +2336,157 @@ export class DeterministicComponent extends GroverStyle {
     this.projectService.saveProject(finalPayload).subscribe({
       next: () => {
         //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
         this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
         setTimeout(() => {
           this.mensajeTemporal2 = '';
         }, 2000);
         this.loadProjectNames();
+        localStorage.setItem('selectedProjectId_algorithm', idCircuit);
       },
       error: (error: any) => {
         console.error('Error saving project:', error);
         alert('Error saving project (Code 400).');
       }
     });
+  }
+
+
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const tipoLocal = 'quco_' + this.selectedAlgorithm;
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const state = {
+        qubits: this.qubits,
+        algorithm: this.selectedAlgorithm,
+        physicalAngle: this.physicalAngle,
+        inParallel: this.inParallel,
+        splitCircuits: this.splitCircuits,
+        frequencies: JSON.stringify(this.expectedFrequencies),
+        expressions: this.userExpressions.slice().sort().join('|'),
+        template: this.manager.selectedTemplate.fileName,
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.selectedProjectId || !this.lastSavedCircuitState) {
+        this.isCircuitModified = false;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    this.saveInLocal();
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            localStorage.removeItem('selectedProjectId_algorithm');
+
+            this.resetValues();
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    if (isNew) {
+        //this.selectedProjectId = '';
+        this.circuitName = this.circuitName || `New ${this.selectedAlgorithm} Project`;
+    } else if (this.selectedProjectId) {
+        this.circuitName = this.circuitName || '';
+    } else {
+        this.circuitName = '';
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
   }
 }

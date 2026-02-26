@@ -1,6 +1,6 @@
 package edu.uclm.tp3.dao;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "binary_trees")

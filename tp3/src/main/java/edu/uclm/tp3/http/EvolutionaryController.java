@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.JSONObject;
@@ -34,12 +34,12 @@ import edu.uclm.tp3.ws.HWSession;
 
 @RestController
 public abstract class EvolutionaryController {
-		
+
 	@Autowired
 	protected ManagerService manager;
 
 	@Autowired
-    private SseEmitters emitters;
+	private SseEmitters emitters;
 
 	@GetMapping("/resetSession")
 	@ResponseBody
@@ -49,7 +49,7 @@ public abstract class EvolutionaryController {
 
 		if (gtObj != null && pc != null && pc.getInputConfiguration().isDeleteFiles()) {
 			String gt = (String) gtObj;
-			
+
 			RunPopulation.requestCancellation(gt);
 
 			ReentrantLock lock = RunPopulation.getLockFor(gt);
@@ -57,7 +57,7 @@ public abstract class EvolutionaryController {
 			try {
 				File dirToDelete = new File(EvolutionaryService.generationFolder(gt));
 
-				if (dirToDelete.exists()) 
+				if (dirToDelete.exists())
 					FileUtils.deleteDirectory(dirToDelete);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -86,28 +86,30 @@ public abstract class EvolutionaryController {
 			}
 		}).start();
 	}
-	
-	@GetMapping("/getGates") @ResponseBody
+
+	@GetMapping("/getGates")
+	@ResponseBody
 	public List<GateDescription> getGates() {
 		return EvolutionaryService.getGateNames();
 	}
-	
+
 	@GetMapping("/getStrategies")
 	public List<String> getStrategies() {
 		return EvolutionaryService.getStrategies();
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	@PutMapping("/selectFitnesser") @ResponseBody
+	@PutMapping("/selectFitnesser")
+	@ResponseBody
 	public SimpleFitnesser selectFitness(HttpSession session, @RequestBody Map<String, Object> info) {
 		try {
 			JSONObject jso = new JSONObject(info);
-			
+
 			int shots = jso.getInt("shots");
 			double desiredError = jso.getDouble("desiredError");
 			session.setAttribute("lastDesiredError", desiredError);
 			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
-			
+
 			SimpleFitnesser fitnesser = new SimpleFitnesser();
 			session.setAttribute("fitnesser", fitnesser);
 			int populationSize = jso.getInt("populationSize");
@@ -121,8 +123,9 @@ public abstract class EvolutionaryController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
-	
-	@GetMapping("/updateDesiredError") @ResponseBody
+
+	@GetMapping("/updateDesiredError")
+	@ResponseBody
 	public void updateDesiredError(HttpSession session, @RequestParam double desiredError) {
 		try {
 			SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
@@ -149,9 +152,25 @@ public abstract class EvolutionaryController {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fitnesser in session");
 			}
 			session.setAttribute("fitnesser", fitnesser);
+			/*
+			 * List<Integer> expectedFrequencies = (List<Integer>)
+			 * info.get("expectedFrequencies");
+			 * int shots = (int) info.get("shots");
+			 */
 
-			List<Integer> expectedFrequencies = (List<Integer>) info.get("expectedFrequencies");
-			int shots = (int) info.get("shots");
+			List<Object> rawExpectedFrequencies = (List<Object>) info.get("expectedFrequencies");
+			List<Integer> expectedFrequencies = new java.util.ArrayList<>();
+			for (Object obj : rawExpectedFrequencies) {
+				if (obj instanceof Number) {
+					expectedFrequencies.add(((Number) obj).intValue());
+				}
+			}
+
+			int shots = 0;
+			Object shotsObj = info.get("shots");
+			if (shotsObj instanceof Number) {
+				shots = ((Number) shotsObj).intValue();
+			}
 
 			fitnesser.setExpected(expectedFrequencies);
 			fitnesser.setShots(shots);
@@ -165,58 +184,59 @@ public abstract class EvolutionaryController {
 
 	public final long generateInitialPopulation(HttpSession session, ProblemConfiguration pc, int initialLength) {
 		long startTime = System.currentTimeMillis();
-		String gt = ""  + EvolutionaryService.dado.nextInt();
+		String gt = "" + EvolutionaryService.dado.nextInt();
 		session.setAttribute("gt", gt);
 		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
 		pc.setSimpleFitnesser(fitnesser);
-		
+
 		try {
-			String[] startEnd= this.getService().generatePopulation(gt, pc, initialLength);
+			String[] startEnd = this.getService().generatePopulation(gt, pc, initialLength);
 			session.setAttribute("templateStart", startEnd[0]);
 			session.setAttribute("templateEnd", startEnd[1]);
 			session.setAttribute("pc", pc);
-			return System.currentTimeMillis()-startTime;
+			return System.currentTimeMillis() - startTime;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
-	
-	@GetMapping("/firstRun") @ResponseBody
+
+	@GetMapping("/firstRun")
+	@ResponseBody
 	public Map<String, Object> firstRun(HttpSession session) {
 		long startTime = System.currentTimeMillis();
 		try {
-			if (session.getAttribute("gt")==null)
+			if (session.getAttribute("gt") == null)
 				throw new Exception("Generate the initial population firstly");
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
-		
+
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
 		SimpleFitnesser fitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
 		session.setAttribute("fitnesser", fitnesser);
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
 		pc.setSimpleFitnesser(fitnesser);
-		
+
 		Map<String, Object> result = new HashMap<>();
-		try {			
+		try {
 			int iterationIndex = pc.getIterationIndex();
 			TextLogger.write(gt, "GeneticController:firstRun gt=" + gt + "\n");
 			TextLogger.write(gt, "\titerationIndex=" + iterationIndex + "\n");
 			TextLogger.write(gt, "\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
 			TextLogger.write(gt, "\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
 			TextLogger.write(gt, "\tgenerationToExecute=" + pc.getGenerationToExecute() + "\n");
-			
+
 			if (emitters == null) {
 				emitters = new SseEmitters();
 			}
 
 			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
 			TaskData taskData = runPopulation.execute();
-	
+
 			long startCalculusTime = System.currentTimeMillis();
-			result.put("executionTime", startCalculusTime-startTime);
-			
+			result.put("executionTime", startCalculusTime - startTime);
+
 			int sourceGeneration = pc.getSourceGeneration();
 
 			pc.setSourceGeneration(sourceGeneration);
@@ -225,19 +245,18 @@ public abstract class EvolutionaryController {
 			pc = runPopulation.apply(this.manager, taskData);
 			pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy("First execution");
 
-	
-			result.put("calculusTime", System.currentTimeMillis()-startCalculusTime);
+			result.put("calculusTime", System.currentTimeMillis() - startCalculusTime);
 			pc.increaseIterationIndex();
 			pc.increaseTargetGeneration();
-	
+
 			TextLogger.write(gt, "\titerationIndex=" + iterationIndex + "\n");
 			TextLogger.write(gt, "\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
 			TextLogger.write(gt, "\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
 			TextLogger.write(gt, "\tgenerationToExecute=" + pc.getGenerationToExecute() + "\n\n");
-			
+
 			result.put("populationSize", pc.getInputConfiguration().getPopulationSize());
 			result.put("lastExecutionResults", pc.getLastExecutionResults());
-			result.put("totalTime", System.currentTimeMillis()-startTime);
+			result.put("totalTime", System.currentTimeMillis() - startTime);
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -245,14 +264,17 @@ public abstract class EvolutionaryController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
-	
-	public abstract Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError, @RequestParam String selectedStratego,
+
+	public abstract Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError,
+			@RequestParam String selectedStratego,
 			@RequestBody List<Map<String, Object>> selectedStrategies);
-	
+
 	protected abstract EvolutionaryService getService();
-	
-	@GetMapping("/getCode/{generation}/{index}") @ResponseBody
-	public String getCode(HttpSession session, @PathVariable int generation, @PathVariable int index, @RequestParam String fitnesserName) {
+
+	@GetMapping("/getCode/{generation}/{index}")
+	@ResponseBody
+	public String getCode(HttpSession session, @PathVariable int generation, @PathVariable int index,
+			@RequestParam String fitnesserName) {
 		String gt = session.getAttribute("gt").toString();
 		try {
 			String templateStart = session.getAttribute("templateStart").toString();
@@ -264,9 +286,9 @@ public abstract class EvolutionaryController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@GetMapping("/getSimpleFitnesser") @ResponseBody
+	@GetMapping("/getSimpleFitnesser")
+	@ResponseBody
 	public SimpleFitnesser getSimpleFitnesser(HttpSession session) {
 		return EvolutionaryService.getSimpleFitnesser();
 	}
 }
-

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,35 +36,39 @@ import edu.uclm.tp3.ws.HWSession;
 @RequestMapping("elonging")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class ElongingController extends EvolutionaryController {
-	
+
 	@Autowired
 	private GeneticService service;
 
 	@Autowired
-    private SseEmitters emitters;
-	
-	@PutMapping("/generateInitialPopulation") @ResponseBody
+	private SseEmitters emitters;
+
+	@PutMapping("/generateInitialPopulation")
+	@ResponseBody
 	public long generateInitialPopulation(HttpSession session, @RequestBody ProblemConfiguration pc) {
-		try {
-			if (pc.getSelected1QubitGates().isEmpty() && pc.getProbOf1QubitGates()>0)
-				throw new Exception("There are no selected 1 qubit gates, but you specificy a chance of " + pc.getProbOf1QubitGates());
-			if (pc.getSelected2QubitGates().isEmpty() && pc.getProbOf2QubitGates()>0)
-				throw new Exception("There are no selected 2 qubit gates, but you specificy a chance of " + pc.getProbOf2QubitGates());
-			if (pc.getSelected3QubitGates().isEmpty() && pc.getProbOf3QubitGates()>0)
-				throw new Exception("There are no selected 3 qubit gates, but you specificy a chance of " + pc.getProbOf3QubitGates());
-			if (pc.getSelectedNQubitGates().isEmpty() && pc.getProbOfNQubitGates()>0)
-				throw new Exception("There are no selected gates of 3 or more qubits, but you specificy a chance of " + pc.getProbOfNQubitGates());
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
 		return super.generateInitialPopulation(session, pc, pc.getInputConfiguration().getMinNumberOfColumns());
 	}
-	
-	@SuppressWarnings("unchecked")
-	@PostMapping("/runPopulation") @ResponseBody
-	public Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError, @RequestParam String selectedStratego,
-			@RequestBody List<Map<String, Object>> selectedStrategies) {
 
+	// @PutMapping("/generateInitialPopulation")
+	// @ResponseBody
+	// public String generateInitialPopulation(HttpSession session, @RequestBody
+	// ProblemConfiguration pc) {
+
+	// try {
+
+	// return "Initial population generated successfully";
+	// } catch (Exception e) {
+	// return "Error generating initial population: " + e.getMessage();
+	// }
+
+	// }
+
+	@SuppressWarnings("unchecked")
+	@PostMapping("/runPopulation")
+	@ResponseBody
+	public Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError,
+			@RequestParam String selectedStratego,
+			@RequestBody List<Map<String, Object>> selectedStrategies) {
 
 		HWSession hw = this.manager.get(session);
 		String gt = session.getAttribute("gt").toString();
@@ -75,61 +79,58 @@ public class ElongingController extends EvolutionaryController {
 		if (!sessionDir.exists()) {
 			System.out.println("Carpeta eliminada. Deteniendo ejecución de runPopulation.");
 			return (Map<String, Object>) ResponseEntity.status(HttpStatus.BAD_REQUEST)
-								.body("La sesión ya no existe. Por favor, reinicia el experimento.");
+					.body("La sesión ya no existe. Por favor, reinicia el experimento.");
 		}
-
-
 
 		long startTime = System.currentTimeMillis();
 		try {
-			if (session.getAttribute("gt")==null)
+			if (session.getAttribute("gt") == null)
 				throw new Exception("Generate the initial population firstly");
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
-		
+
 		SimpleFitnesser sessionFitnesser = (SimpleFitnesser) session.getAttribute("fitnesser");
-		
+
 		ProblemConfiguration pc = (ProblemConfiguration) session.getAttribute("pc");
 		Map<String, Object> result = new HashMap<>();
 
-		try {			
+		try {
 			String templateStart = session.getAttribute("templateStart").toString();
 			String templateEnd = session.getAttribute("templateEnd").toString();
-			
+
 			int iterationIndex = pc.getIterationIndex();
 			TextLogger.write(gt, "GeneticController:runPopulation gt=" + gt + "\n");
-			TextLogger.write(gt, "\t" + java.time.Instant.now().toString() + ")\n");  
+			TextLogger.write(gt, "\t" + java.time.Instant.now().toString() + ")\n");
 			TextLogger.write(gt, "\titerationIndex=" + iterationIndex + "\n");
-			
+
 			SimpleFitnesser fitnesser = sessionFitnesser;
-			IStratego stratego = selectedStratego.equalsIgnoreCase("fixedStratego") ? new Stratego() : new ParameterizableStratego();
-			
+			IStratego stratego = selectedStratego.equalsIgnoreCase("fixedStratego") ? new Stratego()
+					: new ParameterizableStratego();
+
 			int sourceGeneration = pc.getSourceGeneration();
 			RunPopulation runPopulation = new RunPopulation(gt, pc, hw, emitters);
-			
-			
-			
+
 			pc.setSourceGeneration(sourceGeneration);
 
 			TextLogger.write(gt, "\t" + fitnesser.getClass().getSimpleName() + "\n");
-			long strategyTime= System.currentTimeMillis();
+			long strategyTime = System.currentTimeMillis();
 			Strategy strategy = stratego.getStrategy(gt, pc, fitnesser, manager, selectedStrategies);
 			TextLogger.write(gt, "\t\t" + strategy.getClass().getSimpleName() + "\n");
 			TextLogger.write(gt, "\t\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
-			TextLogger.write(gt, "\t\ttargetGeneration=" + pc.getTargetGeneration() + "\n");				
-			
+			TextLogger.write(gt, "\t\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
+
 			emitters.sendMessage("Applying " + strategy.getClass().getSimpleName());
 			strategy.apply(templateStart, templateEnd);
-			result.put("strategyTime", System.currentTimeMillis()-strategyTime);
+			result.put("strategyTime", System.currentTimeMillis() - strategyTime);
 
 			runPopulation.setFitnesser(fitnesser);
 			long startExecutionTime = System.currentTimeMillis();
 			TaskData taskData = runPopulation.execute();
 			long startCalculusTime = System.currentTimeMillis();
-			result.put("executionTime", startCalculusTime-startExecutionTime);
+			result.put("executionTime", startCalculusTime - startExecutionTime);
 			pc = runPopulation.apply(this.manager, taskData);
-			result.put("calculusTime", System.currentTimeMillis()-startCalculusTime);
+			result.put("calculusTime", System.currentTimeMillis() - startCalculusTime);
 			pc.getLastExecutionResults().get(fitnesser.getClass().getSimpleName()).setStrategy(strategy);
 
 			pc.increaseIterationIndex();
@@ -139,10 +140,10 @@ public class ElongingController extends EvolutionaryController {
 			TextLogger.write(gt, "\tsourceGeneration=" + pc.getSourceGeneration() + "\n");
 			TextLogger.write(gt, "\ttargetGeneration=" + pc.getTargetGeneration() + "\n");
 			TextLogger.write(gt, "\tgenerationToExecute=" + pc.getGenerationToExecute() + "\n\n");
-			
+
 			result.put("populationSize", pc.getInputConfiguration().getPopulationSize());
 			result.put("lastExecutionResults", pc.getLastExecutionResults());
-			result.put("time", System.currentTimeMillis()-startTime);
+			result.put("time", System.currentTimeMillis() - startTime);
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -157,4 +158,3 @@ public class ElongingController extends EvolutionaryController {
 	}
 
 }
-

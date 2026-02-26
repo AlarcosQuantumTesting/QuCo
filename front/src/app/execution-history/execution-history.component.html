@@ -97,6 +97,15 @@
 
                         <button 
                             class="apply-button" 
+                            title="Share execution link" 
+                            (click)="$event.stopPropagation(); openShareModal(execution)"
+                            style="margin-left: 10px; background-color: #5bc0de;"
+                            >
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+
+                        <button 
+                            class="apply-button" 
                             title="Download Summary CSV" 
                             [disabled]="execution.status !== 'FINISHED'" 
                             (click)="$event.stopPropagation(); downloadSummary(execution.id)"
@@ -273,10 +282,39 @@
                 </div>
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer" *ngIf="this.enLocal===true">
                 <button class="delete-local-btn" title="Delete execution" (click)="deleteModalConfirm(executionSelected!)">
                     <i class="bi bi-trash3-fill" style="margin-right: 5px;"></i> Delete from local
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="modalShare" class="modal-delete modal-share">
+        <div class="modal-content-delete modal-content-share">
+            <div class="modal-header">
+                <h2 class="title-modal"> Share execution</h2>
+                <button class="close"><i class="close-i" (click)="modalShare = false">&times;</i></button>
+            </div>
+            <div class="modal-message-delete modal-message-share">
+                <p>Share this identifier to allow others to find this execution remotely:</p>
+                
+                <div class="input-group-share" style="width: 100%; margin-bottom: 30px;">
+                    <input 
+                        type="text" 
+                        [value]="generatedShareId" 
+                        readonly 
+                        style="flex-grow: 1; padding: 10px; border: 1px solid #ccc; background-color: #f8f8f8; cursor: text; width: 84%; border-radius: 4px;"
+                    >
+                    <button 
+                        class="btn btn-primary" 
+                        (click)="copyShareId()"
+                        title="Copy"
+                        style="background-color: #28a77b; margin-left: 10px; border-radius: 8px; padding: 7px; "
+                    >
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

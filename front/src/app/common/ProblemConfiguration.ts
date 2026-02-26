@@ -2,31 +2,31 @@ import { BlockCircuit } from "../blocks/BlockCircuit"
 import { CodeTemplate } from "../templates/CodeTemplate"
 
 export class ProblemConfiguration {
-    iterationIndex : number = 0
-    sourceGeneration : number = 0
-    targetGeneration : number = 0
-	
-    desiredError : number = 0.05
+    iterationIndex: number = 0
+    sourceGeneration: number = 0
+    targetGeneration: number = 0
 
-	/*probOf1QubitGates : number = 50
-	probOf2QubitGates : number = 50
-	probOf3QubitGates : number = 20
+    desiredError: number = 0.05
+
+    /*probOf1QubitGates : number = 50
+    probOf2QubitGates : number = 50
+    probOf3QubitGates : number = 20
     probOfNQubitGates : number = 20*/
-    probOf1QubitGates : number = 50
-	probOf2QubitGates : number = 50
-	probOf3QubitGates : number = 50
-    probOfNQubitGates : number = 50
+    probOf1QubitGates: number = 50
+    probOf2QubitGates: number = 50
+    probOf3QubitGates: number = 50
+    probOfNQubitGates: number = 50
 
-    inputConfiguration : ProblemInputConfiguration 
+    inputConfiguration: ProblemInputConfiguration
 
-	massiveMutationPolicy: MassiveMutationPolicy = new MassiveMutationPolicy()   
-    history : Map<string, History> = new Map<string, History>() 
-    lastExecutionResults : Map<string, ExecutionResults> = new Map<string, ExecutionResults>();
+    massiveMutationPolicy: MassiveMutationPolicy = new MassiveMutationPolicy()
+    history: Map<string, History> = new Map<string, History>()
+    lastExecutionResults: Map<string, ExecutionResults> = new Map<string, ExecutionResults>();
 
-    gateNames : string[] = []
-    codeTemplate? : CodeTemplate
+    gateNames: string[] = []
+    codeTemplate?: CodeTemplate
 
-    constructor(conf? : any) {
+    constructor(conf?: any) {
         this.inputConfiguration = new ProblemInputConfiguration()
         if (conf) {
             this.inputConfiguration.qubits = conf.qubits
@@ -36,54 +36,54 @@ export class ProblemConfiguration {
             this.inputConfiguration.maxPopulationSize = conf.maxPopulationSize
             this.inputConfiguration.minNumberOfColumns = conf.minNumberOfColumns
             this.inputConfiguration.deleteFiles = conf.deleteFiles
-            for (let i=0; i<conf.startWithH.length; i++)
+            for (let i = 0; i < conf.startWithH.length; i++)
                 this.inputConfiguration.startWithH[i] = conf.startWithH[i]
-            for (let i=0; i<conf.expectedFrequencies.length; i++)
+            for (let i = 0; i < conf.expectedFrequencies.length; i++)
                 this.inputConfiguration.expectedFrequencies[i] = conf.expectedFrequencies[i]
-            for (let i=0; i<conf.outputs.length; i++)
+            for (let i = 0; i < conf.outputs.length; i++)
                 this.inputConfiguration.outputs[i] = conf.outputs[i]
         }
     }
 
-    updateHistory(receivedHistory : any) {
+    updateHistory(receivedHistory: any) {
         let keys = Object.keys(receivedHistory)
         for (let fitnesserName of keys) {
             let history = Object.assign(new History(), Reflect.get(receivedHistory, fitnesserName))
-            this.history.set(fitnesserName, history)    
+            this.history.set(fitnesserName, history)
         }
     }
 
-    updateLastExecutionResults(receivedLastExecutionResults : any) {
+    updateLastExecutionResults(receivedLastExecutionResults: any) {
         let keys = Object.keys(receivedLastExecutionResults)
         for (let fitnesserName of keys) {
             let er = Object.assign(new ExecutionResults(), Reflect.get(receivedLastExecutionResults, fitnesserName))
-            er.selectionProbabilities = er.selectionProbabilities.map(function(v : any) { return parseFloat(Number.parseFloat(v).toFixed(2))} )
-            er.fitnesses = er.fitnesses.map(function(v : any) { return parseFloat(Number.parseFloat(v).toFixed(2))} )
-            er.errors = er.errors.map(function(v : any) { return parseFloat(Number.parseFloat(v).toFixed(2))} )
-            this.lastExecutionResults.set(fitnesserName, er)             
+            er.selectionProbabilities = er.selectionProbabilities.map(function (v: any) { return parseFloat(Number.parseFloat(v).toFixed(2)) })
+            er.fitnesses = er.fitnesses.map(function (v: any) { return parseFloat(Number.parseFloat(v).toFixed(2)) })
+            er.errors = er.errors.map(function (v: any) { return parseFloat(Number.parseFloat(v).toFixed(2)) })
+            this.lastExecutionResults.set(fitnesserName, er)
         }
     }
 }
 
 export class ProblemInputConfiguration {
-   
-    qubits : number 
-    outputs : boolean[] 
-    expectedFrequencies : number[] = []
-    populationSize : number = 24
-    maxPopulationSize : number = 24
-    minNumberOfColumns : number = 4
-    maxNumberOfColumns : number = 20
-    deleteFiles : boolean = true
-    shots : number = 99
 
-    startWithH : boolean[] = []
-    blockCircuit : BlockCircuit
+    qubits: number
+    outputs: boolean[]
+    expectedFrequencies: number[] = []
+    populationSize: number = 24
+    maxPopulationSize: number = 24
+    minNumberOfColumns: number = 4
+    maxNumberOfColumns: number = 20
+    deleteFiles: boolean = true
+    shots: number = 99
+
+    startWithH: boolean[] = []
+    blockCircuit: BlockCircuit
 
     constructor() {
-        
+
         const config = JSON.parse(localStorage.getItem("qucoConfiguration") || "{}");
-        
+
         if (config) {
             this.qubits = config.qubits || 5
             this.populationSize = config.populationSize || 24
@@ -95,7 +95,7 @@ export class ProblemInputConfiguration {
             this.startWithH = config.startWithH || []
             this.expectedFrequencies = config.expectedFrequencies || []
             this.outputs = config.outputs || [false, false, true, true, true]
-            for (let i=0; i<this.qubits; i++) {
+            for (let i = 0; i < this.qubits; i++) {
                 if (this.startWithH.length <= i) {
                     this.startWithH[i] = false
                 }
@@ -114,18 +114,18 @@ export class ProblemInputConfiguration {
     }
 
     startAllWithHadamard() {
-        for (let i=0; i<this.qubits; i++) {
+        for (let i = 0; i < this.qubits; i++) {
             this.startWithH[i] = !this.startWithH[i]
         }
     }
 
-     toggleOutputQubits() {
-        for (let i=0; i<this.qubits; i++) {
+    toggleOutputQubits() {
+        for (let i = 0; i < this.qubits; i++) {
             this.outputs[i] = !this.outputs[i]
         }
     }
 
-    updateNumberOfQubits(qubits : number) {
+    updateNumberOfQubits(qubits: number) {
         this.blockCircuit.updateNumberOfQubits(qubits)
         this.qubits = qubits
     }
@@ -133,7 +133,7 @@ export class ProblemInputConfiguration {
     reset() {
         //this.blockCircuit = new BlockCircuit(this.qubits, this.blockCircuit.numberOfStartColumns);
         this.blockCircuit = new BlockCircuit(this.qubits)
-        for (let i=0; i<this.qubits; i++) {
+        for (let i = 0; i < this.qubits; i++) {
             this.outputs[i] = true
             this.startWithH[i] = false
         }
@@ -143,29 +143,29 @@ export class ProblemInputConfiguration {
 }
 
 export class MassiveMutationPolicy {
-    fallsThreshold : number = 2  // Número de caídas tras las que se aplica
-	
-	applicableWhenMeanFitnessFalls : boolean = true
-	applicableWhenBestFitnessFalls : boolean = true
-	
-	fitnessPercentage : number = 0.75  // Aplicar cuando el mejor fitness supere este porcentaje del fitness deseado
-	
-	maxConsecutiveApplications : number = 1
-	counter : number = 0
+    fallsThreshold: number = 2  // Número de caídas tras las que se aplica
+
+    applicableWhenMeanFitnessFalls: boolean = true
+    applicableWhenBestFitnessFalls: boolean = true
+
+    fitnessPercentage: number = 0.75  // Aplicar cuando el mejor fitness supere este porcentaje del fitness deseado
+
+    maxConsecutiveApplications: number = 1
+    counter: number = 0
 }
 
 export class History {
-    fitnesserName : string = ""
-    meanFitnessDecrements : number = 0
-	bestFitnessDecrements : number = 0
-    bestGeneration : number = 0
-    bestIndividual : number = 0
-    bestFitness : number = 0
-    lastMeanFitness : number = 0
-    lastBestFitness : number = 0
-    fitnesses : number[] = []
+    fitnesserName: string = ""
+    meanFitnessDecrements: number = 0
+    bestFitnessDecrements: number = 0
+    bestGeneration: number = 0
+    bestIndividual: number = 0
+    bestFitness: number = 0
+    lastMeanFitness: number = 0
+    lastBestFitness: number = 0
+    fitnesses: number[] = []
 
-    load(history : any) {
+    load(history: any) {
         this.fitnesserName = history.fitnesserName
         this.meanFitnessDecrements = history.meanFitnessDecrements
         this.bestFitnessDecrements = history.bestFitnessDecrements
@@ -179,15 +179,15 @@ export class History {
 }
 
 export class ExecutionResults {
-    fitnesserName : string = ""
-    errors : number[] = []
-	fitnesses : number[] = []
-	gotFrequencies : number[] = []
-	selecteds : boolean[] = []
-	bestFitness : number = 0
-	bestIndividual : number = 0
-	selectionProbabilities : number[] = []
-	meanError : number = 0
-	meanFitness : number = 0
-    strategy : string = "";
+    fitnesserName: string = ""
+    errors: number[] = []
+    fitnesses: number[] = []
+    gotFrequencies: number[] = []
+    selecteds: boolean[] = []
+    bestFitness: number = 0
+    bestIndividual: number = 0
+    selectionProbabilities: number[] = []
+    meanError: number = 0
+    meanFitness: number = 0
+    strategy: string = "";
 }

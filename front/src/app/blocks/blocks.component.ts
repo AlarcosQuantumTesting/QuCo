@@ -13,11 +13,12 @@ import { TranspileService } from '../transpile.service';
 import { BlockColumn } from './BlockColumn';
 import { min } from 'rxjs';
 import { ProjectService } from '../project.service';
+import { Block } from './Block';
 
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
-interface StoredProject { id: string; name: string; qProgram: any; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes?: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
@@ -62,12 +63,21 @@ export class BlocksComponent extends EvolutionaryComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic'; 
-  REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
+  BLOCKS_GENERATOR_FQCN = 'edu.uclm.reper.model.Blocks'; 
+  REQUIRED_GENERATOR_TYPE = this.BLOCKS_GENERATOR_FQCN;
 
   responseReceived? : any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Blocks';
+  tipoLocal: string = 'quco_blocks';
+  storedNotesStr = localStorage.getItem('project_notes');
+
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+  applyChanges: boolean = false;
 
 
   constructor(private blocksService : BlocksService, public manager : ManagerService, private notificationService: NotificationService,
@@ -159,6 +169,14 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
 
+    const savedProjectId = localStorage.getItem('selectedProjectId_blocks');
+    if (savedProjectId && this.userEmail && this.userToken) {
+        this.selectedProjectId = savedProjectId;
+        this.onProjectSelected();
+    }
+
+    this.loadProjectNames();
+
   }
 
   updateNumberOfQubits() {
@@ -168,6 +186,8 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.pc.inputConfiguration.qubits = qubits
     this.pc.inputConfiguration.blockCircuit.updateNumberOfQubits(qubits);
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+
+    this.saveState();
   }
 
   private findGate(e : any) : Gate | undefined {
@@ -192,6 +212,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       this.pc.inputConfiguration.blockCircuit.startingColumns[columnIndex].gates[qubitIndex] = gate
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   setBlockGate(side : string, columnIndex : number, qubitIndex : number, e : any) {
@@ -205,12 +226,14 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   updateNumberOfBlocks() {
     this.pc.inputConfiguration.blockCircuit.updateNumberOfBlocks(this.pc.inputConfiguration.outputs.filter(output => output).length)
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    this.saveState();
   }
 
   override generateInitialPopulation() {
@@ -559,6 +582,7 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     // Guarda en localStorage (opcional)
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
   }
 
   updateColumnsFromInputLeft(side: string) {
@@ -572,6 +596,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       blockCircuit.block.leftColumns.splice(blockCircuit.block.leftColumns.length-1, 1)
 
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
         
   }
 
@@ -586,6 +611,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       blockCircuit.block.rightColumns.splice(blockCircuit.block.rightColumns.length-1, 1)
         
     localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(blockCircuit));
+    this.saveState();
   }
 
   ngOnDestroy(): void {
@@ -646,5 +672,592 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
 
+
+  /*private mapColumnsToStrings(columns: BlockColumn[]): string[][] {
+    return columns.map(col => col.gates.map(g => g.name || "I"));
+  }*/
+
+  private mapColumnsToStrings(columns: BlockColumn[]): string[][] {
+    if (!columns) return [];
+    return columns.map(col => col.gates.map(g => g.name || "I"));
+  }
+
+  private mapStringsToColumns(rawData: string[][], qubits: number): BlockColumn[] {
+    const columns: BlockColumn[] = [];
+    if (!rawData) return columns;
+
+    for (const colData of rawData) {
+        const newCol = new BlockColumn(qubits);
+        for (let i = 0; i < qubits; i++) {
+            if (colData[i]) {
+                newCol.gates[i] = new Gate(colData[i], true, 1);
+            } else {
+                newCol.gates[i] = new Gate("I", false, 1);
+            }
+        }
+        columns.push(newCol);
+    }
+    return columns;
+  }
+
+  getGeneratorData(): any {
+    const config = this.pc.inputConfiguration;
+    const selectedGateNames = this.gates
+        .filter(g => g.selected)
+        .map(g => g.name);
+    
+    const bc = config.blockCircuit;
+
+    const blockCircuitPayload = {
+        numberOfStartColumns: bc.numberOfStartColumns,
+        numberOfBlocks: bc.numberOfBlocks,
+        startingColumns: this.mapColumnsToStrings(bc.startingColumns),
+        blocks: [
+            {
+                numberOfLeftColumns: bc.block.numberOfLeftColumns,
+                numberOfRightColumns: bc.block.numberOfRightColumns,
+                leftColumns: this.mapColumnsToStrings(bc.block.leftColumns),
+                rightColumns: this.mapColumnsToStrings(bc.block.rightColumns)
+            }
+        ]
+    };
+
+    return {
+        "type": "BLOCKS",
+        "minNumberColumns": config.minNumberOfColumns,
+        "maxNumberColumns": config.maxNumberOfColumns,
+        "populationSize": config.populationSize,
+        "desiredError": this.pc.desiredError,
+        "fallsThreshold": this.pc.massiveMutationPolicy.fallsThreshold,
+        "applicableWhenBestFitnessFalls": this.pc.massiveMutationPolicy.applicableWhenBestFitnessFalls,
+        "applicableWhenMeanFitnessFalls": this.pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls,
+        "fitnessPercentage": this.pc.massiveMutationPolicy.fitnessPercentage,
+        "maxConsecutiveApplications": this.pc.massiveMutationPolicy.maxConsecutiveApplications,
+        "gates": selectedGateNames,
+
+        "blockCircuit": blockCircuitPayload
+    };
+  }
+
+  openSaveProjectModal(): void {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal(): void {
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.circuitName = ''; 
+  }
+
+  confirmarGuardarProyecto(): void {
+      if (!this.circuitName || this.circuitName.trim().length === 0) {
+          this.saveError = "The project name is mandatory.";
+          return;
+      }
+      this.mostrarModalGuardarProyecto = false;
+      this.saveError = '';
+      this.guardarProyecto();
+  }
+
+  guardarProyecto(): void {
+    if (!this.circuitName || this.circuitName.trim().length === 0) return;
+
+    let idCircuit: string;
+
+    if (this.applyChanges) {
+      idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
+    } else {
+      idCircuit = crypto.randomUUID();
+    }
+    
+    
+    const generatorData = this.getGeneratorData();
+    const qProgramExpressions: QProgramExpression[] = [];
+
+    const selectedOutputIndices = this.pc.inputConfiguration.outputs
+        .map((isSelected, index) => isSelected ? index : -1)
+        .filter(index => index !== -1);
+
+    const qProgram: QProgram = {
+      id: idCircuit,
+      qubits: this.pc.inputConfiguration.qubits || 0,
+      expressions: qProgramExpressions,
+      shots: this.pc.inputConfiguration.shots,
+      generator: generatorData,
+      qcodes: [
+          {
+              platform: "AerSimulator",
+              code: this.code || "No qiskit code generated."
+          }
+      ],
+      inputQubits: Array.from({length: this.pc.inputConfiguration.qubits || 0}, (_, i) => i).join(','),
+      outputQubits: selectedOutputIndices.join(','),
+      qCircuit: {
+          id: idCircuit,
+          qbits: this.pc.inputConfiguration.qubits || 0,
+          quirkCode: {cols: []} 
+      }
+    };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
+                .map((n: any, index: number) => ({
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
+    
+    const projectDtoForMapping: any = {
+        id: idCircuit,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail,
+        mutantCycles: [], 
+        testSuite: null,
+        projectNotes: notesPayload
+    };
+    
+    const finalPayload: FinalPayload = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+
+    console.log('Objeto JSON a guardar (BLOCKS):', JSON.stringify(finalPayload, null, 2));
+    
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: () => {
+        //alert('Project "' + this.circuitName + '" saved successfully!');
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
+        this.loadProjectNames();
+      },
+      error: (error: any) => {
+        console.error('Error saving project:', error);
+        alert('Error saving project (Code 400). Check console.');
+      }
+    });
+  }
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+    if (projectId) {
+        body.projectId = projectId;
+    }
+    return body;
+  }
+
+  loadProjectNames(): void {
+    if (this.userEmail && this.userToken) {
+        const requestBody = this.getAuthRequestBody();
+
+        this.projectService.getProjectsName(requestBody).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(project => 
+                    project.type === this.REQUIRED_GENERATOR_TYPE
+                );
+                console.log("Project names loaded (BLOCKS):", this.projectList);
+            },
+            error: (err) => {
+                console.error('Error al cargar nombres de proyectos:', err);
+                this.projectList = []; 
+            }
+        });
+    }
+  }
+
+  onProjectSelected(): void {
+    if (!this.selectedProjectId) return;
+
+    const requestBody = this.getAuthRequestBody(this.selectedProjectId);
+
+    this.projectService.getProject(requestBody).subscribe({
+        next: (project: StoredProject) => {
+             this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+             setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
+
+             setTimeout(() => {
+                 this.loadProjectDataToComponent(project);
+                 const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+                 const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+                 tabs.forEach((t, i) => t.classList.toggle("active", i === 0));
+                 contents.forEach((c, i) => c.classList.toggle("active", i === 0));
+             }, 1000);
+        },
+        error: (err) => {
+            console.error('Error loading project:', err);
+            alert('Error loading project details.');
+        }
+    });
+  }
+
+  loadProjectDataToComponent(project: StoredProject): void {
+    if (!project.qProgram) return;
+
+    this.selectedProjectId = project.id;
+    this.circuitName = project.name; 
+    
+    localStorage.setItem('selectedProjectId_blocks', project.id);
+    //localStorage.setItem('selectedProjectName_blocks', project.name);
+
+    const qp = project.qProgram;
+    const generator = qp.generator;
+    const config = this.pc.inputConfiguration;
+    
+    this.circuitName = project.name; 
+
+    config.qubits = qp.qubits;
+
+    
+    const outputQubitsString = qp.outputQubits ? qp.outputQubits.toString() : '';
+    const outputIndices: number[] = outputQubitsString 
+        .split(',')
+        .map((s: string) => parseInt(s.trim(), 10))
+        .filter((n: number) => !isNaN(n));
+    
+    config.outputs = Array(qp.qubits).fill(false);
+    outputIndices.forEach(i => {
+        if (i >= 0 && i < qp.qubits) config.outputs[i] = true;
+    });
+
+    /*if (project.projectNotes && Array.isArray(project.projectNotes)) {
+      const notesForStorage = project.projectNotes.map((n: any) => ({
+        title: n.title,
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
+      console.log(`Loaded ${notesForStorage.length} notes from project.`);
+      console.log("Notes content:", notesForStorage);
+    } else {
+      // localStorage.removeItem('project_notes');
+    }*/
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
+    }
+    
+    if (generator.type === 'BLOCKS') {
+        config.minNumberOfColumns = generator.minNumberColumns;
+        config.maxNumberOfColumns = generator.maxNumberColumns;
+        config.populationSize = generator.populationSize;
+        this.pc.desiredError = generator.desiredError;
+        
+        this.pc.massiveMutationPolicy.fallsThreshold = generator.fallsThreshold;
+        this.pc.massiveMutationPolicy.applicableWhenBestFitnessFalls = generator.applicableWhenBestFitnessFalls;
+        this.pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls = generator.applicableWhenMeanFitnessFalls;
+        this.pc.massiveMutationPolicy.fitnessPercentage = generator.fitnessPercentage;
+        this.pc.massiveMutationPolicy.maxConsecutiveApplications = generator.maxConsecutiveApplications;
+
+        const savedGates: string[] = generator.gates || [];
+        this.gates.forEach(g => { g.selected = savedGates.includes(g.name!); });
+        this.saveGates();
+
+        if (generator.blockCircuit) {
+            const bcData = generator.blockCircuit;
+            const qubits = config.qubits;
+
+            const newBlockCircuit = new BlockCircuit(qubits);
+            newBlockCircuit.numberOfStartColumns = bcData.numberOfStartColumns;
+            newBlockCircuit.numberOfBlocks = bcData.numberOfBlocks;
+
+            //newBlockCircuit.startingColumns = this.mapStringsToColumns(bcData.startingColumns, qubits);
+
+            if (bcData.startingColumns) {
+              newBlockCircuit.startingColumns = this.mapStringsToColumns(bcData.startingColumns, qubits);
+            }
+
+            //if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
+            if (bcData.blocks && Array.isArray(bcData.blocks) && bcData.blocks.length > 0) {
+                
+                const blockData = bcData.blocks[0];
+                
+                if (blockData) {
+                    console.log("Loading Block Data:", blockData);
+
+                    const newBlock = new Block(qubits);
+                    
+                    newBlock.numberOfLeftColumns = blockData.numberOfLeftColumns || 0;
+                    newBlock.numberOfRightColumns = blockData.numberOfRightColumns || 0;
+                    
+                    if (blockData.leftColumns) {
+                        newBlock.leftColumns = this.mapStringsToColumns(blockData.leftColumns, qubits);
+                    } else {
+                        newBlock.leftColumns = []; 
+                    }
+
+                    if (blockData.rightColumns) {
+                        newBlock.rightColumns = this.mapStringsToColumns(blockData.rightColumns, qubits);
+                    } else {
+                        newBlock.rightColumns = []; 
+                    }
+
+                    newBlockCircuit.block = newBlock;
+                } else {
+                    console.warn("Block data at index 0 is undefined or null.");
+                }
+
+            } else {
+                console.warn("No 'blocks' array found or it is empty in blockCircuit data. Creating default block.");
+                const defaultBlock = new Block(qubits);
+                newBlockCircuit.block = defaultBlock;
+            }
+            this.pc.inputConfiguration.blockCircuit = newBlockCircuit;
+        }
+    }
+
+    this.updateExpectedFrequencies();
+    this.validarDatos(); 
+    this.notBuilt = false;
+
+    this.lastSavedCircuitState = ''; 
+    this.isCircuitModified = false;
+    
+    //this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+    setTimeout(() => {
+
+        this.updateExpectedFrequencies();
+
+        this.lastSavedCircuitState = this.captureCircuitState(); 
+        this.isCircuitModified = false;
+        
+        
+        this.validarDatos(); 
+        this.notBuilt = false;
+        
+        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+    }, 200);
+    //setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+  }
+
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === this.tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  private captureCircuitState(): string {
+    const config = this.pc.inputConfiguration;
+    const selectedGateNames = this.gates
+        .filter(g => g.selected)
+        .map(g => g.name)
+        .sort()
+        .join(',');
+    
+    const state = {
+        qubits: config.qubits,
+        shots: config.shots,
+        outputQubits: config.outputs ? config.outputs.map((o, i) => o ? i : -1).filter(i => i !== -1).join(',') : '',
+        gates: selectedGateNames,
+        
+        startCols: this.mapColumnsToStrings(config.blockCircuit.startingColumns),
+        leftCols: this.mapColumnsToStrings(config.blockCircuit.block.leftColumns),
+        rightCols: this.mapColumnsToStrings(config.blockCircuit.block.rightColumns),
+        
+        minColumns: config.minNumberOfColumns,
+        maxColumns: config.maxNumberOfColumns,
+        popSize: config.populationSize,
+        desiredError: this.pc.desiredError,
+        
+        currentNotes: this.captureNotesState(),
+
+        massiveMutationPolicy: {
+            fallsThreshold: this.pc.massiveMutationPolicy.fallsThreshold,
+            applicableWhenBestFitnessFalls: this.pc.massiveMutationPolicy.applicableWhenBestFitnessFalls,
+            applicableWhenMeanFitnessFalls: this.pc.massiveMutationPolicy.applicableWhenMeanFitnessFalls,
+            fitnessPercentage: this.pc.massiveMutationPolicy.fitnessPercentage,
+            maxConsecutiveApplications: this.pc.massiveMutationPolicy.maxConsecutiveApplications,
+        },
+
+        //deleteFiles: this.pc.inputConfiguration!.deleteFiles,
+        numberOfBlocks: this.pc.inputConfiguration!.blockCircuit.numberOfBlocks
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.lastSavedCircuitState) {
+        this.isCircuitModified = true;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  saveState() {
+    localStorage.setItem('qucoConfigurationBlocks', JSON.stringify(this.pc.inputConfiguration.blockCircuit));
+    localStorage.setItem('blocksQubits', JSON.stringify(this.pc.inputConfiguration.qubits));
+      
+    this.checkForChanges();
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+            
+            localStorage.removeItem('selectedProjectId_blocks');
+
+            this.reload(); 
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  openSaveOrSaveAsNewModal(isNew: boolean) {
+    this.saveError = '';
+    
+    if (isNew) {
+        //this.selectedProjectId = '';
+        this.circuitName = this.circuitName || 'New Project';
+    } else if (!this.selectedProjectId) {
+        this.circuitName = '';
+    }
+    
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
+    }
+  }
 
 }

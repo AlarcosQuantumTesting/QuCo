@@ -2,10 +2,10 @@ package edu.uclm.tp3.common.model;
 
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,7 +15,7 @@ public class EdQubit {
     private String id;
     @ManyToOne @JsonIgnore
     private EdCircuit circuit;
-    @OneToMany(mappedBy = "qubitId", cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "qubitId", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<EdGate> gates;
 
     public EdQubit() {
