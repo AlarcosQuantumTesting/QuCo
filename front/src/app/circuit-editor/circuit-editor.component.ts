@@ -10,6 +10,14 @@ import { EdCircuitsService } from '../ed-circuits.service';
 
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
+import { ProjectService } from '../project.service';
+
+interface QProgramExpression { name: string; expr: string; description: string; type: string; }
+interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; qCircuit: any; }
+interface ProjectListItem { id: string; name: string; type: string; }
+interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
+interface FinalPayload { circuit: any; user: { id: string }; }
+interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; }
 
 @Component({
   selector: 'app-circuit-editor',
@@ -66,6 +74,31 @@ export class CircuitEditorComponent {
   qubitsConsecutivos: boolean = false;
   mostrarEjecucionRemote = false;
 
+  projectList: ProjectListItem[] = []; 
+  selectedProjectId: string = '';
+
+  mostrarModalGuardarProyecto: boolean = false;
+  saveError: string = '';
+  
+  userEmail: string = localStorage.getItem('userEmail') || '';
+  userToken: string = localStorage.getItem('userToken') || '';
+
+  EDITOR_GENERATOR_FQCN = 'edu.uclm.reper.model.Editor'; 
+  REQUIRED_GENERATOR_TYPE = this.EDITOR_GENERATOR_FQCN;
+
+  responseReceived? : any
+  mostrarNotasModal: boolean = false;
+  nombreComponente: string = 'Editor';
+  tipoLocal: string = 'quco_editor';
+
+  storedNotesStr = localStorage.getItem('project_notes');
+
+  isCircuitModified: boolean = false;
+  private lastSavedCircuitState: string = '';
+
+  showDeleteProjectModal: boolean = false;
+  showApplyChangesModal: boolean = false;
+
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',
     QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
@@ -74,7 +107,7 @@ export class CircuitEditorComponent {
   };
 
   constructor(public manager : ManagerService, private qiskitService : QiskitService, private qubitsConfigurationService: QubitsConfigurationService, 
-    private circuitsService : EdCircuitsService, public transpileService: TranspileService) {
+    private circuitsService : EdCircuitsService, public transpileService: TranspileService, private projectService: ProjectService) {
     this.qiskitService.getCustomizedGates().subscribe(
       gates => {
         for (let i=0; i<gates.length; i++) {
@@ -106,21 +139,12 @@ export class CircuitEditorComponent {
       this.availableBackends = backends;
     });
     
+    console.log("Notas:", this.storedNotesStr);
     
     this.selectedBackends = JSON.parse(localStorage.getItem('selectedBackends') || '[]');
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.manager.selectedTemplate = this.manager.templates[0];
-    /*this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
-        qubitsConfiguration => {
-          this.selectedQubitsConfigurationName = qubitsConfiguration[0];
-          
-          if (this.selectedQubitsConfigurationName) {
-            this.onQubitsConfigurationChange(this.selectedQubitsConfigurationName);
-            this.searchQuery = this.selectedQubitsConfigurationName;
-          }
-            
-    })*/
 
       const savedTemplateFileName = localStorage.getItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
       if (savedTemplateFileName) {
@@ -149,34 +173,15 @@ export class CircuitEditorComponent {
             this.searchQuery = this.selectedQubitsConfigurationName;
           }
       });
-    
-  }
 
-  /*measureColumn(column : number)  {
-    if (!this.circuit) 
-      return
-    let occupied = false
-    for (let i=0; i<this.circuit.qubits.length; i++) {
-      let gate = this.circuit.qubits[i].gates[column]
-      if (gate.name!='I' && gate.name!='0') {
-        occupied = true
-        break
+      const savedProjectId = localStorage.getItem('selectedProjectId_editor');
+      if (savedProjectId && this.userEmail && this.userToken) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
       }
-    }
-    if (occupied) {
-      let option = confirm("There are gates in this column. Do you want to remove them?")
-      if (!option)
-        return
-      for (let i=0; i<this.circuit.qubits.length; i++) 
-        this.circuit.qubits[i].gates[column] = new EdGate('I', 1)
-    } else {
-      for (let i=0; i<this.circuit.qubits.length; i++) {
-        let gate = new EdGate('M', 1)
-        gate.columnIndex = column
-        this.circuit.qubits[i].gates[column] = gate
-      }
-    }
-  }*/
+    
+      this.loadProjectNames();
+  }
 
   measureColumn(column : number) {
     if (!this.circuit) 
@@ -320,6 +325,9 @@ export class CircuitEditorComponent {
           }
           
           this.saveState();
+          if (!isLoadingFromStorage && this.selectedProjectId) {
+              this.isCircuitModified = true; 
+          }
         },
         error => { 
           this.error = error.error.message
@@ -1145,6 +1153,446 @@ export class CircuitEditorComponent {
       localStorage.setItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME, this.manager.selectedTemplate.fileName);
     } else {
       localStorage.removeItem(this.LOCAL_STORAGE_KEYS.SELECTED_TEMPLATE_FILENAME);
+    }
+
+    this.checkForChanges();
+  }
+
+  
+  
+  openSaveProjectModal() {
+    this.saveError = '';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  cancelarSaveModal() {
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+    this.circuitName = '';
+  }
+
+  confirmarGuardarProyecto() {
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+      this.saveError = "The project name is mandatory.";
+      return;
+    }
+    this.mostrarModalGuardarProyecto = false;
+    this.guardarProyecto();
+  }
+
+  guardarProyecto() {
+    if (!this.circuit) return;
+
+    let idCircuit: string;
+
+    if (this.applyChanges === true) {
+      idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
+    } else {
+      idCircuit = crypto.randomUUID();
+    }
+
+    this.generateCode();
+
+    const gatesPayload = this.gateRegistry.map(g => ({
+        id: g.id,
+        column: g.column,
+        name: g.name,
+        qubits: g.qubits,
+        parentQubit: g.parentQubit,
+        transactionId: g.transactionId
+    }));
+
+    const generatorData = {
+        "type": "EDITOR",
+        "columns": this.circuit.columns,
+        "gates": gatesPayload
+    };
+
+    const editorState = {
+        columns: this.circuit.columns,
+        qubitsCount: this.circuit.qubits.length,
+        gateRegistry: this.gateRegistry,
+        qubitsConfigName: this.selectedQubitsConfigurationName
+    };
+    
+    const serializedState = JSON.stringify(editorState);
+    const codeWithState = (this.code || "") + "\n\n# --- EDITOR_STATE_BEGIN ---\n# " + serializedState + "\n# --- EDITOR_STATE_END ---";
+
+    const qubitsArray = Array.from({length: this.circuit.qubits.length}, (_, i) => i);
+    const qubitsString = qubitsArray.join(',');
+
+    const qProgram: QProgram = {
+      id: idCircuit,
+      qubits: this.circuit.qubits.length,
+      expressions: [],
+      shots: 1024,
+      generator: generatorData,
+      qcodes: [{ platform: "AerSimulator", code: codeWithState }],
+      qCircuit: { 
+          id: idCircuit, 
+          qbits: this.circuit.qubits.length, 
+          quirkCode: {cols: []} 
+      }
+    };
+
+    let notesPayload: any[] = [];
+    const allNotesSaved = localStorage.getItem('project_notes');
+    
+    if (allNotesSaved) {
+        try {
+            const allNotes = JSON.parse(allNotesSaved);
+            
+            notesPayload = allNotes
+                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
+                .map((n: any, index: number) => ({
+                    //id: `note_${Date.now()}_${index}`,
+                    id: crypto.randomUUID(),
+                    title: n.title,
+                    text: n.text,
+                    type: n.type,
+                    timestamp: n.timestamp
+                }));
+                
+        } catch (e) {
+            console.error("Error procesando las notas del localStorage", e);
+        }
+    }
+
+    const projectDtoForMapping: any = {
+        id: idCircuit,
+        name: this.circuitName,
+        qProgram: qProgram,
+        userEmail: this.userEmail,
+        
+        mutantCycles: [], 
+        testSuite: null,
+        projectNotes: notesPayload
+    };
+
+    const finalPayload: FinalPayload = {
+        circuit: projectDtoForMapping, 
+        user: { id: this.userEmail } 
+    };
+
+    console.log('Objeto JSON a guardar (EDITOR):', JSON.stringify(finalPayload, null, 2));
+
+    this.projectService.saveProject(finalPayload).subscribe({
+      next: () => {
+        this.selectedProjectId = idCircuit;
+        this.lastSavedCircuitState = this.captureCircuitState();
+        this.isCircuitModified = false;
+
+        this.mensajeTemporal2 = `Project "${this.circuitName}" saved successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
+        this.loadProjectNames();
+      },
+      error: (err) => {
+        console.error('Error saving project:', err);
+        alert('Error saving project (Code 400). Check console.');
+      }
+    });
+  }
+
+  getAuthRequestBody(projectId?: string): any {
+    const instanceId = window.crypto.randomUUID(); 
+    const body: any = {
+        email: this.userEmail,
+        token: this.userToken,
+        instanceId: instanceId
+    };
+    if (projectId) body.projectId = projectId;
+    return body;
+  }
+
+  loadProjectNames() {
+    if (this.userEmail && this.userToken) {
+        this.projectService.getProjectsName(this.getAuthRequestBody()).subscribe({
+            next: (data: ProjectListItem[]) => {
+                this.projectList = data.filter(p => p.type === this.EDITOR_GENERATOR_FQCN);
+                console.log("Editor projects loaded:", this.projectList);
+            },
+            error: (err) => console.error('Error loading projects:', err)
+        });
+    }
+  }
+
+  onProjectSelected() {
+    if (!this.selectedProjectId) return;
+
+    this.projectService.getProject(this.getAuthRequestBody(this.selectedProjectId)).subscribe({
+        next: (project: StoredProject) => {
+            this.mensajeTemporal2 = `Loading "${project.name}"...`;
+            setTimeout(() => {
+              this.mensajeTemporal2 = '';
+              this.loadProjectDataToComponent(project);
+              //location.reload();
+            }, 1000);
+            
+        },
+        error: (err) => {
+            console.error('Error loading project:', err);
+            alert('Error loading project details.');
+        }
+    });
+  }
+
+  loadProjectDataToComponent(project: StoredProject) {
+    if (!project || !project.qProgram) {
+        console.error("Invalid project structure: qProgram missing");
+        return;
+    }
+
+    const qProgramAny = project.qProgram as any;
+    const qcodesList = qProgramAny.QCodes || qProgramAny.qcodes || [];
+
+    if (!qcodesList || qcodesList.length === 0) {
+        console.error("Invalid project structure: No QCodes found");
+        alert("Error: The loaded project has no code associated.");
+        return;
+    }
+
+    this.circuitName = project.name;
+    const fullCode = qcodesList[0].code;
+
+    localStorage.setItem('selectedProjectId_editor', project.id);
+
+    const incomingNotes = project.projectNotes || project.projectNotes;
+
+    if (incomingNotes && Array.isArray(incomingNotes)) {
+        
+        const newNotes = incomingNotes.map((n: any) => ({
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+        }));
+
+        const storedNotesStr = localStorage.getItem('project_notes');
+        let existingNotes: any[] = [];
+        
+        if (storedNotesStr) {
+            try {
+                existingNotes = JSON.parse(storedNotesStr);
+            } catch (e) {
+                console.error("Error parsing existing notes", e);
+                existingNotes = [];
+            }
+        }
+
+        const notesToKeep = existingNotes.filter((n: any) => 
+            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+        );
+
+        const finalNotesList = [...notesToKeep, ...newNotes];
+
+        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+        
+        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+
+    } else {
+        
+        /* const storedNotesStr = localStorage.getItem('project_notes');
+        if (storedNotesStr) {
+            const existingNotes = JSON.parse(storedNotesStr);
+            const notesToKeep = existingNotes.filter((n: any) => 
+                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+            );
+            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+        }
+        */
+    }
+
+    const stateRegex = /# --- EDITOR_STATE_BEGIN ---\n# (.*)\n# --- EDITOR_STATE_END ---/;
+    const match = fullCode.match(stateRegex);
+
+    if (match && match[1]) {
+        try {
+            const editorState = JSON.parse(match[1]);
+
+            const stateToSave = JSON.stringify({
+                columns: editorState.columns,
+                qubitsCount: editorState.qubitsCount,
+                gateRegistry: editorState.gateRegistry,
+                qubitsConfigName: editorState.qubitsConfigName,
+                selectedTemplateFileName: this.manager.selectedTemplate?.fileName,
+                currentNotes: this.captureNotesState()
+            });
+            this.lastSavedCircuitState = stateToSave;
+            this.isCircuitModified = false;
+            
+            if (editorState.qubitsConfigName) {
+                this.qubitsConfigurationService.getQubitsConfiguration(editorState.qubitsConfigName).subscribe({
+                    next: (config) => {
+                        this.qubitsConfiguration = new QubitsConfiguration();
+                        this.qubitsConfiguration.name = config.name;
+                        this.qubitsConfiguration.matrix = config.matrix;
+                        this.qubitsConfiguration.qubits = config.qubits;
+
+                        this.selectedQubitsConfigurationName = config.name;
+                        
+                        this.circuit = new EdCircuit();
+                        this.circuit.name = this.circuitName;
+                        this.circuit.columns = editorState.columns || 10;
+                        
+                        this.circuit.resizeTo(editorState.qubitsCount);
+                        
+                        this.gateRegistry = editorState.gateRegistry || [];
+                        
+                        setTimeout(() => {
+                             this.restoreGatesFromRegistry();
+                        }, 100);
+                        
+                        this.code = fullCode.replace(stateRegex, '').trim();
+                        
+                        this.saveState();
+                        this.mensajeTemporal2 = `Project "${project.name}" loaded!`;
+                        setTimeout(() => this.mensajeTemporal2 = '', 2000);
+                    },
+                    error: (err) => {
+                        console.error("Error loading qubit config:", err);
+                        alert("Error loading qubit configuration for this project.");
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error parsing editor state:", e);
+            alert("Error restoring circuit state. The file might be corrupted.");
+            this.code = fullCode;
+        }
+    } else {
+        this.lastSavedCircuitState = ''; 
+        this.isCircuitModified = true;
+
+        this.code = fullCode;
+        alert("Project loaded (Code only). Circuit layout could not be restored.");
+    }
+  }
+
+  private captureCircuitState(): string {
+    if (!this.circuit || !this.qubitsConfiguration) return '';
+
+    const state = {
+        columns: this.circuit.columns,
+        qubitsCount: this.circuit.qubits.length,
+        gateRegistry: this.gateRegistry,
+        qubitsConfigName: this.selectedQubitsConfigurationName,
+        selectedTemplateFileName: this.manager.selectedTemplate?.fileName,
+        currentNotes: this.captureNotesState()
+    };
+    return JSON.stringify(state);
+  }
+
+  private checkForChanges() {
+    if (!this.lastSavedCircuitState) {
+        this.isCircuitModified = true;
+        return;
+    }
+    const currentState = this.captureCircuitState();
+    this.isCircuitModified = currentState !== this.lastSavedCircuitState;
+  }
+
+  openDeleteProjectModal() {
+    if (!this.selectedProjectId) return;
+    this.showDeleteProjectModal = true;
+  }
+
+  cancelDeleteProject() {
+    this.showDeleteProjectModal = false;
+  }
+
+  confirmDeleteProject() {
+    if (!this.selectedProjectId) return;
+
+    const projectIdToDelete = this.selectedProjectId;
+    
+    const requestBody = { projectId: projectIdToDelete };
+
+    this.projectService.deleteProject(requestBody).subscribe({
+        next: () => {
+            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+            setTimeout(() => this.mensajeTemporal2 = '', 3000);
+            
+            this.showDeleteProjectModal = false;
+            this.selectedProjectId = '';
+            this.circuitName = '';
+            this.lastSavedCircuitState = '';
+            this.isCircuitModified = false;
+
+            if (this.qubitsConfiguration) {
+                 this.circuit = new EdCircuit()
+                 this.circuit.columns = 10
+                 this.circuit.resizeTo(this.qubitsConfiguration.qubits)
+                 this.gateRegistry = [];
+                 this.saveState();
+            }
+            localStorage.removeItem('selectedProjectId_editor');
+            this.loadProjectNames();
+        },
+        error: (err: any) => {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project. Check console.');
+            this.showDeleteProjectModal = false;
+        }
+    });
+  }
+
+  applyChanges: boolean = false;
+
+  openApplyChangesModal() {
+    this.showApplyChangesModal = true;
+  }
+
+  cancelApplyChanges() {
+    this.showApplyChangesModal = false;
+  }
+
+  confirmApplyChanges() {
+    this.showApplyChangesModal = false;
+    this.circuitName = this.circuitName || '';
+    this.applyChanges = true;
+    this.guardarProyecto();
+  }
+
+  openSaveAsNewModal() {
+    this.saveError = '';
+    //this.selectedProjectId = ''; 
+    this.circuitName = this.circuitName || 'New Project';
+    this.mostrarModalGuardarProyecto = true;
+  }
+
+  private captureNotesState(): string {
+    const allNotesStr = localStorage.getItem('project_notes');
+    if (!allNotesStr) return '[]';
+
+    try {
+        const allNotes = JSON.parse(allNotesStr);
+        const editorNotes = allNotes
+            .filter((n: any) => (n.type || '').toLowerCase() === this.tipoLocal.toLowerCase())
+            .map((n: any) => ({
+                title: n.title,
+                text: n.text,
+                type: n.type,
+            }));
+        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+        
+        return JSON.stringify(editorNotes);
+    } catch (e) {
+        console.error("Error capturing notes state:", e);
+        return '[]';
+    }
+  }
+
+  checkNotesChangeAndClose(event: any) {
+    this.mostrarNotasModal = false;
+    
+    if (this.selectedProjectId) {
+        this.checkForChanges();
+        
+        if (this.isCircuitModified) {
+             this.mensajeTemporal = 'Notes changed, save required.';
+             setTimeout(() => this.mensajeTemporal = '', 2000);
+        }
     }
   }
 }

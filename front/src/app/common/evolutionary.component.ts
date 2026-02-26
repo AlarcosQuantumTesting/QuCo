@@ -14,59 +14,59 @@ import { Directive } from '@angular/core';
 @Directive()
 export abstract class EvolutionaryComponent {
   @ViewChildren('card') cardElems!: QueryList<ElementRef>;
-  pc : ProblemConfiguration = new ProblemConfiguration()
+  pc: ProblemConfiguration = new ProblemConfiguration()
 
   mostrarModalCode: boolean = false;
-  individuals : Individual[] = []
-  selectedIndividual? : Individual
-  selectedIndividualFitnesser? : string
+  individuals: Individual[] = []
+  selectedIndividual?: Individual
+  selectedIndividualFitnesser?: string
 
-  remoteFitnessers : RemoteFitnesser[] = []
-  selectedRemoteFitnessers : RemoteFitnesser[] = []
+  remoteFitnessers: RemoteFitnesser[] = []
+  selectedRemoteFitnessers: RemoteFitnesser[] = []
 
-  gates : Gate[] = []
+  gates: Gate[] = []
 
-  lastBestFitness : number = 0
-  lastMeanFitness : number = 0
+  lastBestFitness: number = 0
+  lastMeanFitness: number = 0
 
-  bestFitnesses : any[] = []
-  meanFitnesses : any[] = []
-  meanErrors : any[] = []
-  strategies : any[] = []
+  bestFitnesses: any[] = []
+  meanFitnesses: any[] = []
+  meanErrors: any[] = []
+  strategies: any[] = []
 
-  stratego : string = "fixedStratego"
+  stratego: string = "fixedStratego"
 
-  existingStrategies : Strategy[] = []
-  selectedStrategiesProbability : number = 100
+  existingStrategies: Strategy[] = []
+  selectedStrategiesProbability: number = 100
 
-  code : string = ""
+  code: string = ""
 
-  timesChart? : Chart
+  timesChart?: Chart
 
-  state? : string 
-  substate? : string
-  error ? : string
+  state?: string
+  substate?: string
+  error?: string
 
-  running : boolean = false
+  running: boolean = false
   private eventSource?: EventSource;
 
   math = Math
   _Array = Array
 
-  constructor(public service : IService, controllerName : string) {
+  constructor(public service: IService, controllerName: string) {
     this.service.controller = controllerName
     this.service.resetSession().subscribe(
-      result=> {
+      result => {
         this.service.httpSessionId = result
         this.random()
         this.loadConf()
-       this.eventSource = this.service.connectSSE();
+        this.eventSource = this.service.connectSSE();
 
         this.eventSource.onmessage = (event) => {
-          if (this.running){
+          if (this.running) {
             this.substate = event.data;
             console.log("Event received: " + this.substate);
-          }else{
+          } else {
             this.substate = undefined;
           }
         };
@@ -83,16 +83,16 @@ export abstract class EvolutionaryComponent {
     this.selectedStrategiesProbability = this.existingStrategies.reduce((sum, es) => sum + es.probability, 0)
   }
 
-  moveUp(index : number) {
+  moveUp(index: number) {
     const source = this.existingStrategies[index]
-    this.existingStrategies[index] = this.existingStrategies[index-1]
-    this.existingStrategies[index-1] = source
+    this.existingStrategies[index] = this.existingStrategies[index - 1]
+    this.existingStrategies[index - 1] = source
   }
 
-  moveDown(index : number) {
+  moveDown(index: number) {
     const source = this.existingStrategies[index]
-    this.existingStrategies[index] = this.existingStrategies[index+1]
-    this.existingStrategies[index+1] = source
+    this.existingStrategies[index] = this.existingStrategies[index + 1]
+    this.existingStrategies[index + 1] = source
   }
 
 
@@ -109,30 +109,30 @@ export abstract class EvolutionaryComponent {
 
   private async loadGates(): Promise<void> {
     try {
-        const result = await this.service.getGates().toPromise();
-        this.error = undefined;
-        this.gates = []
-        for (let i=0; i<result.length; i++)
-          this.gates.push(new Gate(result[i].name, false, result[i].affectedQubits))
+      const result = await this.service.getGates().toPromise();
+      this.error = undefined;
+      this.gates = []
+      for (let i = 0; i < result.length; i++)
+        this.gates.push(new Gate(result[i].name, false, result[i].affectedQubits))
     } catch (error: any) {
-        this.state = undefined;
-        this.substate = undefined;
-        this.error = error?.error?.message || 'Error desconocido al cargar los gates.';
+      this.state = undefined;
+      this.substate = undefined;
+      this.error = error?.error?.message || 'Error desconocido al cargar los gates.';
     }
   }
 
   protected async loadStrategies(): Promise<void> {
     try {
-        const result = await this.service.getStrategies().toPromise();
-        this.error = undefined;
-        this.existingStrategies = []
-        for (let i=0; i<result.length; i++)
-          this.existingStrategies.push(new Strategy(result[i], 100/result.length))
-        this.selectedStrategiesProbability = 100
+      const result = await this.service.getStrategies().toPromise();
+      this.error = undefined;
+      this.existingStrategies = []
+      for (let i = 0; i < result.length; i++)
+        this.existingStrategies.push(new Strategy(result[i], 100 / result.length))
+      this.selectedStrategiesProbability = 100
     } catch (error: any) {
-        this.state = undefined;
-        this.substate = undefined;
-        this.error = error?.error?.message || 'Error desconocido al cargar las strategies.';
+      this.state = undefined;
+      this.substate = undefined;
+      this.error = error?.error?.message || 'Error desconocido al cargar las strategies.';
     }
   }
 
@@ -170,8 +170,8 @@ export abstract class EvolutionaryComponent {
     if (qucoGates) {
       let parsedLocalGates = JSON.parse(qucoGates) as Array<any>
 
-      for (let i=0; i<parsedLocalGates.length; i++)
-        this.gates.find(g=> g.name==parsedLocalGates[i].name)!.selected = parsedLocalGates[i].selected
+      for (let i = 0; i < parsedLocalGates.length; i++)
+        this.gates.find(g => g.name == parsedLocalGates[i].name)!.selected = parsedLocalGates[i].selected
     }
 
     await this.loadStrategies()
@@ -186,16 +186,16 @@ export abstract class EvolutionaryComponent {
     localStorage.setItem("qucoGates", JSON.stringify(this.gates))
   }
 
-  getNumberOfSelectedFitnessers() : number {
-    return this.remoteFitnessers.filter(rf=>rf.selected).length
+  getNumberOfSelectedFitnessers(): number {
+    return this.remoteFitnessers.filter(rf => rf.selected).length
   }
 
   async resetMatrix() {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
-    for (let i=0; i<max; i++)
-        this.pc.inputConfiguration.expectedFrequencies.push(0)
+    for (let i = 0; i < max; i++)
+      this.pc.inputConfiguration.expectedFrequencies.push(0)
     this.calculateShots()
   }
 
@@ -203,8 +203,8 @@ export abstract class EvolutionaryComponent {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
-    for (let i=0; i<max; i++)
-        this.pc.inputConfiguration.expectedFrequencies.push(Math.round(Math.random()*10))
+    for (let i = 0; i < max; i++)
+      this.pc.inputConfiguration.expectedFrequencies.push(Math.round(Math.random() * 10))
     this.calculateShots()
     this.updateExpectedFrequencies()
   }
@@ -213,52 +213,63 @@ export abstract class EvolutionaryComponent {
     let outputsA1 = this.pc.inputConfiguration.outputs.filter(output => output).length
     let max = Math.pow(2, outputsA1)
     this.pc.inputConfiguration.expectedFrequencies = []
-    for (let i=1; i<=max; i++)
+    for (let i = 1; i <= max; i++)
       this.pc.inputConfiguration.expectedFrequencies.push(i)
     this.calculateShots()
     this.updateExpectedFrequencies()
   }
 
   async updateExpectedFrequencies() {
-        if (!this.remoteFitnesser) {
-          try {
-            const result = await this.service.getSimpleFitnesser().toPromise();
-            console.log("SimpleFitnesser received:", result);
+    if (!this.remoteFitnesser) {
+      try {
+        const result = await this.service.getSimpleFitnesser().toPromise();
+        console.log("SimpleFitnesser received:", result);
 
-            if (result) {
-              const fitnesser = new RemoteFitnesser(0, result.shortName);
-              fitnesser.shortName = result.shortName;
-              fitnesser.expectedFitness = result.expectedFitness;
-              fitnesser.maxFitness = result.maxFitness;
-              fitnesser.maxError = result.maxError;
+        if (result) {
+          const fitnesser = new RemoteFitnesser(0, result.shortName);
+          fitnesser.shortName = result.shortName;
+          fitnesser.expectedFitness = result.expectedFitness;
+          fitnesser.maxFitness = result.maxFitness;
+          fitnesser.maxError = result.maxError;
 
-              await this.selectFitnesser(fitnesser);
-            } else {
-              this.error = "No fitnesser available to select";
-              return;
-            }
-          } catch (error: any) {
-            this.state = undefined;
-            this.substate = undefined;
-            this.error = error?.error?.message || 'Error al obtener el SimpleFitnesser.';
-            return;
-          }
+          await this.selectFitnesser(fitnesser);
+        } else {
+          this.error = "No fitnesser available to select";
+          return;
         }
+      } catch (error: any) {
+        this.state = undefined;
+        this.substate = undefined;
+        this.error = error?.error?.message || 'Error al obtener el SimpleFitnesser.';
+        return;
+      }
+    }
 
-        console.log("Updating expected frequencies with info:", this.pc.inputConfiguration.expectedFrequencies,
-        "shots: ", this.pc.inputConfiguration.shots);
+    console.log("Updating expected frequencies with info:", this.pc.inputConfiguration.expectedFrequencies,
+      "shots: ", this.pc.inputConfiguration.shots);
 
-        this.service.updateExpectedFrequencies(
-          this.pc.inputConfiguration.expectedFrequencies,
-          this.pc.inputConfiguration.shots
-        ).subscribe(
-          result => this.updateRemoteFitnessers(result),
-          error => {
-            this.state = undefined;
-            this.substate = undefined;
-            this.error = error.error.message;
-          }
+    this.service.updateExpectedFrequencies(
+      this.pc.inputConfiguration.expectedFrequencies,
+      this.pc.inputConfiguration.shots
+    ).subscribe(
+      result => this.updateRemoteFitnessers(result),
+      error => {
+        this.state = undefined;
+        this.substate = undefined;
+        this.error = error.error.message;
+      }
     );
+  }
+
+  onQubitsChange() {
+    let config = this.pc.inputConfiguration;
+    if (config.outputs.length > config.qubits) {
+      config.outputs = config.outputs.slice(0, config.qubits);
+    }
+    if (config.startWithH.length > config.qubits) {
+      config.startWithH = config.startWithH.slice(0, config.qubits);
+    }
+    this.updateOutputs();
   }
 
   updateOutputs() {
@@ -267,16 +278,16 @@ export abstract class EvolutionaryComponent {
     //this.saveConf()
 
     let max = Math.pow(2, outputsA1)
-    if (max<this.pc.inputConfiguration.expectedFrequencies.length) {
+    if (max < this.pc.inputConfiguration.expectedFrequencies.length) {
       this.pc.inputConfiguration.expectedFrequencies.splice(max)
     } else {
       let l = this.pc.inputConfiguration.expectedFrequencies.length
-      for (let i=l; i<max; i++)
+      for (let i = l; i < max; i++)
         this.pc.inputConfiguration.expectedFrequencies.push(0)
     }
     this.calculateShots()
     this.service.updateExpectedFrequencies(this.pc.inputConfiguration.expectedFrequencies, this.pc.inputConfiguration.shots).subscribe(
-      result=> {
+      result => {
         this.updateRemoteFitnessers(result)
       },
       error => {
@@ -309,46 +320,46 @@ export abstract class EvolutionaryComponent {
 
   public calculateShots() {
     this.pc.inputConfiguration.shots = 0
-    for (let i=0; i<this.pc.inputConfiguration.expectedFrequencies.length; i++)
+    for (let i = 0; i < this.pc.inputConfiguration.expectedFrequencies.length; i++)
       this.pc.inputConfiguration.shots = this.pc.inputConfiguration.shots + this.pc.inputConfiguration.expectedFrequencies[i]
   }
 
   remoteFitnesser?: RemoteFitnesser;
 
-    selectFitnesser(rf: RemoteFitnesser): Promise<void> {
-      rf.selected = true;
-      this.remoteFitnesser = rf;
+  selectFitnesser(rf: RemoteFitnesser): Promise<void> {
+    rf.selected = true;
+    this.remoteFitnesser = rf;
 
-      return this.service.selectFitnesser(
-        rf.name!,
-        true,
-        this.pc.inputConfiguration.shots,
-        this.pc.desiredError,
-        this.pc.inputConfiguration.expectedFrequencies,
-        this.pc.inputConfiguration.populationSize
-      ).toPromise().then(result => {
-        this.error = undefined;
-        if (result != null) {
-          rf.shortName = result.shortName;
-          rf.maxFitness = result.maxFitness;
-          rf.maxError = result.maxError;
-          rf.populationSize = result.populationSize;
-          rf.expectedFitness = result.expectedFitness;
-        }
-        this.selectedRemoteFitnessers = [rf];
-        console.log("Fitnesser selected: " + rf.name);
-      }).catch(error => {
-        this.state = undefined;
-        this.substate = undefined;
-        this.error = error.error.message;
-      });
-    }
+    return this.service.selectFitnesser(
+      rf.name!,
+      true,
+      this.pc.inputConfiguration.shots,
+      this.pc.desiredError,
+      this.pc.inputConfiguration.expectedFrequencies,
+      this.pc.inputConfiguration.populationSize
+    ).toPromise().then(result => {
+      this.error = undefined;
+      if (result != null) {
+        rf.shortName = result.shortName;
+        rf.maxFitness = result.maxFitness;
+        rf.maxError = result.maxError;
+        rf.populationSize = result.populationSize;
+        rf.expectedFitness = result.expectedFitness;
+      }
+      this.selectedRemoteFitnessers = [rf];
+      console.log("Fitnesser selected: " + rf.name);
+    }).catch(error => {
+      this.state = undefined;
+      this.substate = undefined;
+      this.error = error.error.message;
+    });
+  }
 
 
 
   updateDesiredError() {
     this.service.updateDesiredError(this.pc.desiredError).subscribe(
-      result=> {
+      result => {
         this.error = undefined
         this.updateRemoteFitnessers(result)
       },
@@ -377,7 +388,7 @@ export abstract class EvolutionaryComponent {
     }
   }
 
-  abstract generateInitialPopulation() : void
+  abstract generateInitialPopulation(): void
 
   firstRun() {
     this.state = "Running population..."
@@ -409,31 +420,31 @@ export abstract class EvolutionaryComponent {
     )
   }
 
-  protected renderResults(result : any) {
+  protected renderResults(result: any) {
     let startRenderingTime = Date.now()
     if (!this.running) {
       this.reset()
-      return      
+      return
     }
     this.error = undefined
-    
+
     let lastExecutionResults = result.lastExecutionResults
     this.pc.updateLastExecutionResults(lastExecutionResults)
 
     let individual
-    let rf : RemoteFitnesser
-    
+    let rf: RemoteFitnesser
+
     rf = this.selectedRemoteFitnessers[0];
     let fitnesserResult
     this.individuals = []
     this.pc.inputConfiguration.populationSize = result.populationSize
-    for (let i=0; i<this.pc.inputConfiguration.populationSize; i++)
+    for (let i = 0; i < this.pc.inputConfiguration.populationSize; i++)
       // this.individuals.push(new Individual(i, this.getNumberOfSelectedFitnessers()))
-    this.individuals.push(new Individual(i))
+      this.individuals.push(new Individual(i))
 
-    for (let i=0; i<this.individuals.length; i++) {
+    for (let i = 0; i < this.individuals.length; i++) {
       individual = this.individuals[i]
-      for (let j=0; j<this.selectedRemoteFitnessers.length; j++) {
+      for (let j = 0; j < this.selectedRemoteFitnessers.length; j++) {
         rf = this.selectedRemoteFitnessers[j]
         fitnesserResult = Reflect.get(lastExecutionResults, rf.name!)
         individual.gotFrequencies[j] = fitnesserResult.gotFrequencies[i]
@@ -441,19 +452,19 @@ export abstract class EvolutionaryComponent {
         individual.fitness[j] = parseFloat(Number.parseFloat(fitnesserResult.fitnesses[i]).toFixed(2))
         individual.length[j] = fitnesserResult.lengths[i]
         individual.selected[j] = fitnesserResult.selecteds[i]
-        
+
         if (individual.selected[j]) {
           this.selectedIndividual = individual
           this.selectedIndividualFitnesser = rf.name
         }
       }
     }
-    
+
     let strategy
     let bestFitness
     let meanFitness
     let meanError
-    for (let i=0; i<this.selectedRemoteFitnessers.length; i++) {
+    for (let i = 0; i < this.selectedRemoteFitnessers.length; i++) {
       rf = this.selectedRemoteFitnessers[i]
       strategy = lastExecutionResults[rf.name!].strategy
       bestFitness = parseFloat(Number(lastExecutionResults[rf.name!].bestFitness).toFixed(2))
@@ -465,9 +476,9 @@ export abstract class EvolutionaryComponent {
       this.meanFitnesses[i].push(meanFitness)
       this.meanErrors[i].push(meanError)
 
-      rf.bestFitnessReached= bestFitness
-      rf.meanFitnessReached= meanFitness
-      rf.meanErrorReached= meanError
+      rf.bestFitnessReached = bestFitness
+      rf.meanFitnessReached = meanFitness
+      rf.meanErrorReached = meanError
       rf.updateChart(this.pc.sourceGeneration, this.pc.massiveMutationPolicy.fitnessPercentage, lastExecutionResults[rf.name!])
     }
 
@@ -475,7 +486,7 @@ export abstract class EvolutionaryComponent {
     this.timesChart!.data.datasets[0].data.push(result.executionTime)
     this.timesChart!.data.datasets[1].data.push(result.calculusTime)
     this.timesChart!.data.datasets[2].data.push(result.strategyTime)
-    this.timesChart!.data.datasets[3].data.push(Date.now()-startRenderingTime)
+    this.timesChart!.data.datasets[3].data.push(Date.now() - startRenderingTime)
     this.timesChart!.update()
 
     this.pc.iterationIndex++
@@ -491,8 +502,8 @@ export abstract class EvolutionaryComponent {
     }
   }
 
-  getCode(individual : Individual) {
-    this.service.getCode(this.pc.targetGeneration-1, individual.index, this.selectedIndividualFitnesser!).subscribe(
+  getCode(individual: Individual) {
+    this.service.getCode(this.pc.targetGeneration - 1, individual.index, this.selectedIndividualFitnesser!).subscribe(
       result => {
         this.error = undefined
         this.code = result
@@ -515,14 +526,14 @@ export abstract class EvolutionaryComponent {
     this.mostrarModalCode = true;
   }
 
-  isResultCode(individual : Individual, fitnesserIndex: number) {
-    if(individual.selected[fitnesserIndex]) {
+  isResultCode(individual: Individual, fitnesserIndex: number) {
+    if (individual.selected[fitnesserIndex]) {
       this.getCode(individual);
     }
   }
 
   copyCode() {
-    let wholeCode = document.getElementById("codeArea") 
+    let wholeCode = document.getElementById("codeArea")
     let range = document.createRange()
     range.selectNode(wholeCode!)
     window.getSelection()!.removeAllRanges();
@@ -533,47 +544,47 @@ export abstract class EvolutionaryComponent {
 
   protected prepareCharts() {
     let rrff = this.selectedRemoteFitnessers
-    for (let i=0; i<rrff.length; i++)
+    for (let i = 0; i < rrff.length; i++)
       rrff[i].prepareChart("chart" + i, rrff[i].shortName!)
     if (this.timesChart)
       this.timesChart.destroy()
     this.timesChart = new Chart("timesChart",
       {
-       type : "line",
-       options : {
-         plugins : {
-           title : {
-             display : true,
-             text : "Times (ms)"
-           }
-         },
-         aspectRatio : 2.5
-       },
-       data : {
-         labels : [],
-         datasets : [
-           { 
-             data : [],
-             label : "Execution time",
-             backgroundColor : "orange"
-           },
-           {
-            data : [],
-            label : "Calculus time",
-            backgroundColor : "red"
-           },
-           {
-            data : [],
-            label : "Strategy application time",
-            backgroundColor : "blue"
-           },
-           {
-            data : [],
-            label : "Rendering (UA) time",
-            backgroundColor : "green"
-           }
-         ]
-       }
+        type: "line",
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Times (ms)"
+            }
+          },
+          aspectRatio: 2.5
+        },
+        data: {
+          labels: [],
+          datasets: [
+            {
+              data: [],
+              label: "Execution time",
+              backgroundColor: "orange"
+            },
+            {
+              data: [],
+              label: "Calculus time",
+              backgroundColor: "red"
+            },
+            {
+              data: [],
+              label: "Strategy application time",
+              backgroundColor: "blue"
+            },
+            {
+              data: [],
+              label: "Rendering (UA) time",
+              backgroundColor: "green"
+            }
+          ]
+        }
       })
   }
 }

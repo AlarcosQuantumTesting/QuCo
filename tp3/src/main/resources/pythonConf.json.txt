@@ -1,5 +1,5 @@
 {
-	"environment" : "Mac de Maco",
+	"environment" : "AlarcosJ3",
 	"DEBUG" : false,
 	"proxyAOtro" : "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/",
 	"proxyAOtro en desarrollo" : "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/",
@@ -34,6 +34,16 @@
 			"inheritIO" : false,
 			"working directory" : "C:/Users/Public/",
 			"output directory" : "C:/Users/Public/"
+		},
+		{
+			"name" : "AlarcosJ3",
+			"path" : "C:\\Program Files\\java\\jdk-21.0.10\\bin;C:\\Program Files\\Common Files\\Oracle\\Java\\javapath;C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\Java Update;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Common Files\\Acronis\\VirtualFile\\;C:\\Program Files (x86)\\Common Files\\Acronis\\VirtualFile64\\;C:\\Program Files (x86)\\Common Files\\Acronis\\SnapAPI\\;C:\\Program Files\\CMake\\bin;C:\\Users\\GrupoAlarcos\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\;C:\\Users\\GrupoAlarcos\\AppData\\Local\\Programs\\Python\\Python312\\;C:\\Users\\GrupoAlarcos\\AppData\\Local\\Microsoft\\WindowsApps",
+			"commands" : [ "python" ],
+			"PYTHONPATH" : "C:\\Users\\Tomcat\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages",
+			"joinLastCommand" : false,
+			"inheritIO" : false,
+			"working directory" : "C:/Program Files/Apache Software Foundation/Tomcat 11.0/temp/",
+			"output directory" : "C:/Program Files/Apache Software Foundation/Tomcat 11.0/temp/"
 		},
 		{
 			"name": "Ordenador de Patri",
