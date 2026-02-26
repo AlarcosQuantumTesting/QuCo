@@ -11,7 +11,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import edu.uclm.tp3.common.model.Pair;
 import edu.uclm.tp3.ws.HWSession;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class ManagerService {

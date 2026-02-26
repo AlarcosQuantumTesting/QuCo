@@ -6,7 +6,10 @@ import java.util.List;
 import edu.uclm.tp3.common.strategies.Strategy;
 import edu.uclm.tp3.parallel.TaskReceptor;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @SuppressWarnings("serial")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExecutionResults implements Serializable, TaskReceptor {
 	private int fitnesserIndex;
 	private double[] errors;
@@ -22,10 +25,10 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	private String strategy;
 	private int iterationIndex;
 	private String initials;
-	
+
 	public ExecutionResults() {
 	}
-	
+
 	public ExecutionResults(int individuals, int numberOfOutputs) {
 		this.errors = new double[individuals];
 		this.fitnesses = new double[individuals];
@@ -36,18 +39,18 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	}
 
 	public synchronized void setGotFrequencies(int individual, List<Integer> frequencies) {
-		for (int j=0; j<frequencies.size(); j++)
+		for (int j = 0; j < frequencies.size(); j++)
 			this.gotFrequencies[individual][j] = frequencies.get(j);
 	}
 
 	public void setSelecteds(int individual, boolean selected) {
 		this.selecteds[individual] = selected;
 	}
-	
+
 	public void setBestFitness(double bestFitness) {
 		this.bestFitness = bestFitness;
 	}
-	
+
 	public void setBestIndividual(int bestIndividual) {
 		this.bestIndividual = bestIndividual;
 	}
@@ -55,7 +58,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public void setMeanError(double meanError) {
 		this.meanError = meanError;
 	}
-	
+
 	public void setMeanFitness(double meanFitness) {
 		this.meanFitness = meanFitness;
 	}
@@ -63,7 +66,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public double[] getErrors() {
 		return errors;
 	}
-	
+
 	public double getError(int individual) {
 		return errors[individual];
 	}
@@ -79,7 +82,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public synchronized void setFitnesses(int individual, double fitness) {
 		this.fitnesses[individual] = fitness;
 	}
-	
+
 	public synchronized void setLength(int individual, int length) {
 		this.lengths[individual] = length;
 	}
@@ -111,7 +114,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public double getBestFitness() {
 		return bestFitness;
 	}
-	
+
 	public int getBestIndividual() {
 		return bestIndividual;
 	}
@@ -123,24 +126,24 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public double getMeanFitness() {
 		return meanFitness;
 	}
-	
+
 	public void setStrategy(Strategy strategy) {
 		this.strategy = strategy.getClass().getSimpleName();
 		this.initials = strategy.getInitials();
 	}
-	
+
 	public String getInitials() {
 		return initials;
 	}
-	
+
 	public void setStrategy(String strategy) {
 		this.strategy = strategy;
 	}
-	
+
 	public String getStrategy() {
 		return strategy;
 	}
-	
+
 	public int size() {
 		return this.fitnesses.length;
 	}
@@ -148,7 +151,7 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public void setIterationIndex(int iterationIndex) {
 		this.iterationIndex = iterationIndex;
 	}
-	
+
 	public int getIterationIndex() {
 		return iterationIndex;
 	}
@@ -156,15 +159,15 @@ public class ExecutionResults implements Serializable, TaskReceptor {
 	public void setFitnesserIndex(int fitnesserIndex) {
 		this.fitnesserIndex = fitnesserIndex;
 	}
-	
+
 	public int getFitnesserIndex() {
 		return fitnesserIndex;
 	}
-	
+
 	public void setLengths(int[] lengths) {
 		this.lengths = lengths;
 	}
-	
+
 	public int[] getLengths() {
 		return lengths;
 	}

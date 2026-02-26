@@ -31,32 +31,26 @@ body {
     padding: 20px;
 }
 
-div.titulo {
+/*div.titulo {
     display: flex;
-    /* justify-content: center;
-    align-items: center; */
     margin: 0;
     margin-top: -20px;
 }
 
 h1 {
     display: inline-block;
-    /* background: linear-gradient(90deg, #005c99, #0099cc); */
     background-color: #008f99;
     color: white;
     font-family: 'Georgia', serif;
-    /* font-size: 32px; */
     font-size: 25px;
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 10px;
-    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); */
-    /* text-align: center; */
     position: relative;
     letter-spacing: 2px;
     margin-top: 0px;
     margin-bottom: 20px;
-}
+}*/
 /* 
 h1:before {
     content: "[";
@@ -76,6 +70,63 @@ h1:after {
     transform: translateY(-2px);
 } */
 
+
+div.titulo {
+    display: flex;
+    /* justify-content: center;*/
+    align-items: center;
+    margin: 0;
+    margin-top: -20px;
+}
+
+div.titulo h1 {
+    margin-top: 0px;
+}
+
+h1 {
+    display: inline-block;
+    background-color: #008f99;
+    color: white;
+    font-family: 'Georgia', serif;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    position: relative;
+    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.unsaved-indicator {
+    color: #008f99;
+    font-size: 0.7em;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.pulsing-dot {
+    animation: slowPulseDot 0.7s ease-in-out infinite alternate;
+    cursor: default;
+}
+
+@keyframes slowPulseDot {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.9);
+        color: #008b95;
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(1.1);
+        color: #10989c;
+    }
+}
 
 .title img {
     width: 40px;
@@ -2505,3 +2556,19 @@ input[disabled], textarea[disabled], select[disabled] {
     background-color: #0f5d63;
     transform: scale(1.05);
   }
+
+  .btn-delete-project {
+    background-color: #c92e2e; 
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-delete-project:hover {
+    background-color: #9f1c1c;
+    transform: scale(1.05);
+}

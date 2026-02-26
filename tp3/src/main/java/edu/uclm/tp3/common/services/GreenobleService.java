@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

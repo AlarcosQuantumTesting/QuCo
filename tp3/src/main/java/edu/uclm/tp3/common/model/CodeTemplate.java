@@ -1,10 +1,13 @@
 package edu.uclm.tp3.common.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CodeTemplate {
 
 	@Id
@@ -25,7 +28,7 @@ public class CodeTemplate {
 	public String getFileName() {
 		return fileName;
 	}
-	
+
 	public String getCode() {
 		return code;
 	}

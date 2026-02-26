@@ -70,7 +70,7 @@ ul li.right {
     opacity: 0.9;
     z-index: 9999;
 }
-
+/*
 div.titulo {
     display: flex;
     margin: 0;
@@ -90,6 +90,64 @@ h1 {
     letter-spacing: 2px;
     margin-top: 0px;
     margin-bottom: 20px;
+}*/
+
+
+div.titulo {
+    display: flex;
+    /* justify-content: center;*/
+    align-items: center;
+    margin: 0;
+    margin-top: -20px;
+}
+
+div.titulo h1 {
+    margin-top: 0px;
+}
+
+h1 {
+    display: inline-block;
+    background-color: #008f99;
+    color: white;
+    font-family: 'Georgia', serif;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    position: relative;
+    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.unsaved-indicator {
+    color: #008f99;
+    font-size: 0.7em;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.pulsing-dot {
+    animation: slowPulseDot 0.7s ease-in-out infinite alternate;
+    cursor: default;
+}
+
+@keyframes slowPulseDot {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.9);
+        color: #008b95;
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(1.1);
+        color: #10989c;
+    }
 }
 
 h2 {
@@ -1493,4 +1551,125 @@ input[type="checkbox"] {
 
 .hidden-checkbox:focus + .custom-toggle-switch {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+
+.btn-confirm-project {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-width: 100px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.btn-confirm-project {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-confirm-project:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.btn-confirm-project:disabled {
+    background-color: #8f929073;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-delete-project {
+    background-color: #c92e2e; 
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-left: 5px;
+}
+
+.btn-delete-project:hover {
+    background-color: #9f1c1c;
+    transform: scale(1.05);
+}
+
+
+.modal-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .btn-delete-modal {
+    background-color: #dc3545;
+    color: white;
+  }
+
+.btn-delete-modal:hover {
+  background-color: #881520;
+  transform: scale(1.05);
+}
+
+.btn-cancel-delete-modal {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-cancel-delete-modal:hover {
+  background-color: #414549;
+  transform: scale(1.05);
+}
+
+.modal-delete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  border-radius: 15px;
+}
+
+.modal-content-delete {
+  background-color: white;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+}
+
+.modal-header-delete {
+  width: 100%;
+  background-color: #a1241b;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-weight: bold;
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-message-delete {
+  padding: 20px;
+  font-size: 16px;
+  color: #333;
+  text-align: center;
 }
