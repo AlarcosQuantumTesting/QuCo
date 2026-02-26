@@ -21,4 +21,6 @@ public abstract class GRGate {
     public String getId() {
         return this.id;
     }
+
+    protected abstract String getCirqCode();
 }

@@ -4,9 +4,9 @@
 
 export const environment = {
   production: false,
-  beUrl2: "http://localhost:8080/",
-  wsUrl2: "ws://localhost:8080/",
+  beUrl: "http://localhost:8080/",
+  wsUrl: "ws://localhost:8080/",
 
-  beUrl: "https://alarcosj.esi.uclm.es/tp3/",
-  wsUrl: "wss://alarcosj.esi.uclm.es/tp3/"
+  //beUrl: "https://alarcosj.esi.uclm.es/tp3/",
+  //wsUrl: "wss://alarcosj.esi.uclm.es/tp3/"
 };

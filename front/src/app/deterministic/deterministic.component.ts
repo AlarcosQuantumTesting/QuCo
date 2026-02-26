@@ -186,13 +186,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
 
-    //this.setInfoLocal();
-
     this.onAlgorithmChange2(this.selectedAlgorithm);
-    
-    /*this.isGrover = this.selectedAlgorithm === 'grover';
-    this.isGrenoble = this.selectedAlgorithm === 'grenoble';
-    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';*/
     
     if(this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
@@ -236,24 +230,6 @@ export class DeterministicComponent extends GroverStyle {
       });
     }
 
-
-    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
-
-    const savedProjectId = localStorage.getItem(nombreLocal);
-
-    if (savedProjectId && this.userEmail && this.userToken) {
-      if (this.selectedAlgorithm === 'grover' && nombreLocal === 'selectedProjectId_grover') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'grenoble' && nombreLocal === 'selectedProjectId_grenoble') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'originalgr' && nombreLocal === 'selectedProjectId_originalgr') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      }
-    }*/
-
     const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
     if (savedProjectId && this.userEmail && this.userToken) {
         this.selectedProjectId = savedProjectId;
@@ -269,7 +245,6 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      // this.markElementsWithUserExpressions()
       this.fillTableWithUserExpressions()
   }
 
@@ -406,10 +381,6 @@ export class DeterministicComponent extends GroverStyle {
           if (key=="#INITIALIZE#") {
             let tag = "TEMPLATE = '" + this.manager.selectedTemplate.fileName + "'\n"
             tag = tag + "ORIGINAL_QUBITS = " + this.qubits + "\n"
-            //if (this.inParallel) 
-            //  tag = tag + "PARALLEL = True\n"
-            //else
-            //  tag = tag + "PARALLEL = False\n"
             if (this.splitCircuits)
               tag = tag + "SPLIT = True\n"
             else
@@ -430,7 +401,6 @@ export class DeterministicComponent extends GroverStyle {
       }
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
-    //this.goToCode()
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
@@ -484,12 +454,12 @@ export class DeterministicComponent extends GroverStyle {
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
-      //this.isOriginalGR,
       this.inParallel,
       this.splitCircuits,
       this.selectedAlgorithm,
       this.useMCX,
-      this.prefix
+      this.prefix,
+      this.manager.selectedTemplate.fileName
     ).subscribe(
       blob => {
         blob.text().then(text => {
@@ -533,32 +503,6 @@ export class DeterministicComponent extends GroverStyle {
       }
     );
   }
-  
-
-  /*getCircuit() {
-    this.running = true
-    this.state = "Calculating"
-    this.error = undefined
-
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.inParallel, this.splitCircuits, this.prefix).subscribe(
-      response=> {
-        this.responseReceived = response
-        this.buildCode()
-
-        const { svg, width, height } = this.generateSvgFromBottom(response.tree);
-        this.svgTree = this.sanitizer.bypassSecurityTrustHtml(svg);
-        this.svgWidth = width; // Define el ancho dinámico del SVG
-        this.svgHeight = height; // Define el alto dinámico del SVG
-        this.state = undefined
-      },
-      error => {
-        if (error.error && error.error.message)
-          this.error = error.error.message
-        else
-          this.error = error.message + " (is the server running?)"
-      }
-    )
-  }*/
 
   goToCode() {
     this.codeArea.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });

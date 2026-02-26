@@ -14,9 +14,14 @@ public class GRX extends GRGate {
         return "X";
     }
 
-    @Override
+    @Override  // Qiskit
     public String toString() {
         return "\tU.x(" + this.qubit + ")\n";
+    }
+
+    @Override
+    protected String getCirqCode() {
+        return "\tc.append(cirq.X(q" + this.qubit + "))\n";
     }
 
     @Override

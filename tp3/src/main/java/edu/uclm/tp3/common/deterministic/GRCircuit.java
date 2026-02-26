@@ -21,13 +21,32 @@ public class GRCircuit {
         this.qubits = nodeDepth;
     }
 
-    @Override
+    public String getCode(String backend) {
+        if (backend.equalsIgnoreCase("qiskit"))
+            return this.toString();
+        return this.getCirqCode();
+    }
+
+    @Override // Este devuelve el código para Qiskit
     public String toString() {
         StringBuilder sb = new StringBuilder("def get" + this.functionPrefix + this.name + "():\n");
         sb.append("\tU = QuantumCircuit(" + this.qubits + ", name=\"" + this.functionPrefix + this.name + "\")\n");
         for (GRGate gate : this.gates)
             sb.append(gate.toString());
         sb.append("\treturn U.to_gate()\n\n");
+        return sb.toString();
+    }
+
+    private String getCirqCode() {
+        StringBuilder sb = new StringBuilder("def get" + this.functionPrefix + this.name + "() -> cirq.FrozenCircuit:\n\t");
+        for (int i=0; i<this.qubits-1; i++) {
+            sb.append("q" + i + ", ");
+        }
+        sb.append("q" + (this.qubits-1) + " = cirq.LineQubit.range(" + this.qubits + ")\n");
+        sb.append("\tc = cirq.Circuit()\n");
+        for (GRGate gate : this.gates)
+            sb.append(gate.getCirqCode());
+        sb.append("\treturn cirq.FrozenCircuit(c)\n\n");
         return sb.toString();
     }
 

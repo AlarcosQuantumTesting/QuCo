@@ -17,8 +17,6 @@ import java.util.zip.GZIPOutputStream;
 
 import jakarta.transaction.Transactional;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -115,7 +113,7 @@ public class DeterministicService {
 		return tree;
 	}
 	
-	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR) throws Exception {
+	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend) throws Exception {
 		BinaryTree tree = this.buildTree(qubits, expectedFrequencies.getPairs(), prefix);
 
 		if (!originalGR && physicalAngle>0) {
@@ -127,7 +125,7 @@ public class DeterministicService {
 		QCircuit quirkCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, -1, originalGR);
 		
 		int shots = expectedFrequencies.getShots();
-		UnifierSolver solver = new UnifierSolver(tree, prefix, originalGR);
+		UnifierSolver solver = new UnifierSolver(tree, prefix, originalGR, backend);
 		Map<String, Object> result = solver.solve(shots);
 
 		Map<String, Object> cleanCircuit = quirkCircuit.toJson().toMap();
@@ -135,10 +133,9 @@ public class DeterministicService {
 		result.put("#QUBITS#", qubits);
 		result.put("#OUTPUT_QUBITS#", qubits);
 		result.put("#SHOTS#", "1024");
-		String sCalculus = "for i in range(0, len(circuits)) :\n" + 
-			"\tfor j in range(startQubit, qubits) :\n" +
-			"\t\tcircuits[i].h(j)\n" + 
-			"circuits[0].append(get" + prefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])";
+
+		String sCalculus = this.getCalculus(backend, qubits, prefix);
+
 		result.put("#CALCULUS#", sCalculus);
 		result.put("tree", tree.toMap());
 		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph" : "Grenoble");
@@ -158,8 +155,26 @@ public class DeterministicService {
 		}
 		sbExpected.append("]");
 		result.put("#EXPECTED#", sbExpected.toString());
-		result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, qubits)");
+
+		if (backend.equalsIgnoreCase("qiskit"))
+			result.put("#CIRCUITS_DECLARATION#", "QuantumCircuit(qubits, qubits)");
+		else
+			result.put("#CIRCUITS_DECLARATION#", "cirq.Circuit(cirq.I(q) for q in cirq.LineQubit.range(qubits))");
 		return result;
+	}
+
+	private String getCalculus(String backend, int qubits, String prefix) {
+		String sCalculus;
+		if (backend.equalsIgnoreCase("qiskit")) {
+			sCalculus = "for i in range(0, len(circuits)) :\n" + 
+			"\tfor j in range(startQubit, qubits) :\n" +
+			"\t\tcircuits[i].h(j)\n" + 
+			"\tcircuits[i].append(get" + prefix + "0(), [" + Coder.getTargetQubits(0, qubits) + "])";
+		} else {
+			sCalculus = "for i in range(0, len(circuits)) :\n" + 
+				"\tcircuits[i].append(cirq.CircuitOperation(get0()))\n";
+		}
+		return sCalculus;
 	}
 
 	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR) throws Exception {

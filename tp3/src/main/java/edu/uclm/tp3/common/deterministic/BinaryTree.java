@@ -41,8 +41,8 @@ public class BinaryTree implements Serializable{
         this.qubits = qubits;
     }
 
-    public String getCode() {
-        return this.circuit.toString();
+    public String getCode(String backend) {
+        return this.circuit.getCode(backend);
     }
 
 	public void setCoder(Coder coder) {

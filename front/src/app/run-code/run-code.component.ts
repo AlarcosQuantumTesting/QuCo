@@ -30,6 +30,7 @@ export class RunCodeComponent implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
 
   executionUrl : string = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=';
+  #executionUrl : string = 'http://localhost:8000/proxyaotro/resend?url=';
   batchId? : string
 
   cerrarModal(): void {
@@ -118,8 +119,9 @@ export class RunCodeComponent implements OnInit {
     const runnerNumber = optionMatch ? optionMatch[0] : '1';
     const overwriteValue = override ? 'y' : 'n';
 
+    const runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
 
-    let finalUrl = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let finalUrl = `${this.executionUrl}http://172.20.48.130:8080/${runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
     if (ibm_token) {
       finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;
@@ -135,7 +137,7 @@ export class RunCodeComponent implements OnInit {
     console.log('URL:', finalUrl);
     console.log('Body:', finalBody);
 
-    this.http.post(finalUrl, finalBody).subscribe({
+    this.http.post(finalUrl, finalBody, { headers: { 'Content-Type': 'application/json' }}).subscribe({
       next: (response: any) => {
         console.log('Execution successful!', response);
         //alert(`Execution successful! Batch ID: ${response.batch_id}`);

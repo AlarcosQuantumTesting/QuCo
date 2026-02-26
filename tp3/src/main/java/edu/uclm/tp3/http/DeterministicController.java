@@ -3,6 +3,7 @@ package edu.uclm.tp3.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -24,9 +25,11 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.uclm.tp3.common.deterministic.FreqTable;
+import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.common.services.DeterministicService;
 import edu.uclm.tp3.common.services.GroverService;
 import edu.uclm.tp3.common.services.HammingService;
+import edu.uclm.tp3.dao.TemplateDao;
 
 @RestController
 @RequestMapping("deterministic")
@@ -39,6 +42,8 @@ public class DeterministicController {
 	private GroverService groverService;
 	@Autowired
 	private HammingService hammingService;
+	@Autowired
+	private TemplateDao templateDao;
 	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
@@ -60,6 +65,16 @@ public class DeterministicController {
 		String algorithm = jso.optString("algorithm", "grenoble");
 		boolean originalGR = algorithm.equals("originalGR");
 		boolean useMCX = jso.optBoolean("useMCX", false);
+		String template = jso.optString("template", null);
+
+		String backend = null;
+		if (template!=null) {
+			Optional<CodeTemplate> templateCode = this.templateDao.findById(template);
+			if (templateCode.isPresent() && templateCode.get().getCode().contains("import cirq"))
+				backend = "cirq";
+			else 
+				backend = "qiskit";
+		}
 		
 		expectedFrequencies.sort();
 		try {
@@ -79,7 +94,7 @@ public class DeterministicController {
 				else if (splitCircuits)
 					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
 				else
-					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 			}
 			return this.buildResponse(result);
 		} catch (IOException e) {
