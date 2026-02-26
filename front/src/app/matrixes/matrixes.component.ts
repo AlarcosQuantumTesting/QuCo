@@ -590,7 +590,10 @@ export class MatrixesComponent implements AfterViewInit  {
       functionName: functionName
     };
 
-    if (rowIndex !== undefined) info.matrix = matrix[rowIndex];
+    if (rowIndex !== undefined) {
+      info.matrix = []
+      info.matrix.push(matrix[rowIndex])
+    }
     this.mostrarModal = true;
     this.qiskitService.getCode(info).subscribe({
       next: result => {
