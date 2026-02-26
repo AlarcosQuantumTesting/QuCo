@@ -44,20 +44,9 @@ public class BlocksController extends EvolutionaryController {
 	
 	@PutMapping("/generateInitialPopulation") @ResponseBody
 	public long generateInitialPopulation(HttpSession session, @RequestBody ProblemConfiguration pc) {
-		/*try {
-			if (pc.getSelected1QubitGates().isEmpty() && pc.getProbOf1QubitGates()>0)
-				throw new Exception("There are no selected 1 qubit gates, but you specificy a chance of " + pc.getProbOf1QubitGates());
-			if (pc.getSelected2QubitGates().isEmpty() && pc.getProbOf2QubitGates()>0)
-				throw new Exception("There are no selected 2 qubit gates, but you specificy a chance of " + pc.getProbOf2QubitGates());
-			if (pc.getSelected3QubitGates().isEmpty() && pc.getProbOf3QubitGates()>0)
-				throw new Exception("There are no selected 3 qubit gates, but you specificy a chance of " + pc.getProbOf3QubitGates());
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}*/
 		return super.generateInitialPopulation(session, pc, pc.getInputConfiguration().getMinNumberOfColumns());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@PostMapping("/runPopulation") @ResponseBody
 	public Map<String, Object> runPopulation(HttpSession session, @RequestParam double desiredError, @RequestParam String selectedStratego,
 			@RequestBody List<Map<String, Object>> selectedStrategies) {

@@ -423,8 +423,6 @@ export class CircuitEditorComponent {
     });
 
     let calculus = ""
-    for (let i=0; i<this.circuit.qubits.length; i++)
-      calculus += "circuit.h(" + i + ")\n"
 
     let measures = ""
     for (let i=0; i<this.circuit.columns; i++) {
@@ -460,7 +458,7 @@ export class CircuitEditorComponent {
 
     // Generar el código de append
     consolidatedQubitSets.forEach((qubitsSet, key) => {
-        const gateName = key.split('_')[1]; 
+        const gateName = key.substring(key.indexOf("_")+1)
 
         const sortedQubits = Array.from(qubitsSet).sort((a, b) => a - b);
         const qubitsList = sortedQubits.join(', '); 
