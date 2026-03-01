@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +16,6 @@ export class AppComponent implements AfterViewInit, OnInit {
   menuAbierto = false;
   mostrarInicio = true;
   tokenStored: string | null = localStorage.getItem('userToken');
-  //URL_BASE = "http://localhost:8081";
-  URL_BASE = "https://alarcosj.esi.uclm.es/qsauronback";
-  //URL_BASE = "https://c9x3lxf0-8080.uks1.devtunnels.ms";
 
   ngOnInit(): void {
     this.loadSettings();
@@ -253,7 +251,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   //   this.mostrarModalLogin = true;
   // }
   toggleLogin() {
-    window.open('https://alarcosj.esi.uclm.es/qsauron', '_blank');
+    window.open(environment.qsauronUrl, '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -329,7 +327,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     console.log("Intentando iniciar sesión con:", body);
 
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/create`, userData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/create`, userData, {
         observe: 'response',
         responseType: 'text'
       }));
@@ -374,7 +372,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       });
       console.log("Request headers:", headers);
 
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/login`, loginData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/login`, loginData, {
         headers: headers,
         observe: 'response',
         responseType: 'text'
@@ -396,7 +394,7 @@ export class AppComponent implements AfterViewInit, OnInit {
           this.limpiarMensajeExito(2000);
 
           //location.reload();
-          window.location.href = "https://alarcosj.esi.uclm.es/qsauron";
+          window.location.href = environment.qsauronUrl;
           return token;
         } else {
           throw new Error("Token vacío recibido.");
@@ -421,7 +419,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   async obtenerEmailUsuario(token: string) {
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/getUser`, { token: token }, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/getUser`, { token: token }, {
         observe: 'response',
         responseType: 'text'
       }));
@@ -488,7 +486,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   logout(): void {
-    this.http.post(`${this.URL_BASE}/users/logout`, {}, { withCredentials: true }).subscribe({
+    this.http.post(`${environment.qsauronUrl}users/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.clearUserStorage();
         console.log("Sesión cerrada.");
@@ -536,7 +534,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     };
 
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/validate`, validationData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/validate`, validationData, {
         observe: 'response',
         responseType: 'json'
       }));
@@ -556,7 +554,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   async restoreSessionFromCookie(): Promise<boolean> {
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/getUser`, {}, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/getUser`, {}, {
         observe: 'response',
         responseType: 'text'
       }));

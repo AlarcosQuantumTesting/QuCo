@@ -13,11 +13,11 @@ export class TemplatesService {
   constructor(private client : HttpClient) { }
 
   getTemplates(): Observable<CodeTemplate[]> {
-      return this.client.get<CodeTemplate[]>(environment.beUrl + this.controller + "/getTemplates", { responseType : 'json' })
+      return this.client.get<CodeTemplate[]>(environment.tp3Url + this.controller + "/getTemplates", { responseType : 'json' })
   }
 
   createTemplate<Template>(selectedTemplate: Template) : Observable<Template> {
-    return this.client.post<Template>(environment.beUrl + this.controller + "/createTemplate", selectedTemplate, { responseType : 'json' })
+    return this.client.post<Template>(environment.tp3Url + this.controller + "/createTemplate", selectedTemplate, { responseType : 'json' })
   }
 
   /*updateTemplate<Template>(selectedTemplate: Template) {
@@ -26,7 +26,7 @@ export class TemplatesService {
 
   updateTemplate<Template>(selectedTemplate: Template) {
     console.log("updateTemplate", selectedTemplate)
-    return this.client.post<Template>(environment.beUrl + this.controller + "/updateTemplate", selectedTemplate)
+    return this.client.post<Template>(environment.tp3Url + this.controller + "/updateTemplate", selectedTemplate)
   }
   
 }

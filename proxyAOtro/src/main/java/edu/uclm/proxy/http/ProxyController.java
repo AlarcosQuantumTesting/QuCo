@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "proxyaotro")
-@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST }, allowedHeaders = "*", allowCredentials = "false")
 public class ProxyController {
 
 	@GetMapping("/saludar")
@@ -26,7 +25,6 @@ public class ProxyController {
 	public Object resend(HttpServletRequest request, @RequestBody(required = false) Object payload) {
 		try {
 			String queryString = request.getQueryString();
-			// url=http://172.20.48.130:8080/run_qiskit?iterations=1&overwrite=n&runner=1
 			int indexIgual = queryString.indexOf('=');
 			String url = queryString.substring(indexIgual + 1);
 			HttpClient client = new HttpClient();

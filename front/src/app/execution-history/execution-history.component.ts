@@ -3,6 +3,7 @@ import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { environment } from '../../environments/environment';
 
 interface ExecutionHistory {
   id: string;
@@ -45,7 +46,7 @@ export class ExecutionHistoryComponent implements OnInit {
   modalShare = false;
   generatedShareId: string = '';
   
-  private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit'; 
+  private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/run_qiskit`; 
 
   constructor(private http: HttpClient) { }
 
@@ -125,51 +126,6 @@ export class ExecutionHistoryComponent implements OnInit {
       }
     }
   }
-
-  /*searchRemoteExecution(id: string): void {
-    this.isLoading = true;
-    this.showMessage(`Searching server for Batch ID ${id}...`);
-    
-    const statusUrl = `${this.serverUrl}/status/${id}`;
-    this.enLocal = false;
-    
-    this.http.post(statusUrl, null).subscribe({
-        next: (result: any) => {
-            const remoteExecution: ExecutionHistory = {
-                id: id,
-                name: `${id}`,
-                creationDateTime: result.started_at || new Date().toISOString(),
-                status: result.state.toUpperCase(),
-                details: {
-                  runner: result.runner,
-                  iterations: result.iterations,
-                  optionSelected: result.optionSelected,
-                  ibm_token_provided: result.ibm_token_provided,
-                  ibm_instance_provided: result.ibm_instance_provided,
-                  files: result.files,
-                  started_at: result.started_at,
-                  finished_at: result.finished_at,
-                  stderr_path: result.stderr_path,
-                  stdout_path: result.stdout_path,
-                }
-            };
-            
-            this.selectExecution(remoteExecution);
-
-            this.checkStatus(id); 
-            this.isLoading = false;
-            
-        },
-        error: (err) => {
-            if (err.status === 404) {
-                this.showMessage(`Error: Execution ID ${id} not found on the server.`, true);
-            } else {
-                this.showMessage(`Error connecting to server. Code: ${err.status}`, true);
-            }
-            this.isLoading = false;
-        }
-    });
-  }*/
 
   selectExecution(execution: ExecutionHistory): void {
     this.executionSelected = execution;

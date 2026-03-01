@@ -10,14 +10,14 @@ export class EdCircuitsService {
   constructor(private client : HttpClient) { }
   
   saveCircuit(circuit: EdCircuit) {
-    return this.client.post(environment.beUrl + "circuits/saveCircuit", circuit);
+    return this.client.post(environment.tp3Url + "circuits/saveCircuit", circuit);
   }
 
   getCircuitNames() {
-    return this.client.get<string[]>(environment.beUrl + "circuits/getCircuitNames");
+    return this.client.get<string[]>(environment.tp3Url + "circuits/getCircuitNames");
   }
 
   getCircuit(name: string) {
-    return this.client.get<EdCircuit>(environment.beUrl + "circuits/getCircuit/" + name);
+    return this.client.get<EdCircuit>(environment.tp3Url + "circuits/getCircuit/" + name);
   }
 }

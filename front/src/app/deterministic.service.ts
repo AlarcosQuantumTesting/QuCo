@@ -13,7 +13,7 @@ export class DeterministicService {
   constructor(private client: HttpClient) { }
 
   loadTemplates(): Observable<any[]> {
-    return this.client.get<any[]>(environment.beUrl + this.controller + "/getTemplates", { responseType: 'json' })
+    return this.client.get<any[]>(environment.tp3Url + this.controller + "/getTemplates", { responseType: 'json' })
   }
 
   calculate(
@@ -38,7 +38,7 @@ export class DeterministicService {
       useMCX,
       template
     };
-    let url = environment.beUrl + this.controller + '/newCalculate';
+    let url = environment.tp3Url + this.controller + '/newCalculate';
 
     return this.client.post(
       url,

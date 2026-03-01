@@ -10,15 +10,15 @@ export class QubitsConfigurationService {
   constructor(private client : HttpClient) { }
 
   getQubitConfigurationNames() {
-    return this.client.get<string[]>(environment.beUrl + "qubitsConfigurations/getQubitConfigurationNames");
+    return this.client.get<string[]>(environment.tp3Url + "qubitsConfigurations/getQubitConfigurationNames");
   }
 
   getQubitsConfiguration(cfgName: string) {
-    return this.client.get<QubitsConfiguration>(environment.beUrl + "qubitsConfigurations/getQubitsConfiguration/" + cfgName);
+    return this.client.get<QubitsConfiguration>(environment.tp3Url + "qubitsConfigurations/getQubitsConfiguration/" + cfgName);
   }
 
   saveQubitsConfiguration(qubitsConfiguration : QubitsConfiguration) {
-    return this.client.post(environment.beUrl + "qubitsConfigurations/saveQubitsConfiguration", qubitsConfiguration);
+    return this.client.post(environment.tp3Url + "qubitsConfigurations/saveQubitsConfiguration", qubitsConfiguration);
   }
 
 }

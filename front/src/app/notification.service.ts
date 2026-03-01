@@ -7,7 +7,7 @@ export class NotificationService {
 
   getMessages(): Observable<string> {
     return new Observable<string>(observer => {
-      let url = environment.beUrl + "sse"
+      let url = environment.tp3Url + "sse"
       const eventSource = new EventSource(url);
 
       eventSource.onmessage = event => observer.next(event.data);

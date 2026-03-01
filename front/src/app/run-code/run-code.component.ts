@@ -5,6 +5,7 @@ import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 interface BatchInfo {
     id: string;
@@ -29,9 +30,10 @@ export class RunCodeComponent implements OnInit {
 
   @Output() cerrar = new EventEmitter<void>();
 
-  executionUrl : string = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=';
-  #executionUrl : string = 'http://localhost:8000/proxyaotro/resend?url=';
   batchId? : string
+  runWhat: string = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
+
+
 
   cerrarModal(): void {
     if(this.batchId) {
@@ -82,7 +84,7 @@ export class RunCodeComponent implements OnInit {
       this.batchId = '';
     }
 
-    let url = `${this.executionUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
+    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
         url += `&ibm_token=${ibm_token}`; 
@@ -119,9 +121,7 @@ export class RunCodeComponent implements OnInit {
     const runnerNumber = optionMatch ? optionMatch[0] : '1';
     const overwriteValue = override ? 'y' : 'n';
 
-    const runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
-
-    let finalUrl = `${this.executionUrl}http://172.20.48.130:8080/${runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let finalUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
     if (ibm_token) {
       finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;
@@ -132,10 +132,6 @@ export class RunCodeComponent implements OnInit {
     }
         
     const finalBody = [this.qiskitCode]; 
-
-    console.log('Sending POST Request...');
-    console.log('URL:', finalUrl);
-    console.log('Body:', finalBody);
 
     this.http.post(finalUrl, finalBody, { headers: { 'Content-Type': 'application/json' }}).subscribe({
       next: (response: any) => {

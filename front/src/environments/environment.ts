@@ -4,9 +4,8 @@
 
 export const environment = {
   production: false,
-  beUrl: "http://localhost:8080/",
-  wsUrl: "ws://localhost:8080/",
 
-  //beUrl: "https://alarcosj.esi.uclm.es/tp3/",
-  //wsUrl: "wss://alarcosj.esi.uclm.es/tp3/"
+  tp3Url: "http://localhost:8080/",
+  qsauronUrl: "https://alarcosj.esi.uclm.es/qsauronback/",
+  proxyAOtroUrl : "http://localhost:8000/proxyaotro/resend?url="
 };

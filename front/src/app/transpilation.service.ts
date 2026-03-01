@@ -13,22 +13,22 @@ export class TranspilationService {
   constructor(private client : HttpClient) { }
 
   getListOfTranspilationWorks() {
-    return this.client.get<any[]>(environment.beUrl + this.controller + "/getListOfTranspilationWorks", { responseType : 'json' })
+    return this.client.get<any[]>(environment.tp3Url + this.controller + "/getListOfTranspilationWorks", { responseType : 'json' })
   }
 
   getTranspiledCode(id : any)  {
-    return this.client.get<any>(environment.beUrl + this.controller + "/getTranspiledCode?id=" + id)
+    return this.client.get<any>(environment.tp3Url + this.controller + "/getTranspiledCode?id=" + id)
   }
 
   getErrors(id: any) {
-    return this.client.get<any>(environment.beUrl + this.controller + "/getErrors?id=" + id)
+    return this.client.get<any>(environment.tp3Url + this.controller + "/getErrors?id=" + id)
   }
 
   cancelTranspilation(id: any) {
-    return this.client.delete<any>(environment.beUrl + this.controller + "/cancelTranspilation?id=" + id)
+    return this.client.delete<any>(environment.tp3Url + this.controller + "/cancelTranspilation?id=" + id)
   }
 
   getCircuitSvg(id: string): Observable<Blob> {
-	  return this.client.get(environment.beUrl + '/transpiler/draw?id=' + id, { responseType: 'blob' });
+	  return this.client.get(environment.tp3Url + '/transpiler/draw?id=' + id, { responseType: 'blob' });
   }
 }
