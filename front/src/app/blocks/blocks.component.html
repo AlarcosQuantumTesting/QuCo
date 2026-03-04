@@ -35,16 +35,18 @@
             >
                 <i class="fas fa-save"></i> Save project
             </button> -->
-            <button *ngIf="!selectedProjectId" (click)="openSaveOrSaveAsNewModal(false)" class="btn-confirm-save">
+            <button *ngIf="userEmail && userToken && !selectedProjectId" (click)="openSaveOrSaveAsNewModal(false)"
+                class="btn-confirm-save">
                 <i class="fas fa-save"></i> Save
             </button>
 
-            <button *ngIf="selectedProjectId && isCircuitModified" (click)="openApplyChangesModal()"
-                class="btn-confirm-save update-btn">
+            <button *ngIf="userEmail && userToken && selectedProjectId && isCircuitModified"
+                (click)="openApplyChangesModal()" class="btn-confirm-save update-btn">
                 <i class="fas fa-pen"></i> Update
             </button>
 
-            <button *ngIf="selectedProjectId" (click)="openSaveOrSaveAsNewModal(true)" class="btn-confirm-save">
+            <button *ngIf="userEmail && userToken && selectedProjectId" (click)="openSaveOrSaveAsNewModal(true)"
+                class="btn-confirm-save">
                 <i class="fas fa-save"></i> Save as new
             </button>
         </div>
