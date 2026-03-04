@@ -3,22 +3,29 @@ package edu.uclm.proxy.http;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@CrossOrigin(origins = "*", methods = {org.springframework.web.bind.annotation.RequestMethod.GET, org.springframework.web.bind.annotation.RequestMethod.POST})
 @RequestMapping(value = "proxyaotro")
 public class ProxyController {
 
-	@GetMapping("/saludar")
-	public String saludar() {
-		return "Hola desde AlarcosJ o wherever";
+@GetMapping(value="/saludar", produces = MediaType.TEXT_PLAIN_VALUE)
+
+	public ResponseEntity<String> saludar() {
+		return ResponseEntity
+			.ok()
+			.header("X-ProxyController", "saludar")
+			.contentType(MediaType.TEXT_PLAIN)
+			.body("Hola desde AlarcosJ o wherever");
 	}
 
 	@PostMapping("/resend")

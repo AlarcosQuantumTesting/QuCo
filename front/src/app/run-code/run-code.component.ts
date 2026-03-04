@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgForm } from '@angular/forms';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,9 +30,7 @@ export class RunCodeComponent implements OnInit {
   @Output() cerrar = new EventEmitter<void>();
 
   batchId? : string
-  runWhat: string = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
-
-
+  runWhat: string = 'qiskit';
 
   cerrarModal(): void {
     if(this.batchId) {
@@ -83,8 +80,9 @@ export class RunCodeComponent implements OnInit {
     if (this.batchId) {
       this.batchId = '';
     }
+    this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
 
-    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/run_qiskit?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
+    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
         url += `&ibm_token=${ibm_token}`; 
@@ -121,6 +119,7 @@ export class RunCodeComponent implements OnInit {
     const runnerNumber = optionMatch ? optionMatch[0] : '1';
     const overwriteValue = override ? 'y' : 'n';
 
+    this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
     let finalUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
     if (ibm_token) {
@@ -133,10 +132,18 @@ export class RunCodeComponent implements OnInit {
         
     const finalBody = [this.qiskitCode]; 
 
-    this.http.post(finalUrl, finalBody, { headers: { 'Content-Type': 'application/json' }}).subscribe({
+    /*this.http.get("http://localhost:8000/proxyaotro/saludar", { responseType: 'text' as const, observe: 'response' }).subscribe({
+      next: (res) => {
+        console.log('OK', res.status, res.body)
+      },
+      error: (err) => {
+        console.error('ERR', err.status, err.message, err.error)
+      }
+    });*/
+
+    this.http.post(finalUrl, finalBody).subscribe({
       next: (response: any) => {
         console.log('Execution successful!', response);
-        //alert(`Execution successful! Batch ID: ${response.batch_id}`);
 
         if (response && response.batch_id) {
                     
