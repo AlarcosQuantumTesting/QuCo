@@ -24,20 +24,38 @@
 
 
   <div class="titulo">
-
     <h1>Algorithms
-
       <br>
-
       <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
-
     </h1>
-
+    <!-- <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
+      <i class="fas fa-question-circle"></i>
+    </button> -->
     <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
       title="Unsaved changes detected" style="cursor: default !important;">
       <i class="fas fa-circle"></i>
     </span>
+  </div>
 
+  <!-- Help Modal -->
+  <div class="help-modal" *ngIf="showHelp">
+    <div class="help-content">
+      <div class="help-modal-header">
+        <h2 class="help-title-modal">Help</h2>
+        <button class="close"
+          style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;"><i class="close-i"
+            (click)="toggleHelp()">&times;</i></button>
+      </div>
+      <div class="help-text">
+        <h2>💡 How to use 'Algorithms' 💡</h2>
+        <span class="span-help-modal">Select Grover, Grover and Rudolph, or Grenoble to generate quantum algorithms
+          based on your specified constraints and oracle configurations. Configure the inputs and expressions, and then
+          generate the corresponding Qiskit code.</span>
+        <div class="help-actions">
+          <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 

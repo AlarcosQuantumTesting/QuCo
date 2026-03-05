@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
 export class ProjectService {
   //private baseUrl = 'http://localhost:8081/projects';
   //private baseUrl = 'https://alarcosj.esi.uclm.es/qsauronback/projects';
-  private baseUrl = 'https://alarcosj.esi.uclm.es/qsauronback/qucoreper';
+  private baseUrl = 'https://alarcosj.esi.uclm.es/qsauronback/projects/';
+  private baseUrl2 = 'https://alarcosj.esi.uclm.es/qsauronback/qucoreper/';
   //private baseUrl = 'https://c9x3lxf0-8080.uks1.devtunnels.ms/projects';
 
   constructor(private http: HttpClient) { }
@@ -28,7 +29,7 @@ export class ProjectService {
   }
 
   getProjectsName(requestBody: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/getProjectsName`, requestBody);
+    return this.http.post(`${this.baseUrl2}/getProjectsName`, requestBody);
   }
 
   getProject(requestBody: any): Observable<any> {

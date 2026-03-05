@@ -21,7 +21,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.loadSettings();
-    this.checkTokenValidity();
+    //this.checkTokenValidity();
 
   }
 

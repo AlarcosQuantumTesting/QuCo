@@ -35,19 +35,19 @@ export class ElongingComponent extends EvolutionaryComponent {
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
 
-  projectList: ProjectListItem[] = []; 
+  projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';
 
   mostrarModalGuardarProyecto: boolean = false;
   saveError: string = '';
-  
+
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic'; 
+  GENETIC_GENERATOR_FQCN = 'Genetic';
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
 
-  responseReceived? : any
+  responseReceived?: any
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Genetic';
   tipoLocal: string = 'quco_genetic';
@@ -60,8 +60,8 @@ export class ElongingComponent extends EvolutionaryComponent {
   showApplyChangesModal: boolean = false;
   applyChanges: boolean = false;
 
-  constructor(private evolutionaryService : EvolutionaryService, public manager : ManagerService, private notificationService: NotificationService,
-     public transpileService: TranspileService, private projectService: ProjectService) {
+  constructor(private evolutionaryService: EvolutionaryService, public manager: ManagerService, private notificationService: NotificationService,
+    public transpileService: TranspileService, private projectService: ProjectService) {
     super(evolutionaryService, "elonging")
   }
 
@@ -85,22 +85,22 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
   }
 
-  rf : any;
+  rf: any;
 
-  ngOnInit () {
+  ngOnInit() {
 
     localStorage.removeItem('qucoConfigurationBlocks');
     localStorage.removeItem('qucoConfiguration');
 
     const savedProjectId = localStorage.getItem('selectedProjectId_genetic');
     if (savedProjectId && this.userEmail && this.userToken) {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
+      this.selectedProjectId = savedProjectId;
+      this.onProjectSelected();
     }
 
     this.loadProjectNames();
 
-    for (let i=0; i<this.remoteFitnessers.length; i++) {
+    for (let i = 0; i < this.remoteFitnessers.length; i++) {
       if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {
         this.rf = this.remoteFitnessers[i]
         this.rf.selected = true
@@ -149,7 +149,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       }
     } else {
       console.log('No hay plantilla seleccionada');
-    }    
+    }
 
     this.validarDatos()
     this.tieneFrecuenciasEsperadas()
@@ -204,7 +204,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   generateClicked: boolean = false;
 
   circuitName: string = '';
-  
+
 
   override generateInitialPopulation() {
     this.running = true
@@ -213,21 +213,21 @@ export class ElongingComponent extends EvolutionaryComponent {
     this.showCharts = true;
     this.generateClicked = true;
 
-    if (this.selectedRemoteFitnessers.length==0 ) {
+    if (this.selectedRemoteFitnessers.length == 0) {
       this.error = "You must select one fitnesser at least"
     } else {
       let selectedGates = this.gates.filter(g => g.selected)
-      let qubitGates = selectedGates.filter(g => g.affectedQubits==1)
-      if (qubitGates.length==0)
+      let qubitGates = selectedGates.filter(g => g.affectedQubits == 1)
+      if (qubitGates.length == 0)
         this.pc.probOf1QubitGates = 0
-      qubitGates = selectedGates.filter(g => g.affectedQubits==2)
-      if (qubitGates.length==0)
+      qubitGates = selectedGates.filter(g => g.affectedQubits == 2)
+      if (qubitGates.length == 0)
         this.pc.probOf2QubitGates = 0
-      qubitGates = selectedGates.filter(g => g.affectedQubits==3)
-      if (qubitGates.length==0)
+      qubitGates = selectedGates.filter(g => g.affectedQubits == 3)
+      if (qubitGates.length == 0)
         this.pc.probOf3QubitGates = 0
-      qubitGates = selectedGates.filter(g => g.affectedQubits==1000)
-      if (qubitGates.length==0)
+      qubitGates = selectedGates.filter(g => g.affectedQubits == 1000)
+      if (qubitGates.length == 0)
         this.pc.probOfNQubitGates = 0
 
       this.pc.gateNames = []
@@ -239,14 +239,14 @@ export class ElongingComponent extends EvolutionaryComponent {
           this.error = undefined
           this.state = undefined
           this.prepareCharts()
-          for (let i=0; i<this.selectedRemoteFitnessers.length; i++) {
-            this.strategies[i]=[]
-            this.bestFitnesses[i]=[]
-            this.meanFitnesses[i]=[]
-            this.meanErrors[i]=[]
+          for (let i = 0; i < this.selectedRemoteFitnessers.length; i++) {
+            this.strategies[i] = []
+            this.bestFitnesses[i] = []
+            this.meanFitnesses[i] = []
+            this.meanErrors[i] = []
           }
 
-          for (let i=0; i<this.pc.inputConfiguration.populationSize; i++) {
+          for (let i = 0; i < this.pc.inputConfiguration.populationSize; i++) {
             this.individuals.push(new Individual(i))
           }
           if (this.running)
@@ -263,9 +263,9 @@ export class ElongingComponent extends EvolutionaryComponent {
       )
     }
   }
-     
+
   onTemplateChange(selected: CodeTemplate) {
-    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName == selected.fileName) || new CodeTemplate("", "", "")
     console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
     console.log('plantillas:', this.manager.templates);
     this.templateSelected = true;
@@ -285,21 +285,21 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   @HostListener('document:click', ['$event'])
-    onDocumentClick(event: MouseEvent): void {
-      const tooltipElement = document.querySelector('.tooltip');
-      const tooltipCustomElement = document.querySelector('.custom-tooltip');
-      const buttonElement = document.querySelector('button');
-      
-  
-      if (this.tooltipGenerationVisible &&
-        tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
-          buttonElement && !buttonElement.contains(event.target as Node)) {
-        this.tooltipGenerationVisible = false;
-      }
-    }
+  onDocumentClick(event: MouseEvent): void {
+    const tooltipElement = document.querySelector('.tooltip');
+    const tooltipCustomElement = document.querySelector('.custom-tooltip');
+    const buttonElement = document.querySelector('button');
 
-    onOptionFreqChange(value: string): void {
-    
+
+    if (this.tooltipGenerationVisible &&
+      tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
+      buttonElement && !buttonElement.contains(event.target as Node)) {
+      this.tooltipGenerationVisible = false;
+    }
+  }
+
+  onOptionFreqChange(value: string): void {
+
     this.isNone = value === 'none';
     this.isRandom = value === 'random';
     this.isZeroTo2N = value === 'zeroTo2N';
@@ -344,15 +344,15 @@ export class ElongingComponent extends EvolutionaryComponent {
       contents[i].classList.toggle("active", i === selectedIndex);
     });
     this.tieneFrecuenciasEsperadas();
-    
+
   }
 
-   validarGates(): boolean {
-      return this.gates.some(g => g.affectedQubits === 1 && g.selected)
-        && this.gates.some(g => g.affectedQubits === 2 && g.selected)
-        && this.gates.some(g => g.affectedQubits === 3 && g.selected)
-        && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
-    }
+  validarGates(): boolean {
+    return this.gates.some(g => g.affectedQubits === 1 && g.selected)
+      && this.gates.some(g => g.affectedQubits === 2 && g.selected)
+      && this.gates.some(g => g.affectedQubits === 3 && g.selected)
+      && this.gates.some(g => g.affectedQubits >= 4 && g.selected);
+  }
 
 
   validarDatos(): boolean {
@@ -393,31 +393,31 @@ export class ElongingComponent extends EvolutionaryComponent {
     return false;
   }
 
-  validarDatosInputMin() : boolean {
+  validarDatosInputMin(): boolean {
     const config = this.pc.inputConfiguration;
     if (config.minNumberOfColumns == null || config.minNumberOfColumns < 4) return true;
     return false;
   }
 
-  validarDatosInputMax() : boolean {
+  validarDatosInputMax(): boolean {
     const config = this.pc.inputConfiguration;
     if (config.maxNumberOfColumns == null || config.maxNumberOfColumns < 4) return true;
     return false;
   }
 
-  validarInputPopSizeInit() : boolean {
+  validarInputPopSizeInit(): boolean {
     const config = this.pc.inputConfiguration;
     if (config.populationSize == null || config.populationSize < 2 || config.populationSize % 2 !== 0) return true;
     return false;
   }
 
-  validarInputPopSizeMax() : boolean {
+  validarInputPopSizeMax(): boolean {
     const config = this.pc.inputConfiguration;
     if (config.maxPopulationSize == null || config.maxPopulationSize < 2 || config.maxPopulationSize % 2 !== 0) return true;
     return false;
   }
 
-  validarInputError() : boolean {
+  validarInputError(): boolean {
     const config = this.pc.inputConfiguration;
     if (this.pc.desiredError == null || this.pc.desiredError < 0) return true;
     return false;
@@ -475,7 +475,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       console.log('Código copiado al portapapeles');
       this.mensajeTemporal2 = 'Code copied';
       setTimeout(() => {
-          this.mensajeTemporal2 = '';
+        this.mensajeTemporal2 = '';
       }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
@@ -486,12 +486,12 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     setTimeout(() => {
       const codigo = this.code?.toString() || '';
-    
+
       navigator.clipboard.writeText(codigo).then(() => {
         console.log('Código copiado al portapapeles');
         this.mensajeTemporal2 = 'Code copied';
         setTimeout(() => {
-            this.mensajeTemporal2 = '';
+          this.mensajeTemporal2 = '';
         }, 1000);
       }).catch(err => {
         console.error('Error al copiar el código:', err);
@@ -502,40 +502,40 @@ export class ElongingComponent extends EvolutionaryComponent {
   transpileCodigo() {
     this.modalTranspile = true;
   }
-  
+
   selectBackend(backend: Backend) {
     this.selectedBackends.push(backend);
     this.availableBackends = this.availableBackends.filter(b => b.name !== backend.name);
     localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
     localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
   }
-  
+
   deselectBackend(backend: Backend) {
     this.availableBackends.push(backend);
     this.selectedBackends = this.selectedBackends.filter(b => b.name !== backend.name);
     localStorage.setItem('selectedBackends', JSON.stringify(this.selectedBackends));
     localStorage.setItem('availableBackends', JSON.stringify(this.availableBackends));
   }
-  
+
   transpile() {
-      try{
-        const backendsToTranspile = this.selectedBackends.map(b => b.name);
-        this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
-          this.transpiledCode = result;
-        });
-        this.mensajeTemporal = 'The code will be transpiled.';
-        setTimeout(() => {
-          this.mensajeTemporal = '';
-        }
-        , 2000);
-      } catch (error) {
-        console.error('Error during transpilation:', error);
-        this.mensajeTemporal = 'Error during transpilation. Please try again.';
-        setTimeout(() => {
-          this.mensajeTemporal = '';
-        }, 2000);
+    try {
+      const backendsToTranspile = this.selectedBackends.map(b => b.name);
+      this.transpileService.transpile(this.code, backendsToTranspile, this.circuitName).subscribe(result => {
+        this.transpiledCode = result;
+      });
+      this.mensajeTemporal = 'The code will be transpiled.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
       }
-      
+        , 2000);
+    } catch (error) {
+      console.error('Error during transpilation:', error);
+      this.mensajeTemporal = 'Error during transpilation. Please try again.';
+      setTimeout(() => {
+        this.mensajeTemporal = '';
+      }, 2000);
+    }
+
   }
 
   toggleSelectGates(minQubits: number) {
@@ -576,19 +576,19 @@ export class ElongingComponent extends EvolutionaryComponent {
   getGeneratorData(): any {
     const config = this.pc.inputConfiguration;
     const selectedGateNames = this.gates
-        .filter(g => g.selected)
-        .map(g => g.name);
+      .filter(g => g.selected)
+      .map(g => g.name);
 
     return {
-        "type": "GENETIC",
-        
-        "hadamards": config.startWithH,
-        "minColumns": config.minNumberOfColumns,
-        "maxColumns": config.maxNumberOfColumns,
-        "initPopSize": config.populationSize,
-        "maxPopSize": config.maxPopulationSize,
-        "desiredError": this.pc.desiredError,
-        "gates": selectedGateNames
+      "type": "GENETIC",
+
+      "hadamards": config.startWithH,
+      "minColumns": config.minNumberOfColumns,
+      "maxColumns": config.maxNumberOfColumns,
+      "initPopSize": config.populationSize,
+      "maxPopSize": config.maxPopulationSize,
+      "desiredError": this.pc.desiredError,
+      "gates": selectedGateNames
     };
   }
 
@@ -598,31 +598,31 @@ export class ElongingComponent extends EvolutionaryComponent {
   }
 
   cancelarSaveModal(): void {
-      this.mostrarModalGuardarProyecto = false;
-      this.saveError = '';
-      this.circuitName = ''; 
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+    this.circuitName = '';
   }
 
   confirmarGuardarProyecto(): void {
-      if (!this.circuitName || this.circuitName.trim().length === 0) {
-          this.saveError = "The project name is mandatory.";
-          return;
-      }
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+      this.saveError = "The project name is mandatory.";
+      return;
+    }
 
-      this.mostrarModalGuardarProyecto = false;
-      this.saveError = '';
-      
-      this.guardarProyecto();
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+
+    this.guardarProyecto();
   }
 
   guardarProyecto(): void {
 
     if (!this.circuitName || this.circuitName.trim().length === 0) {
-        console.error("No se puede guardar: el nombre del circuito es obligatorio.");
-        this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
-        return;
+      console.error("No se puede guardar: el nombre del circuito es obligatorio.");
+      this.saveError = "Guardado fallido: el nombre del proyecto es obligatorio.";
+      return;
     }
-    
+
     //const idCircuit = crypto.randomUUID();
     let idCircuit: string;
 
@@ -649,28 +649,28 @@ export class ElongingComponent extends EvolutionaryComponent {
     let quirkCircuitData: any = {};
 
     if (this.responseReceived && this.responseReceived["QUIRK"] && this.responseReceived["QUIRK"].length > 0) {
-        quirkCircuitData = this.responseReceived["QUIRK"][0]; 
+      quirkCircuitData = this.responseReceived["QUIRK"][0];
     }
 
     let finalQuirkPayload: any = quirkCircuitData;
 
     if (finalQuirkPayload.cols) {
-        finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
-             if (col.some(item => item === "…")) {
-                 return col;
-             }
-             
-             let lastSignificantIndex = col.length - 1;
-             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
-                 lastSignificantIndex--;
-             }
-             
-             return col.slice(0, lastSignificantIndex + 1);
-        });
+      finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
+        if (col.some(item => item === "…")) {
+          return col;
+        }
+
+        let lastSignificantIndex = col.length - 1;
+        while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+          lastSignificantIndex--;
+        }
+
+        return col.slice(0, lastSignificantIndex + 1);
+      });
     }
 
     if (!finalQuirkPayload.cols && !finalQuirkPayload.gates) {
-        finalQuirkPayload = { cols: [] };
+      finalQuirkPayload = { cols: [] };
     }
 
     console.log('Final quirk payload to be sent:', finalQuirkPayload);
@@ -685,64 +685,64 @@ export class ElongingComponent extends EvolutionaryComponent {
       shots: this.pc.inputConfiguration.shots,
       generator: generatorData,
       qcodes: [
-          {
-              platform: "AerSimulator",
-              code: this.code || "No qiskit code generated."
-          }
+        {
+          platform: "AerSimulator",
+          code: this.code || "No qiskit code generated."
+        }
       ],
-      inputQubits: Array.from({length: this.pc.inputConfiguration.qubits || 0}, (_, i) => i).join(','),
+      inputQubits: Array.from({ length: this.pc.inputConfiguration.qubits || 0 }, (_, i) => i).join(','),
       outputQubits: this.pc.inputConfiguration.outputs
-          .map((selected, index) => selected ? index : -1)
-          .filter(index => index !== -1)
-          .join(','),
+        .map((selected, index) => selected ? index : -1)
+        .filter(index => index !== -1)
+        .join(','),
       qCircuit: {
-          id: idCircuit,
-          qbits: this.pc.inputConfiguration.qubits,
-          quirkCode: finalQuirkPayload 
+        id: idCircuit,
+        qbits: this.pc.inputConfiguration.qubits,
+        quirkCode: finalQuirkPayload
       }
     };
 
     let notesPayload: any[] = [];
     const allNotesSaved = localStorage.getItem('project_notes');
-    
+
     if (allNotesSaved) {
-        try {
-            const allNotes = JSON.parse(allNotesSaved);
-            
-            notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
-                .map((n: any, index: number) => ({
-                    //id: `note_${Date.now()}_${index}`,
-                    id: crypto.randomUUID(),
-                    title: n.title,
-                    text: n.text,
-                    type: n.type,
-                    timestamp: n.timestamp
-                }));
-                
-        } catch (e) {
-            console.error("Error procesando las notas del localStorage", e);
-        }
+      try {
+        const allNotes = JSON.parse(allNotesSaved);
+
+        notesPayload = allNotes
+          .filter((n: any) => n.type.toLowerCase() === this.tipoLocal.toLowerCase())
+          .map((n: any, index: number) => ({
+            //id: `note_${Date.now()}_${index}`,
+            id: crypto.randomUUID(),
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+          }));
+
+      } catch (e) {
+        console.error("Error procesando las notas del localStorage", e);
+      }
     }
-    
+
     const projectDtoForMapping: any = {
-        id: idCircuit,
-        name: this.circuitName,
-        qProgram: qProgram,
-        userEmail: this.userEmail,
-        mutantCycles: [], 
-        testSuite: null,
-        projectNotes: notesPayload
+      id: idCircuit,
+      name: this.circuitName,
+      qProgram: qProgram,
+      userEmail: this.userEmail,
+      mutantCycles: [],
+      testSuite: null,
+      projectNotes: notesPayload
     };
-    
+
     const finalPayload: any = {
-        circuit: projectDtoForMapping, 
-        user: { id: this.userEmail } 
+      circuit: projectDtoForMapping,
+      user: { id: this.userEmail }
     };
 
     console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
 
-    
+
     this.projectService.saveProject(finalPayload).subscribe({
       next: (response: unknown) => {
         //alert('Project "' + this.circuitName + '" saved successfully!');
@@ -764,20 +764,20 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   loadProjectNames(): void {
     if (this.userEmail && this.userToken) {
-        const requestBody = this.getAuthRequestBody();
+      const requestBody = this.getAuthRequestBody();
 
-        this.projectService.getProjectsName(requestBody).subscribe({
-            next: (data: ProjectListItem[]) => {
-                this.projectList = data.filter(project => 
-                    project.type === this.REQUIRED_GENERATOR_TYPE
-                );
-                console.log("Project names loaded.", this.projectList);
-            },
-            error: (err) => {
-                console.log('Error loading project names', err);
-                this.projectList = []; 
-            }
-        });
+      this.projectService.getProjectsName(requestBody).subscribe({
+        next: (data: ProjectListItem[]) => {
+          this.projectList = data.filter(project =>
+            project.type === this.REQUIRED_GENERATOR_TYPE
+          );
+          console.log("Project names loaded.", this.projectList);
+        },
+        error: (err) => {
+          console.log('Error loading project names', err);
+          this.projectList = [];
+        }
+      });
     }
   }
 
@@ -787,28 +787,28 @@ export class ElongingComponent extends EvolutionaryComponent {
     const requestBody = this.getAuthRequestBody(this.selectedProjectId);
 
     this.projectService.getProject(requestBody).subscribe({
-        next: (project: StoredProject) => {
-            //alert(`Proyecto "${project.name}" cargando...`);
-            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
-            setTimeout(() => {
-              this.mensajeTemporal2 = '';
-            }, 1000);
-            setTimeout(() => {
-              this.loadProjectDataToComponent(project);
-              const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
-              const contents = document.querySelectorAll<HTMLElement>(".tab-content");
-              tabs[0].classList.add("active");
-              contents[0].classList.add("active");
-              tabs[1].classList.remove("active");
-              contents[1].classList.remove("active");
-            }, 1000);
-            
+      next: (project: StoredProject) => {
+        //alert(`Proyecto "${project.name}" cargando...`);
+        this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+        setTimeout(() => {
+          this.mensajeTemporal2 = '';
+        }, 1000);
+        setTimeout(() => {
+          this.loadProjectDataToComponent(project);
+          const tabs = document.querySelectorAll<HTMLButtonElement>(".tab");
+          const contents = document.querySelectorAll<HTMLElement>(".tab-content");
+          tabs[0].classList.add("active");
+          contents[0].classList.add("active");
+          tabs[1].classList.remove("active");
+          contents[1].classList.remove("active");
+        }, 1000);
 
-        },
-        error: (err) => {
-            console.log('Error loading project details', err);
-            alert('Error loading project details. Check console for details.');
-        }
+
+      },
+      error: (err) => {
+        console.log('Error loading project details', err);
+        alert('Error loading project details. Check console for details.');
+      }
     });
   }
 
@@ -818,181 +818,181 @@ export class ElongingComponent extends EvolutionaryComponent {
     const qp = project.qProgram;
     const generator = qp.generator;
     const config = this.pc.inputConfiguration;
-    
-    this.circuitName = project.name; 
+
+    this.circuitName = project.name;
 
     localStorage.setItem('selectedProjectId_genetic', project.id);
 
     config.qubits = qp.qubits;
     const outputQubitsString = qp.outputQubits ? qp.outputQubits.toString() : '';
-    
-    const outputIndices: number[] = outputQubitsString 
-        .split(',')
-        .map((s: string) => parseInt(s.trim(), 10))
-        .filter((n: number) => !isNaN(n));
-    
+
+    const outputIndices: number[] = outputQubitsString
+      .split(',')
+      .map((s: string) => parseInt(s.trim(), 10))
+      .filter((n: number) => !isNaN(n));
+
     config.outputs = Array(qp.qubits).fill(false);
     outputIndices.forEach(i => {
-        if (i >= 0 && i < qp.qubits) {
-            config.outputs[i] = true;
-        }
+      if (i >= 0 && i < qp.qubits) {
+        config.outputs[i] = true;
+      }
     });
 
     const incomingNotes = project.projectNotes || project.projectNotes;
 
     if (incomingNotes && Array.isArray(incomingNotes)) {
-        
-        const newNotes = incomingNotes.map((n: any) => ({
-            title: n.title,
-            text: n.text,
-            type: n.type,
-            timestamp: n.timestamp
-        }));
 
-        const storedNotesStr = localStorage.getItem('project_notes');
-        let existingNotes: any[] = [];
-        
-        if (storedNotesStr) {
-            try {
-                existingNotes = JSON.parse(storedNotesStr);
-            } catch (e) {
-                console.error("Error parsing existing notes", e);
-                existingNotes = [];
-            }
+      const newNotes = incomingNotes.map((n: any) => ({
+        title: n.title,
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      const storedNotesStr = localStorage.getItem('project_notes');
+      let existingNotes: any[] = [];
+
+      if (storedNotesStr) {
+        try {
+          existingNotes = JSON.parse(storedNotesStr);
+        } catch (e) {
+          console.error("Error parsing existing notes", e);
+          existingNotes = [];
         }
+      }
 
-        const notesToKeep = existingNotes.filter((n: any) => 
-            (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
-        );
+      const notesToKeep = existingNotes.filter((n: any) =>
+        (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+      );
 
-        const finalNotesList = [...notesToKeep, ...newNotes];
+      const finalNotesList = [...notesToKeep, ...newNotes];
 
-        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
-        
-        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
+      localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+
+      console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${this.tipoLocal}.`);
 
     } else {
-        
-        /* const storedNotesStr = localStorage.getItem('project_notes');
-        if (storedNotesStr) {
-            const existingNotes = JSON.parse(storedNotesStr);
-            const notesToKeep = existingNotes.filter((n: any) => 
-                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
-            );
-            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
-        }
-        */
+
+      /* const storedNotesStr = localStorage.getItem('project_notes');
+      if (storedNotesStr) {
+          const existingNotes = JSON.parse(storedNotesStr);
+          const notesToKeep = existingNotes.filter((n: any) => 
+              (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+          );
+          localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+      }
+      */
     }
-    
+
     if (generator.type === 'GENETIC') {
-        config.startWithH = generator.hadamards;
-        config.minNumberOfColumns = generator.minColumns;
-        config.maxNumberOfColumns = generator.maxColumns;
-        config.populationSize = generator.initPopSize;
-        config.maxPopulationSize = generator.maxPopSize;
-        this.pc.desiredError = generator.desiredError;
-        
-        const savedGates: string[] = generator.gates || [];
-        this.gates.forEach(g => {
-            g.selected = savedGates.includes(g.name!);
-        });
-        this.saveGates();
+      config.startWithH = generator.hadamards;
+      config.minNumberOfColumns = generator.minColumns;
+      config.maxNumberOfColumns = generator.maxColumns;
+      config.populationSize = generator.initPopSize;
+      config.maxPopulationSize = generator.maxPopSize;
+      this.pc.desiredError = generator.desiredError;
+
+      const savedGates: string[] = generator.gates || [];
+      this.gates.forEach(g => {
+        g.selected = savedGates.includes(g.name!);
+      });
+      this.saveGates();
     }
 
     this.updateExpectedFrequencies();
-    this.validarDatos(); 
-    
+    this.validarDatos();
+
     this.notBuilt = false;
-    
+
     /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
     setTimeout(() => {
       this.mensajeTemporal2 = '';
     }, 1000);*/
 
     setTimeout(() => {
-        this.updateExpectedFrequencies();
-        this.validarDatos(); 
-        this.notBuilt = false;
+      this.updateExpectedFrequencies();
+      this.validarDatos();
+      this.notBuilt = false;
 
-        this.lastSavedCircuitState = this.captureCircuitState();
-        this.isCircuitModified = false;
-        
-        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
-        setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
+      this.lastSavedCircuitState = this.captureCircuitState();
+      this.isCircuitModified = false;
+
+      this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+      setTimeout(() => { this.mensajeTemporal2 = ''; }, 1000);
     }, 200);
   }
 
   getAuthRequestBody(projectId?: string): any {
-    const instanceId = window.crypto.randomUUID(); 
-    
+    const instanceId = window.crypto.randomUUID();
+
     const body: any = {
-        email: this.userEmail,
-        token: this.userToken,
-        instanceId: instanceId
+      email: this.userEmail,
+      token: this.userToken,
+      instanceId: instanceId
     };
 
     if (projectId) {
-        body.projectId = projectId;
+      body.projectId = projectId;
     }
     return body;
   }
-  
+
 
   private captureNotesState(): string {
     const allNotesStr = localStorage.getItem('project_notes');
     if (!allNotesStr) return '[]';
 
     try {
-        const tipoLocal = 'quco_' + this.nombreComponente.toLowerCase();
-        const allNotes = JSON.parse(allNotesStr);
-        const editorNotes = allNotes
-            .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
-            .map((n: any) => ({ title: n.title, text: n.text, type: n.type }));
-        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
-        
-        return JSON.stringify(editorNotes);
+      const tipoLocal = 'quco_' + this.nombreComponente.toLowerCase();
+      const allNotes = JSON.parse(allNotesStr);
+      const editorNotes = allNotes
+        .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
+        .map((n: any) => ({ title: n.title, text: n.text, type: n.type }));
+      editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+
+      return JSON.stringify(editorNotes);
     } catch (e) {
-        console.error("Error capturing notes state:", e);
-        return '[]';
+      console.error("Error capturing notes state:", e);
+      return '[]';
     }
   }
 
   private captureCircuitState(): string {
     const config = this.pc.inputConfiguration;
     const selectedGateNames = this.gates
-        .filter(g => g.selected)
-        .map(g => g.name)
-        .sort()
-        .join(',');
-    
+      .filter(g => g.selected)
+      .map(g => g.name)
+      .sort()
+      .join(',');
+
     const state = {
-        qubits: config.qubits,
-        minColumns: config.minNumberOfColumns,
-        maxColumns: config.maxNumberOfColumns,
-        initPopSize: config.populationSize,
-        maxPopSize: config.maxPopulationSize,
-        desiredError: this.pc.desiredError,
-        startWithH: config.startWithH,
-        outputs: config.outputs.map(o => o ? 1 : 0).join(','),
-        
-        frequencies: JSON.stringify(config.expectedFrequencies), 
+      qubits: config.qubits,
+      minColumns: config.minNumberOfColumns,
+      maxColumns: config.maxNumberOfColumns,
+      initPopSize: config.populationSize,
+      maxPopSize: config.maxPopulationSize,
+      desiredError: this.pc.desiredError,
+      startWithH: config.startWithH,
+      outputs: config.outputs.map(o => o ? 1 : 0).join(','),
 
-        prob1Q: this.pc.probOf1QubitGates,
-        prob2Q: this.pc.probOf2QubitGates,
-        prob3Q: this.pc.probOf3QubitGates,
-        probNQ: this.pc.probOfNQubitGates,
+      frequencies: JSON.stringify(config.expectedFrequencies),
 
-        gates: selectedGateNames,
-        template: this.manager.selectedTemplate.fileName,
-        currentNotes: this.captureNotesState()
+      prob1Q: this.pc.probOf1QubitGates,
+      prob2Q: this.pc.probOf2QubitGates,
+      prob3Q: this.pc.probOf3QubitGates,
+      probNQ: this.pc.probOfNQubitGates,
+
+      gates: selectedGateNames,
+      template: this.manager.selectedTemplate.fileName,
+      currentNotes: this.captureNotesState()
     };
     return JSON.stringify(state);
   }
 
   private checkForChanges() {
     if (!this.selectedProjectId || !this.lastSavedCircuitState) {
-        this.isCircuitModified = false;
-        return;
+      this.isCircuitModified = false;
+      return;
     }
     const currentState = this.captureCircuitState();
     this.isCircuitModified = currentState !== this.lastSavedCircuitState;
@@ -1018,26 +1018,26 @@ export class ElongingComponent extends EvolutionaryComponent {
     const requestBody = { projectId: projectIdToDelete };
 
     this.projectService.deleteProject(requestBody).subscribe({
-        next: () => {
-            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
-            setTimeout(() => this.mensajeTemporal2 = '', 3000);
-            
-            this.showDeleteProjectModal = false;
-            
-            this.selectedProjectId = '';
-            this.circuitName = '';
-            this.lastSavedCircuitState = '';
-            this.isCircuitModified = false;
-            localStorage.removeItem('selectedProjectId_genetic');
+      next: () => {
+        this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
 
-            this.reload(); 
-            this.loadProjectNames();
-        },
-        error: (err: any) => {
-            console.error('Error deleting project:', err);
-            alert('Error deleting project. Check console.');
-            this.showDeleteProjectModal = false;
-        }
+        this.showDeleteProjectModal = false;
+
+        this.selectedProjectId = '';
+        this.circuitName = '';
+        this.lastSavedCircuitState = '';
+        this.isCircuitModified = false;
+        localStorage.removeItem('selectedProjectId_genetic');
+
+        this.reload();
+        this.loadProjectNames();
+      },
+      error: (err: any) => {
+        console.error('Error deleting project:', err);
+        alert('Error deleting project. Check console.');
+        this.showDeleteProjectModal = false;
+      }
     });
   }
 
@@ -1052,32 +1052,32 @@ export class ElongingComponent extends EvolutionaryComponent {
   confirmApplyChanges() {
     this.showApplyChangesModal = false;
     this.circuitName = this.circuitName || '';
-    this.applyChanges = true; 
+    this.applyChanges = true;
     this.guardarProyecto();
   }
 
   openSaveOrSaveAsNewModal(isNew: boolean) {
     this.saveError = '';
-    
-    this.applyChanges = !isNew && !!this.selectedProjectId; 
-    
+
+    this.applyChanges = !isNew && !!this.selectedProjectId;
+
     if (isNew || !this.selectedProjectId) {
-        this.circuitName = this.circuitName || `New ${this.nombreComponente} Project`;
+      this.circuitName = this.circuitName || `New ${this.nombreComponente} Project`;
     }
-    
+
     this.mostrarModalGuardarProyecto = true;
   }
 
   checkNotesChangeAndClose(event: any) {
     this.mostrarNotasModal = false;
-    
+
     if (this.selectedProjectId) {
-        this.checkForChanges();
-        
-        if (this.isCircuitModified) {
-             this.mensajeTemporal = 'Notes changed, save required.';
-             setTimeout(() => this.mensajeTemporal = '', 2000);
-        }
+      this.checkForChanges();
+
+      if (this.isCircuitModified) {
+        this.mensajeTemporal = 'Notes changed, save required.';
+        setTimeout(() => this.mensajeTemporal = '', 2000);
+      }
     }
   }
 
