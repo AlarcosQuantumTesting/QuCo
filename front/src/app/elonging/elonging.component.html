@@ -9,11 +9,100 @@
 
     <div class="titulo">
         <h1>Genetic algorithm</h1>
+        <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()"
+            title="Show help">
+            ?
+        </button>
 
         <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
             title="Unsaved changes detected" style="cursor: default !important;">
             <i class="fas fa-circle"></i>
         </span>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" *ngIf="showHelp">
+        <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+            <div class="help-modal-header" cdkDragHandle>
+                <h2 class="help-title-modal">Help</h2>
+                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+            </div>
+            <div class="help-text">
+                <h2 class="help-heading" style="color: #0a6369;">How to use 'Genetic algorithm'</h2>
+                <div class="help-intro">
+                    Use evolutionary strategies to find quantum circuits that match a target probability distribution.
+                </div>
+
+                <div class="help-section">
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-cogs"></i></div>
+                        <div class="help-content-desc">
+                            <h3>1. Basic Setup</h3>
+                            <p>Select a <b>Template</b> to define the base code structure. Set the number of
+                                <b>Qubits</b>
+                                and identify which ones are <b>Output qubits</b>. You can also choose to start all
+                                qubits with a <b>Hadamard</b> gate to explore the full state space.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-users"></i></div>
+                        <div class="help-content-desc">
+                            <h3>2. Population & Columns</h3>
+                            <p>Define the circuit depth by setting the <b>Min/Max number of columns</b>. Control the
+                                evolution speed and diversity with <b>Initial</b> and <b>Max population size</b>. Set
+                                the
+                                <b>Desired error</b> to tell the algorithm when to stop.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-microchip"></i></div>
+                        <div class="help-content-desc">
+                            <h3>3. Gate Pool</h3>
+                            <p>Choose which gates the algorithm can use in its search. You can select individual gates
+                                or
+                                toggle entire categories (1, 2, 3, or N-qubit gates). Click <b>Build</b> to finalize
+                                these settings and move to the Generation tab.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-play"></i></div>
+                        <div class="help-content-desc">
+                            <h3>4. Generation & Stop</h3>
+                            <p>Click <b>Generate</b> to start the evolution. The algorithm will create an initial
+                                population and begin the search. Use <b>Stop</b> at any time to freeze the current
+                                progress. Use the <b>Reset</b> icon to clear everything and start fresh.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="help-content-desc">
+                            <h3>5. Monitoring Progress</h3>
+                            <p>Toggle <b>Show charts</b> to visualize the evolution of fitness, error, and execution
+                                times across generations. The <b>Strategy</b> policy lets you choose between fixed or
+                                parameterizable evolutionary strategies.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-code"></i></div>
+                        <div class="help-content-desc">
+                            <h3>6. Solutions & Code</h3>
+                            <p>The table displays the best individuals. Rows marked with 💃 represent successful
+                                solutions. Click on an individual's index to view and copy its <b>Qiskit code</b>,
+                                transpile it, or execute it on remote backends.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="help-actions">
+                    <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">

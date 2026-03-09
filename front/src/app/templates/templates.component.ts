@@ -21,14 +21,16 @@ export class TemplatesComponent implements OnInit {
   currentDescription: string = '';
   codeTemplate: string = '';
   currentCode: string = '';
-  mostrarModalCrear : boolean = false;
-  mostrarInstrucciones : boolean = false;
-  error : string = '';
-  isInvalid : boolean = false;
+  mostrarModalCrear: boolean = false;
+  mostrarInstrucciones: boolean = false;
+  error: string = '';
+  isInvalid: boolean = false;
+  showHelp: boolean = false;
+
 
   templateToSave: CodeTemplate = new CodeTemplate("", "", "");
 
-  constructor(private service : TemplatesService, public manager : ManagerService) { }
+  constructor(private service: TemplatesService, public manager: ManagerService) { }
 
   ngOnInit(): void {
     this.service.getTemplates().subscribe(
@@ -49,7 +51,7 @@ export class TemplatesComponent implements OnInit {
     this.validateInputs();
   }
 
-  show(template : any) {
+  show(template: any) {
     this.manager.selectedTemplate = template
     this.creatingTemplate = false
   }
@@ -107,7 +109,7 @@ export class TemplatesComponent implements OnInit {
   }
 
   onFocusInput() {
-    
+
   }
 
   selectTemplateIfMatch() {
@@ -115,7 +117,7 @@ export class TemplatesComponent implements OnInit {
     if (match) {
       this.manager.selectedTemplate = match;
       //console.log('Template seleccionado:', match);
-    } 
+    }
   }
 
   clearSearch() {
@@ -126,7 +128,7 @@ export class TemplatesComponent implements OnInit {
     const match = this.manager.templates.find(
       template => template.fileName.toLowerCase() === this.searchQuery.trim().toLowerCase()
     );
-  
+
     if (match) {
       this.manager.selectedTemplate = match;
       /*console.log('Template seleccionado:', match);
@@ -137,7 +139,7 @@ export class TemplatesComponent implements OnInit {
       console.warn('No se encontró ningún template con ese nombre.');
     }
   }
-  
+
   editTemplate() {
     this.editingTemplate = true;
     this.nameTemplate = this.manager.selectedTemplate?.fileName?.trim();
@@ -166,7 +168,7 @@ export class TemplatesComponent implements OnInit {
     this.currentCode = this.codeTemplate?.trim();
 
     if (!this.currentName) return false;
-  
+
     const requiredSuffix = '.template.txt';
 
     if (this.currentName.toLowerCase().endsWith('.template.')) {
@@ -177,23 +179,23 @@ export class TemplatesComponent implements OnInit {
       this.currentName += 'template.txt';
     } else if (!this.currentName.toLowerCase().endsWith(requiredSuffix)) {
       this.currentName += requiredSuffix;
-    } 
-    
+    }
+
 
     const index = this.manager.templates.findIndex(
       t => t.fileName.trim().toLowerCase() === this.currentName.toLowerCase()
     );
     this.validateInputs();
-    
+
     return index !== -1;
   }
 
-  descriptionInput () {
+  descriptionInput() {
     this.currentDescription = this.descriptionTemplate?.trim();
     this.validateInputs();
   }
 
-  codeInput () {
+  codeInput() {
     this.currentCode = this.codeTemplate?.trim();
     this.validateInputs();
   }
@@ -201,7 +203,7 @@ export class TemplatesComponent implements OnInit {
   createTemplate() {
     //this.manager.selectedTemplate.fileName = this.nameTemplate.trim();
     console.log("Nombre del template:", this.currentName);
-    console.log("Descripción del template:", this.currentDescription); 
+    console.log("Descripción del template:", this.currentDescription);
     console.log("Código del template:", this.currentCode);
   }
 
@@ -240,7 +242,7 @@ export class TemplatesComponent implements OnInit {
     this.isInvalid = false;
   }
 
-  validInputs() : boolean {
+  validInputs(): boolean {
     this.isInvalid = false;
     if (this.descriptionTemplate === '' || this.nameTemplate.trim() === '' || this.nameTemplate === '' || this.codeTemplate === '') {
       this.error = 'All fields are required';
@@ -260,7 +262,7 @@ export class TemplatesComponent implements OnInit {
     this.isInvalid = false;
     return false;
   }
-  
+
   saveTemplate() {
 
     this.templateToSave.fileName = this.currentName;
@@ -273,7 +275,7 @@ export class TemplatesComponent implements OnInit {
       if (!option)
         return
     }
-    
+
     this.service.createTemplate(this.templateToSave).subscribe(
       data => {
         this.mensajeTemporal = 'Template created successfully!';
@@ -310,18 +312,18 @@ export class TemplatesComponent implements OnInit {
     /*this.templateToSave.fileName = this.currentName;
     this.templateToSave.description = this.currentDescription;
     this.templateToSave.code = this.currentCode;*/
-    
+
 
     this.isExistingTemplate = this.templateExists();
 
-    this.manager.selectedTemplate.description =  this.currentDescription;
+    this.manager.selectedTemplate.description = this.currentDescription;
     this.manager.selectedTemplate.code = this.currentCode;
 
     console.log("Nombre del template sel:", this.manager.selectedTemplate.fileName);
     console.log("Descripción del template sel:", this.manager.selectedTemplate.description);
     console.log("Código del template sel:", this.manager.selectedTemplate.code);
 
-  
+
     /*const forgottenTokens = this.manager.selectedTemplate.getForgottenTokens();
     if (forgottenTokens.length > 0) {
       const confirmMsg = `The following tokens are not used in the code: ${forgottenTokens.join(", ")}. Do you want to continue?`;
@@ -329,8 +331,8 @@ export class TemplatesComponent implements OnInit {
       if (!option) return;
     }*/
 
-    
-  
+
+
     this.service.updateTemplate(this.manager.selectedTemplate).subscribe(
       (data) => {
         /*console.log("Nombre del template:", this.templateToSave.fileName);
@@ -341,30 +343,34 @@ export class TemplatesComponent implements OnInit {
           console.error("Error: respuesta inválida del backend", data);
           return;
         }
-    
+
         const index = this.manager.templates
           .filter(t => t && t.fileName)
           .findIndex(t => t.fileName === data.fileName);
-    
+
         if (index === -1) {
           this.manager.templates.push(data);
         } else {
           this.manager.templates[index] = data;
         }
-    
+
         this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
         this.manager.selectedTemplate = data;
         this.mensajeTemporal = 'Template updated successfully!';
         setTimeout(() => {
           this.mensajeTemporal = '';
         }, 2000);
-    
+
         this.cancelEdit();
       },
       (error) => {
         console.error("Error updating template:", error);
       }
     );
-    
+
+  }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
   }
 }

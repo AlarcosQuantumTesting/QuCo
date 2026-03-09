@@ -31,8 +31,6 @@ export class CircuitEditorComponent {
   code?: string;
   error?: any
 
-  showInstructions: any;
-
   selectedCircuitName: string | null = null
   circuit?: EdCircuit
   circuitNames: string[] = []
@@ -98,6 +96,7 @@ export class CircuitEditorComponent {
 
   showDeleteProjectModal: boolean = false;
   showApplyChangesModal: boolean = false;
+  showHelp: boolean = false;
 
   private readonly LOCAL_STORAGE_KEYS = {
     CIRCUIT: 'circuitEditorCircuit',
@@ -840,10 +839,6 @@ export class CircuitEditorComponent {
     window.getSelection()!.addRange(range);
     document.execCommand("copy")
     window.getSelection()!.removeAllRanges()
-  }
-
-  seeOrHideInstructions() {
-    this.showInstructions = !this.showInstructions;
   }
 
   onTemplateChange(selected: CodeTemplate) {
@@ -1592,6 +1587,10 @@ export class CircuitEditorComponent {
         setTimeout(() => this.mensajeTemporal = '', 2000);
       }
     }
+  }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
   }
 }
 

@@ -1474,49 +1474,7 @@ html {
     background: #005f63;
 }
 
-/* Asegurar que el modal cubra todo */
-.help-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-/* Modal Content */
-.help-content {
-    background: white;
-    border-radius: 12px;
-    width: 85%;
-    height: 85%;
-    text-align: center;
-    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 10000;
-    overflow-y: auto;
-    padding-bottom: 20px;
-}
-
-.help-modal-header {
-    position: sticky;
-    /* Se mantiene fija en la parte superior dentro del modal */
-    top: 0;
-    /* Pegada arriba */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50px;
-    background-color: #008b95;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+/* Help Modal Styles consolidated at the end of file */
 
 .help-title-modal {
     font-size: 20px;
@@ -2632,5 +2590,185 @@ select[disabled] {
 
 .btn-delete-project:hover {
     background-color: #9f1c1c;
+    transform: scale(1.05);
+}
+
+/* Help Modal Styles */
+.help-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #14645b;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+.help-intro {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 25px;
+    margin-top: 5px;
+}
+
+/* --- PREMIUM HELP MODAL STYLES --- */
+.help-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    z-index: 9999;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.help-modal .help-content {
+    background-color: #f7f9fc;
+    border-radius: 12px;
+    width: 60%;
+    max-width: 95%;
+    height: 80vh;
+    margin: auto;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    pointer-events: auto;
+    /* Resizable properties */
+    resize: both;
+    overflow: auto;
+    min-width: 450px;
+    min-height: 400px;
+}
+
+.help-modal-header {
+    cursor: move;
+    padding: 15px 20px;
+    background-color: #008b95;
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.help-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #14645b;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+.help-intro {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 25px;
+    margin-top: 5px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+.help-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.help-card {
+    background-color: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.help-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-color: #008b95;
+}
+
+.help-icon {
+    background-color: #eaf7f7;
+    color: #008b95;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.help-content-desc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.help-content-desc h3 {
+    margin: 0 0 8px 0;
+    color: #0b555a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.help-content-desc p {
+    margin: 0;
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.help-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    padding-bottom: 30px;
+}
+
+.action-btn {
+    background-color: #008b95;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 10px rgba(0, 139, 149, 0.3);
+}
+
+.action-btn:hover {
+    background-color: #006f77;
     transform: scale(1.05);
 }

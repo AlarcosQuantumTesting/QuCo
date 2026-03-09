@@ -13,13 +13,16 @@
 
     <div class="titulo">
         <h1>Templates</h1>
+        <button class="btn-toggle-help" style="margin-left: 15px; margin-top: 8px;" (click)="toggleHelp()">
+            ?
+        </button>
     </div>
     <div class="container search-container">
         <div class="form-row">
             <div class="section buildText">
                 <p>
                     In this section you can see all the templates available in the system.
-                    
+
                     You can also create your own templates and save them for later use.
                     <br>
                     You can select a template from the list and its specifications will be shown below.
@@ -28,16 +31,13 @@
             <div class="section inputsContainer">
                 <div class="input-group">
                     <label>Available templates:</label>
-                    <input type="text"
-                        [(ngModel)]="searchQuery"
-                        (input)="onSearchInput()"
-                        (keydown)="onTabPress($event)"
-                        (focus)="onFocusInput()"
-                        placeholder="Search for a template..."
+                    <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)" (focus)="onFocusInput()" placeholder="Search for a template..."
                         list="templatesList">
-            
+
                     <datalist id="templatesList">
-                        <option class="temOpt" *ngFor="let template of manager.templates" [value]="template.fileName"></option>
+                        <option class="temOpt" *ngFor="let template of manager.templates" [value]="template.fileName">
+                        </option>
                     </datalist>
 
                     <div>
@@ -45,12 +45,13 @@
                             <i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
-            
+
                 </div>
 
                 <div class="buttons-container">
                     <!-- <button class="btn btn-primary" (click)="create()">New template</button> -->
-                    <button class="btn btn-primary" [disabled]="editingTemplate"  (click)="createModal()">New template</button>
+                    <button class="btn btn-primary" [disabled]="editingTemplate" (click)="createModal()">New
+                        template</button>
                     <!-- &nbsp;
                     <button (click)="save()" [disabled]="isInvalid" *ngIf="manager.selectedTemplate.fileName && manager.selectedTemplate.code && creatingTemplate">Save</button> -->
                 </div>
@@ -63,68 +64,57 @@
             <h2 style="margin-top: 10px;">Template</h2>
             <div style="position: relative;">
                 <button class="editTemp-button" title="Edit template" (click)="editTemplate()">
-                  <i class="fa fa-edit"></i>
+                    <i class="fa fa-edit"></i>
                 </button>
             </div>
         </div>
         <div class="template-info">
             <div class="name-description">
-              <div class="info-block">
-                <label><strong>Name:</strong></label>
-                <span>{{ manager.selectedTemplate.fileName }}</span>
-              </div>
-              <div class="info-block">
-                <label><strong>Description:</strong></label>
-                <span>{{ manager.selectedTemplate.description }}</span>
-              </div>
+                <div class="info-block">
+                    <label><strong>Name:</strong></label>
+                    <span>{{ manager.selectedTemplate.fileName }}</span>
+                </div>
+                <div class="info-block">
+                    <label><strong>Description:</strong></label>
+                    <span>{{ manager.selectedTemplate.description }}</span>
+                </div>
             </div>
-          
+
             <pre class="template-code">{{ manager.selectedTemplate.code }}</pre>
-          </div>          
+        </div>
     </div>
 
     <div *ngIf="manager.selectedTemplate && !creatingTemplate && editingTemplate" class="template-details">
 
         <div class="template-header">
             <h2>Template</h2>
-          
+
             <div class="template-buttons">
-              <button class="btn-cancel" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
-              <button 
-                class="btn-confirm" 
-                title="Save or Create template"
-                [disabled]="nameTemplate.trim() === '' || validInputs()"
-                (ngModelChange)="onNameChange(nameTemplate)"
-                *ngIf="manager.selectedTemplate"
-                (click)="templateExists() ? updateTemplate() : saveTemplate()">
-                {{ templateExists() ? 'Update' : 'Create' }}
-              </button>
+                <button class="btn-cancel" title="Cancel editing" (click)="cancelEdit()">Cancel</button>
+                <button class="btn-confirm" title="Save or Create template"
+                    [disabled]="nameTemplate.trim() === '' || validInputs()"
+                    (ngModelChange)="onNameChange(nameTemplate)" *ngIf="manager.selectedTemplate"
+                    (click)="templateExists() ? updateTemplate() : saveTemplate()">
+                    {{ templateExists() ? 'Update' : 'Create' }}
+                </button>
             </div>
         </div>
-          
+
         <div class="template-info">
             <div class="name-description">
-              <div class="info-block">
-                <label for="templateName">Name:</label>
-                <input id="templateName" 
-                    type="text" 
-                    [(ngModel)]="nameTemplate"
-                    (input)="templateExists()"
-                    (focus)="templateExists()"/>
-              </div>
-              <div class="info-block">
-                <label for="templateDesc">Description:</label>
-                <input id="templateDesc" type="text" 
-                    [(ngModel)]="descriptionTemplate"
-                    (input)="descriptionInput()"
-                    (focus)="descriptionInput()"/>
-              </div>
+                <div class="info-block">
+                    <label for="templateName">Name:</label>
+                    <input id="templateName" type="text" [(ngModel)]="nameTemplate" (input)="templateExists()"
+                        (focus)="templateExists()" />
+                </div>
+                <div class="info-block">
+                    <label for="templateDesc">Description:</label>
+                    <input id="templateDesc" type="text" [(ngModel)]="descriptionTemplate" (input)="descriptionInput()"
+                        (focus)="descriptionInput()" />
+                </div>
             </div>
-          
-            <textarea class="template-code-edit" 
-                [(ngModel)]="codeTemplate"
-                (input)="codeInput()"
-                (focus)="codeInput()">
+
+            <textarea class="template-code-edit" [(ngModel)]="codeTemplate" (input)="codeInput()" (focus)="codeInput()">
             </textarea>
         </div>
     </div>
@@ -136,45 +126,39 @@
             <div class="modal-header">
                 <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                     <h2 class="title-modal">New template</h2>
-                    <button title="Template instructions" (click)="abrirInstucciones()" style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
+                    <button title="Template instructions" (click)="abrirInstucciones()"
+                        style="color: white; font-weight: normal; font-size: small; border: none; background: none;">
                         <i class="fa fa-info-circle"></i>
                     </button>
                 </div>
                 <button class="close"><i class="close-i" (click)="cancelarModal()">&times;</i></button>
             </div>
-        
+
             <div class="template-info-modal">
-                
+
                 <div class="name-description-modal">
                     <div class="info-block">
                         <label for="templateName">Name:</label>
                         <div class="input-wrapper-modal">
-                        <input id="templateName"  placeholder="template.name..."
-                            type="text" 
-                            [(ngModel)]="nameTemplate"
-                            (input)="templateExists()"
-                            (focus)="templateExists()"/>
-                        <span *ngIf="templateExists()" class="error-text">
-                            The template already exists
-                        </span>
+                            <input id="templateName" placeholder="template.name..." type="text"
+                                [(ngModel)]="nameTemplate" (input)="templateExists()" (focus)="templateExists()" />
+                            <span *ngIf="templateExists()" class="error-text">
+                                The template already exists
+                            </span>
                         </div>
                     </div>
                     <div class="info-block">
-                        <label for="templateDesc" >Description:</label>
-                        <input id="templateDesc" placeholder="This template is for..."
-                            type="text"
-                            [(ngModel)]="descriptionTemplate"
-                            (input)="descriptionInput()"
-                            (focus)="descriptionInput()"/>
+                        <label for="templateDesc">Description:</label>
+                        <input id="templateDesc" placeholder="This template is for..." type="text"
+                            [(ngModel)]="descriptionTemplate" (input)="descriptionInput()"
+                            (focus)="descriptionInput()" />
                     </div>
                 </div>
                 <label style="justify-content: left; width: 93%; margin-bottom: 10px">
                     <strong>Code:</strong>
                 </label>
-                <textarea class="template-code-create" placeholder="from qiskit..."
-                    [(ngModel)]="codeTemplate"
-                    (input)="codeInput()"
-                    (focus)="codeInput()">
+                <textarea class="template-code-create" placeholder="from qiskit..." [(ngModel)]="codeTemplate"
+                    (input)="codeInput()" (focus)="codeInput()">
                 </textarea>
                 <div class="create-actions">
                     <button class="save-btn"
@@ -188,16 +172,15 @@
     </div>
 
     <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
-        <div class="modal-content instrucciones"
-        cdkDrag
-        cdkDragRootElement="modal-content">
+        <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Instructions</h2>
                 <button class="close"><i class="close-i" (click)="mostrarInstrucciones = false">&times;</i></button>
             </div>
             <div class="intructions-content">
                 <p class="text-instructions">
-                    Remind to use the following tokens. They will be replaced by the actual values when the circuit code is generated.
+                    Remind to use the following tokens. They will be replaced by the actual values when the circuit code
+                    is generated.
                 </p>
                 <p class="text-instructions">
                     See the existing templates to have examples.
@@ -228,6 +211,66 @@
                 <div class="modal-actions">
                     <button class="action-btn" (click)="mostrarInstrucciones = false">Got it!</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-modal" *ngIf="showHelp">
+        <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+            <div class="help-modal-header" cdkDragHandle>
+                <h2 class="help-title-modal">Help</h2>
+                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+            </div>
+            <div class="help-text">
+                <h2 class="help-heading" style="color: #0a6369;">How to use 'Templates'</h2>
+                <div class="help-intro">
+                    Templates allow you to save and manage complex Qiskit code structures for reuse across different
+                    components of QuCo.
+                </div>
+                <div class="help-section">
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-search"></i></div>
+                        <div class="help-content-desc">
+                            <h3>1. Search & Select</h3>
+                            <p>Use the search bar to find existing templates. Start typing to see suggestions and press
+                                Enter or Tab to select a template from the list.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-edit"></i></div>
+                        <div class="help-content-desc">
+                            <h3>2. Edit Templates</h3>
+                            <p>Click the <b>edit</b> icon next to a template's title to modify its name, description, or
+                                code. Changes can be saved by clicking "Update".</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-plus-circle"></i></div>
+                        <div class="help-content-desc">
+                            <h3>3. Create New</h3>
+                            <p>Click <b>"New template"</b> to open the creation modal. Provide a unique name ending in
+                                <i>.template.txt</i> and a clear description.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-key"></i></div>
+                        <div class="help-content-desc">
+                            <h3>4. Use Tokens</h3>
+                            <p>Use tokens like <code>#QUBITS#</code>, <code>#CALCULUS#</code>, and
+                                <code>#MEASURES#</code>. They are replaced dynamically when generating circuit code.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="help-actions">
+                <button class="action-btn" (click)="toggleHelp()">Got it!</button>
             </div>
         </div>
     </div>

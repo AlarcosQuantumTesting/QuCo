@@ -11,6 +11,9 @@
 
     <div class="titulo">
         <h1>Execution history</h1>
+        <button class="btn-toggle-help" style="margin-left: 15px; margin-top: 8px;" (click)="toggleHelp()">
+            ?
+        </button>
     </div>
 
     <div class="container search-container">
@@ -25,14 +28,13 @@
             <div class="section inputsContainer">
                 <div class="input-group">
                     <label>Executions:</label>
-                        
-                    <input type="text"
-                        [(ngModel)]="searchQuery"
-                        placeholder="Search for an ID or name..."
+
+                    <input type="text" [(ngModel)]="searchQuery" placeholder="Search for an ID or name..."
                         list="executionList">
-            
+
                     <datalist id="executionList">
-                        <option class="executionOpt" *ngFor="let execution of filteredExecutionWorks" [value]="execution.name"></option>
+                        <option class="executionOpt" *ngFor="let execution of filteredExecutionWorks"
+                            [value]="execution.name"></option>
                     </datalist>
 
                     <div>
@@ -47,9 +49,9 @@
                         <i class="fas fa-sync-alt" [class.spin]="isLoading"></i> Refresh list
                     </button>
 
-                   <button class="btn btn-primary" *ngIf="executionWorks.length > 0" 
-                            (click)="executionSelected = null; modalDelete = true" 
-                            style="margin-left: 10px; background-color: #dc3545;">
+                    <button class="btn btn-primary" *ngIf="executionWorks.length > 0"
+                        (click)="executionSelected = null; modalDelete = true"
+                        style="margin-left: 10px; background-color: #dc3545;">
                         <i class="fas fa-trash-can"></i> Clear all
                     </button>
                 </div>
@@ -70,10 +72,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let execution of executionWorks" [class.table-active]="execution.id === executionSelected?.id">
+                <tr *ngFor="let execution of executionWorks"
+                    [class.table-active]="execution.id === executionSelected?.id">
                     <td>
-                        <i class="bi bi-circle-fill" 
-                        [ngClass]="{
+                        <i class="bi bi-circle-fill" [ngClass]="{
                             'text-success': execution.status === 'FINISHED',
                             'text-danger': execution.status === 'ERROR',
                             'text-warning': execution.status === 'RUNNING',
@@ -86,8 +88,9 @@
                     <td>{{ execution.creationDateTime | date: 'short' }}</td>
                     <td>
                         <span class="fw-semibold">
-                            {{ execution.status }} 
-                            <span *ngIf="execution.status === 'RUNNING'" class="spinner-border spinner-border-sm ms-1"></span>
+                            {{ execution.status }}
+                            <span *ngIf="execution.status === 'RUNNING'"
+                                class="spinner-border spinner-border-sm ms-1"></span>
                         </span>
                     </td>
                     <td>
@@ -95,36 +98,28 @@
                             <i class="fas fa-eye"></i> See details
                         </button>
 
-                        <button 
-                            class="apply-button" 
-                            title="Share execution link" 
+                        <button class="apply-button" title="Share execution link"
                             (click)="$event.stopPropagation(); openShareModal(execution)"
-                            style="margin-left: 10px; background-color: #5bc0de;"
-                            >
+                            style="margin-left: 10px; background-color: #5bc0de;">
                             <i class="fas fa-share-alt"></i> Share
                         </button>
 
-                        <button 
-                            class="apply-button" 
-                            title="Download Summary CSV" 
-                            [disabled]="execution.status !== 'FINISHED'" 
+                        <button class="apply-button" title="Download Summary CSV"
+                            [disabled]="execution.status !== 'FINISHED'"
                             (click)="$event.stopPropagation(); downloadSummary(execution.id)"
-                            style="margin-left: 10px; background-color: #28a745;"
-                            >
+                            style="margin-left: 10px; background-color: #28a745;">
                             <i class="fas fa-file-download"></i> Sumary CSV
                         </button>
 
-                        <button 
-                            class="apply-button" 
-                            title="Download All Results CSV" 
-                            [disabled]="execution.status !== 'FINISHED'" 
+                        <button class="apply-button" title="Download All Results CSV"
+                            [disabled]="execution.status !== 'FINISHED'"
                             (click)="$event.stopPropagation(); downloadResults(execution.id)"
-                            style="margin-left: 10px; background-color: #0b555a;"
-                            >
+                            style="margin-left: 10px; background-color: #0b555a;">
                             <i class="fas fa-download"></i> All results CSV
                         </button>
 
-                        <button class="btn-cancel" title="Delete local" style="margin-left: 10px;" (click)="deleteModalConfirm(execution)">
+                        <button class="btn-cancel" title="Delete local" style="margin-left: 10px;"
+                            (click)="deleteModalConfirm(execution)">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     </td>
@@ -138,7 +133,8 @@
             <i class="fas fa-box-open empty-icon"></i>
             <h3>No execution history found</h3>
             <p>Your local execution history is empty. </p>
-            <p class="guide-text">Run a new job using the <strong>Execute remote</strong> button to see your first entry here.</p>
+            <p class="guide-text">Run a new job using the <strong>Execute remote</strong> button to see your first entry
+                here.</p>
         </div>
     </div>
 
@@ -149,17 +145,23 @@
                 <button class="close"><i class="close-i" (click)="modalDelete = false">&times;</i></button>
             </div>
             <div class="modal-message-delete" *ngIf="executionSelected != null">
-                <p>Are you sure you want to delete the local history for batch <strong>{{executionSelected?.name}}</strong>?</p>
+                <p>Are you sure you want to delete the local history for batch
+                    <strong>{{executionSelected?.name}}</strong>?
+                </p>
                 <div class="modal-buttons">
-                    <button class="btn btn-delete-modal" (click)="confirmDelete(executionSelected!.id); executionSelected=null;">Yes, delete</button>
-                    <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false; executionSelected=null;">Cancel</button>
+                    <button class="btn btn-delete-modal"
+                        (click)="confirmDelete(executionSelected!.id); executionSelected=null;">Yes, delete</button>
+                    <button class="btn btn-cancel-delete-modal"
+                        (click)="modalDelete = false; executionSelected=null;">Cancel</button>
                 </div>
             </div>
             <div class="modal-message-delete" *ngIf="executionSelected == null">
                 <p>Are you sure you want to delete the local history?</p>
                 <div class="modal-buttons">
-                    <button class="btn btn-delete-modal" (click)="clearAllHistory(); executionSelected=null;">Yes, delete</button>
-                    <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false; executionSelected=null;">Cancel</button>
+                    <button class="btn btn-delete-modal" (click)="clearAllHistory(); executionSelected=null;">Yes,
+                        delete</button>
+                    <button class="btn btn-cancel-delete-modal"
+                        (click)="modalDelete = false; executionSelected=null;">Cancel</button>
                 </div>
             </div>
         </div>
@@ -169,10 +171,8 @@
 
 
     <div class="modal ejemplos" *ngIf="executionSelected && modalDetails">
-        <div class="modal-content ejemplos"
-            cdkDrag
-            cdkDragRootElement=".modal-content.ejecuciones"
-             style="max-height: 90%;">
+        <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content.ejecuciones"
+            style="max-height: 90%;">
 
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Execution specifications: {{ executionSelected.name }}</h2>
@@ -182,9 +182,9 @@
             </div>
 
             <div class="intructions-content">
-                
+
                 <div class="execution-metadata">
-                    <div class="info-blocks-grid"> 
+                    <div class="info-blocks-grid">
                         <div class="info-column">
                             <div class="info-block">
                                 <label><strong>ID:</strong></label>
@@ -196,7 +196,8 @@
                             </div>
                             <div class="info-block">
                                 <label><strong>Status:</strong></label>
-                                <span [ngClass]="{'text-success': executionSelected.status === 'FINISHED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR', 'text-secondary': executionSelected.status === 'PENDING'}">
+                                <span
+                                    [ngClass]="{'text-success': executionSelected.status === 'FINISHED', 'text-warning': executionSelected.status === 'RUNNING', 'text-danger': executionSelected.status === 'ERROR', 'text-secondary': executionSelected.status === 'PENDING'}">
                                     {{ executionSelected.status }}
                                 </span>
                             </div>
@@ -218,61 +219,60 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="details-viewer" *ngIf="enLocal == true">
-                    
+
                     <p class="section-title">Execution parameters</p>
-                    
+
                     <div class="parameters-grid">
                         <div class="param-line">
-                            <label>Iterations:</label> 
+                            <label>Iterations:</label>
                             <span>{{ executionSelected.details?.iterations || 'N/A' }}</span>
                         </div>
                         <div class="param-line">
-                            <label>Option selected:</label> 
+                            <label>Option selected:</label>
                             <span>{{ executionSelected.details?.optionSelected || 'N/A' }}</span>
                         </div>
                         <div class="param-line">
-                            <label>IBM Token provided:</label> 
+                            <label>IBM Token provided:</label>
                             <span>{{ executionSelected.details?.ibm_token_provided ? 'Yes' : 'No' }}</span>
                         </div>
                         <div class="param-line">
-                            <label>IBM Instance provided:</label> 
+                            <label>IBM Instance provided:</label>
                             <span>{{ executionSelected.details?.ibm_instance_provided ? 'Yes' : 'No' }}</span>
                         </div>
                     </div>
-                    
+
                 </div>
                 <div class="details-viewer" style="margin-top: 20px;">
                     <p class="section-title">Server files</p>
                     <div class="log-paths" [class]="getFileListColorClass()">
-    
+
                         <p class="guide-text" style="margin-bottom: 5px;">Files generated in batch directory:</p>
 
                         <div *ngFor="let file of executionSelected.details?.files" class="param-line file-line">
-                            
+
                             <label class="file-name-label">{{ file.name }}</label>
                             <span class="file-size-info">({{ (file.size) | number:'1.0-2' }} KB)</span>
-                            
+
                             <div class="file-download-actions">
                                 <ng-container *ngIf="executionSelected.status === 'FINISHED'">
-                                    </ng-container>
+                                </ng-container>
                             </div>
 
                             <div class="file-download-actions">
-                                
+
                                 <ng-container *ngIf="executionSelected.status === 'FINISHED'">
-                                    
-                                    <button class="apply-button download-btn" 
-                                            title="Download {{ file.name }}"
-                                            (click)="downloadGenericFile(executionSelected!.id, file.name)"
-                                            style="padding: 5px 10px; margin-left: 10px;">
-                                        
+
+                                    <button class="apply-button download-btn" title="Download {{ file.name }}"
+                                        (click)="downloadGenericFile(executionSelected!.id, file.name)"
+                                        style="padding: 5px 10px; margin-left: 10px;">
+
                                         <!-- <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
                                         <i *ngIf="file.name.endsWith('.txt')" class="fas fa-file-alt"></i>
                                         <i *ngIf="!file.name.endsWith('.csv') && !file.name.endsWith('.txt')" class="fas fa-download"></i> -->
-                                         <i class="fas fa-download"></i>
-                                        
+                                        <i class="fas fa-download"></i>
+
                                     </button>
 
                                 </ng-container>
@@ -283,7 +283,8 @@
             </div>
 
             <div class="modal-footer" *ngIf="this.enLocal===true">
-                <button class="delete-local-btn" title="Delete execution" (click)="deleteModalConfirm(executionSelected!)">
+                <button class="delete-local-btn" title="Delete execution"
+                    (click)="deleteModalConfirm(executionSelected!)">
                     <i class="bi bi-trash3-fill" style="margin-right: 5px;"></i> Delete from local
                 </button>
             </div>
@@ -298,23 +299,75 @@
             </div>
             <div class="modal-message-delete modal-message-share">
                 <p>Share this identifier to allow others to find this execution remotely:</p>
-                
+
                 <div class="input-group-share" style="width: 100%; margin-bottom: 30px;">
-                    <input 
-                        type="text" 
-                        [value]="generatedShareId" 
-                        readonly 
-                        style="flex-grow: 1; padding: 10px; border: 1px solid #ccc; background-color: #f8f8f8; cursor: text; width: 84%; border-radius: 4px;"
-                    >
-                    <button 
-                        class="btn btn-primary" 
-                        (click)="copyShareId()"
-                        title="Copy"
-                        style="background-color: #28a77b; margin-left: 10px; border-radius: 8px; padding: 7px; "
-                    >
+                    <input type="text" [value]="generatedShareId" readonly
+                        style="flex-grow: 1; padding: 10px; border: 1px solid #ccc; background-color: #f8f8f8; cursor: text; width: 84%; border-radius: 4px;">
+                    <button class="btn btn-primary" (click)="copyShareId()" title="Copy"
+                        style="background-color: #28a77b; margin-left: 10px; border-radius: 8px; padding: 7px; ">
                         <i class="fas fa-copy"></i>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="help-modal" *ngIf="showHelp">
+        <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+            <div class="help-modal-header" cdkDragHandle>
+                <h2 class="help-title-modal">Help</h2>
+                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+            </div>
+            <div class="help-text">
+                <h2 class="help-heading" style="color: #0a6369;">How to use 'Execution history'</h2>
+                <div class="help-intro">
+                    Execution history is a record of all the remote executions that have been run in the system,
+                    providing access to results and status tracking.
+                </div>
+                <div class="help-section">
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-search"></i></div>
+                        <div class="help-content-desc">
+                            <h3>1. Search & Sync</h3>
+                            <p>Search for jobs by <b>ID or Name</b>. Use the <b>"Refresh list"</b> button to synchronize
+                                your local history with the server and get updated statuses for all jobs.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="help-content-desc">
+                            <h3>2. Status Tracking</h3>
+                            <p>Track job progress with status icons: <span style="color: #28a745;">Finished</span>,
+                                <span style="color: #dc3545;">Error</span>, or <span
+                                    style="color: #ffc107;">Running</span>. Click on any job to see its specific
+                                progress.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-list-ul"></i></div>
+                        <div class="help-content-desc">
+                            <h3>3. Inspect Details</h3>
+                            <p>Click <b>"See details"</b> to view technical specifications, execution parameters
+                                (iterations, options), and the list of files generated during the process.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-file-export"></i></div>
+                        <div class="help-content-desc">
+                            <h3>4. Results & Sharing</h3>
+                            <p>Download <b>CSV summaries</b> of your results. Use the <b>"Share"</b> button to generate
+                                a unique ID that allows others to retrieve the execution remotely.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="help-actions">
+                <button class="action-btn" (click)="toggleHelp()">Got it!</button>
             </div>
         </div>
     </div>

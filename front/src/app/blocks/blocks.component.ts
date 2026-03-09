@@ -44,6 +44,12 @@ export class BlocksComponent extends EvolutionaryComponent {
   selectedOptionFreq: string = 'none';
   selectedGate: String = 'H';
 
+  showHelp: boolean = false;
+
+  toggleHelp(): void {
+    this.showHelp = !this.showHelp;
+  }
+
   modalTranspile: boolean = false;
   transpiledCode: string = '';
   availableBackends: Backend[] = [];

@@ -8,6 +8,10 @@
 
     <div class="titulo">
         <h1>Blocks genetic algorithm</h1>
+        <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()"
+            title="Show help">
+            ?
+        </button>
         <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
             title="Unsaved changes detected" style="cursor: default !important;">
             <i class="fas fa-circle"></i>
@@ -904,6 +908,92 @@
     <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)"
         [contextIdentifier]="nombreComponente"> </app-notes-modal>
 
+    <div class="modal-backdrop" *ngIf="showHelp" (click)="toggleHelp()"></div>
+    <div class="help-modal" *ngIf="showHelp">
+        <div class="help-content" cdkDrag>
+            <div class="help-modal-header" cdkDragHandle>
+                <h2 class="help-title-modal">Help</h2>
+                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+            </div>
+
+            <div class="help-text">
+
+                <h2 class="help-heading" style="color: #0a6369;">How to use 'Blocks genetic algorithm'</h2>
+                <div class="help-intro">
+                    Configuring the genetic blocks algorithm allows you to evolve quantum unitaries <b>U</b>
+                    based on a specific goal. Use the sections below to refine your strategy.
+                </div>
+
+                <div class="help-section">
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-cog"></i></div>
+                        <div class="help-content-desc">
+                            <h3>1. Basic Configuration</h3>
+                            <p>Select a <strong>Template</strong> to start. Configure the <strong>Number of
+                                    Qubits</strong>
+                                and choose which ones will be your <strong>Output Qubits</strong>. Click <b>"Build"</b>
+                                to
+                                initialize the circuit structure.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-th-large"></i></div>
+                        <div class="help-content-desc">
+                            <h3>2. Blocks & Columns</h3>
+                            <p>Define <strong>Starting Columns</strong> for fixed initial gates. Set the <strong>Number
+                                    of
+                                    Blocks</strong> to evolve. Use the <b>Block Description</b> to specify left and
+                                right
+                                gates that surround the evolved unitary <b>U</b>.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-dna"></i></div>
+                        <div class="help-content-desc">
+                            <h3>3. Genetic Strategy</h3>
+                            <p>Set <strong>Population Size</strong> and <strong>Desired Error</strong>. Configure
+                                <strong>Massive Mutation</strong> policies to escape local minima if the fitness
+                                stagnates
+                                during the evolution process.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-microchip"></i></div>
+                        <div class="help-content-desc">
+                            <h3>4. Available Gates</h3>
+                            <p>Select the <strong>Quantum Gates</strong> that the algorithm can use to build the blocks.
+                                You
+                                can categorize them by the number of affected qubits for better control over the circuit
+                                complexity.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="help-content-desc">
+                            <h3>5. Monitoring & Code</h3>
+                            <p>Once you click <b>"Generate"</b>, monitor <strong>Fitness</strong> and
+                                <strong>Error</strong>
+                                per generation. Click on an individual to view its <strong>Qiskit Code</strong>,
+                                transpile
+                                it, or execute it.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-actions">
+                <button class="action-btn" (click)="toggleHelp()">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 
 

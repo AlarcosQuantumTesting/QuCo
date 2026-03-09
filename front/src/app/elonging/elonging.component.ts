@@ -51,6 +51,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   mostrarNotasModal: boolean = false;
   nombreComponente: string = 'Genetic';
   tipoLocal: string = 'quco_genetic';
+  showHelp: boolean = false;
   storedNotesStr = localStorage.getItem('project_notes');
 
   isCircuitModified: boolean = false;
@@ -202,6 +203,10 @@ export class ElongingComponent extends EvolutionaryComponent {
   notBuilt: boolean = true;
   templateSelected: boolean = false;
   generateClicked: boolean = false;
+
+  toggleHelp(): void {
+    this.showHelp = !this.showHelp;
+  }
 
   circuitName: string = '';
 

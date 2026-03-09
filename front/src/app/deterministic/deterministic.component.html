@@ -28,6 +28,9 @@
       <br>
       <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
     </h1>
+    <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
+      ?
+    </button>
     <!-- <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
       <i class="fas fa-question-circle"></i>
     </button> -->
@@ -37,26 +40,86 @@
     </span>
   </div>
 
-  <!-- Help Modal -->
   <div class="help-modal" *ngIf="showHelp">
-    <div class="help-content">
-      <div class="help-modal-header">
+    <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+      <div class="help-modal-header" cdkDragHandle>
         <h2 class="help-title-modal">Help</h2>
-        <button class="close"
-          style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;"><i class="close-i"
-            (click)="toggleHelp()">&times;</i></button>
+        <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
       </div>
       <div class="help-text">
-        <h2>💡 How to use 'Algorithms' 💡</h2>
-        <span class="span-help-modal">Select Grover, Grover and Rudolph, or Grenoble to generate quantum algorithms
-          based on your specified constraints and oracle configurations. Configure the inputs and expressions, and then
-          generate the corresponding Qiskit code.</span>
-        <div class="help-actions">
-          <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+        <h2 class="help-heading" style="color: #0a6369;">How to use 'Algorithms'</h2>
+        <div class="help-intro">
+          Design search oracles or prepare precise quantum state distributions for your circuits.
         </div>
+
+        <div class="help-section">
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-search"></i></div>
+            <div class="help-content-desc">
+              <h3>1. Grover's Algorithm</h3>
+              <p>Used to find "solutions" in an unstructured database. Use the table or expressions to <b>mark</b> rows
+                with value <b>1</b> (solution) or <b>0</b> (not a solution). Choose between <b>MCX</b> (Multi-Controlled
+                X) or <b>H-MCZ-H</b> (Hadamard + Multi-Controlled Z) for the oracle implementation.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-wave-square"></i></div>
+            <div class="help-content-desc">
+              <h3>2. Grenoble & Grover-Rudolph</h3>
+              <p>Algorithms for <b>state preparation</b> and loading probability distributions. Use them to create
+                operators that represent specific data patterns. The <b>Physical Angle</b> (in radians) controls the
+                rotation intensity for the probability loading phase.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-bolt"></i></div>
+            <div class="help-content-desc">
+              <h3>3. Circuit Optimizations</h3>
+              <p>Enable <b>Parallel circuit</b> to reduce the gate depth by executing independent operations
+                simultaneously. Use <b>Split in several circuits</b> if the resulting operator exceeds the maximum
+                allowed gates for a single circuit on your target hardware.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-terminal"></i></div>
+            <div class="help-content-desc">
+              <h3>4. Expression Editor</h3>
+              <p>Automate table filling using JS expressions. Use <b>q0, q1...</b> for specific bits, <b>input</b> for
+                the decimal value, or <b>dv(start..end)</b> for decimal ranges. Look for <b>automatic
+                  recommendations</b> to quickly implement prime numbers, parity checks, or sums.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-save"></i></div>
+            <div class="help-content-desc">
+              <h3>5. Persist Your Work</h3>
+              <p>Click <b>Save</b> to store your configuration. For complex setups, use <b>Save as new</b> to create
+                versions. Projects store your qubit count, algorithm selection, expressions, and the resulting frequency
+                table.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-file-code"></i></div>
+            <div class="help-content-desc">
+              <h3>6. Export & Transpile</h3>
+              <p>Generate <b>Qiskit code</b> as a main program or as a re-usable modular function. Once generated, use
+                the <b>Transpile</b> feature to convert your Qiskit implementation for other platforms.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-actions">
+        <button class="action-btn" (click)="toggleHelp()">Got it!</button>
       </div>
     </div>
   </div>
+
 
 
 

@@ -10,7 +10,7 @@ export class TranspilationComponent {
 
   transpilationWorks: any[] = [];
   transpiledCode?: string;
-  svgCircuit? : any
+  svgCircuit?: any
 
   mensajeTemporal: string = '';
   mensajeTemporal2: string = '';
@@ -23,9 +23,10 @@ export class TranspilationComponent {
   modalDelete: boolean = false;
   mostrarTabla: boolean = false;
   modalCodigo: boolean = false;
+  showHelp: boolean = false;
 
 
-  constructor(private service: TranspilationService) { 
+  constructor(private service: TranspilationService) {
     this.getTranspilationWorks();
   }
 
@@ -54,14 +55,14 @@ export class TranspilationComponent {
 
   cancelTranspilation(id: any) {
     let option = confirm("Are you sure you want to delete this work?");
-    if (!option) 
+    if (!option)
       return
 
     this.service.cancelTranspilation(id).subscribe({
       next: (data) => {
         this.transpilationSelected = null;
         this.searchQuery = '';
-       this.getTranspilationWorks(); // Refresh the list after cancellation
+        this.getTranspilationWorks(); // Refresh the list after cancellation
       },
       error: (err) => {
         console.error("Error fetching transpilation works:", err);
@@ -69,7 +70,7 @@ export class TranspilationComponent {
     });
   }
 
-  getTranspiledCode(id : any) {
+  getTranspiledCode(id: any) {
     this.service.getTranspiledCode(id).subscribe({
       next: (data) => {
         this.transpiledCode = data.code;
@@ -109,7 +110,7 @@ export class TranspilationComponent {
   }
 
   onFocusInput() {
-    
+
   }
 
   onTabPress(event: KeyboardEvent) {
@@ -189,10 +190,14 @@ export class TranspilationComponent {
       console.log('Código copiado al portapapeles');
       this.mensajeTemporal2 = 'Code copied';
       setTimeout(() => {
-          this.mensajeTemporal2 = '';
+        this.mensajeTemporal2 = '';
       }, 1000);
     }).catch(err => {
       console.error('Error al copiar el código:', err);
     });
+  }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
   }
 }
