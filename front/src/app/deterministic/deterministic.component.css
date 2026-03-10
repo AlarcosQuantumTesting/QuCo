@@ -68,15 +68,14 @@ h1 {
 }
 
 .unsaved-indicator {
-  color: #008f99;
-  font-size: 0.7em;
-  margin-left: 15px;
-  display: flex;
+  color: white;
+  font-size: 0.4em;
+  margin-left: 4px;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  vertical-align: middle;
   cursor: default;
-  margin-top: 0px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .pulsing-dot {
@@ -86,15 +85,15 @@ h1 {
 
 @keyframes slowPulseDot {
   0% {
-    opacity: 0.5;
+    opacity: 0.4;
     transform: scale(0.9);
-    color: #008b95;
+    color: rgba(255, 255, 255, 0.6);
   }
 
   100% {
-    opacity: 0.9;
+    opacity: 1;
     transform: scale(1.1);
-    color: #10989c;
+    color: white;
   }
 }
 

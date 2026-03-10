@@ -18,14 +18,15 @@
   </div>
 
   <div class="titulo">
-    <h1>Circuits editor</h1>
+    <h1>Circuits editor
+      <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
+        title="Unsaved changes detected" style="cursor: default !important;">
+        <i class="fas fa-circle"></i>
+      </span>
+    </h1>
     <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
       ?
     </button>
-    <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
-      title="Unsaved changes detected" style="cursor: default !important;">
-      <i class="fas fa-circle"></i>
-    </span>
   </div>
 
   <div class="container search-container">

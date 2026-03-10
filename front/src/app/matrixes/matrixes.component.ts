@@ -11,6 +11,7 @@ import { EditorComponent } from '../editor/editor.component';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { ProjectService } from '../project.service';
+import { QiskitCode } from '../grover/QiskitCode';
 
 @Component({
   selector: 'app-matrixes',
@@ -54,6 +55,7 @@ export class MatrixesComponent implements AfterViewInit {
   isDisabled = false;
   isDisabled2 = false;
   isLoadingQiskitCode = false;
+  hasHadamardGates = false;
 
   cols: number = 0
   rows: number = 0
@@ -424,11 +426,21 @@ export class MatrixesComponent implements AfterViewInit {
     }
     this.quirkService.getQuirk(info).subscribe(
       result => {
+        if (this.hasHadamardGates) {
+          result = this.applyHadamardToQuirk(result);
+        }
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
         window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
       }
     )
+  }
+
+  private applyHadamardToQuirk(quirkJson: any): any {
+    if (!quirkJson || !quirkJson.cols) return quirkJson;
+    const hadamardCol = new Array(this.inputQubits).fill('H');
+    quirkJson.cols.unshift(hadamardCol);
+    return quirkJson;
   }
 
   drawAllQuirk(matrix: any[]) {
@@ -443,6 +455,9 @@ export class MatrixesComponent implements AfterViewInit {
 
     this.quirkService.getAllQuirk(info).subscribe(
       result => {
+        if (this.hasHadamardGates) {
+          result = this.applyHadamardToQuirk(result);
+        }
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
         window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
@@ -462,6 +477,9 @@ export class MatrixesComponent implements AfterViewInit {
 
     this.quirkService.getAllQuirk(info).subscribe(
       result => {
+        if (this.hasHadamardGates) {
+          result = this.applyHadamardToQuirk(result);
+        }
         let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
         //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
@@ -603,6 +621,7 @@ export class MatrixesComponent implements AfterViewInit {
           this.qiskitCode = this.qiskitCode.replace("#ALGORITHM#", "Matrixes")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
         }
+        this.hasHadamardGates = false;
         this.isLoadingQiskitCode = false;
         this.mostrarModal = true;
         this.copiarCodigo();
@@ -619,30 +638,59 @@ export class MatrixesComponent implements AfterViewInit {
 
   //mio
 
+  toggleHadamardGates() {
+    if (this.hasHadamardGates) {
+      this.removeHadamardGates();
+    } else {
+      this.addHadamardGates();
+    }
+    this.hasHadamardGates = !this.hasHadamardGates;
+    this.saveState();
+  }
+
   addHadamardGates() {
-    /*if (this.isDisabled) return; // Si ya está deshabilitado, no hace nada
-    this.isDisabled = true;
+    if (!this.qiskitCode) return;
 
-    let start = 0
-    for (let i=0; i<this.qiskitCode!.length; i++) {
-      if (this.qiskitCode![i].startsWith("#Output qubits")) {
-        start = i
-        break
-      }
-    }
-    while (this.qiskitCode![start].trim().length!=0)
-      start++
+    const lines = this.qiskitCode.split('\n');
+    let index = lines.findIndex(line => line.includes('#Output qubits'));
 
-    this.qiskitCode!.splice(start++, 0, "#HADAMARD GATES#\n")
-    for (let i=0; i<this.inputQubits; i++) {
-      this.qiskitCode!.splice(start++, 0, "circuit.h(" + i + ")\n")
+    if (index === -1) {
+      index = lines.findIndex(line => line.includes('QuantumCircuit('));
+      if (index !== -1) index++;
     }
 
+    const hadamardLines = ['#HADAMARD GATES#'];
+    for (let i = 0; i < this.inputQubits; i++) {
+      hadamardLines.push(`circuit.h(${i})`);
+    }
+    hadamardLines.push('');
 
+    if (index !== -1) {
+      lines.splice(index, 0, ...hadamardLines);
+    } else {
+      lines.push(...hadamardLines);
+    }
+
+    this.qiskitCode = lines.join('\n');
     this.mensajeTemporal = 'Added Hadamard gates!';
     setTimeout(() => {
-        this.mensajeTemporal = '';
-    }, 2000); // Se oculta después de 2 segundos*/
+      this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  removeHadamardGates() {
+    if (!this.qiskitCode) return;
+    const lines = this.qiskitCode.split('\n');
+    this.qiskitCode = lines.filter(line => {
+      const isHHeader = line.includes('#HADAMARD GATES#');
+      const isHGate = line.trim().startsWith('circuit.h(') && line.includes(')');
+      return !isHHeader && !isHGate;
+    }).join('\n');
+
+    this.mensajeTemporal = 'Removed Hadamard gates!';
+    setTimeout(() => {
+      this.mensajeTemporal = '';
+    }, 2000);
   }
 
   countLastQubit() {
@@ -953,6 +1001,9 @@ export class MatrixesComponent implements AfterViewInit {
     localStorage.setItem('inputQubits', JSON.stringify(this.numberOfInputQubits));
     localStorage.setItem('outputQubits', JSON.stringify(this.numberOfOutputQubits));
 
+    this.hasHadamardGates = false;
+    this.qiskitCode = "";
+
     this.getEmptyMatrix();
     // this.goToSpecifications();
     this.goToTable();
@@ -963,6 +1014,8 @@ export class MatrixesComponent implements AfterViewInit {
 
 
   mostrarModal: boolean = false;
+  mostrarModalGuargarCode: boolean = false;
+  qiskitCodeObj: QiskitCode = new QiskitCode();
 
   copiarCodigo() {
     if (!this.qiskitCode)
@@ -977,6 +1030,31 @@ export class MatrixesComponent implements AfterViewInit {
     }).catch(err => {
       console.error('Error copying code: ', err);
     });
+  }
+
+  guardarCodigo() {
+    this.mostrarModalGuargarCode = true;
+    this.mostrarModal = false;
+  }
+
+  saveCode() {
+    this.error = undefined
+    if (!this.qiskitCode) return;
+    this.qiskitCodeObj.qubits = this.inputQubits + this.outputQubits
+    this.qiskitCodeObj.lines = this.qiskitCode?.split('\n')
+    this.qiskitService.saveCode(this.qiskitCodeObj).subscribe(
+      result => {
+        // alert("Code saved")
+        this.mensajeTemporal = 'Code successfully saved';
+        setTimeout(() => {
+          this.mensajeTemporal = '';
+        }, 2000);
+        this.mostrarModalGuargarCode = false;
+      },
+      error => {
+        this.error = error.error ? error.error.message : error
+      }
+    )
   }
 
   transpileCodigo() {

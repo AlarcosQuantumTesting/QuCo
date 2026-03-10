@@ -10,6 +10,7 @@ import { Component, ViewChildren, ElementRef, QueryList } from '@angular/core';
 Chart.register(...registerables)
 
 import { Directive } from '@angular/core';
+import { Subject, Observable } from 'rxjs';
 
 @Directive()
 export abstract class EvolutionaryComponent {
@@ -24,7 +25,47 @@ export abstract class EvolutionaryComponent {
   remoteFitnessers: RemoteFitnesser[] = []
   selectedRemoteFitnessers: RemoteFitnesser[] = []
 
+  showMsgModal: boolean = false;
+  msgModalTitle: string = '';
+  msgModalMessage: string = '';
+  msgModalType: 'info' | 'error' | 'success' = 'info';
+
+  showConfirmModal: boolean = false;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  private confirmSubject: Subject<boolean> | null = null;
+
   gates: Gate[] = []
+
+  // ... (existing state) ...
+
+  showMessage(title: string, message: string, type: 'info' | 'error' | 'success' = 'info') {
+    this.msgModalTitle = title;
+    this.msgModalMessage = message;
+    this.msgModalType = type;
+    this.showMsgModal = true;
+  }
+
+  closeMsgModal() {
+    this.showMsgModal = false;
+  }
+
+  showConfirmation(title: string, message: string): Observable<boolean> {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.showConfirmModal = true;
+    this.confirmSubject = new Subject<boolean>();
+    return this.confirmSubject.asObservable();
+  }
+
+  onConfirmModalChoice(choice: boolean) {
+    this.showConfirmModal = false;
+    if (this.confirmSubject) {
+      this.confirmSubject.next(choice);
+      this.confirmSubject.complete();
+      this.confirmSubject = null;
+    }
+  }
 
   lastBestFitness: number = 0
   lastMeanFitness: number = 0
@@ -540,6 +581,10 @@ export abstract class EvolutionaryComponent {
     window.getSelection()!.addRange(range);
     document.execCommand("copy")
     window.getSelection()!.removeAllRanges()
+  }
+
+  getOutputQubitsCount(): number {
+    return this.pc.inputConfiguration.outputs.filter(o => o).length;
   }
 
   protected prepareCharts() {

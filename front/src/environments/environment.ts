@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  beUrl2: "http://localhost:8080/",
+  beUr2: "http://localhost:8080/",
   wsUrl2: "ws://localhost:8080/",
 
   beUrl: "https://alarcosj.esi.uclm.es/tp3/",

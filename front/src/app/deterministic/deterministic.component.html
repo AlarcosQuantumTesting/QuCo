@@ -25,19 +25,17 @@
 
   <div class="titulo">
     <h1>Algorithms
+      <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
+        title="Unsaved changes detected" style="cursor: default !important;">
+        <i class="fas fa-circle"></i>
+      </span>
       <br>
       <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
+
     </h1>
     <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
       ?
     </button>
-    <!-- <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
-      <i class="fas fa-question-circle"></i>
-    </button> -->
-    <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
-      title="Unsaved changes detected" style="cursor: default !important;">
-      <i class="fas fa-circle"></i>
-    </span>
   </div>
 
   <div class="help-modal" *ngIf="showHelp">

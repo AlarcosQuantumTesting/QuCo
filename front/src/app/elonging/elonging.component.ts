@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Chart, registerables } from 'chart.js';
 import { Individual } from '../common/Individual';
 import { EvolutionaryService } from '../evolutionary.service';
@@ -173,9 +174,9 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   }
 
-  canDeactivate(): boolean {
+  canDeactivate(): boolean | Observable<boolean> {
     if (this.running || !this.notBuilt) {
-      return confirm('Are you sure you want to exit Genetic algorithm?');
+      return this.showConfirmation('Confirm exit', 'Are you sure you want to exit Genetic algorithm?');
     }
     return true;
   }
@@ -761,7 +762,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       },
       error: (error: any) => {
         console.error('Errorl saving project: ', error);
-        alert('Error saving project (Code 400). Check the console and the API documentation.');
+        this.showMessage('Error', 'Error saving project (Code 400). Check the console and the API documentation.', 'error');
       }
     });
   }
@@ -812,7 +813,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       },
       error: (err) => {
         console.log('Error loading project details', err);
-        alert('Error loading project details. Check console for details.');
+        this.showMessage('Error', 'Error loading project details. Check console for details.', 'error');
       }
     });
   }
@@ -1040,7 +1041,7 @@ export class ElongingComponent extends EvolutionaryComponent {
       },
       error: (err: any) => {
         console.error('Error deleting project:', err);
-        alert('Error deleting project. Check console.');
+        this.showMessage('Error', 'Error deleting project. Check console.', 'error');
         this.showDeleteProjectModal = false;
       }
     });

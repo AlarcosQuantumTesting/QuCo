@@ -8,16 +8,16 @@
     </div>
 
     <div class="titulo">
-        <h1>Genetic algorithm</h1>
+        <h1>Genetic algorithm
+            <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
+                title="Unsaved changes detected" style="cursor: default !important;">
+                <i class="fas fa-circle"></i>
+            </span>
+        </h1>
         <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()"
             title="Show help">
             ?
         </button>
-
-        <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
-            title="Unsaved changes detected" style="cursor: default !important;">
-            <i class="fas fa-circle"></i>
-        </span>
     </div>
 
     <!-- Help Modal -->
@@ -41,7 +41,8 @@
                             <p>Select a <b>Template</b> to define the base code structure. Set the number of
                                 <b>Qubits</b>
                                 and identify which ones are <b>Output qubits</b>. You can also choose to start all
-                                qubits with a <b>Hadamard</b> gate to explore the full state space.</p>
+                                qubits with a <b>Hadamard</b> gate to explore the full state space.
+                            </p>
                         </div>
                     </div>
 
@@ -620,7 +621,7 @@
                         align="center">
                         <td>
                             {{ rowIndex }}
-                            <sub>{{ rowIndex.toString(2) }}</sub>
+                            <sub>{{ rowIndex.toString(2).padStart(getOutputQubitsCount(), '0') }}</sub>
                         </td>
                         <td>
                             <input type="number" min="0" step="1"
@@ -877,4 +878,47 @@
     <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)"
         [contextIdentifier]="nombreComponente"> </app-notes-modal>
 
+    <!-- Message Modal -->
+    <div *ngIf="showMsgModal" class="modal-delete" style="z-index: 1100;">
+        <div class="modal-content-delete">
+            <div class="modal-header"
+                [style.background-color]="msgModalType === 'error' ? 'rgb(201, 46, 46)' : '#008b95'"
+                style="border-radius: 10px 10px 0 0;">
+                <h2 class="title-modal">
+                    <i class="fas"
+                        [ngClass]="{'fa-exclamation-triangle': msgModalType === 'error', 'fa-info-circle': msgModalType === 'info', 'fa-check-circle': msgModalType === 'success'}"></i>
+                    {{ msgModalTitle }}
+                </h2>
+                <button class="close"><i class="close-i" (click)="closeMsgModal()">&times;</i></button>
+            </div>
+            <div class="modal-message-delete">
+                <p>{{ msgModalMessage }}</p>
+                <div class="modal-buttons">
+                    <button class="btn" [ngClass]="msgModalType === 'error' ? 'btn-delete-modal' : 'btn-confirm-modal'"
+                        (click)="closeMsgModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Confirmation Modal -->
+    <div *ngIf="showConfirmModal" class="modal-delete" style="z-index: 1200;">
+        <div class="modal-content-delete">
+            <div class="modal-header" style="background-color: #008b95; border-radius: 10px 10px 0 0;">
+                <h2 class="title-modal">
+
+                    {{ confirmModalTitle }}
+                </h2>
+                <button class="close"><i class="close-i" (click)="onConfirmModalChoice(false)">&times;</i></button>
+            </div>
+            <div class="modal-message-delete">
+                <p>{{ confirmModalMessage }}</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-confirm-modal" (click)="onConfirmModalChoice(true)">Confirm</button>
+                    <button class="btn btn-cancel-delete-modal" (click)="onConfirmModalChoice(false)">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>

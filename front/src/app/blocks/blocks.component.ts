@@ -11,7 +11,7 @@ import { BlockCircuit } from './BlockCircuit';
 import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { BlockColumn } from './BlockColumn';
-import { min } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ProjectService } from '../project.service';
 import { Block } from './Block';
 
@@ -631,9 +631,9 @@ export class BlocksComponent extends EvolutionaryComponent {
     }
   };
 
-  canDeactivate(): boolean {
+  canDeactivate(): boolean | Observable<boolean> {
     if (this.running || !this.notBuilt) {
-      return confirm('Are you sure you want to exit Blocks genetic algorithm?');
+      return this.showConfirmation('Confirm exit', 'Are you sure you want to exit Blocks genetic algorithm?');
     }
     return true;
   }
@@ -860,7 +860,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       },
       error: (error: any) => {
         console.error('Error saving project:', error);
-        alert('Error saving project (Code 400). Check console.');
+        this.showMessage('Error', 'Error saving project (Code 400). Check console.', 'error');
       }
     });
   }
@@ -917,7 +917,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       },
       error: (err) => {
         console.error('Error loading project:', err);
-        alert('Error loading project details.');
+        this.showMessage('Error', 'Error loading project details.', 'error');
       }
     });
   }
@@ -1219,7 +1219,7 @@ export class BlocksComponent extends EvolutionaryComponent {
       },
       error: (err: any) => {
         console.error('Error deleting project:', err);
-        alert('Error deleting project. Check console.');
+        this.showMessage('Error', 'Error deleting project. Check console.', 'error');
         this.showDeleteProjectModal = false;
       }
     });
