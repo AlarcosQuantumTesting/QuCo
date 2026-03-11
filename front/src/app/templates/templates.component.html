@@ -36,7 +36,8 @@
                         list="templatesList">
 
                     <datalist id="templatesList">
-                        <option class="temOpt" *ngFor="let template of manager.templates" [value]="template.fileName">
+                        <option class="temOpt" *ngFor="let template of manager.templates"
+                            [value]="template.displayName">
                         </option>
                     </datalist>
 
@@ -72,7 +73,7 @@
             <div class="name-description">
                 <div class="info-block">
                     <label><strong>Name:</strong></label>
-                    <span>{{ manager.selectedTemplate.fileName }}</span>
+                    <span>{{ manager.selectedTemplate.displayName }}</span>
                 </div>
                 <div class="info-block">
                     <label><strong>Description:</strong></label>

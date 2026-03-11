@@ -189,7 +189,7 @@
                         [ngClass]="{'is-invalid': templateSelected === false}">
                         <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])"
                             [ngValue]="template">
-                            {{ template.fileName }}
+                            {{ template.displayName }}
                         </option>
                     </select>
                 </div>

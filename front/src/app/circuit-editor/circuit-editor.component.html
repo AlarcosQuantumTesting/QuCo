@@ -62,7 +62,7 @@
           <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)"
             [disabled]="selectedQubitsConfigurationName==null">
             <option *ngFor="let template of manager.templates" [ngValue]="template">
-              {{ template.fileName }}
+              {{ template.displayName }}
             </option>
           </select>
           <div>

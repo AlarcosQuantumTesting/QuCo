@@ -13,9 +13,9 @@ export class ManagerService {
   templates: CodeTemplate[] = []
   expressions: Expression[] = []
 
-  constructor(templateService : TemplatesService, expressionService : ExpressionsService) {
+  constructor(templateService: TemplatesService, expressionService: ExpressionsService) {
     templateService.getTemplates().subscribe((data) => {
-      this.templates = data
+      this.templates = data.map(t => new CodeTemplate(t.fileName, t.description, t.code))
       this.selectedTemplate = this.templates[0]
     })
 
@@ -40,6 +40,6 @@ export class ManagerService {
   getExpressionsStartingBy(name: string): Expression[] {
     return this.expressions.filter(t => t.expressionName.startsWith(name))
   }
-  
-  
+
+
 }

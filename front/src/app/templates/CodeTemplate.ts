@@ -4,14 +4,18 @@ export class CodeTemplate {
   code: string = ""
 
   constructor(name: string, description: string, code: string) {
-      this.fileName = name
-      this.description = description
-      this.code = code
+    this.fileName = name
+    this.description = description
+    this.code = code
   }
 
-  getForgottenTokens() : string[] {
-    const requiredTokens = [ "#QUBITS#", "#OUTPUT_QUBITS#", "#INITIALIZE#", "#CALCULUS#", "#MEASURES#" ]
-    let r : string[] = [];
+  get displayName(): string {
+    return this.fileName.replace('.template.txt', '');
+  }
+
+  getForgottenTokens(): string[] {
+    const requiredTokens = ["#QUBITS#", "#OUTPUT_QUBITS#", "#INITIALIZE#", "#CALCULUS#", "#MEASURES#"]
+    let r: string[] = [];
     for (let token of requiredTokens) {
       if (!this.code.includes(token))
         r.push(token)
