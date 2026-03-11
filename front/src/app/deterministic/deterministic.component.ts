@@ -478,8 +478,24 @@ export class DeterministicComponent extends GroverStyle {
     this.isLoadingQiskitCode = true;
     this.mostrarModal = true;
 
-    if (!asGrover)
-      asGrover = false
+    if (this.expectedFrequencies.getShots() === 0) {
+      if (this.userExpressions.length > 0) {
+        try {
+          this.setFrequenciesWithUserExpressions();
+        } catch (e) {
+          console.error("Error auto-filling frequencies:", e);
+        }
+      }
+
+      if (this.expectedFrequencies.getShots() === 0) {
+        this.error = "Please select at least one frequency or apply an expression before generating code.";
+        this.running = false;
+        this.isLoadingQiskitCode = false;
+        this.mostrarModal = false;
+        this.modalError = true;
+        return;
+      }
+    }
 
     this.service.calculate(
       this.qubits,
@@ -2079,11 +2095,30 @@ export class DeterministicComponent extends GroverStyle {
 
   setInfoLocal(): void {
     this.userExpressions = JSON.parse(localStorage.getItem('processedExpressionsDeterministic') || '[]');
-    this.expectedFrequencies = JSON.parse(localStorage.getItem('deterministicFrequencies') || '{}');
+
+    const storedFreqs = localStorage.getItem('deterministicFrequencies');
+    if (storedFreqs) {
+      try {
+        const plainFreqs = JSON.parse(storedFreqs);
+        this.expectedFrequencies = new FreqTable();
+        this.expectedFrequencies.setQubits(plainFreqs.qubits || 4);
+        if (plainFreqs.pairs && Array.isArray(plainFreqs.pairs)) {
+          plainFreqs.pairs.forEach((p: any) => {
+            this.expectedFrequencies.setFreq(p.index, p.freq);
+          });
+        }
+      } catch (e) {
+        console.error("Error parsing stored frequencies", e);
+        this.expectedFrequencies = new FreqTable();
+      }
+    } else {
+      this.expectedFrequencies = new FreqTable();
+    }
+
     this.qubits = parseInt(localStorage.getItem('qubits') || '3', 10);
     this.physicalAngle = parseFloat(localStorage.getItem('deterministicPhysicalAngle') || '0');
-    this.inParallel = localStorage.getItem('deterministicInParallel') === 'false';
-    this.splitCircuits = localStorage.getItem('deterministicSplitCircuits') === 'false';
+    this.inParallel = localStorage.getItem('deterministicInParallel') === 'true';
+    this.splitCircuits = localStorage.getItem('deterministicSplitCircuits') === 'true';
     if (this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
