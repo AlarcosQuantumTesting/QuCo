@@ -97,13 +97,16 @@
                     Available templates:
                     <select [disabled]="running" [(ngModel)]="manager.selectedTemplate"
                         (ngModelChange)="onTemplateChange($event)"
-                        style="margin-right: 20px; margin-left: 10px; min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"
+                        style="margin-right: 10px; margin-left: 10px; min-width: 200px; font-size: 14px; padding: 2px; border-radius: 5px; border: 1px solid #ccc;"
                         [ngClass]="{'is-invalid': templateSelected === false}">
                         <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['elonging'])"
                             [ngValue]="template">
                             {{ template.displayName }}
                         </option>
                     </select>
+                    <button routerLink="/templates" class="btn-templates-link" title="Go to Templates">
+                        <i class="fas fa-file-code"></i>
+                    </button>
                 </div>
 
                 <div>

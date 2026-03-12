@@ -65,6 +65,10 @@
               {{ template.displayName }}
             </option>
           </select>
+          <button routerLink="/templates" class="btn-templates-link" title="Go to Templates"
+            [disabled]="selectedQubitsConfigurationName==null">
+            <i class="fas fa-file-code"></i>
+          </button>
           <div>
             <button class="btn-search" title="See code" (click)="showModalCode(); copiarCodigo()"
               [disabled]="selectedQubitsConfigurationName==null"><i class="fa fa-code"></i></button>
