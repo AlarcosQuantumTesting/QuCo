@@ -47,7 +47,7 @@ export class ExecutionHistoryComponent implements OnInit {
   showHelp: boolean = false;
 
 
-  private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/run_qiskit';
+  private readonly serverUrl = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8081/run_qiskit';
 
   constructor(private http: HttpClient) { }
 
