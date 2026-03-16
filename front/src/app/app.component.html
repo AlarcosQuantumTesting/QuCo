@@ -87,18 +87,31 @@
           </a>
         </li>
 
-        <li class="user" style="cursor: default;">
-          <a href="https://alarcosj.esi.uclm.es/qsauron" target="_blank" rel="noopener noreferrer"
-            style="cursor: pointer; margin-bottom: 5px;">
-            <i class="fas fa-eye" title="qSauron"></i>
-            <span *ngIf="menuAbierto">QSauron</span>
+        <li class="user" style="cursor: default; position: relative;" (mouseleave)="isUserDropdownOpen = false">
+          <a (click)="toggleUserDropdown()" style="cursor: pointer; margin-bottom: 5px;" title="User Menu">
+            <i class="fas fa-user-circle"></i>
+            <span *ngIf="menuAbierto">User</span>
           </a>
-          <!-- <a 
-              routerLinkActive="active" style="cursor: pointer;"
-              (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()"
-          > -->
+
+          <!-- Dropdown Menu -->
+          <div class="user-dropdown" *ngIf="isUserDropdownOpen" [class.menu-open]="menuAbierto">
+            <div class="user-dropdown-header">
+              <span class="dropdown-title">User Info</span>
+            </div>
+
+            <a href="https://alarcosj.esi.uclm.es/qsauron" target="_blank" rel="noopener noreferrer"
+              class="dropdown-item">
+              <i class="fas fa-eye" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">Go to
+                Projects</span>
+            </a>
+            <a (click)="toggleDarkMode(); toggleUserDropdown()" class="dropdown-item" style="cursor: pointer;">
+              <i class="fas fa-adjust" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">{{
+                darkMode ? 'Light Theme' : 'Toggle Theme' }}</span>
+            </a>
+          </div>
+
           <a routerLinkActive="active" style="cursor: pointer;" (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()">
-            <i class="fas fa-circle-user" title="Log in" *ngIf="!isLoggedIn()"></i>
+            <i class="fas fa-sign-in-alt" title="Log in" *ngIf="!isLoggedIn()"></i>
             <i class="fas fa-sign-out-alt" title="Log out" *ngIf="isLoggedIn()"></i>
 
             <span *ngIf="menuAbierto">

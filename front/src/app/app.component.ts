@@ -20,9 +20,12 @@ export class AppComponent implements AfterViewInit, OnInit {
   //URL_BASE = "https://c9x3lxf0-8080.uks1.devtunnels.ms";
 
   ngOnInit(): void {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.darkMode = savedTheme === 'dark';
+    }
     this.loadSettings();
     this.checkTokenValidity();
-
   }
 
   constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient) {
@@ -77,6 +80,22 @@ export class AppComponent implements AfterViewInit, OnInit {
   darkMode = false;
   highContrast = false;
   userBgColor = '';
+  isUserDropdownOpen = false;
+
+  toggleUserDropdown() {
+    this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  toggleDarkMode() {
+    this.darkMode = !this.darkMode;
+    if (this.darkMode) {
+      localStorage.setItem('theme', 'dark');
+    } else {
+      localStorage.setItem('theme', 'light');
+    }
+
+    this.saveSettings();
+  }
 
 
   toggleAccessibilityPanel() {
@@ -93,7 +112,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       containerColor: this.containerColor,
       sidebarColor: this.sidebarColor,
       grayscale: this.grayscale,
-      zoomLevel: this.zoomLevel
+      zoomLevel: this.zoomLevel,
+      darkMode: this.darkMode
     };
     localStorage.setItem('settings', JSON.stringify(settings));
   }
@@ -108,6 +128,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.sidebarColor = settings.sidebarColor || this.sidebarColor;
       this.grayscale = settings.grayscale || false;
       this.zoomLevel = settings.zoomLevel || 1;
+      this.darkMode = settings.darkMode || false;
 
       this.renderer.setStyle(document.body, 'background-color', this.bgColor);
 

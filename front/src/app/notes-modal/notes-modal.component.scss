@@ -561,3 +561,152 @@
     margin-bottom: 8px;
     display: inline-block;
 }
+
+/* --- DARK MODE OVERRIDES PARA NOTES MODAL --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1, 
+:host-context(body.dark-mode) h2, 
+:host-context(body.dark-mode) h3, 
+:host-context(body.dark-mode) h4, 
+:host-context(body.dark-mode) p, 
+:host-context(body.dark-mode) label, 
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .notes-history-title,
+:host-context(body.dark-mode) .note-card-title {
+    color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) p, 
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .note-content {
+    color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .note-timestamp,
+:host-context(body.dark-mode) .no-notes-message {
+    color: #8fa8a8 !important;
+}
+
+/* Modal and Content backgrounds */
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content.notas-content,
+:host-context(body.dark-mode) .modal-content.instrucciones,
+:host-context(body.dark-mode) .modal-content.redimensionar,
+:host-context(body.dark-mode) .modal-content-delete-confirm {
+    background-color: #172424 !important;
+    border-color: #008b95 !important;
+    box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+    color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+    background-color: #0a4d52 !important;
+    color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .modal-footer,
+:host-context(body.dark-mode) .history-toggle-container,
+:host-context(body.dark-mode) .note-timestamp,
+:host-context(body.dark-mode) .note-footer {
+    border-color: #386161 !important;
+}
+
+/* Inputs, Textareas y Selects */
+:host-context(body.dark-mode) input[type="text"], 
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) .note-textarea,
+:host-context(body.dark-mode) .note-title,
+:host-context(body.dark-mode) .note-edit-title,
+:host-context(body.dark-mode) .note-edit-textarea {
+    background-color: #233737 !important;
+    color: #ffffff !important;
+    border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus, 
+:host-context(body.dark-mode) select:focus,
+:host-context(body.dark-mode) textarea:focus,
+:host-context(body.dark-mode) .note-edit-title:focus {
+    border-color: #58a597 !important;
+    box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+    outline: none !important;
+}
+
+/* Contenedores de notas y filtros */
+:host-context(body.dark-mode) .new-note-container,
+:host-context(body.dark-mode) .notes-filter-bar {
+    background-color: #1a2a2a !important;
+    border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .no-notes-message {
+    border: 1px dashed #386161 !important;
+}
+
+:host-context(body.dark-mode) .note-card {
+    background-color: #172424 !important;
+    border-top: 1px solid #386161 !important;
+    border-right: 1px solid #386161 !important;
+    border-bottom: 1px solid #386161 !important;
+    border-left: 5px solid #008b95 !important;
+    box-shadow: 0 2px 5px rgba(0, 5, 5, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .note-card-title {
+    border-bottom: 1px dashed #386161 !important;
+}
+
+:host-context(body.dark-mode) .note-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 5, 5, 1) !important;
+}
+
+/* Etiquetas especiales */
+:host-context(body.dark-mode) .note-type-label {
+    background-color: #233737 !important;
+    color: #a4e4eb !important;
+}
+
+/* Botones varios */
+:host-context(body.dark-mode) .btn-toggle-history {
+    color: #a4e4eb !important;
+}
+:host-context(body.dark-mode) .btn-toggle-history:hover {
+    background-color: rgba(0, 139, 149, 0.2) !important;
+}
+
+:host-context(body.dark-mode) .btn-edit-note { color: #a4e4eb !important; }
+:host-context(body.dark-mode) .btn-edit-note:hover { color: #ffffff !important; }
+
+:host-context(body.dark-mode) .btn-delete-note { color: #f87171 !important; }
+:host-context(body.dark-mode) .btn-delete-note:hover { color: #ffcccc !important; }
+
+:host-context(body.dark-mode) .btn-delete-all { color: #f87171 !important; }
+:host-context(body.dark-mode) .btn-delete-all:hover {
+    background-color: rgba(248, 113, 113, 0.2) !important;
+    color: #ffcccc !important;
+}
+
+/* Modales Header / Messages - Confirmaciones de borrado */
+:host-context(body.dark-mode) .modal-content-delete-confirm .modal-header {
+    background-color: #7a1d15 !important;
+}
+
+:host-context(body.dark-mode) .modal-content-delete-confirm .modal-message-delete p,
+:host-context(body.dark-mode) .modal-content-delete-confirm .modal-message-delete strong {
+    color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .btn-delete-modal {
+    background-color: #a1241b !important;
+    color: white !important;
+}
+:host-context(body.dark-mode) .btn-delete-modal:hover {
+    background-color: #c92e2e !important;
+}
+:host-context(body.dark-mode) .btn-cancel-delete-modal {
+    background-color: #386161 !important;
+}
+:host-context(body.dark-mode) .btn-cancel-delete-modal:hover {
+    background-color: #4c9696 !important;
+}

@@ -1878,7 +1878,7 @@ export class DeterministicComponent extends GroverStyle {
     this.pageIndex = target - 1;
   }
 
-
+  type: string = '';
 
 
 
@@ -1901,13 +1901,20 @@ export class DeterministicComponent extends GroverStyle {
     if (this.userEmail && this.userToken) {
       const requestBody = this.getAuthRequestBody();
 
+      console.log("Algotirmo: ", this.selectedAlgorithm)
+
+      if (this.selectedAlgorithm === 'grover') {
+        this.type = 'edu.uclm.reper.model.Grover'
+      } else if (this.selectedAlgorithm === 'grenoble') {
+        this.type = 'edu.uclm.reper.model.Grenoble'
+      }
+
       this.projectService.getProjectsName(requestBody).subscribe({
         next: (data: ProjectListItem[]) => {
-          const requiredType = this.mapAlgorithmToRequiredType(this.selectedAlgorithm);
           this.projectList = data.filter(project =>
-            project.type === requiredType
+            project.type === this.type
           );
-
+          this.projectList.sort((a, b) => a.name.localeCompare(b.name));
           console.log("Project names loaded.", this.projectList);
         },
         error: (err) => {
@@ -2032,12 +2039,12 @@ export class DeterministicComponent extends GroverStyle {
 
     const generator = qp.generator;
 
-    if (generator.type === 'GROVER' && generator.truePositions) {
+    if (generator.type === 'edu.uclm.reper.model.Grover' && generator.truePositions) {
       generator.truePositions.forEach((pos: number) => {
         this.expectedFrequencies.setFreq(pos, 1);
       });
       // } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
-    } else if (generator.type === 'GRENOBLE') {
+    } else if (generator.type === 'edu.uclm.reper.model.Grenoble') {
       const positions = generator.positionValue;
 
       if (positions) {
@@ -2076,8 +2083,16 @@ export class DeterministicComponent extends GroverStyle {
       this.lastSavedCircuitState = this.captureCircuitState();
       this.isCircuitModified = false;
 
+      if (this.type === 'edu.uclm.reper.model.Grover') {
+        this.selectedAlgorithm = 'grover';
+
+      } else if (this.type === 'edu.uclm.reper.model.Grenoble') {
+        this.selectedAlgorithm = 'grenoble';
+      }
+
       this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
       setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+
     }, 200);
 
     this.saveInLocal();

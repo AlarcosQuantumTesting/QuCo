@@ -2210,3 +2210,423 @@ select[disabled] {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.05);
 }
+
+/* --- DARK MODE OVERRIDES PARA DETERMINISTIC --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) h5,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .radioTitle,
+:host-context(body.dark-mode) .form-title,
+:host-context(body.dark-mode) .title-instructions {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) i {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .pRadioTitle,
+:host-context(body.dark-mode) .pRadio,
+:host-context(body.dark-mode) .radioTitle,
+:host-context(body.dark-mode) .form-title {
+  color: #f0f4f4 !important;
+  /* Blanco con toque cyan */
+}
+
+:host-context(body.dark-mode) .input-hint,
+:host-context(body.dark-mode) .text-instructions,
+:host-context(body.dark-mode) .list-instructions,
+:host-context(body.dark-mode) li,
+:host-context(body.dark-mode) .instructions-link {
+  color: #cddbda !important;
+}
+
+/* Contenedores principales */
+:host-context(body.dark-mode) .matrix-container,
+:host-context(body.dark-mode) .form-container,
+:host-context(body.dark-mode) .domain-section,
+:host-context(body.dark-mode) .expressions-section,
+:host-context(body.dark-mode) .box,
+:host-context(body.dark-mode) .contenedorBackends {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .examples-code {
+  background-color: #1a2a2a !important;
+  color: #e4eced !important;
+}
+
+/* Inputs generales */
+:host-context(body.dark-mode) input[type="text"],
+:host-context(body.dark-mode) input[type="number"],
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) textarea,
+:host-context(body.dark-mode) .form-control,
+:host-context(body.dark-mode) .inputPaginador {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .info-form {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .info-form {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .info-form h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .input-function,
+:host-context(body.dark-mode) .info-form input {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .input-function:focus,
+:host-context(body.dark-mode) .info-form input:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) .modal-message-delete p,
+:host-context(body.dark-mode) .modal-message-delete strong {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .btn-confirm,
+:host-context(body.dark-mode) .btn-confirm,
+:host-context(body.dark-mode) .btn-confirm-modal {
+  background-color: #008b95 !important;
+  color: white !important;
+  border: none !important;
+}
+
+:host-context(body.dark-mode) .btn-confirm:hover,
+:host-context(body.dark-mode) .btn-confirm:hover,
+:host-context(body.dark-mode) .btn-confirm-modal:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) input:focus,
+:host-context(body.dark-mode) .form-control:focus,
+:host-context(body.dark-mode) .table-input:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) input:disabled,
+:host-context(body.dark-mode) textarea:disabled,
+:host-context(body.dark-mode) select:disabled,
+:host-context(body.dark-mode) input[disabled] {
+  background-color: #162424 !important;
+  color: #8fa8a8 !important;
+  border-color: #2a4141 !important;
+  opacity: 0.8 !important;
+}
+
+/* TABLAS - CRÍTICO PARA CONTRASTE */
+:host-context(body.dark-mode) table {
+  background-color: #172424 !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid #233737 !important;
+}
+
+:host-context(body.dark-mode) th {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border: 1px solid #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) td {
+  border: 1px solid #233737 !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) tr {
+  background-color: rgba(23, 36, 36, 0.8) !important;
+}
+
+:host-context(body.dark-mode) tr:hover {
+  background-color: rgba(11, 85, 90, 0.5) !important;
+  /* #0b555a con transparencia */
+}
+
+/* Highlighted Rows in Deterministic */
+:host-context(body.dark-mode) .true-row {
+  background-color: rgba(74, 222, 128, 0.2) !important;
+  /* Subtle Green background for marked rows */
+}
+
+:host-context(body.dark-mode) .true-row:hover {
+  background-color: rgba(74, 222, 128, 0.3) !important;
+}
+
+:host-context(body.dark-mode) .table-input {
+  background-color: #1e3131 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+/* Botones y utilidades */
+:host-context(body.dark-mode) .custom-checkbox {
+  border-color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .cancel-btn,
+:host-context(body.dark-mode) .btn-clear,
+:host-context(body.dark-mode) .delete-expression-btn,
+:host-context(body.dark-mode) .deleteButton,
+:host-context(body.dark-mode) .btn-delete-modal {
+  background-color: #a33b47 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .cancel-btn:hover,
+:host-context(body.dark-mode) .btn-clear:hover,
+:host-context(body.dark-mode) .delete-expression-btn:hover,
+:host-context(body.dark-mode) .deleteButton:hover,
+:host-context(body.dark-mode) .btn-delete-modal:hover {
+  background-color: #7a2833 !important;
+}
+
+/* Modales */
+:host-context(body.dark-mode) .modal-content-delete,
+:host-context(body.dark-mode) .modal-content {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+  background-color: #0a4d52 !important;
+}
+
+/* Modal text / Qiskit Output Code */
+:host-context(body.dark-mode) .code-output pre {
+  /* background-color: #121c1c !important; */
+  color: #e4eced !important;
+  /* border: 1px solid #233737 !important; */
+}
+
+:host-context(body.dark-mode) .code-output code {
+  color: #a4e4eb !important;
+  background-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .code-output p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .code-output a {
+  color: #58a597 !important;
+}
+
+/* Icons and specific texts */
+:host-context(body.dark-mode) .input-qubit-span {
+  color: #4ade80 !important;
+  /* Bright green */
+}
+
+:host-context(body.dark-mode) .clickable-span {
+  color: #f87171 !important;
+  /* Bright red */
+}
+
+:host-context(body.dark-mode) .clickable-span:hover {
+  color: #fca5a5 !important;
+  /* Lighter red on hover */
+}
+
+:host-context(body.dark-mode) .action-icon,
+:host-context(body.dark-mode) .action-icon-header {
+  color: #a4e4eb !important;
+  /* Bright teal */
+}
+
+:host-context(body.dark-mode) .action-icon:hover,
+:host-context(body.dark-mode) .action-icon-header:hover {
+  color: #ffffff !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA TOOLTIPS & INSTRUCTIONS MODAL --- */
+
+/* Tooltips */
+:host-context(body.dark-mode) .tooltip,
+:host-context(body.dark-mode) .custom-tooltip {
+  background-color: #1a2a2a !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .tooltip::after {
+  border-bottom-color: #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) .tooltip::before {
+  border-bottom-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) .custom-tooltip::after {
+  border-right-color: #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) .custom-tooltip::before {
+  border-right-color: #386161 !important;
+}
+
+/* Tooltip internal elements */
+:host-context(body.dark-mode) .tooltip .highlight {
+  color: #f87171 !important;
+  /* Bright red/rose for contrast in dark mode */
+}
+
+:host-context(body.dark-mode) .tooltip .instructions-link {
+  color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .tooltip .instructions-link:hover {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .tooltip .divider,
+:host-context(body.dark-mode) .tooltip .divider span {
+  color: #8fa8a8 !important;
+}
+
+/* Modal Instrucciones */
+:host-context(body.dark-mode) .modal-content.instrucciones {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .modal-content.instrucciones .text-instructions,
+:host-context(body.dark-mode) .modal-content.instrucciones .list-instructions {
+  color: #f0f4f4 !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA HELP MODAL --- */
+:host-context(body.dark-mode) .help-modal .help-content {
+  background-color: #172424 !important;
+  border: 1px solid #008b95 !important;
+  box-shadow: 0 15px 40px rgba(0, 5, 5, 0.6) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header h2,
+:host-context(body.dark-mode) .help-title-modal {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header .close-i,
+:host-context(body.dark-mode) .help-modal-header .close {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-heading {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-intro {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .help-card {
+  background-color: #1a2a2a !important;
+  border-color: #2a4141 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover {
+  background-color: #233737 !important;
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context(body.dark-mode) .help-icon {
+  background-color: #0a4d52 !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .action-btn {
+  background-color: #008b95 !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .action-btn:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help:hover {
+  background-color: #386161 !important;
+  border-color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .help-content b,
+:host-context(body.dark-mode) .help-content strong {
+  color: #a4e4eb !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA EL MODAL DE TRANSPILE (Backends) --- */
+:host-context(body.dark-mode) .contenedorBackends {
+  background-color: #172424 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .form-row-backends h4 {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .listaBackends .list-group-item {
+  background-color: transparent !important;
+  border-bottom: 1px solid #386161 !important;
+  color: #e4eced !important;
+}
+
+:host-context(body.dark-mode) .listaBackends .list-group-item .text-muted {
+  color: #8fa8a8 !important;
+}

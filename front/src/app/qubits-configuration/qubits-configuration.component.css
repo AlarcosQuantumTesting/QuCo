@@ -683,10 +683,193 @@ p {
   height: 30px;
 }
 
-
-.btn-toggle-help:hover:hover {
+.btn-toggle-help:hover {
   background-color: #38789b;
   border-color: #2e607a;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.05);
+}
+
+/* --- DARK MODE OVERRIDES PARA QUBITS CONFIGURATION --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .radioTitle,
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .help-heading,
+:host-context(body.dark-mode) .config-title {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .info-block span {
+  color: #f0f4f4 !important;
+}
+
+/* Contenedores principales */
+:host-context(body.dark-mode) .search-container,
+:host-context(body.dark-mode) .help-content {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+}
+
+/* Inputs y Selects */
+:host-context(body.dark-mode) input[type="text"],
+:host-context(body.dark-mode) input[type="number"],
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) .info-block input {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus,
+:host-context(body.dark-mode) select:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) input:disabled,
+:host-context(body.dark-mode) select:disabled {
+  background-color: #162424 !important;
+  color: #8fa8a8 !important;
+  border-color: #2a4141 !important;
+}
+
+/* TABLA DE QUBITS (CUADRÍCULA) - MUY IMPORTANTE */
+:host-context(body.dark-mode) .qubits-table {
+  background-color: #172424 !important;
+  border: 1px solid #233737 !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+:host-context(body.dark-mode) .qubits-table th,
+:host-context(body.dark-mode) .qubits-table th.header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border: 1px solid #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) .qubits-table td {
+  border: 1px solid #386161 !important;
+  color: #f0f4f4 !important;
+  background-color: #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) .qubits-table tr {
+  background-color: #172424 !important;
+}
+
+:host-context(body.dark-mode) .qubits-table td:hover {
+  background-color: rgba(11, 85, 90, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .qubits-table td.x-cell {
+  background-color: #0b555a !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+:host-context(body.dark-mode) .qubits-table td.conflict {
+  background-color: #7a1d15 !important;
+  color: #ffffff !important;
+}
+
+/* Modal text / Help Content */
+:host-context(body.dark-mode) .help-content {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel-delete-modal:hover {
+  background-color: #4c9696 !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA HELP MODAL --- */
+:host-context(body.dark-mode) .help-modal .help-content {
+  background-color: #172424 !important;
+  border: 1px solid #008b95 !important;
+  box-shadow: 0 15px 40px rgba(0, 5, 5, 0.6) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header h2,
+:host-context(body.dark-mode) .help-title-modal {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header .close-i,
+:host-context(body.dark-mode) .help-modal-header .close {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-heading {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-intro {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .help-card {
+  background-color: #1a2a2a !important;
+  border-color: #2a4141 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover {
+  background-color: #233737 !important;
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context(body.dark-mode) .help-icon {
+  background-color: #0a4d52 !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .action-btn {
+  background-color: #008b95 !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .action-btn:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help:hover {
+  background-color: #386161 !important;
+  border-color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .help-content b,
+:host-context(body.dark-mode) .help-content strong {
+  color: #a4e4eb !important;
 }

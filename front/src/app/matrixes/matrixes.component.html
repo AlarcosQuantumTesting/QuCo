@@ -312,7 +312,7 @@
 
                         <td *ngFor="let value of row; let colIndex = index" align="right"
                             (click)="negate(rowIndex, colIndex)" (change)="saveState()">
-                            <span *ngIf="colIndex < inputQubits" style="color: green">{{ value }}</span>
+                            <span *ngIf="colIndex < inputQubits" class="input-qubit-span">{{ value }}</span>
                             <span *ngIf="colIndex >= inputQubits" class="clickable-span">{{ value }}</span>
                         </td>
 
@@ -365,26 +365,30 @@
                 <ol class="list-instructions">
                     <li>
                         The left side of the assignment must reference an output qubit with the notation
-                        <code><strong>q<i>index</i></strong></code>, where the <i>index</i> is one of the output qubits'
+                        <mark><code><strong>q<i>index</i></strong></code></mark>, where the <i>index</i> is one of the
+                        output qubits'
                         indexes.
-                        Examples are <code><strong>q0</strong></code>, <code><strong>q1</strong></code>, or
-                        <code><strong>q10</strong></code>.
+                        Examples are <mark><code><strong>q0</strong></code></mark>,
+                        <mark><code><strong>q1</strong></code></mark>, or
+                        <mark><code><strong>q10</strong></code></mark>.
                     </li>
                     <li>
                         The right side must fulfill the form
-                        <code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code>.
+                        <mark><code><strong>condition ? <i>0 or 1</i> : <i>0 or 1</i></strong></code></mark>.
                     </li>
                     <li>
-                        The <code><strong>condition</strong></code> may reference an input qubit or the row index
-                        <code><strong>index</strong></code>.
+                        The <mark><code><strong>condition</strong></code></mark> may reference an input qubit or the row
+                        index
+                        <mark><code><strong>index</strong></code></mark>.
                     </li>
                     <li>
                         Complex values like <mark><code>(q0==1) ? <strong>(q1==0 ? 1 : 0)</strong> : 0</code></mark> are
                         not allowed.
                     </li>
                     <li>
-                        Every expression will be processed using Java's <code>ScriptEngineManager</code> with
-                        <code>JavaScript</code>.
+                        Every expression will be processed using Java's <mark><code>ScriptEngineManager</code></mark>
+                        with
+                        <mark><code>JavaScript</code></mark>.
                     </li>
                 </ol>
                 <div class="help-actions">

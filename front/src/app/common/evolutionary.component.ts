@@ -413,20 +413,24 @@ export abstract class EvolutionaryComponent {
   }
 
   stop() {
-    if (confirm('Are you sure you want to stop the execution?')) {
-      this.service.resetSession().subscribe(
-        result => {
-          this.running = false
-          this.state = "Process stopped"
-          this.substate = undefined
-        },
-        error => {
-          this.state = undefined
-          this.substate = undefined
-          this.error = error.error.message
+    this.showConfirmation('Stop execution', 'Are you sure you want to stop the execution?').subscribe(
+      (confirmed) => {
+        if (confirmed) {
+          this.service.resetSession().subscribe(
+            result => {
+              this.running = false
+              this.state = "Process stopped"
+              this.substate = undefined
+            },
+            error => {
+              this.state = undefined
+              this.substate = undefined
+              this.error = error.error.message
+            }
+          )
         }
-      )
-    }
+      }
+    )
   }
 
   abstract generateInitialPopulation(): void
@@ -593,6 +597,11 @@ export abstract class EvolutionaryComponent {
       rrff[i].prepareChart("chart" + i, rrff[i].shortName!)
     if (this.timesChart)
       this.timesChart.destroy()
+    
+    // Check if dark mode is active
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const chartTextColor = isDarkMode ? '#f0f4f4' : '#666';
+
     this.timesChart = new Chart("timesChart",
       {
         type: "line",
@@ -600,7 +609,23 @@ export abstract class EvolutionaryComponent {
           plugins: {
             title: {
               display: true,
-              text: "Times (ms)"
+              text: "Times (ms)",
+              color: chartTextColor
+            },
+            legend: {
+              labels: {
+                color: chartTextColor
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: chartTextColor },
+              grid: { color: isDarkMode ? '#386161' : '#e0e0e0' }
+            },
+            y: {
+              ticks: { color: chartTextColor },
+              grid: { color: isDarkMode ? '#386161' : '#e0e0e0' }
             }
           },
           aspectRatio: 2.5
@@ -611,22 +636,26 @@ export abstract class EvolutionaryComponent {
             {
               data: [],
               label: "Execution time",
-              backgroundColor: "orange"
+              backgroundColor: isDarkMode ? "#ffb347" : "orange",
+              borderColor: isDarkMode ? "#ffb347" : "orange"
             },
             {
               data: [],
               label: "Calculus time",
-              backgroundColor: "red"
+              backgroundColor: isDarkMode ? "#ff6961" : "red",
+              borderColor: isDarkMode ? "#ff6961" : "red"
             },
             {
               data: [],
               label: "Strategy application time",
-              backgroundColor: "blue"
+              backgroundColor: isDarkMode ? "#77dd77" : "blue",
+              borderColor: isDarkMode ? "#77dd77" : "blue"
             },
             {
               data: [],
               label: "Rendering (UA) time",
-              backgroundColor: "green"
+              backgroundColor: isDarkMode ? "#84b6f4" : "green",
+              borderColor: isDarkMode ? "#84b6f4" : "green"
             }
           ]
         }

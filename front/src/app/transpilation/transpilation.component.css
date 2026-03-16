@@ -1109,10 +1109,286 @@ td {
   height: 30px;
 }
 
-
-.btn-toggle-help:hover:hover {
+.btn-toggle-help:hover {
   background-color: #38789b;
   border-color: #2e607a;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.05);
+}
+
+/* --- DARK MODE OVERRIDES PARA TRANSPILATION --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .help-heading {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .info-block span {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .text-muted,
+:host-context(body.dark-mode) .text-muted.small {
+  color: #8fa8a8 !important;
+}
+
+/* Contenedores principales y modales*/
+:host-context(body.dark-mode) .search-container,
+:host-context(body.dark-mode) .help-content,
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content-delete,
+:host-context(body.dark-mode) .modal-content.ejemplos,
+:host-context(body.dark-mode) .modal-content.instrucciones {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+  color: #f0f4f4 !important;
+}
+
+/* Inputs y Selects */
+:host-context(body.dark-mode) input[type="text"],
+:host-context(body.dark-mode) input[type="number"],
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) select#backendSelect,
+:host-context(body.dark-mode) .info-block input {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus,
+:host-context(body.dark-mode) select:focus,
+:host-context(body.dark-mode) textarea:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) input:disabled,
+:host-context(body.dark-mode) select:disabled {
+  background-color: #162424 !important;
+  color: #8fa8a8 !important;
+  border-color: #2a4141 !important;
+}
+
+/* Modales Header / Messages */
+:host-context(body.dark-mode) .modal-header,
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .modal-header-delete {
+  background-color: #7a1d15 !important;
+}
+
+:host-context(body.dark-mode) .modal-message-delete,
+:host-context(body.dark-mode) .modal-message-delete p,
+:host-context(body.dark-mode) .modal-message-delete strong {
+  color: #f0f4f4 !important;
+}
+
+/* Textareas / Codeblocks */
+:host-context(body.dark-mode) .template-code,
+:host-context(body.dark-mode) .template-code {
+  background-color: #121c1c !important;
+  color: #e4eced !important;
+  border: 1px solid #233737 !important;
+}
+
+:host-context(body.dark-mode) .modal .instrucciones .code-output pre {
+  background-color: #121c1c00 !important;
+  color: #e4eced !important;
+  border: 1px solid #23373700 !important;
+}
+
+:host-context(body.dark-mode) code {
+  background-color: #233737 !important;
+  color: #a4e4eb !important;
+}
+
+/* Tablas */
+:host-context(body.dark-mode) table,
+:host-context(body.dark-mode) .table {
+  background-color: #172424 !important;
+  border: 1px solid #233737 !important;
+}
+
+:host-context(body.dark-mode) .table-dark th {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border: 1px solid #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) table td,
+:host-context(body.dark-mode) table th {
+  border: 1px solid #386161 !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) table tr {
+  background-color: #172424 !important;
+}
+
+:host-context(body.dark-mode) table tr:hover {
+  background-color: rgba(11, 85, 90, 0.5) !important;
+}
+
+/* Iconos de estado en Tabla */
+:host-context(body.dark-mode) .text-success {
+  color: #a4e4eb !important;
+  /* Adaptamos el verde oscuro a nuestro teal brillante para legibilidad */
+}
+
+:host-context(body.dark-mode) .text-danger {
+  color: #f87171 !important;
+  /* Rojo brillante pastel */
+}
+
+:host-context(body.dark-mode) .badge.bg-primary {
+  background-color: #0b555a !important;
+}
+
+:host-context(body.dark-mode) .badge.bg-secondary {
+  background-color: #233737 !important;
+  color: #a4e4eb !important;
+}
+
+/* Boton de info / help-cards */
+:host-context(body.dark-mode) .help-intro,
+:host-context(body.dark-mode) .text-instructions {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .help-card {
+  background-color: #1a2a2a !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover {
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+  background-color: #233737 !important;
+}
+
+:host-context(body.dark-mode) .help-icon {
+  background-color: rgba(0, 139, 149, 0.3) !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc h3 {
+  color: #a4e4eb !important;
+}
+
+/* Botones y Outline transparent */
+:host-context(body.dark-mode) .btn-cancel,
+:host-context(body.dark-mode) .btn-delete-modal {
+  background-color: #a1241b !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel:hover,
+:host-context(body.dark-mode) .btn-delete-modal:hover {
+  background-color: #c92e2e !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel-delete-modal {
+  background-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel-delete-modal:hover {
+  background-color: #4c9696 !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA HELP MODAL --- */
+:host-context(body.dark-mode) .help-modal .help-content {
+  background-color: #172424 !important;
+  border: 1px solid #008b95 !important;
+  box-shadow: 0 15px 40px rgba(0, 5, 5, 0.6) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header h2,
+:host-context(body.dark-mode) .help-title-modal {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header .close-i,
+:host-context(body.dark-mode) .help-modal-header .close {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-heading {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-intro {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .help-card {
+  background-color: #1a2a2a !important;
+  border-color: #2a4141 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover {
+  background-color: #233737 !important;
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context(body.dark-mode) .help-icon {
+  background-color: #0a4d52 !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .action-btn {
+  background-color: #008b95 !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .action-btn:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help:hover {
+  background-color: #386161 !important;
+  border-color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .help-content b,
+:host-context(body.dark-mode) .help-content strong {
+  color: #a4e4eb !important;
 }

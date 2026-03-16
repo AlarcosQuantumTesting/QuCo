@@ -2251,10 +2251,455 @@ table {
   height: 30px;
 }
 
-
-.btn-toggle-help:hover:hover {
+.btn-toggle-help:hover {
   background-color: #38789b;
   border-color: #2e607a;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: scale(1.05);
+}
+
+/* --- DARK MODE OVERRIDES PARA CIRCUIT EDITOR --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .radioTitle,
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .help-heading,
+:host-context(body.dark-mode) .form-title {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .config-cell label {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .instructions {
+  background-color: #1a2a2a !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .instructions p,
+:host-context(body.dark-mode) .instructions h4 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .instructions code {
+  background-color: #233737 !important;
+  color: #a4e4eb !important;
+}
+
+/* Contenedores principales */
+:host-context(body.dark-mode) .matrix-container,
+:host-context(body.dark-mode) .info-form,
+:host-context(body.dark-mode) .form-container,
+:host-context(body.dark-mode) .search-container,
+:host-context(body.dark-mode) .contenedorBackends {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  /* box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important; */
+}
+
+:host-context(body.dark-mode) .template-code,
+:host-context(body.dark-mode) .template-code-edit,
+:host-context(body.dark-mode) .template-code-create {
+  background-color: #1a2a2a !important;
+  color: #e4eced !important;
+  border: 1px solid #386161 !important;
+}
+
+/* Inputs y Selects */
+:host-context(body.dark-mode) input[type="text"],
+:host-context(body.dark-mode) input[type="number"],
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) textarea,
+:host-context(body.dark-mode) .form-control {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus,
+:host-context(body.dark-mode) select:focus,
+:host-context(body.dark-mode) textarea:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) input:disabled,
+:host-context(body.dark-mode) select:disabled {
+  background-color: #162424 !important;
+  color: #8fa8a8 !important;
+  border-color: #2a4141 !important;
+}
+
+/* TABLA DEL CIRCUITO (CUADRÍCULA) - MUY IMPORTANTE */
+:host-context(body.dark-mode) table {
+  background-color: #172424 !important;
+  border: 1px solid #233737 !important;
+}
+
+:host-context(body.dark-mode) th {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border: 1px solid #1a2a2a !important;
+}
+
+:host-context(body.dark-mode) td {
+  border: 1px solid #386161 !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) tr {
+  background-color: #172424 !important;
+}
+
+:host-context(body.dark-mode) td:hover {
+  background-color: rgba(11, 85, 90, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .physicalQubits {
+  background-color: rgba(9, 91, 97, 0.4) !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .expressions-table {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.6) !important;
+}
+
+:host-context(body.dark-mode) .expressions-table td {
+  background-color: #172424 !important;
+}
+
+:host-context(body.dark-mode) .expressions-table tr:hover {
+  background-color: rgba(11, 85, 90, 0.5) !important;
+}
+
+/* Botones y Gates */
+:host-context(body.dark-mode) .gate-circuit-btn {
+  background: #0b555a !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .gate-circuit-btn:hover {
+  background: #9f1c1c !important;
+}
+
+:host-context(body.dark-mode) .gate-btn {
+  background-color: rgba(0, 139, 149, 0.3) !important;
+}
+
+:host-context(body.dark-mode) .gate-btn:hover {
+  background-color: rgba(0, 139, 149, 0.7) !important;
+}
+
+:host-context(body.dark-mode) .selected-gate {
+  background-color: #d35400 !important;
+  color: white !important;
+  border: 2px solid #a04000 !important;
+}
+
+:host-context(body.dark-mode) .cancel-btn,
+:host-context(body.dark-mode) .btn-cancel,
+:host-context(body.dark-mode) .delete-expression-btn,
+:host-context(body.dark-mode) .btn-delete-modal,
+:host-context(body.dark-mode) .btn-delete-project {
+  background-color: #a1241b !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .cancel-btn:hover,
+:host-context(body.dark-mode) .btn-cancel:hover,
+:host-context(body.dark-mode) .delete-expression-btn:hover,
+:host-context(body.dark-mode) .btn-delete-modal:hover,
+:host-context(body.dark-mode) .btn-delete-project:hover {
+  background-color: #c92e2e !important;
+}
+
+:host-context(body.dark-mode) .modal-header-delete {
+  background-color: #7a1d15 !important;
+}
+
+/* Modal text / Qiskit Output Code */
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content-delete,
+:host-context(body.dark-mode) .modal-content.ejemplos,
+:host-context(body.dark-mode) .choice-content,
+:host-context(body.dark-mode) .modal-content.instrucciones {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8) !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .modal-message-delete p,
+:host-context(body.dark-mode) .modal-message-delete strong {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .code-output pre {
+  /* background-color: #121c1c !important; */
+  color: #e4eced !important;
+  /* border: 1px solid #233737 !important; */
+}
+
+/* Modales específicos: placement y qubits */
+:host-context(body.dark-mode) .placement-question {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .placement-note {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .btn-primary-choice {
+  background-color: #1e6971 !important;
+}
+
+:host-context(body.dark-mode) .btn-primary-choice:hover {
+  background-color: #124147 !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel-choice {
+  color: #fca5a5 !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel-choice:hover {
+  color: #f87171 !important;
+}
+
+:host-context(body.dark-mode) .qubit-selector-container {
+  background-color: #1a2a2a !important;
+  border-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) .qubit-header {
+  background-color: #1a2a2a !important;
+  color: #a4e4eb !important;
+  border-bottom: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .qubit-selection-grid label {
+  border-color: #386161 !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .qubit-selection-grid label:hover {
+  background-color: #233737 !important;
+  border-color: #58a597 !important;
+}
+
+:host-context(body.dark-mode) .qubit-selection-grid label.selected {
+  background-color: rgba(0, 139, 149, 0.4) !important;
+  border-color: #008b95 !important;
+  color: #ffffff !important;
+}
+
+/* Listas y List Group */
+:host-context(body.dark-mode) .list-group-item {
+  border-bottom-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) .text-muted {
+  color: #8fa8a8 !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA MODALES DE GUARDAR / UPDATE (SAVE AS NEW) --- */
+
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content-delete {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .title-modal {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .info-form {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .info-form {
+  background-color: #172424 !important;
+  color: #f0f4f4 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .info-form h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .input-function,
+:host-context(body.dark-mode) .info-form input {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .input-function:focus,
+:host-context(body.dark-mode) .info-form input:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+}
+
+:host-context(body.dark-mode) .modal-message-delete p,
+:host-context(body.dark-mode) .modal-message-delete strong {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .btn-confirm,
+:host-context(body.dark-mode) .btn-confirm,
+:host-context(body.dark-mode) .btn-confirm-modal {
+  background-color: #008b95 !important;
+  color: white !important;
+  border: none !important;
+}
+
+:host-context(body.dark-mode) .btn-confirm:hover,
+:host-context(body.dark-mode) .btn-confirm:hover,
+:host-context(body.dark-mode) .btn-confirm-modal:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel,
+:host-context(body.dark-mode) .btn-cancel-delete-modal {
+  background-color: #386161 !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel:hover,
+:host-context(body.dark-mode) .btn-cancel-delete-modal:hover {
+  background-color: #4c9696 !important;
+}
+
+:host-context(body.dark-mode) .btn-confirm:disabled,
+:host-context(body.dark-mode) .btn-confirm-modal:disabled {
+  background-color: #1a3233 !important;
+  color: #557577 !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA HELP MODAL --- */
+:host-context(body.dark-mode) .help-modal .help-content {
+  background-color: #172424 !important;
+  border: 1px solid #008b95 !important;
+  box-shadow: 0 15px 40px rgba(0, 5, 5, 0.6) !important;
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header h2,
+:host-context(body.dark-mode) .help-title-modal {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-modal-header .close-i,
+:host-context(body.dark-mode) .help-modal-header .close {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .help-heading {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-intro {
+  color: #cddbda !important;
+}
+
+:host-context(body.dark-mode) .help-card {
+  background-color: #1a2a2a !important;
+  border-color: #2a4141 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover {
+  background-color: #233737 !important;
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context(body.dark-mode) .help-icon {
+  background-color: #0a4d52 !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc h3 {
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .help-content-desc p {
+  color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .action-btn {
+  background-color: #008b95 !important;
+  color: white !important;
+}
+
+:host-context(body.dark-mode) .action-btn:hover {
+  background-color: #0f5d63 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .btn-toggle-help:hover {
+  background-color: #386161 !important;
+  border-color: #58a597 !important;
+}
+
+
+:host-context(body.dark-mode) .help-content b,
+:host-context(body.dark-mode) .help-content strong {
+  color: #a4e4eb !important;
+}
+
+/* --- DARK MODE OVERRIDES PARA EL MODAL DE TRANSPILE (Backends) --- */
+:host-context(body.dark-mode) .contenedorBackends {
+  background-color: #172424 !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .form-row-backends h4 {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .listaBackends .list-group-item {
+  background-color: transparent !important;
+  border-bottom: 1px solid #386161 !important;
+  color: #e4eced !important;
+}
+
+:host-context(body.dark-mode) .listaBackends .list-group-item .text-muted {
+  color: #8fa8a8 !important;
 }

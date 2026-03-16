@@ -45,7 +45,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  GENETIC_GENERATOR_FQCN = 'Genetic';
+  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic';
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
 
   responseReceived?: any

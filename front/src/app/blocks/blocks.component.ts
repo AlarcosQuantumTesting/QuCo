@@ -69,7 +69,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  BLOCKS_GENERATOR_FQCN = 'Blocks';
+  BLOCKS_GENERATOR_FQCN = 'edu.uclm.reper.model.Blocks';
   REQUIRED_GENERATOR_TYPE = this.BLOCKS_GENERATOR_FQCN;
 
   responseReceived?: any

@@ -155,7 +155,7 @@ export class MatrixesComponent implements AfterViewInit {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  REQUIRED_GENERATOR_TYPE: string = 'Matrix';
+  REQUIRED_GENERATOR_TYPE: string = 'edu.uclm.reper.model.Matrix';
 
   mostrarNotasModal: boolean = false;
 

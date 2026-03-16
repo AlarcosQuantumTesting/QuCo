@@ -81,7 +81,7 @@ export class CircuitEditorComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  EDITOR_GENERATOR_FQCN = 'Editor';
+  EDITOR_GENERATOR_FQCN = 'edu.uclm.reper.model.Editor';
   REQUIRED_GENERATOR_TYPE = this.EDITOR_GENERATOR_FQCN;
 
   responseReceived?: any

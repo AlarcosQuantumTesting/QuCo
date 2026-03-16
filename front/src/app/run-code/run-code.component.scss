@@ -209,3 +209,74 @@ form {
   font-size: 12px;
   margin-top: 5px;
 }
+
+/* --- DARK MODE OVERRIDES PARA RUN CODE --- */
+
+/* Textos generales */
+:host-context(body.dark-mode) h1, 
+:host-context(body.dark-mode) h2, 
+:host-context(body.dark-mode) h3, 
+:host-context(body.dark-mode) h4, 
+:host-context(body.dark-mode) p, 
+:host-context(body.dark-mode) label, 
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .form-group label,
+:host-context(body.dark-mode) .radio-group label {
+    color: #a4e4eb !important;
+}
+
+/* Modal and Content backgrounds */
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content.ejemplos {
+    background-color: #172424 !important;
+    border-color: #008b95 !important;
+    box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+    background-color: #0a4d52 !important;
+    color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .modal-footer {
+    background-color: #172424 !important;
+}
+
+/* Inputs y Selects */
+:host-context(body.dark-mode) input[type="text"], 
+:host-context(body.dark-mode) input[type="number"], 
+:host-context(body.dark-mode) select {
+    background-color: #233737 !important;
+    color: #ffffff !important;
+    border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus, 
+:host-context(body.dark-mode) select:focus {
+    border-color: #58a597 !important;
+    box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+    outline: none !important;
+}
+
+/* Special HTTP label group */
+:host-context(body.dark-mode) .http-label-group {
+    background-color: #1a2a2a !important;
+    border: 1px dashed #386161 !important;
+}
+
+:host-context(body.dark-mode) .http-label-group .http-label {
+    color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .http-label-group .http-value {
+    color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .http-label:hover {
+    color: #cddbda !important;
+}
+
+/* Error messages */
+:host-context(body.dark-mode) .error-message {
+    color: #f87171 !important;
+}

@@ -1,7 +1,9 @@
 .header-with-button {
     display: flex;
-    justify-content: space-between; /* Alinea los elementos al principio */
-    align-items: center; /* Centra los elementos verticalmente */
+    justify-content: space-between;
+    /* Alinea los elementos al principio */
+    align-items: center;
+    /* Centra los elementos verticalmente */
 }
 
 h3 {
@@ -34,9 +36,9 @@ button:hover {
     display: flex;
     justify-content: center;
     position: relative;
-  }
+}
 
-  .fa-edit:hover {
+.fa-edit:hover {
     color: #0f3436;
     transform: scale(1.05);
 }
@@ -54,19 +56,19 @@ button:hover {
     color: white;
     border-radius: 50%;
     padding: 0;
-  }
+}
 
-  .btn-toggle-createExp:hover {
+.btn-toggle-createExp:hover {
     background-color: #2d5f7a;
     border-color: #2e607a;
     transform: scale(1.05);
 }
-  
-  .btn-toggle-createExp i {
-    font-size: 16px;
-  }
 
-  .input-group {
+.btn-toggle-createExp i {
+    font-size: 16px;
+}
+
+.input-group {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -82,16 +84,17 @@ button:hover {
 
 .input-group {
     position: relative;
-  }
+}
 
-  .buttons-container {
+.buttons-container {
     display: flex;
-    flex-direction: row; /* Asegura que sea en fila */
+    flex-direction: row;
+    /* Asegura que sea en fila */
     align-items: center;
     gap: 10px;
-  }
+}
 
-  .btn-clear {
+.btn-clear {
     background-color: #c94855;
     color: white;
     border: none;
@@ -138,8 +141,10 @@ button:hover {
     text-align: center;
 
     display: flex;
-    justify-content: center; /* Centra horizontalmente */
-    align-items: center; /* Centra verticalmente */
+    justify-content: center;
+    /* Centra horizontalmente */
+    align-items: center;
+    /* Centra verticalmente */
 
     min-width: 24%;
 }
@@ -192,7 +197,7 @@ button:hover {
     border-top: 4px solid #128c7e;
     border-bottom: 4px solid #128c7e;
     width: 100%;
-    
+
     flex: 1 1 50%;
     display: flex;
     flex-direction: column;
@@ -224,36 +229,36 @@ button:hover {
     color: white;
     border-radius: 50%;
     padding: 0;
-  }
+}
 
-  .btn-toggle-examples:hover {
+.btn-toggle-examples:hover {
     background-color: #2d5f7a;
     border-color: #2e607a;
     transform: scale(1.05);
 }
-  
-  .btn-toggle-examples i {
+
+.btn-toggle-examples i {
     font-size: 16px;
-  }
+}
 
-  i {
+i {
     font-style: normal !important;
-  }
+}
 
-  .btn-search {
+.btn-search {
     background: none;
     color: #0b555a;
     font-weight: bold;
     font-size: 14px;
     margin-left: 0px;
-  }
+}
 
-  .btn-search:hover {
+.btn-search:hover {
     background: none;
     transform: scale(1);
-  }
+}
 
-  .btn-add {
+.btn-add {
     background-color: #4c9696;
     color: white;
     border: none;
@@ -305,7 +310,8 @@ code {
 
 .suggestions {
     position: absolute;
-    top: 100%;  /* Justo debajo del input */
+    top: 100%;
+    /* Justo debajo del input */
     left: 0;
     width: auto;
     max-width: 200px;
@@ -314,15 +320,98 @@ code {
     border-radius: 4px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     max-height: 200px;
-    overflow-y: auto;  /* Si hay muchas sugerencias, permite hacer scroll */
-    z-index: 10;  /* Encima del input */
-  }
-  
-  .suggestion-item {
+    overflow-y: auto;
+    /* Si hay muchas sugerencias, permite hacer scroll */
+    z-index: 10;
+    /* Encima del input */
+}
+
+.suggestion-item {
     padding: 8px;
     cursor: pointer;
-  }
-  
-  .suggestion-item:hover {
+}
+
+.suggestion-item:hover {
     background-color: #f0f0f0;
-  }
+}
+
+/* --- DARK MODE OVERRIDES PARA EDITOR --- */
+:host-context(body.dark-mode) {
+
+    /* Títulos */
+    h3 {
+        color: #a4e4eb !important;
+    }
+
+    /* Inputs y textareas */
+    .input-group input {
+        background-color: #233737 !important;
+        color: #ffffff !important;
+        border: 1px solid #386161 !important;
+    }
+
+    .input-group input:focus {
+        border-color: #58a597 !important;
+        box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+        outline: none !important;
+    }
+
+    /* Listas de expresiones y contenedores menores */
+    .expression-list {
+        background-color: #1a2a2a !important;
+        border: 1px solid #386161 !important;
+        color: #f0f4f4 !important;
+    }
+
+    /* Código inline */
+    code {
+        background-color: #121c1c !important;
+        color: #e4eced !important;
+    }
+
+    /* Sugerencias de autocompletado */
+    .suggestions {
+        background-color: #172424 !important;
+        border: 1px solid #386161 !important;
+        color: #f0f4f4 !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .suggestion-item:hover {
+        background-color: #233737 !important;
+    }
+
+    /* Botones - Ajustes de contraste sobre fondo oscuro */
+    .btn-add {
+        background-color: #14645b !important;
+        color: #e4eced !important;
+    }
+
+    .btn-add:hover {
+        background-color: #1a8f82 !important;
+    }
+
+    .btn-add:disabled {
+        background-color: #14645b80 !important;
+        color: #7b9e9e !important;
+    }
+
+    .btn-apply {
+        background-color: #0b555a !important;
+        color: #e4eced !important;
+    }
+
+    .btn-apply:hover {
+        background-color: #158a92 !important;
+    }
+
+    .btn-apply:disabled {
+        background-color: #0b555a80 !important;
+        color: #6a8c8e !important;
+    }
+}
+
+
+:host-context(body.dark-mode) i.editorIcon {
+    color: #a4e4eb !important;
+}

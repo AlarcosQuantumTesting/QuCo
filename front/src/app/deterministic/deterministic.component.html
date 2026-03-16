@@ -596,7 +596,7 @@
                 [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
                 (change)="setFreq($event, currentOffset + rowIndex); saveState()">
 
-              <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset +
+              <label class="label-number input-qubit-span" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset +
                 rowIndex) }} </label>
 
             </td>
@@ -610,10 +610,10 @@
 
             <td *ngIf="isGroverOption()">
 
-              <span (change)="saveState()"
+              <span class="input-qubit-span" (change)="saveState()"
                 *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
 
-              <span (change)="saveState()"
+              <span class="clickable-span" (change)="saveState()"
                 *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
 
             </td>
@@ -1193,7 +1193,7 @@
   <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false"
     style="width: 100%; height: 100%;"></app-modal-descarga>
   <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
-    [qiskitCode]="(qiskitCode?.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
+    [qiskitCode]="(qiskitCode.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
 
   <div class="modal" *ngIf="mostrarModalGuargarCode">
 
