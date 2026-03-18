@@ -733,10 +733,10 @@
     <!-- Modales -->
 
     <div class="modal instrucciones" [ngClass]="{ 'hidden': !showCharts }">
-        <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
+        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Charts</h2>
-                <button class="close"><i class="close-i" (click)="showCharts = false">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="showCharts = false">&times;</i></button>
             </div>
             <div class="intructions-content">
                 <div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;"
@@ -761,7 +761,8 @@
     </div>
 
     <div class="modal instrucciones" *ngIf="mostrarModalCode">
-        <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content">
+
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Qiskit Code</h2>
 
@@ -792,7 +793,8 @@
         [qiskitCode]="code || ''"></app-run-code>
 
     <div class="modal instrucciones" *ngIf="modalTranspile">
-        <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+
+        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content" style="min-width: 950px;">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Transpile Code</h2>
                 <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
@@ -914,10 +916,10 @@
 
     <div class="modal-backdrop" *ngIf="showHelp" (click)="toggleHelp()"></div>
     <div class="help-modal" *ngIf="showHelp">
-        <div class="help-content" cdkDrag>
+        <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
             <div class="help-modal-header" cdkDragHandle>
                 <h2 class="help-title-modal">Help</h2>
-                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="toggleHelp()">&times;</i></button>
             </div>
 
             <div class="help-text">
@@ -1046,3 +1048,4 @@
 
 
 <span style="color : red">{{ error }}</span>
+

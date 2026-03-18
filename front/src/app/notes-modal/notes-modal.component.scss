@@ -52,7 +52,7 @@
     background-color: transparent;
     pointer-events: none;
 }
-  
+
 .modal-content.instrucciones {
     pointer-events: auto;
     background-color: white;
@@ -74,31 +74,31 @@
 
 
 .modal.redimensionar {
-  position: fixed;
-  z-index: 1000;
-  background-color: transparent;
-  pointer-events: none;
+    position: fixed;
+    z-index: 1000;
+    background-color: transparent;
+    pointer-events: none;
 }
 
 .modal-content.redimensionar {
-  pointer-events: auto;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 60%;
-  height: fit-content;
-  max-width: none;
-  max-height: fit-content;
-  overflow-y: auto;
-  position: relative;
+    pointer-events: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 60%;
+    height: fit-content;
+    max-width: none;
+    max-height: fit-content;
+    overflow-y: auto;
+    position: relative;
 
-  resize: both;
-  overflow: auto;
+    resize: both;
+    overflow: auto;
 
-  min-width: 300px;
-  min-height: 200px;
+    min-width: 300px;
+    min-height: 200px;
 
-  border: 1px solid #ccc;
+    border: 1px solid #ccc;
 }
 
 
@@ -115,9 +115,9 @@
 }
 
 .close:hover {
-  background: none;
-  cursor: default;
-  color: white;
+    background: none;
+    cursor: default;
+    color: white;
 }
 
 .close-i:hover {
@@ -396,7 +396,8 @@
     gap: 10px;
 }
 
-.btn-save-edit, .btn-cancel-edit {
+.btn-save-edit,
+.btn-cancel-edit {
     padding: 8px 15px;
     border: none;
     border-radius: 6px;
@@ -466,7 +467,8 @@
     gap: 15px;
 }
 
-.btn-delete-modal, .btn-cancel-delete-modal {
+.btn-delete-modal,
+.btn-cancel-delete-modal {
     padding: 10px 20px;
     border-radius: 6px;
     font-weight: bold;
@@ -565,19 +567,19 @@
 /* --- DARK MODE OVERRIDES PARA NOTES MODAL --- */
 
 /* Textos generales */
-:host-context(body.dark-mode) h1, 
-:host-context(body.dark-mode) h2, 
-:host-context(body.dark-mode) h3, 
-:host-context(body.dark-mode) h4, 
-:host-context(body.dark-mode) p, 
-:host-context(body.dark-mode) label, 
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
 :host-context(body.dark-mode) .title-modal,
 :host-context(body.dark-mode) .notes-history-title,
 :host-context(body.dark-mode) .note-card-title {
-    color: #a4e4eb !important;
+    color: #ffffff !important;
 }
 
-:host-context(body.dark-mode) p, 
+:host-context(body.dark-mode) p,
 :host-context(body.dark-mode) label,
 :host-context(body.dark-mode) .note-content {
     color: #f0f4f4 !important;
@@ -613,7 +615,7 @@
 }
 
 /* Inputs, Textareas y Selects */
-:host-context(body.dark-mode) input[type="text"], 
+:host-context(body.dark-mode) input[type="text"],
 :host-context(body.dark-mode) select,
 :host-context(body.dark-mode) .note-textarea,
 :host-context(body.dark-mode) .note-title,
@@ -624,7 +626,7 @@
     border: 1px solid #386161 !important;
 }
 
-:host-context(body.dark-mode) input:focus, 
+:host-context(body.dark-mode) input:focus,
 :host-context(body.dark-mode) select:focus,
 :host-context(body.dark-mode) textarea:focus,
 :host-context(body.dark-mode) .note-edit-title:focus {
@@ -671,17 +673,31 @@
 :host-context(body.dark-mode) .btn-toggle-history {
     color: #a4e4eb !important;
 }
+
 :host-context(body.dark-mode) .btn-toggle-history:hover {
     background-color: rgba(0, 139, 149, 0.2) !important;
 }
 
-:host-context(body.dark-mode) .btn-edit-note { color: #a4e4eb !important; }
-:host-context(body.dark-mode) .btn-edit-note:hover { color: #ffffff !important; }
+:host-context(body.dark-mode) .btn-edit-note {
+    color: #a4e4eb !important;
+}
 
-:host-context(body.dark-mode) .btn-delete-note { color: #f87171 !important; }
-:host-context(body.dark-mode) .btn-delete-note:hover { color: #ffcccc !important; }
+:host-context(body.dark-mode) .btn-edit-note:hover {
+    color: #ffffff !important;
+}
 
-:host-context(body.dark-mode) .btn-delete-all { color: #f87171 !important; }
+:host-context(body.dark-mode) .btn-delete-note {
+    color: #f87171 !important;
+}
+
+:host-context(body.dark-mode) .btn-delete-note:hover {
+    color: #ffcccc !important;
+}
+
+:host-context(body.dark-mode) .btn-delete-all {
+    color: #f87171 !important;
+}
+
 :host-context(body.dark-mode) .btn-delete-all:hover {
     background-color: rgba(248, 113, 113, 0.2) !important;
     color: #ffcccc !important;
@@ -701,12 +717,15 @@
     background-color: #a1241b !important;
     color: white !important;
 }
+
 :host-context(body.dark-mode) .btn-delete-modal:hover {
     background-color: #c92e2e !important;
 }
+
 :host-context(body.dark-mode) .btn-cancel-delete-modal {
     background-color: #386161 !important;
 }
+
 :host-context(body.dark-mode) .btn-cancel-delete-modal:hover {
     background-color: #4c9696 !important;
 }

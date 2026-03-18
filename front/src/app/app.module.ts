@@ -20,6 +20,7 @@ import { TranspilationComponent } from './transpilation/transpilation.component'
 import { ModalDescargaComponent } from './modal-descarga/modal-descarga.component';
 import { RunCodeComponent } from "./run-code/run-code.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
+import { MinimizeDirective } from './common/minimize.directive';
 
 const appRoutes: Routes = [
   { path: 'matrixes', component: MatrixesComponent },
@@ -55,7 +56,8 @@ import { authInterceptor } from './interceptors/auth.interceptor';
     RouterModule.forRoot(appRoutes),
     ModalDescargaComponent,
     RunCodeComponent,
-    NotesModalComponent
+    NotesModalComponent,
+    MinimizeDirective
   ],
   providers: [
     provideHttpClient(withInterceptors([authInterceptor]))

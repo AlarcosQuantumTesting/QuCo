@@ -5,6 +5,7 @@ import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { MinimizeDirective } from '../common/minimize.directive';
 
 interface BatchInfo {
   id: string;
@@ -16,7 +17,7 @@ interface BatchInfo {
 @Component({
   selector: 'app-run-code',
   standalone: true,
-  imports: [CommonModule, FormsModule, CdkDrag, CdkDragHandle, NgIf, NgFor],
+  imports: [CommonModule, FormsModule, CdkDrag, CdkDragHandle, NgIf, NgFor, MinimizeDirective],
   templateUrl: './run-code.component.html',
   styleUrls: ['./run-code.component.scss']
 })

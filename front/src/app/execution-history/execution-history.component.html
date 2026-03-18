@@ -171,13 +171,13 @@
 
 
     <div class="modal ejemplos" *ngIf="executionSelected && modalDetails">
-        <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content.ejecuciones"
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content.ejecuciones"
             style="max-height: 90%;">
 
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Execution specifications: {{ executionSelected.name }}</h2>
                 <button class="close">
-                    <i class="close-i" (click)="clearSelection(); modalDetails = false">&times;</i>
+                    <i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="clearSelection(); modalDetails = false">&times;</i>
                 </button>
             </div>
 
@@ -313,10 +313,10 @@
     </div>
 
     <div class="help-modal" *ngIf="showHelp">
-        <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+        <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
             <div class="help-modal-header" cdkDragHandle>
                 <h2 class="help-title-modal">Help</h2>
-                <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="toggleHelp()">&times;</i></button>
             </div>
             <div class="help-text">
                 <h2 class="help-heading" style="color: #0a6369;">How to use 'Execution history'</h2>
@@ -373,3 +373,4 @@
     </div>
 
 </body>
+

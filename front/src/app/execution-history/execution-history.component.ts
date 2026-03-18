@@ -3,6 +3,7 @@ import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { MinimizeDirective } from '../common/minimize.directive';
 
 interface ExecutionHistory {
   id: string;
@@ -26,7 +27,7 @@ interface ExecutionHistory {
 @Component({
   selector: 'app-execution-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe, CdkDrag, CdkDragHandle],
+  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe, CdkDrag, CdkDragHandle, MinimizeDirective],
   templateUrl: './execution-history.component.html',
   styleUrls: ['./execution-history.component.scss']
 })

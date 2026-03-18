@@ -83,8 +83,83 @@ body {
   color: #ddd;
 }
 
-.help-modal-header .close-i {
+.help-modal-header .close-i,
+.help-modal-header .minimize-i {
   font-style: normal;
+}
+
+.help-modal-header .minimize-i {
+  margin-right: 10px;
+}
+
+/* Minimized Modal Styles */
+.minimized {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  min-height: 200px !important;
+  min-width: 250px !important;
+  top: auto !important;
+  left: auto !important;
+  margin: 0 !important;
+  z-index: 2001;
+  /* Above other elements */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  overflow: auto !important;
+  resize: both !important;
+  /* transition: width 0.3s ease, height 0.3s ease, max-width 0.3s ease, max-height 0.3s ease, min-width 0.3s ease, min-height 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease; */
+}
+
+.minimized .modal-header,
+.minimized .help-modal-header {
+  margin: 0 !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 10px 15px !important;
+  height: auto !important;
+}
+
+.minimized .title-modal,
+.minimized .help-title-modal {
+  font-size: 16px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 0 !important;
+}
+
+.overlay-minimized {
+  background-color: transparent !important;
+  pointer-events: none !important;
+  /* Let clicks pass through to background */
+}
+
+/* Prevent clicking through the minimized modal itself */
+.overlay-minimized .minimized {
+  pointer-events: auto !important;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+}
+
+.minimize-i {
+  font-style: normal;
+  margin-right: 12px;
+  font-size: 18px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.close-i {
+  vertical-align: middle;
+}
+
+.close .minimize-i:hover,
+.help-modal-header .minimize-i:hover,
+.modal-header .minimize-i:hover {
+  color: #ddd;
 }
 
 .help-text {

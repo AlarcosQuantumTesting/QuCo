@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { MinimizeDirective } from '../common/minimize.directive';
 
 interface ProjectNote {
   title: string;
@@ -14,7 +15,7 @@ interface ProjectNote {
 @Component({
   selector: 'app-notes-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe, CdkDrag, CdkDragHandle],
+  imports: [CommonModule, FormsModule, NgFor, NgIf, DatePipe, CdkDrag, CdkDragHandle, MinimizeDirective],
   templateUrl: './notes-modal.component.html',
   styleUrl: './notes-modal.component.scss'
 })

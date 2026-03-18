@@ -151,10 +151,10 @@
 
 
   <div class="accessibility-modal" *ngIf="showAccessibility">
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content">
       <div class="modal-header" cdkDragHandle>
         <h2 class="title-modal">Settings</h2>
-        <button class="close"><i class="close-i" (click)="showAccessibility = false">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="showAccessibility = false">&times;</i></button>
       </div>
 
       <div class="modal-body">
@@ -330,3 +330,4 @@
   </div>
 
 </body>
+

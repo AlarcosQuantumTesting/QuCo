@@ -39,10 +39,11 @@
   </div>
 
   <div class="help-modal" *ngIf="showHelp">
-    <div class="help-content" cdkDrag cdkDragRootElement=".help-content">
+    <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
       <div class="help-modal-header" cdkDragHandle>
         <h2 class="help-title-modal">Help</h2>
-        <button class="close"><i class="close-i" (click)="toggleHelp()">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="toggleHelp()">&times;</i></button>
       </div>
       <div class="help-text">
         <h2 class="help-heading" style="color: #0a6369;">How to use 'Algorithms'</h2>
@@ -596,7 +597,8 @@
                 [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
                 (change)="setFreq($event, currentOffset + rowIndex); saveState()">
 
-              <label class="label-number input-qubit-span" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset +
+              <label class="label-number input-qubit-span" *ngIf="isGroverOption()"> {{
+                expectedFrequencies.getFreq(currentOffset +
                 rowIndex) }} </label>
 
             </td>
@@ -644,13 +646,14 @@
 
   <div class="modal ejemplos" *ngIf="mostrarEjemplos">
 
-    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content">
+    <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Examples</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
 
       </div>
 
@@ -729,13 +732,16 @@
 
   <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
 
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Instructions</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarInstrucciones = false;">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarInstrucciones = false;">&times;</i></button>
 
       </div>
 
@@ -1116,7 +1122,9 @@
 
     </div>
 
-    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
+
+    <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content"
+      *ngIf="!isLoadingQiskitCode">
 
       <!-- Botón para cerrar el modal -->
 
@@ -1271,13 +1279,16 @@
 
   <div class="modal instrucciones" *ngIf="mostrarModalTree">
 
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content" style="min-width: 950px;">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Tree</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarModalTree = false;">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarModalTree = false;">&times;</i></button>
 
       </div>
 
@@ -1302,7 +1313,9 @@
 
 
   <div class="modal instrucciones" *ngIf="modalTranspile">
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content" style="min-width: 950px;">
       <div class="modal-header" cdkDragHandle>
         <h2 class="title-modal">Transpile Code</h2>
         <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
