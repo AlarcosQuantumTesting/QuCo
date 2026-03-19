@@ -1337,7 +1337,7 @@ export class CircuitEditorComponent {
     }
 
     const qProgramAny = project.qProgram as any;
-    const qcodesList = qProgramAny.QCodes || qProgramAny.qcodes || [];
+    const qcodesList = qProgramAny.QCodes || qProgramAny.qCodes || qProgramAny.qcodes || [];
 
     if (!qcodesList || qcodesList.length === 0) {
       console.error("Invalid project structure: No QCodes found");
