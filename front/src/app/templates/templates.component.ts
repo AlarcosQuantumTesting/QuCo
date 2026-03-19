@@ -35,10 +35,11 @@ export class TemplatesComponent implements OnInit {
   ngOnInit(): void {
     this.service.getTemplates().subscribe(
       data => {
-        data.sort((a, b) => a.fileName.localeCompare(b.fileName))
-        this.manager.templates = Object.assign(data)
+        const templates = data.map((t: any) => new CodeTemplate(t.fileName, t.description, t.code));
+        templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
+        this.manager.templates = templates;
         this.manager.selectedTemplate = this.manager.templates[0]
-        this.searchQuery = this.manager.selectedTemplate?.fileName?.trim() || "";
+        this.searchQuery = this.manager.selectedTemplate?.displayName?.trim() || "";
         this.searchTemplate();
       },
       error => {
@@ -76,11 +77,12 @@ export class TemplatesComponent implements OnInit {
       }
 
       this.service.createTemplate(this.manager.selectedTemplate).subscribe(
-        data => {
-          this.manager.templates.push(data)
-          this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName))
-          this.manager.selectedTemplate = data
-          this.creatingTemplate = false
+        (data: any) => {
+          const newTemplate = new CodeTemplate(data.fileName, data.description, data.code);
+          this.manager.templates.push(newTemplate);
+          this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
+          this.manager.selectedTemplate = newTemplate;
+          this.creatingTemplate = false;
         },
         error => {
           console.error(error)
@@ -88,8 +90,8 @@ export class TemplatesComponent implements OnInit {
       )
     } else {
       this.service.updateTemplate(this.manager.selectedTemplate).subscribe(
-        data => {
-          this.manager.selectedTemplate = data
+        (data: any) => {
+          this.manager.selectedTemplate = new CodeTemplate(data.fileName, data.description, data.code);
         },
         error => {
           console.error(error)
@@ -113,7 +115,7 @@ export class TemplatesComponent implements OnInit {
   }
 
   selectTemplateIfMatch() {
-    const match = this.manager.templates.find(t => t.fileName.toLowerCase() === this.searchQuery.toLowerCase());
+    const match = this.manager.templates.find(t => t.fileName.toLowerCase() === this.searchQuery.toLowerCase() || t.displayName.toLowerCase() === this.searchQuery.toLowerCase());
     if (match) {
       this.manager.selectedTemplate = match;
       //console.log('Template seleccionado:', match);
@@ -126,7 +128,7 @@ export class TemplatesComponent implements OnInit {
 
   searchTemplate() {
     const match = this.manager.templates.find(
-      template => template.fileName.toLowerCase() === this.searchQuery.trim().toLowerCase()
+      template => template.fileName.toLowerCase() === this.searchQuery.trim().toLowerCase() || template.displayName.toLowerCase() === this.searchQuery.trim().toLowerCase()
     );
 
     if (match) {
@@ -277,16 +279,17 @@ export class TemplatesComponent implements OnInit {
     }
 
     this.service.createTemplate(this.templateToSave).subscribe(
-      data => {
+      (data: any) => {
         this.mensajeTemporal = 'Template created successfully!';
         setTimeout(() => {
           this.mensajeTemporal = '';
         }, 2000);
         this.mostrarModalCrear = false;
         this.mostrarInstrucciones = false;
-        this.manager.templates.push(data);
+        const newTemplate = new CodeTemplate(data.fileName, data.description, data.code);
+        this.manager.templates.push(newTemplate);
         this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        this.manager.selectedTemplate = data;
+        this.manager.selectedTemplate = newTemplate;
       },
       error => {
         console.error(error);
@@ -334,7 +337,7 @@ export class TemplatesComponent implements OnInit {
 
 
     this.service.updateTemplate(this.manager.selectedTemplate).subscribe(
-      (data) => {
+      (data: any) => {
         /*console.log("Nombre del template:", this.templateToSave.fileName);
         console.log("Descripción del template:", this.templateToSave.description);
         console.log("Código del template:", this.templateToSave.code);*/
@@ -348,14 +351,16 @@ export class TemplatesComponent implements OnInit {
           .filter(t => t && t.fileName)
           .findIndex(t => t.fileName === data.fileName);
 
+        const updatedTemplate = new CodeTemplate(data.fileName, data.description, data.code);
+
         if (index === -1) {
-          this.manager.templates.push(data);
+          this.manager.templates.push(updatedTemplate);
         } else {
-          this.manager.templates[index] = data;
+          this.manager.templates[index] = updatedTemplate;
         }
 
         this.manager.templates.sort((a, b) => a.fileName.localeCompare(b.fileName));
-        this.manager.selectedTemplate = data;
+        this.manager.selectedTemplate = updatedTemplate;
         this.mensajeTemporal = 'Template updated successfully!';
         setTimeout(() => {
           this.mensajeTemporal = '';

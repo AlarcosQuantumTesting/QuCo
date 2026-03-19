@@ -88,7 +88,7 @@
         </li>
 
         <li class="user" style="cursor: default; position: relative;" (mouseleave)="isUserDropdownOpen = false">
-          <a (click)="toggleUserDropdown()" style="cursor: pointer; margin-bottom: 5px;" title="User Menu">
+          <a (click)="toggleUserDropdown()" style="cursor: pointer; margin-bottom: 5px;" title="User info">
             <i class="fas fa-user-circle"></i>
             <span *ngIf="menuAbierto">User</span>
           </a>
@@ -106,7 +106,7 @@
             </a>
             <a (click)="toggleDarkMode(); toggleUserDropdown()" class="dropdown-item" style="cursor: pointer;">
               <i class="fas fa-adjust" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">{{
-                darkMode ? 'Light Theme' : 'Toggle Theme' }}</span>
+                darkMode ? 'Light Theme' : 'Dark Theme' }}</span>
             </a>
           </div>
 
