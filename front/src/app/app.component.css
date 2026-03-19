@@ -1367,3 +1367,7 @@
   body.dark-mode .notification-error .error-icon {
     color: #dc3545 !important;
   }
+
+  body.dark-mode .logo {
+    filter: brightness(0) invert(1) !important;
+  }
