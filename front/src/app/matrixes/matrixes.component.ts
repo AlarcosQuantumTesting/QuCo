@@ -429,9 +429,12 @@ export class MatrixesComponent implements AfterViewInit {
         if (this.hasHadamardGates) {
           result = this.applyHadamardToQuirk(result);
         }
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+
         this.quirkURL = url
-        window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+        // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -458,9 +461,12 @@ export class MatrixesComponent implements AfterViewInit {
         if (this.hasHadamardGates) {
           result = this.applyHadamardToQuirk(result);
         }
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+
         this.quirkURL = url
-        window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+        // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -480,9 +486,11 @@ export class MatrixesComponent implements AfterViewInit {
         if (this.hasHadamardGates) {
           result = this.applyHadamardToQuirk(result);
         }
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
         this.quirkURL = url
         //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
       }
     )
   }

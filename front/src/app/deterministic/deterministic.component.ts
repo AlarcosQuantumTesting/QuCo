@@ -834,7 +834,9 @@ export class DeterministicComponent extends GroverStyle {
   showQuirk(index?: number) {
     if (index == undefined)
       index = 0
-    let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
+    // let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
+    let url = " https://alarcosj.esi.uclm.es/quirk#circuit=" + this.quirkCodes[index]
+
     this.quirkURL = url
     window.open(url, "_blank")
   }
