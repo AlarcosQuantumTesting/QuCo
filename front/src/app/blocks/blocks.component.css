@@ -2551,3 +2551,10 @@ input[type="checkbox"] {
 :host-context(body.dark-mode) .listaBackends .list-group-item .text-muted {
   color: #8fa8a8 !important;
 }
+
+/* --- AUTO DARK MODE FOR CHARTS EN MODO OSCURO --- */
+:host-context(body.dark-mode) .chart-container canvas,
+:host-context(body.dark-mode) canvas#timesChart {
+  filter: invert(0.85) hue-rotate(180deg) brightness(1.2);
+  transition: filter 0.3s ease;
+}

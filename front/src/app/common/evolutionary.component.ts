@@ -597,10 +597,6 @@ export abstract class EvolutionaryComponent {
       rrff[i].prepareChart("chart" + i, rrff[i].shortName!)
     if (this.timesChart)
       this.timesChart.destroy()
-    
-    // Check if dark mode is active
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const chartTextColor = isDarkMode ? '#f0f4f4' : '#666';
 
     this.timesChart = new Chart("timesChart",
       {
@@ -609,23 +605,7 @@ export abstract class EvolutionaryComponent {
           plugins: {
             title: {
               display: true,
-              text: "Times (ms)",
-              color: chartTextColor
-            },
-            legend: {
-              labels: {
-                color: chartTextColor
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: { color: chartTextColor },
-              grid: { color: isDarkMode ? '#386161' : '#e0e0e0' }
-            },
-            y: {
-              ticks: { color: chartTextColor },
-              grid: { color: isDarkMode ? '#386161' : '#e0e0e0' }
+              text: "Times (ms)"
             }
           },
           aspectRatio: 2.5
@@ -636,26 +616,26 @@ export abstract class EvolutionaryComponent {
             {
               data: [],
               label: "Execution time",
-              backgroundColor: isDarkMode ? "#ffb347" : "orange",
-              borderColor: isDarkMode ? "#ffb347" : "orange"
+              backgroundColor: "#ea580c", // Deep Orange
+              borderColor: "#ea580c"
             },
             {
               data: [],
               label: "Calculus time",
-              backgroundColor: isDarkMode ? "#ff6961" : "red",
-              borderColor: isDarkMode ? "#ff6961" : "red"
+              backgroundColor: "#dc2626", // Deep Red
+              borderColor: "#dc2626"
             },
             {
               data: [],
               label: "Strategy application time",
-              backgroundColor: isDarkMode ? "#77dd77" : "blue",
-              borderColor: isDarkMode ? "#77dd77" : "blue"
+              backgroundColor: "#2563eb", // Deep Blue
+              borderColor: "#2563eb"
             },
             {
               data: [],
               label: "Rendering (UA) time",
-              backgroundColor: isDarkMode ? "#84b6f4" : "green",
-              borderColor: isDarkMode ? "#84b6f4" : "green"
+              backgroundColor: "#16a34a", // Deep Green
+              borderColor: "#16a34a"
             }
           ]
         }
