@@ -443,9 +443,7 @@
     cursor: pointer;
   }
 
-  .sidebar ul li a.accessibility-link:hover {
-    background-color: rgba(0, 123, 255, 0.1);
-  }
+
 
 
   /* Interfaz modal de accesibilidad */

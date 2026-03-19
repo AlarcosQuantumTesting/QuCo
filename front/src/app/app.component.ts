@@ -548,7 +548,13 @@ export class AppComponent implements AfterViewInit, OnInit {
 
     if (!sToken || !email) {
       console.log("No token in localStorage. Attempting to restore from cookie...");
-      return await this.restoreSessionFromCookie();
+      return await this.restoreSessionFromCookie(false);
+    }
+
+    const cookieValid = await this.restoreSessionFromCookie(true);
+    if (!cookieValid) {
+      console.log("Session cookie missing or invalid. Cleared local storage.");
+      return false;
     }
 
     const validationData = {
@@ -567,15 +573,17 @@ export class AppComponent implements AfterViewInit, OnInit {
         return true;
       }
 
+      this.clearUserStorage();
       return false;
 
     } catch (error: any) {
-      console.log("Token validation failed or missing. Attempting to restore from cookie...");
-      return await this.restoreSessionFromCookie();
+      console.log("Token validation failed.", error);
+      this.clearUserStorage();
+      return false;
     }
   }
 
-  async restoreSessionFromCookie(): Promise<boolean> {
+  async restoreSessionFromCookie(silent: boolean = false): Promise<boolean> {
     try {
       const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/getUser`, {}, {
         observe: 'response',
@@ -583,15 +591,20 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        const email = response.body;
-        if (email) {
-          console.log("Session restored from cookie. Email:", email);
-          localStorage.setItem('userEmail', email);
-          localStorage.setItem('userToken', 'COOKIE_SESSION');
+        const responseEmail = response.body;
+        if (responseEmail) {
+          console.log("Session valid from cookie. Email:", responseEmail);
+          localStorage.setItem('userEmail', responseEmail);
 
-          this.mensajeExito = `Welcome back, ${email}!`;
-          this.mostrarMensajeExito = true;
-          this.limpiarMensajeExito(2000);
+          if (!localStorage.getItem('userToken')) {
+            localStorage.setItem('userToken', 'COOKIE_SESSION');
+          }
+
+          if (!silent) {
+            this.mensajeExito = `Welcome back, ${responseEmail}!`;
+            this.mostrarMensajeExito = true;
+            this.limpiarMensajeExito(2000);
+          }
           return true;
         }
       }
