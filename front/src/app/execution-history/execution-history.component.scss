@@ -1510,8 +1510,8 @@ tr.table-active {
 
 /* File log paths en modals */
 :host-context(body.dark-mode) .log-paths {
-  background-color: #172424 !important;
-  border: 1px solid #386161 !important;
+  // background-color: #172424 !important;
+  // border: 1px solid #386161 !important;
 }
 
 :host-context(body.dark-mode) .param-line.file-line {

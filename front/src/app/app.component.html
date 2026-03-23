@@ -108,6 +108,9 @@
               <i class="fas fa-adjust" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">{{
                 darkMode ? 'Light Theme' : 'Dark Theme' }}</span>
             </a>
+            <a (click)="toggleAccessibilityPanel(); toggleUserDropdown()" class="dropdown-item" style="cursor: pointer;">
+              <i class="fas fa-cog" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">Settings</span>
+            </a>
           </div>
 
           <a routerLinkActive="active" style="cursor: pointer;" (click)="isLoggedIn() ? cerrarSesion() : toggleLogin()">
@@ -121,9 +124,9 @@
         </li>
 
         <li class="ajustes">
-          <a (click)="toggleAccessibilityPanel()" class="accessibility-link">
-            <i class="fas fa-cog" title="Settings"></i>
-            <span *ngIf="menuAbierto">Settings</span>
+          <a (click)="showAboutUsModal = true" class="accessibility-link">
+            <i class="fas fa-info-circle" title="About us"></i>
+            <span *ngIf="menuAbierto">About us</span>
           </a>
         </li>
 
@@ -331,4 +334,5 @@
     <p style="color: white;">{{ mensajeError }}</p>
   </div>
 
+  <app-about-us [mostrarModal]="showAboutUsModal" (cerrarModal)="showAboutUsModal = false"></app-about-us>
 </body>

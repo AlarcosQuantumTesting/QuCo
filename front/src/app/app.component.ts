@@ -77,6 +77,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   showAccessibility = false;
+  showAboutUsModal = false;
   darkMode = false;
   highContrast = false;
   userBgColor = '';

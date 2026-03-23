@@ -21,6 +21,7 @@ import { ModalDescargaComponent } from './modal-descarga/modal-descarga.componen
 import { RunCodeComponent } from "./run-code/run-code.component";
 import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { MinimizeDirective } from './common/minimize.directive';
+import { AboutUsComponent } from './about-us/about-us.component';
 
 const appRoutes: Routes = [
   { path: 'matrixes', component: MatrixesComponent },
@@ -57,7 +58,8 @@ import { authInterceptor } from './interceptors/auth.interceptor';
     ModalDescargaComponent,
     RunCodeComponent,
     NotesModalComponent,
-    MinimizeDirective
+    MinimizeDirective,
+    AboutUsComponent
   ],
   providers: [
     provideHttpClient(withInterceptors([authInterceptor]))

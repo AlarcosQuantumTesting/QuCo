@@ -9,9 +9,8 @@ import { NavigationEnd, Router } from '@angular/router';
 export class HomeComponent {
 
   mostrarInicio = true;
-
   constructor(private router: Router, private el: ElementRef) {
-    
+
   }
 
   ngAfterViewInit() {
