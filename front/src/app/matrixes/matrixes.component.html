@@ -477,8 +477,10 @@
                         {{ hasHadamardGates ? 'Delete start with Hadamard gates' : 'Start with Hadamard gates' }}
                     </a>
                     &nbsp;
-                    <a (click)="countLastQubit()" [class.disabled]="isDisabled2"><i class="fas fa-plus-circle"></i>
-                        Count last qubit</a>
+                    <a (click)="toggleCountLastQubit()" [class.disabled]="isDisabled2">
+                        <i [class]="hasCountLastQubit ? 'fas fa-minus-circle' : 'fas fa-plus-circle'"></i>
+                        {{ hasCountLastQubit ? 'Delete count last qubit' : 'Count last qubit' }}
+                    </a>
                 </div>
 
                 <button class="close"><i class="close-i"

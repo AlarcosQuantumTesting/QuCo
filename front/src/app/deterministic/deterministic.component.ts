@@ -1084,6 +1084,8 @@ export class DeterministicComponent extends GroverStyle {
 
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     localStorage.removeItem('processedExpressionsDeterministic');
+    this.selectedProjectId = '';
+    this.loadProjectNames();
 
   }
 
@@ -1920,7 +1922,7 @@ export class DeterministicComponent extends GroverStyle {
 
       if (this.selectedAlgorithm === 'grover') {
         this.type = 'GROVER'
-      } else if (this.selectedAlgorithm === 'grenoble') {
+      } else if (this.selectedAlgorithm === 'grenoble' || this.selectedAlgorithm === 'originalGR') {
         this.type = 'GRENOBLE'
       }
 

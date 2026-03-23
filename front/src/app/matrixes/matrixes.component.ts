@@ -56,6 +56,7 @@ export class MatrixesComponent implements AfterViewInit {
   isDisabled2 = false;
   isLoadingQiskitCode = false;
   hasHadamardGates = false;
+  hasCountLastQubit = false;
 
   cols: number = 0
   rows: number = 0
@@ -558,6 +559,12 @@ export class MatrixesComponent implements AfterViewInit {
 
         }
 
+        if (this.hasCountLastQubit) {
+          this.isDisabled2 = false; // Allow addition
+          this.addCountLastQubit();
+          this.mensajeTemporal = '';
+        }
+
         if (asFunction) {
           this.mostrarModal = true;
         }
@@ -630,6 +637,13 @@ export class MatrixesComponent implements AfterViewInit {
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
         }
         this.hasHadamardGates = false;
+        
+        if (this.hasCountLastQubit) {
+          this.isDisabled2 = false; // Allow addition
+          this.addCountLastQubit();
+          this.mensajeTemporal = '';
+        }
+
         this.isLoadingQiskitCode = false;
         this.mostrarModal = true;
         this.copiarCodigo();
@@ -701,19 +715,44 @@ export class MatrixesComponent implements AfterViewInit {
     }, 2000);
   }
 
-  countLastQubit() {
-    if (this.isDisabled2) return; // Si ya está deshabilitado, no hace nada
-    this.isDisabled2 = true;
+  toggleCountLastQubit() {
+    if (this.isDisabled2) return;
+    if (this.hasCountLastQubit) {
+      this.removeCountLastQubit();
+    } else {
+      this.addCountLastQubit();
+    }
+    this.hasCountLastQubit = !this.hasCountLastQubit;
+  }
 
+  addCountLastQubit() {
     let code = ["counts_output_qubit" + " = absolute_frequencies.get('1', 1)\n",
       "probability_output_qubit = counts_output_qubit / 1000\n",
     "result" + " = " + (2 ** this.inputQubits) + " * probability_output_qubit\n",
-      "print(f\"Probability of getting 1 in the output qubit: {result}\")"
+      "print(f\"Probability of getting 1 in the output qubit: {result}\")\n"
     ]
     for (let i = 0; i < code.length; i++)
       this.qiskitCode += code[i]
 
     this.mensajeTemporal = 'Counted last qubit!';
+    setTimeout(() => {
+      this.mensajeTemporal = '';
+    }, 2000);
+  }
+
+  removeCountLastQubit() {
+    if (this.qiskitCode) {
+      let lines = this.qiskitCode.split('\n');
+      lines = lines.filter(line => 
+        !line.includes("counts_output_qubit = absolute_frequencies.get") &&
+        !line.includes("probability_output_qubit = counts_output_qubit / 1000") &&
+        !line.includes("* probability_output_qubit") &&
+        !line.includes("print(f\"Probability of getting 1 in the output qubit:")
+      );
+      this.qiskitCode = lines.join('\n');
+    }
+
+    this.mensajeTemporal = 'Removed count last qubit!';
     setTimeout(() => {
       this.mensajeTemporal = '';
     }, 2000);
@@ -1126,6 +1165,7 @@ export class MatrixesComponent implements AfterViewInit {
     this.mostrarModal = false;
     this.isDisabled = false;
     this.isDisabled2 = false;
+    this.hasHadamardGates = false;
     this.fromEdit = false;
     this.isNameDisabled = false;
     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };
