@@ -69,7 +69,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  BLOCKS_GENERATOR_FQCN = 'edu.uclm.reper.model.Blocks';
+  BLOCKS_GENERATOR_FQCN = 'BLOCKS';
   REQUIRED_GENERATOR_TYPE = this.BLOCKS_GENERATOR_FQCN;
 
   responseReceived?: any
@@ -114,6 +114,9 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
   ngOnInit() {
+
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
 
     window.addEventListener('beforeunload', this.confirmExit);
     localStorage.removeItem('qucoConfigurationBlocks');

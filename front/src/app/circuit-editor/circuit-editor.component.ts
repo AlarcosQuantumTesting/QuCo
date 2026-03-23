@@ -81,7 +81,7 @@ export class CircuitEditorComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  EDITOR_GENERATOR_FQCN = 'edu.uclm.reper.model.Editor';
+  EDITOR_GENERATOR_FQCN = 'EDITOR';
   REQUIRED_GENERATOR_TYPE = this.EDITOR_GENERATOR_FQCN;
 
   responseReceived?: any
@@ -134,6 +134,9 @@ export class CircuitEditorComponent {
 
   ngOnInit() {
 
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
+
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
     });
@@ -173,13 +176,23 @@ export class CircuitEditorComponent {
         }
       });
 
-    const savedProjectId = localStorage.getItem('selectedProjectId_editor');
-    if (savedProjectId && this.userEmail && this.userToken) {
-      this.selectedProjectId = savedProjectId;
-      this.onProjectSelected();
-    }
+    let sessionAttempts = 0;
+    const initSession = setInterval(() => {
+      this.userEmail = localStorage.getItem('userEmail') || '';
+      this.userToken = localStorage.getItem('userToken') || '';
+      if (this.userEmail && this.userToken) {
+        clearInterval(initSession);
+        this.loadProjectNames();
 
-    this.loadProjectNames();
+        const savedProjectId = localStorage.getItem('selectedProjectId_editor');
+        if (savedProjectId) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
+        }
+      } else if (++sessionAttempts >= 12) {
+        clearInterval(initSession);
+      }
+    }, 250);
   }
 
   measureColumn(column: number) {

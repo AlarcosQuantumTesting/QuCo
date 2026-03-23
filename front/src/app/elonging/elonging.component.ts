@@ -45,7 +45,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  GENETIC_GENERATOR_FQCN = 'edu.uclm.reper.model.Genetic';
+  GENETIC_GENERATOR_FQCN = 'GENETIC';
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
 
   responseReceived?: any
@@ -91,16 +91,29 @@ export class ElongingComponent extends EvolutionaryComponent {
 
   ngOnInit() {
 
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
+
     localStorage.removeItem('qucoConfigurationBlocks');
     localStorage.removeItem('qucoConfiguration');
 
-    const savedProjectId = localStorage.getItem('selectedProjectId_genetic');
-    if (savedProjectId && this.userEmail && this.userToken) {
-      this.selectedProjectId = savedProjectId;
-      this.onProjectSelected();
-    }
+    let sessionAttempts = 0;
+    const initSession = setInterval(() => {
+      this.userEmail = localStorage.getItem('userEmail') || '';
+      this.userToken = localStorage.getItem('userToken') || '';
+      if (this.userEmail && this.userToken) {
+        clearInterval(initSession);
+        this.loadProjectNames();
 
-    this.loadProjectNames();
+        const savedProjectId = localStorage.getItem('selectedProjectId_genetic');
+        if (savedProjectId) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
+        }
+      } else if (++sessionAttempts >= 12) {
+        clearInterval(initSession);
+      }
+    }, 250);
 
     for (let i = 0; i < this.remoteFitnessers.length; i++) {
       if (this.remoteFitnessers[i].name === 'SimpleFitnesser') {

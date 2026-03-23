@@ -173,6 +173,9 @@ export class DeterministicComponent extends GroverStyle {
 
   ngOnInit() {
 
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
+
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
     });
@@ -255,13 +258,23 @@ export class DeterministicComponent extends GroverStyle {
       }
     }*/
 
-    const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
-    if (savedProjectId && this.userEmail && this.userToken) {
-      this.selectedProjectId = savedProjectId;
-      this.onProjectSelected();
-    }
+    let sessionAttempts = 0;
+    const initSession = setInterval(() => {
+      this.userEmail = localStorage.getItem('userEmail') || '';
+      this.userToken = localStorage.getItem('userToken') || '';
+      if (this.userEmail && this.userToken) {
+        clearInterval(initSession);
+        this.loadProjectNames();
 
-    this.loadProjectNames();
+        const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
+        if (savedProjectId) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
+        }
+      } else if (++sessionAttempts >= 12) {
+        clearInterval(initSession);
+      }
+    }, 250);
   }
 
   override tryFill(index: number): void {
@@ -1906,9 +1919,9 @@ export class DeterministicComponent extends GroverStyle {
       console.log("Algotirmo: ", this.selectedAlgorithm)
 
       if (this.selectedAlgorithm === 'grover') {
-        this.type = 'edu.uclm.reper.model.Grover'
+        this.type = 'GROVER'
       } else if (this.selectedAlgorithm === 'grenoble') {
-        this.type = 'edu.uclm.reper.model.Grenoble'
+        this.type = 'GRENOBLE'
       }
 
       this.projectService.getProjectsName(requestBody).subscribe({

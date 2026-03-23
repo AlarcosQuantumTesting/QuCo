@@ -155,7 +155,7 @@ export class MatrixesComponent implements AfterViewInit {
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  REQUIRED_GENERATOR_TYPE: string = 'edu.uclm.reper.model.Matrix';
+  REQUIRED_GENERATOR_TYPE: string = 'MATRIX';
 
   mostrarNotasModal: boolean = false;
 
@@ -813,18 +813,31 @@ export class MatrixesComponent implements AfterViewInit {
 
   ngOnInit() {
 
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
+
     console.log("User email in matrixes:", this.userEmail);
     console.log("User token in matrixes:", this.userToken);
 
-    this.loadProjectNames();
+    let sessionAttempts = 0;
+    const initSession = setInterval(() => {
+      this.userEmail = localStorage.getItem('userEmail') || '';
+      this.userToken = localStorage.getItem('userToken') || '';
+      if (this.userEmail && this.userToken) {
+        clearInterval(initSession);
+        this.loadProjectNames();
 
-    const savedProjectId = localStorage.getItem('selectedProjectId_matrices');
-    const savedProjectName = localStorage.getItem('selectedProjectName_matrices');
-    if (savedProjectId && this.userEmail && this.userToken && savedProjectName) {
-      this.selectedProjectId = savedProjectId;
-      this.selectedProjectName = savedProjectName;
-      //this.onProjectSelected();
-    }
+        const savedProjectId = localStorage.getItem('selectedProjectId_matrices');
+        const savedProjectName = localStorage.getItem('selectedProjectName_matrices');
+        if (savedProjectId && savedProjectName) {
+          this.selectedProjectId = savedProjectId;
+          this.selectedProjectName = savedProjectName;
+          //this.onProjectSelected();
+        }
+      } else if (++sessionAttempts >= 12) {
+        clearInterval(initSession);
+      }
+    }, 250);
 
     this.validateInputs();
 
