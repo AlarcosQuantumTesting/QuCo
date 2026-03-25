@@ -24,21 +24,101 @@
 
 
   <div class="titulo">
-
     <h1>Algorithms
-
+      <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
+        title="Unsaved changes detected" style="cursor: default !important;">
+        <i class="fas fa-circle"></i>
+      </span>
       <br>
-
       <small style="font-size: 14px;">Grover, Grover and Rudolph, Grenoble</small>
 
     </h1>
-
-    <span *ngIf="selectedProjectId && isCircuitModified" class="unsaved-indicator pulsing-dot"
-      title="Unsaved changes detected" style="cursor: default !important;">
-      <i class="fas fa-circle"></i>
-    </span>
-
+    <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
+      ?
+    </button>
   </div>
+
+  <div class="help-modal" *ngIf="showHelp">
+    <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
+      <div class="help-modal-header" cdkDragHandle>
+        <h2 class="help-title-modal">Help</h2>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="toggleHelp()">&times;</i></button>
+      </div>
+      <div class="help-text">
+        <h2 class="help-heading" style="color: #0a6369;">How to use 'Algorithms'</h2>
+        <div class="help-intro">
+          Design search oracles or prepare precise quantum state distributions for your circuits.
+        </div>
+
+        <div class="help-section">
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-search"></i></div>
+            <div class="help-content-desc">
+              <h3>1. Grover's Algorithm</h3>
+              <p>Used to find "solutions" in an unstructured database. Use the table or expressions to <b>mark</b> rows
+                with value <b>1</b> (solution) or <b>0</b> (not a solution). Choose between <b>MCX</b> (Multi-Controlled
+                X) or <b>H-MCZ-H</b> (Hadamard + Multi-Controlled Z) for the oracle implementation.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-wave-square"></i></div>
+            <div class="help-content-desc">
+              <h3>2. Grenoble & Grover-Rudolph</h3>
+              <p>Algorithms for <b>state preparation</b> and loading probability distributions. Use them to create
+                operators that represent specific data patterns. The <b>Physical Angle</b> (in radians) controls the
+                rotation intensity for the probability loading phase.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-bolt"></i></div>
+            <div class="help-content-desc">
+              <h3>3. Circuit Optimizations</h3>
+              <p>Enable <b>Parallel circuit</b> to reduce the gate depth by executing independent operations
+                simultaneously. Use <b>Split in several circuits</b> if the resulting operator exceeds the maximum
+                allowed gates for a single circuit on your target hardware.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-terminal"></i></div>
+            <div class="help-content-desc">
+              <h3>4. Expression Editor</h3>
+              <p>Automate table filling using JS expressions. Use <b>q0, q1...</b> for specific bits, <b>input</b> for
+                the decimal value, or <b>dv(start..end)</b> for decimal ranges. Look for <b>automatic
+                  recommendations</b> to quickly implement prime numbers, parity checks, or sums.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-save"></i></div>
+            <div class="help-content-desc">
+              <h3>5. Persist Your Work</h3>
+              <p>Click <b>Save</b> to store your configuration. For complex setups, use <b>Save as new</b> to create
+                versions. Projects store your qubit count, algorithm selection, expressions, and the resulting frequency
+                table.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-file-code"></i></div>
+            <div class="help-content-desc">
+              <h3>6. Export & Transpile</h3>
+              <p>Generate <b>Qiskit code</b> as a main program or as a re-usable modular function. Once generated, use
+                the <b>Transpile</b> feature to convert your Qiskit implementation for other platforms.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-actions">
+        <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+      </div>
+    </div>
+  </div>
+
 
 
 
@@ -135,17 +215,18 @@
                 *ngIf="userEmail && userToken">
                 <i class="fas fa-save"></i> Save project
             </button> -->
-        <button *ngIf="!selectedProjectId" (click)="openSaveOrSaveAsNewModal(false)" class="btn-confirm-save">
+        <button *ngIf="userEmail && userToken && !selectedProjectId" (click)="openSaveOrSaveAsNewModal(false)"
+          class="btn-confirm-save">
           <i class="fas fa-save"></i> Save
         </button>
 
-        <button *ngIf="selectedProjectId && isCircuitModified" (click)="openApplyChangesModal()"
-          class="btn-confirm-save update-btn">
+        <button *ngIf="userEmail && userToken && selectedProjectId && isCircuitModified"
+          (click)="openApplyChangesModal()" class="btn-confirm-save update-btn">
           <i class="fas fa-pen"></i> Update
         </button>
 
-        <button *ngIf="selectedProjectId" (click)="openSaveOrSaveAsNewModal(true)" class="btn-confirm-save"
-          style="margin-left: 5px;">
+        <button *ngIf="userEmail && userToken && selectedProjectId" (click)="openSaveOrSaveAsNewModal(true)"
+          class="btn-confirm-save" style="margin-left: 5px;">
           <i class="fas fa-save"></i> Save as new
         </button>
       </div>
@@ -178,7 +259,7 @@
                     <option *ngFor="let template of manager.getTemplatesStartingBy(['matrixes', 'grover'])"
                       [ngValue]="template">
 
-                      {{ template.fileName }}
+                      {{ template.displayName }}
 
                     </option>
 
@@ -191,11 +272,14 @@
 
                     <option *ngFor="let template of manager.getTemplatesStartingBy(['grover'])" [ngValue]="template">
 
-                      {{ template.fileName }}
+                      {{ template.displayName }}
 
                     </option>
 
                   </select>
+                  <button routerLink="/templates" class="btn-templates-link" title="Go to Templates">
+                    <i class="fas fa-file-code"></i>
+                  </button>
 
                   <input type="checkbox" class="custom-checkbox" [(ngModel)]="inParallel"
                     (change)="saveState()">Parallel circuit
@@ -513,7 +597,8 @@
                 [ngModel]="expectedFrequencies.getFreq(currentOffset + rowIndex)"
                 (change)="setFreq($event, currentOffset + rowIndex); saveState()">
 
-              <label class="label-number" *ngIf="isGroverOption()"> {{ expectedFrequencies.getFreq(currentOffset +
+              <label class="label-number input-qubit-span" *ngIf="isGroverOption()"> {{
+                expectedFrequencies.getFreq(currentOffset +
                 rowIndex) }} </label>
 
             </td>
@@ -527,10 +612,10 @@
 
             <td *ngIf="isGroverOption()">
 
-              <span (change)="saveState()"
+              <span class="input-qubit-span" (change)="saveState()"
                 *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 1">true</span>
 
-              <span (change)="saveState()"
+              <span class="clickable-span" (change)="saveState()"
                 *ngIf="expectedFrequencies.getFreq(currentOffset + rowIndex) === 0">false</span>
 
             </td>
@@ -561,13 +646,14 @@
 
   <div class="modal ejemplos" *ngIf="mostrarEjemplos">
 
-    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content">
+    <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Examples</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
 
       </div>
 
@@ -646,13 +732,16 @@
 
   <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
 
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Instructions</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarInstrucciones = false;">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarInstrucciones = false;">&times;</i></button>
 
       </div>
 
@@ -1033,7 +1122,9 @@
 
     </div>
 
-    <div class="modal-content ejemplos" cdkDrag cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode">
+
+    <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content"
+      *ngIf="!isLoadingQiskitCode">
 
       <!-- Botón para cerrar el modal -->
 
@@ -1099,6 +1190,7 @@
           Execute remote</button>
         <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
           Transpile</button>
+        <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
         <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
         <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
       </div>
@@ -1109,8 +1201,10 @@
 
   <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false"
     style="width: 100%; height: 100%;"></app-modal-descarga>
+  <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
+    [qiskitCode]="(qiskitCode.lines ? qiskitCode.lines.join('\n') : '')" style="width: 100%; height: 100%;"></app-download-code-modal>
   <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
-    [qiskitCode]="(qiskitCode?.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
+    [qiskitCode]="(qiskitCode.lines ? qiskitCode.lines.join('\n') : '')"></app-run-code>
 
   <div class="modal" *ngIf="mostrarModalGuargarCode">
 
@@ -1188,13 +1282,16 @@
 
   <div class="modal instrucciones" *ngIf="mostrarModalTree">
 
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content" style="min-width: 950px;">
 
       <div class="modal-header" cdkDragHandle>
 
         <h2 class="title-modal">Tree</h2>
 
-        <button class="close"><i class="close-i" (click)="mostrarModalTree = false;">&times;</i></button>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarModalTree = false;">&times;</i></button>
 
       </div>
 
@@ -1219,7 +1316,9 @@
 
 
   <div class="modal instrucciones" *ngIf="modalTranspile">
-    <div class="modal-content instrucciones" cdkDrag cdkDragRootElement="modal-content" style="min-width: 950px;">
+
+    <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+      cdkDragRootElement="modal-content" style="min-width: 950px;">
       <div class="modal-header" cdkDragHandle>
         <h2 class="title-modal">Transpile Code</h2>
         <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>

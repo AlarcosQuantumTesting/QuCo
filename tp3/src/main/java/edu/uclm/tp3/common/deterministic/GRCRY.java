@@ -25,4 +25,10 @@ public class GRCRY extends GRGate {
     public String toString() {
         return "\tU.cry(" + + this.ry.theta + ", " + this.qubit0 + ", " + this.ry.qubit + ")\n";
     }
+
+    @Override
+    protected String getCirqCode() {
+        String declaration = "\tc.append(cirq.ry(" + this.ry.theta + ").on(q" + this.ry.qubit + ").controlled_by(q" + this.qubit0 + "))\n";
+        return declaration;
+    }
 }

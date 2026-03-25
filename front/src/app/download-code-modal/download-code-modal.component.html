@@ -1,0 +1,37 @@
+<body>
+    <div class="modal ejemplos" *ngIf="mostrarModal">
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize
+            cdkDragRootElement=".modal-content">
+
+            <div class="modal-header" cdkDragHandle>
+                <h2 class="title-modal">Download as</h2>
+                <button class="close">
+                    <i class="close-i" (click)="cerrarModal()">&times;</i>
+                </button>
+            </div>
+            <div class="instructions-content">
+                <p class="text-instructions">Select the format to download your code:</p>
+                <div class="options-container">
+                    <label class="format-card" [class.selected]="selectedExtension === '.py'">
+                        <input type="radio" [(ngModel)]="selectedExtension" value=".py" style="display: none;">
+                        <i class="fab fa-python format-icon"></i>
+                        <span class="format-title">Python</span>
+                        <span class="format-ext">.py</span>
+                    </label>
+                    <label class="format-card" [class.selected]="selectedExtension === '.txt'">
+                        <input type="radio" [(ngModel)]="selectedExtension" value=".txt" style="display: none;">
+                        <i class="fas fa-file-alt format-icon"></i>
+                        <span class="format-title">Text</span>
+                        <span class="format-ext">.txt</span>
+                    </label>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="download-btn" (click)="descargarCodigo()">
+                        <i class="fas fa-download"></i> Download file
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

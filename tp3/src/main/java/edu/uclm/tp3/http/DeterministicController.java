@@ -3,10 +3,10 @@ package edu.uclm.tp3.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,69 +24,86 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.uclm.tp3.common.deterministic.FreqTable;
+import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.common.services.DeterministicService;
 import edu.uclm.tp3.common.services.GroverService;
 import edu.uclm.tp3.common.services.HammingService;
+import edu.uclm.tp3.dao.TemplateDao;
 
 @RestController
 @RequestMapping("deterministic")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class DeterministicController {
-	
+
 	@Autowired
 	private DeterministicService service;
 	@Autowired
 	private GroverService groverService;
 	@Autowired
 	private HammingService hammingService;
+	@Autowired
+	private TemplateDao templateDao;
 	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
 		return this.service.getTemplates();
 	}
 
-	@PostMapping(path = "/newCalculate", produces = MediaType.APPLICATION_JSON_VALUE) @ResponseBody
-	public ResponseEntity<StreamingResponseBody> newCalculate(HttpServletRequest req, @RequestBody Map<String, Object> info) {
-		JSONObject jso = new JSONObject(info);
-		
-		int qubits = jso.getInt("qubits");
-		FreqTable expectedFrequencies = new FreqTable(jso.getJSONObject("expectedFrequencies"));
-		if (expectedFrequencies.getPairs().size()==0)
+	@PostMapping(path = "/newCalculate", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ResponseEntity<StreamingResponseBody> newCalculate(HttpServletRequest req,
+			@RequestBody Map<String, Object> info) {
+		ObjectMapper mapper = new ObjectMapper();
+		int qubits = Integer.parseInt(info.get("qubits").toString());
+		FreqTable expectedFrequencies = mapper.convertValue(info.get("expectedFrequencies"), FreqTable.class);
+
+		if (expectedFrequencies == null || expectedFrequencies.getPairs().isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "There are no selected values");
-		double physicalAngle = jso.getDouble("physicalAngle");
-		boolean inParallel = jso.getBoolean("inParallel");
-		boolean splitCircuits = jso.getBoolean("splitCircuits");
-		String functionPrefix = jso.optString("functionPrefix");
-		String algorithm = jso.optString("algorithm", "grenoble");
+
+		double physicalAngle = Double.parseDouble(info.get("physicalAngle").toString());
+		boolean inParallel = (Boolean) info.getOrDefault("inParallel", false);
+		boolean splitCircuits = (Boolean) info.getOrDefault("splitCircuits", false);
+		String functionPrefix = (String) info.getOrDefault("functionPrefix", "");
+		String algorithm = (String) info.getOrDefault("algorithm", "grenoble");
 		boolean originalGR = algorithm.equals("originalGR");
 		boolean useMCX = jso.optBoolean("useMCX", false);
+		String templateName = jso.getString("template");
+
+		boolean steaking = false;
+
+		Optional<CodeTemplate> optTemplateCode = this.templateDao.findById(templateName);
+		if (optTemplateCode.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, templateName + " not found");
+		String templateCode = optTemplateCode.get().getCode();
 		
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = null;
 			if (algorithm.equals("grover")) {
 				if (inParallel)
-					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX, templateCode);
 				else if (splitCircuits)
-					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX, templateCode);
+				else if (steaking)
+					result = this.groverService.calculateSteaking(qubits, expectedFrequencies, useMCX, templateCode);
 				else
-					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX, templateCode);
 			} else if (algorithm.equals("hamming")) {
 				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
 			} else {
+				String backend = "qiskit";
 				if (inParallel)
-					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else if (splitCircuits)
-					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else
-					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 			}
 			return this.buildResponse(result);
-		} catch (IOException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-
 		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+			System.err.println("Error in calculate: " + e.getMessage());
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
 
@@ -95,9 +112,8 @@ public class DeterministicController {
 			new ObjectMapper().writeValue(out, result);
 		};
 		return ResponseEntity
-			.ok()
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(body);
+				.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body);
 	}
 }
-

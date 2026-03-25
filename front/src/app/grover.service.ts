@@ -11,14 +11,14 @@ export class GroverService {
   constructor(private client : HttpClient) { }
 
   getAllQuirk(info: any, useMCX : boolean, separating : boolean) {
-    return this.client.put<any>(environment.beUrl + "grover/getAllQuirk?useMCX=" + useMCX + "&separating=" + separating, info)
+    return this.client.put<any>(environment.tp3Url + "grover/getAllQuirk?useMCX=" + useMCX + "&separating=" + separating, info)
   }
 
   getCode(info : any, useMCX : boolean, separating : boolean) {
-    return this.client.put<any>(environment.beUrl + "grover/getCode?useMCX=" + useMCX + "&inParallel=" + separating, info)
+    return this.client.put<any>(environment.tp3Url + "grover/getCode?useMCX=" + useMCX + "&inParallel=" + separating, info)
   }
 
   getQiskitMatrix(info : any) {
-    return this.client.put<any>(environment.beUrl + "grover/getQiskitMatrix", info)
+    return this.client.put<any>(environment.tp3Url + "grover/getQiskitMatrix", info)
   }
 }

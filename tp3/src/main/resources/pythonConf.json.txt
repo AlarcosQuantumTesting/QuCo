@@ -1,8 +1,8 @@
 {
-	"environment" : "AlarcosJ3",
+	"environment" : "Mac de Maco",
 	"DEBUG" : false,
-	"proxyAOtro" : "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8080/",
-	"proxyAOtro en desarrollo" : "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8080/",
+	"proxyAOtro" : "https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=http://172.20.48.130:8081/",
+	"proxyAOtro en desarrollo" : "http://localhost:8000/proxyaotro/resend?url=http://172.20.48.130:8081/",
 	"environments" : [
 		{
 			"name" : "Mac de Maco",

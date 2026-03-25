@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,14 +16,14 @@ export class AppComponent implements AfterViewInit, OnInit {
   menuAbierto = false;
   mostrarInicio = true;
   tokenStored: string | null = localStorage.getItem('userToken');
-  //URL_BASE = "http://localhost:8081";
-  URL_BASE = "https://alarcosj.esi.uclm.es/qsauronback";
-  //URL_BASE = "https://c9x3lxf0-8080.uks1.devtunnels.ms";
 
   ngOnInit(): void {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      this.darkMode = savedTheme === 'dark';
+    }
     this.loadSettings();
     this.checkTokenValidity();
-
   }
 
   constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient) {
@@ -74,9 +75,26 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   showAccessibility = false;
+  showAboutUsModal = false;
   darkMode = false;
   highContrast = false;
   userBgColor = '';
+  isUserDropdownOpen = false;
+
+  toggleUserDropdown() {
+    this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  toggleDarkMode() {
+    this.darkMode = !this.darkMode;
+    if (this.darkMode) {
+      localStorage.setItem('theme', 'dark');
+    } else {
+      localStorage.setItem('theme', 'light');
+    }
+
+    this.saveSettings();
+  }
 
 
   toggleAccessibilityPanel() {
@@ -93,7 +111,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       containerColor: this.containerColor,
       sidebarColor: this.sidebarColor,
       grayscale: this.grayscale,
-      zoomLevel: this.zoomLevel
+      zoomLevel: this.zoomLevel,
+      darkMode: this.darkMode
     };
     localStorage.setItem('settings', JSON.stringify(settings));
   }
@@ -108,6 +127,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       this.sidebarColor = settings.sidebarColor || this.sidebarColor;
       this.grayscale = settings.grayscale || false;
       this.zoomLevel = settings.zoomLevel || 1;
+      this.darkMode = settings.darkMode || false;
 
       this.renderer.setStyle(document.body, 'background-color', this.bgColor);
 
@@ -253,7 +273,7 @@ export class AppComponent implements AfterViewInit, OnInit {
   //   this.mostrarModalLogin = true;
   // }
   toggleLogin() {
-    window.open('https://alarcosj.esi.uclm.es/qsauron', '_blank');
+    window.open(environment.qsauronUrl, '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -329,7 +349,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     console.log("Intentando iniciar sesión con:", body);
 
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/create`, userData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/create`, userData, {
         observe: 'response',
         responseType: 'text'
       }));
@@ -374,7 +394,7 @@ export class AppComponent implements AfterViewInit, OnInit {
       });
       console.log("Request headers:", headers);
 
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/login`, loginData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/login`, loginData, {
         headers: headers,
         observe: 'response',
         responseType: 'text'
@@ -396,7 +416,7 @@ export class AppComponent implements AfterViewInit, OnInit {
           this.limpiarMensajeExito(2000);
 
           //location.reload();
-          window.location.href = "https://alarcosj.esi.uclm.es/qsauron";
+          window.location.href = environment.qsauronUrl;
           return token;
         } else {
           throw new Error("Token vacío recibido.");
@@ -421,7 +441,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   async obtenerEmailUsuario(token: string) {
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/getUser`, { token: token }, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/getUser`, { token: token }, {
         observe: 'response',
         responseType: 'text'
       }));
@@ -485,10 +505,13 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
+    
+    this.tokenStored = null;
+    this.emailUsuario = '';
   }
 
   logout(): void {
-    this.http.post(`${this.URL_BASE}/users/logout`, {}, { withCredentials: true }).subscribe({
+    this.http.post(`${environment.qsauronUrl}users/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.clearUserStorage();
         console.log("Sesión cerrada.");
@@ -527,7 +550,13 @@ export class AppComponent implements AfterViewInit, OnInit {
 
     if (!sToken || !email) {
       console.log("No token in localStorage. Attempting to restore from cookie...");
-      return await this.restoreSessionFromCookie();
+      return await this.restoreSessionFromCookie(false);
+    }
+
+    const cookieValid = await this.restoreSessionFromCookie(true);
+    if (!cookieValid) {
+      console.log("Session cookie missing or invalid. Cleared local storage.");
+      return false;
     }
 
     const validationData = {
@@ -536,7 +565,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     };
 
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/tokens/validate`, validationData, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/validate`, validationData, {
         observe: 'response',
         responseType: 'json'
       }));
@@ -546,31 +575,38 @@ export class AppComponent implements AfterViewInit, OnInit {
         return true;
       }
 
+      this.clearUserStorage();
       return false;
 
     } catch (error: any) {
-      console.log("Token validation failed or missing. Attempting to restore from cookie...");
-      return await this.restoreSessionFromCookie();
+      console.log("Token validation failed.", error);
+      this.clearUserStorage();
+      return false;
     }
   }
 
-  async restoreSessionFromCookie(): Promise<boolean> {
+  async restoreSessionFromCookie(silent: boolean = false): Promise<boolean> {
     try {
-      const response = await firstValueFrom(this.http.post(`${this.URL_BASE}/users/getUser`, {}, {
+      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}users/getUser`, {}, {
         observe: 'response',
         responseType: 'text'
       }));
 
       if (response.ok) {
-        const email = response.body;
-        if (email) {
-          console.log("Session restored from cookie. Email:", email);
-          localStorage.setItem('userEmail', email);
-          localStorage.setItem('userToken', 'COOKIE_SESSION');
+        const responseEmail = response.body;
+        if (responseEmail) {
+          console.log("Session valid from cookie. Email:", responseEmail);
+          localStorage.setItem('userEmail', responseEmail);
 
-          this.mensajeExito = `Welcome back, ${email}!`;
-          this.mostrarMensajeExito = true;
-          this.limpiarMensajeExito(2000);
+          if (!localStorage.getItem('userToken')) {
+            localStorage.setItem('userToken', 'COOKIE_SESSION');
+          }
+
+          if (!silent) {
+            this.mensajeExito = `Welcome back, ${responseEmail}!`;
+            this.mostrarMensajeExito = true;
+            this.limpiarMensajeExito(2000);
+          }
           return true;
         }
       }

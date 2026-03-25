@@ -1,5 +1,6 @@
 package edu.uclm.tp3.coders;
 
+import java.util.ArrayList;
 import java.util.List;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QCircuitGate;
@@ -41,6 +42,25 @@ public class Quirk2Qiskit {
         }
         sb.append("\n\n");
         return sb;
+    }
+
+    public static List<StringBuilder> getGatesDeclarations(QCircuit circuit, String... excludedGates) {
+        List<QGate> gates = circuit.getGates();
+        List<StringBuilder> ssbb = new ArrayList<>();
+        for (int i=0; i<gates.size(); i++) {
+            QGate gate = gates.get(i);
+            boolean excluded = false;
+            for (int j=0; j<excludedGates.length; j++) 
+                if (gate.getName().equals(excludedGates[j])) {
+                    excluded = true;
+                    break;
+                }
+            if (excluded)
+                continue;
+            if (!(gate instanceof QStdGate))
+                ssbb.add(getFunctionCode(gate));
+        }
+        return ssbb;
     }
 
     private static StringBuilder getFunctionCode(QGate gate) {

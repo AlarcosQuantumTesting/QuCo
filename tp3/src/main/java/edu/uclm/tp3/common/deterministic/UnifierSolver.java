@@ -17,7 +17,7 @@ public class UnifierSolver {
 		this.originalGR = originalGR;
 	}
 
-	public Map<String, Object> solve(int shots) {
+	public Map<String, Object> solve(int shots, String backend) {
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
 
 		List<String> nodeNames = nodes.keySet().stream()
@@ -74,9 +74,9 @@ public class UnifierSolver {
 		QCircuit generalCircuit = new QCircuit();
 		Object[] initialize;
 		if (originalGR)
-			initialize = this.getInitialize(usedNodesList, generalCircuit);
+			initialize = this.getInitialize(usedNodesList, generalCircuit, backend);
 		else 
-			initialize = this.getInitialize(usedNodesMap, generalCircuit);
+			initialize = this.getInitialize(usedNodesMap, generalCircuit, backend);
 		
 		result.put("#INITIALIZE#", initialize[0]);
 
@@ -84,23 +84,23 @@ public class UnifierSolver {
 		return result;
 	}
 
-	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit) {
+	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit, String backend) {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		for (BinaryTree bt : usedNodeList) {
-			sbSubcircuits.append(bt.getCode());
+			sbSubcircuits.append(bt.getCode(backend));
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 
 		return new Object[]{ sbSubcircuits + "\n", qCircuits };
 	}
 	
-	private Object[] getInitialize(Map<Integer, BinaryTree> usedNodesMap, QCircuit generalCircuit) {
+	private Object[] getInitialize(Map<Integer, BinaryTree> usedNodesMap, QCircuit generalCircuit, String backend) {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		
 		for (BinaryTree bt : usedNodesMap.values()) {
-			sbSubcircuits.append(bt.getCode());
+			sbSubcircuits.append(bt.getCode(backend));
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 		
@@ -110,74 +110,6 @@ public class UnifierSolver {
 	private QCircuit buildQuirk(BinaryTree node, QCircuit generalCircuit) {
 		QCircuit circuit = new QCircuit();
 		circuit.setName(node.name);
-		/*if (node.getDepth()==2) {
-			if (node.leftProbability!=0 && node.rightProbability!=0) {
-				QMatrixGate ry0 = this.getQMatrixGate(node);
-				ry0.name = node.name + "-0";
-				QColumn ry0Column = new QColumn().addGate(ry0);
-				circuit.addColumn(ry0Column);
-				generalCircuit.addGate(ry0);
-				QColumn x0Column = new QColumn().addGate(new QStdGate("X"));
-				circuit.addColumn(x0Column);
-				
-				BinaryTree leftChild = node.leftChild;
-				QMatrixGate ryLeft = this.getQMatrixGate(leftChild);
-				circuit.addColumn("•", ryLeft);
-				generalCircuit.addGate(ryLeft);
-				circuit.addColumn("X");
-
-				BinaryTree rightChild = node.rightChild;
-				if (rightChild!=null) {  // ¿Seguro? XXX
-					QMatrixGate ryRight = this.getQMatrixGate(rightChild);
-					circuit.addColumn("•", ryRight);
-					generalCircuit.addGate(ryRight);
-				}
-			} else if (node.rightProbability==0) {
-				QMatrixGate ry0 = this.getQMatrixGate(node);
-				ry0.name = node.name + "-0";
-				circuit.addColumn(ry0);
-				generalCircuit.addGate(ry0);
-
-				BinaryTree leftChild = node.leftChild;
-				if (leftChild!=null) { // ¿Seguro? XXX
-					QMatrixGate ryLeft = this.getQMatrixGate(leftChild);
-					circuit.addColumn("1", ryLeft);
-					generalCircuit.addGate(ryLeft);
-				}
-			} else if (node.leftProbability==0) {
-				QMatrixGate ry0 = this.getQMatrixGate(node);
-				ry0.name = node.name + "-0";
-				circuit.addColumn(ry0);
-				generalCircuit.addGate(ry0);
-
-				BinaryTree rightChild = node.rightChild;
-				QMatrixGate ryRight = this.getQMatrixGate(rightChild);
-				circuit.addColumn("1", ryRight);
-				generalCircuit.addGate(ryRight);
-			}
-		} else {
-			QMatrixGate ry0 = this.getQMatrixGate(node);
-			ry0.name = node.name + "-0";
-			circuit.addColumn(ry0);
-			generalCircuit.addGate(ry0);
-
-			if (node.rightProbability==0) {
-				BinaryTree leftChild = node.leftChild;
-				circuit.addColumn("1", leftChild.name);
-			} else if (node.leftProbability==0) {
-				BinaryTree rightChild = node.rightChild;
-				circuit.addColumn("1", rightChild.name);
-			} else {
-				circuit.addColumn("X");
-				BinaryTree leftChild = node.leftChild;
-				circuit.addColumn("•", leftChild.name);
-
-				circuit.addColumn("X");
-				BinaryTree rightChild = node.rightChild;
-				circuit.addColumn("•", rightChild.name);
-			}
-		}
-		generalCircuit.addGate(circuit);*/
 		return circuit;
 	}
 

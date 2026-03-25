@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.uclm.tp3.common.deterministic.BinaryTree;
+import edu.uclm.tp3.common.deterministic.FreqTable;
+import edu.uclm.tp3.common.deterministic.Pair;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QCircuitGate;
 import edu.uclm.tp3.common.deterministic.QColumn;
@@ -15,8 +17,100 @@ import edu.uclm.tp3.common.deterministic.QGate;
 import edu.uclm.tp3.common.deterministic.QGateReference;
 import edu.uclm.tp3.common.deterministic.QMatrixGate;
 import edu.uclm.tp3.common.deterministic.QStdGate;
+import edu.uclm.tp3.common.utils.BinaryTreesUtils;
+import edu.uclm.tp3.dao.BinaryTreeDao;
 
 public class BinaryTree2Quirk {
+
+    /**** PARA PARALLEL ****/
+    public static List<QCircuit> buildQuirkParallel(BinaryTreeDao btDao, FreqTable expectedFrequencies, int qubits, boolean originalGR, double physicalAngle, String prefix) {
+        int numberOfPairs = expectedFrequencies.getPairs().size();
+        List<QCircuit> circuits = new ArrayList<>();
+        for (int i=0; i<numberOfPairs; i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			FreqTable ft = new FreqTable();
+			ft.addPair(pair);
+			BinaryTree tree = BinaryTreesUtils.buildTree(btDao, qubits, ft.getPairs(), prefix + "circ" + i + "_", originalGR, physicalAngle);
+			if (!originalGR && physicalAngle>0) {
+				double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
+				minProb = minProb * minProb;
+				tree.removeLowAngles(physicalAngle);
+			}
+			QCircuit pairCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, i, originalGR);
+			circuits.add(pairCircuit);
+		}
+        return circuits;
+    }
+
+    public static QCircuit parallelize(List<QCircuit> circuits, int qubits) {
+        QCircuit quirkCircuit = new QCircuit();
+        int maxCols = addGates(quirkCircuit, circuits);
+        
+        for (int i=0; i<maxCols; i++) {
+            List<QColumn> columns = getColumn(i, circuits);
+            QColumn column = QColumn.merge(columns, qubits, quirkCircuit);
+            quirkCircuit.addColumn(column);
+        }
+
+        return quirkCircuit;
+    }
+
+    private static int addGates(QCircuit quirkCircuit, List<QCircuit> circuits) {
+        int maxCols = 0;
+        for (int i=0; i<circuits.size(); i++) {
+            QCircuit circuit = circuits.get(i);
+            if (circuit.getColumns().size() > maxCols) 
+                maxCols = circuit.getColumns().size();
+            for (int j=0; j<circuit.getGates().size(); j++) {
+                QGate gate = circuit.getGates().get(j);
+				quirkCircuit.addGate(gate);
+            }
+        }
+        return maxCols;
+    }
+
+    private static List<QColumn> getColumn(int index, List<QCircuit> circuits) {
+        List<QColumn> columns = new ArrayList<>();
+        for (int i=0; i<circuits.size(); i++) {
+            QCircuit circuit = circuits.get(i);
+            if (index < circuit.getColumns().size()) 
+                columns.add(circuit.getColumns().get(index));
+            else
+                columns.add(null);
+        }
+        return columns;
+    }
+    /*** FIN DEL PARALLEL */
+
+
+    /**** PARA SPLITTING *****/
+    public static List<QCircuit> buildQuirkSplitting(BinaryTreeDao btDao, FreqTable expectedFrequencies, int qubits, boolean originalGR, double physicalAngle, String prefix) {
+		List<QCircuit> circuits = new ArrayList<>();
+		for (int i=0; i<expectedFrequencies.getPairs().size(); i++) {
+			Pair pair = expectedFrequencies.getPairs().get(i);
+			FreqTable ft = new FreqTable();
+			ft.addPair(pair);
+			BinaryTree tree = BinaryTreesUtils.buildTree(btDao, qubits, ft.getPairs(), prefix + "circ" + i + "_", originalGR, physicalAngle);
+			if (!originalGR && physicalAngle>0) {
+				double minProb = Math.cos(physicalAngle/2 + Math.PI/4);
+				minProb = minProb * minProb;
+				tree.removeLowAngles(physicalAngle);
+			}
+			QCircuit pairCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, i, originalGR);
+			circuits.add(pairCircuit);
+		}
+        return circuits;
+    }
+
+    public static List<Map<String, Object>> toMap(List<QCircuit> circuits) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (QCircuit circuit : circuits)
+            result.add(circuit.toJson().toMap());
+        return result;
+    }
+    /***** FIN DEL SPLITTING *****/
+
+
 
     public static QCircuit buildQuirk(BinaryTree tree, int qubits, int circuitIndex, boolean originalGR) {
         QCircuit quirkCircuit = new QCircuit();
@@ -25,9 +119,9 @@ public class BinaryTree2Quirk {
         Map<String, BinaryTree> nodes = tree.getSeparatedNodes();
         for (String nodeName : nodes.keySet()) {
             BinaryTree node = nodes.get(nodeName);
-            if (node.depth == qubits - 1) 
+            if (node.depth == qubits) 
                 continue; // Skip leaf nodes
-            if (node.depth == qubits - 2) {
+            if (node.depth == qubits - 1) {
                 buildGatesDepth2(node, originalGR, gates, quirkCircuit);
             } else {
                 buildGatesDepthN(node, originalGR, gates, quirkCircuit);

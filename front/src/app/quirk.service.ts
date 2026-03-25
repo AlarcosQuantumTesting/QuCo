@@ -10,15 +10,15 @@ export class QuirkService {
   constructor(private client : HttpClient) { }
   
   getEmptyMatrix(outputQubits : number, inputQubits : number) {
-    return this.client.get<any>(environment.beUrl + "classicMatrix/getEmptyMatrix?outputQubits=" + outputQubits +
+    return this.client.get<any>(environment.tp3Url + "classicMatrix/getEmptyMatrix?outputQubits=" + outputQubits +
       "&inputQubits=" + inputQubits)
   }
 
   getQuirk(info: any) {
-    return this.client.put<any>(environment.beUrl + "quirk/getQuirk", info)
+    return this.client.put<any>(environment.tp3Url + "quirk/getQuirk", info)
   }
   
   getAllQuirk(info: any) {
-    return this.client.put<any>(environment.beUrl + "quirk/getAllQuirk", info)
+    return this.client.put<any>(environment.tp3Url + "quirk/getAllQuirk", info)
   }
 }

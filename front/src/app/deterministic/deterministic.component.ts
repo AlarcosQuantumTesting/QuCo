@@ -11,7 +11,7 @@ import { FreqTable } from './FreqTable';
 import { EditorComponent } from '../editor/editor.component';
 import { Expression } from '../matrixes/Expression';
 import { ExpressionsService } from '../expressions.service';
-import { TranspileService } from '../transpile.service';  
+import { TranspileService } from '../transpile.service';
 import { Backend } from './Backend';
 import { ProjectService } from '../project.service';
 
@@ -20,7 +20,6 @@ interface QProgramExpression { name: string; expr: string; description: string; 
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
 interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
-interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
 
@@ -32,14 +31,14 @@ Chart.register(...registerables)
 export class DeterministicComponent extends GroverStyle {
   @ViewChild('codeArea', { static: false }) codeArea!: ElementRef;
   @ViewChild(EditorComponent) editor!: EditorComponent;
-  
+
   ngAfterViewInit() {
     setTimeout(() => {
       if (this.editor) {
         this.editor.parent = this;
       }
     }, 0);
-    
+
     if (this.editor) {
       this.editor.parent = this;
 
@@ -52,33 +51,33 @@ export class DeterministicComponent extends GroverStyle {
     }
   }
 
-  shots : number = 0
-  desiredError : number = 0.05
+  shots: number = 0
+  desiredError: number = 0.05
 
-  probOf0 : number = 0.5
-  amountOfValues : number = 1
+  probOf0: number = 0.5
+  amountOfValues: number = 1
 
-  expectedFrequencies : FreqTable = new FreqTable()
+  expectedFrequencies: FreqTable = new FreqTable()
 
-  physicalAngle : number = 0
-  prefix? : string
+  physicalAngle: number = 0
+  prefix?: string
 
-  originalGR : boolean = false
+  originalGR: boolean = false
 
-  running : boolean = false
-  state? : string 
+  running: boolean = false
+  state?: string
 
   codeAsFunctions = true
   svgTree: SafeHtml | null = null; // SVG seguro para renderizar
-  svgWidth : number = 0
-  svgHeight : number = 0
+  svgWidth: number = 0
+  svgHeight: number = 0
 
   maxRows = 1024
 
-  responseReceived? : any
-  quirkCodes : string[] = [];
+  responseReceived?: any
+  quirkCodes: string[] = [];
   // mensajeTemporal: string = '';
-  numberOfQubits : number | null = null;
+  numberOfQubits: number | null = null;
   isInvalid: boolean = true;
   isInvalidSave: boolean = true;
   tooltipVisible: boolean = false;
@@ -122,7 +121,7 @@ export class DeterministicComponent extends GroverStyle {
   expressionToDelete: any = null;
   deleteIndex: number = -1;
 
-  dialogo : any = undefined
+  dialogo: any = undefined
   filteredExpressions: Expression[] = [];
   expressions: Expression[] = [];
   searchQuery: string = "";
@@ -141,11 +140,12 @@ export class DeterministicComponent extends GroverStyle {
   selectedBackends: Backend[] = [];
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
+  mostrarDownloadModal = false;
 
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';
 
-  projectList: ProjectListItem[] = []; 
+  projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';
 
   mostrarModalGuardarProyecto: boolean = false;
@@ -160,10 +160,11 @@ export class DeterministicComponent extends GroverStyle {
   showDeleteProjectModal: boolean = false;
   showApplyChangesModal: boolean = false;
   applyChanges: boolean = false;
+  showHelp: boolean = false;
 
 
-  constructor(private service : DeterministicService, protected override qiskitService: QiskitService, private sanitizer : DomSanitizer,
-     public manager : ManagerService, public expService : ExpressionsService, public transpileService: TranspileService, 
+  constructor(private service: DeterministicService, protected override qiskitService: QiskitService, private sanitizer: DomSanitizer,
+    public manager: ManagerService, public expService: ExpressionsService, public transpileService: TranspileService,
     private projectService: ProjectService) {
     super(qiskitService)
 
@@ -171,6 +172,9 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   ngOnInit() {
+
+    this.userEmail = localStorage.getItem('userEmail') || '';
+    this.userToken = localStorage.getItem('userToken') || '';
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -186,13 +190,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
 
-    //this.setInfoLocal();
-
     this.onAlgorithmChange2(this.selectedAlgorithm);
-    
-    /*this.isGrover = this.selectedAlgorithm === 'grover';
-    this.isGrenoble = this.selectedAlgorithm === 'grenoble';
-    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';*/
     
     if(this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
@@ -208,16 +206,16 @@ export class DeterministicComponent extends GroverStyle {
 
     if (savedQubits) {
       this.qubits = Number(savedQubits);
-        this.buildMatrixActions();
-        setTimeout(() => {
+      this.buildMatrixActions();
+      setTimeout(() => {
 
-            if (savedUserExpressions) {
-              // Agregar expresiones guardadas al sistema
-              this.userExpressions = JSON.parse(savedUserExpressions);
-              this.fillTableWithUserExpressions();
-              
-          }
-        }, 50);
+        if (savedUserExpressions) {
+          // Agregar expresiones guardadas al sistema
+          this.userExpressions = JSON.parse(savedUserExpressions);
+          this.fillTableWithUserExpressions();
+
+        }
+      }, 50);
 
     }
 
@@ -236,30 +234,24 @@ export class DeterministicComponent extends GroverStyle {
       });
     }
 
+    let sessionAttempts = 0;
+    const initSession = setInterval(() => {
+      this.userEmail = localStorage.getItem('userEmail') || '';
+      this.userToken = localStorage.getItem('userToken') || '';
+      if (this.userEmail && this.userToken) {
+        clearInterval(initSession);
+        this.loadProjectNames();
 
-    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
-
-    const savedProjectId = localStorage.getItem(nombreLocal);
-
-    if (savedProjectId && this.userEmail && this.userToken) {
-      if (this.selectedAlgorithm === 'grover' && nombreLocal === 'selectedProjectId_grover') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'grenoble' && nombreLocal === 'selectedProjectId_grenoble') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'originalgr' && nombreLocal === 'selectedProjectId_originalgr') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
+        const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
+        if (savedProjectId  && this.userEmail && this.userToken) {
+          this.selectedProjectId = savedProjectId;
+          this.onProjectSelected();
+        }
+      } else if (++sessionAttempts >= 12) {
+        clearInterval(initSession);
       }
-    }*/
-
-    const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
-    if (savedProjectId && this.userEmail && this.userToken) {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-    }
-    
+    }, 250);
+  } 
     this.loadProjectNames();
   }
 
@@ -269,7 +261,6 @@ export class DeterministicComponent extends GroverStyle {
       let exprs = this.javaExamples[index].exprs
       this.userExpressions = []
       this.userExpressions = this.userExpressions.concat(exprs)
-      // this.markElementsWithUserExpressions()
       this.fillTableWithUserExpressions()
   }
 
@@ -285,9 +276,9 @@ export class DeterministicComponent extends GroverStyle {
     } catch (error) {
       this.error = error
     }
-}
+  }
 
-  fillTable(marking : boolean) {
+  fillTable(marking: boolean) {
     if (this.userExpressions.length == 0)
       throw Error("There are no expressions to fill-in the table")
     if (!this.expectedFrequencies)
@@ -307,7 +298,7 @@ export class DeterministicComponent extends GroverStyle {
       }
       if (wholeExpression.length > 0)
         wholeExpression = wholeExpression.substring(0, wholeExpression.length - 4).trim()
-      let result = eval(wholeExpression )
+      let result = eval(wholeExpression)
       if (marking && result) {
         if (this.selectedAlgorithm === 'grover') {
           this.expectedFrequencies.setFreq(i, 1)
@@ -397,67 +388,44 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   buildCode() {
-    let code = this.manager.selectedTemplate.code
+    let code
     if (!this.responseReceived)
       return
 
     if (this.codeAsFunctions) {
-        for (let key in this.responseReceived) {
-          if (key=="#INITIALIZE#") {
-            let tag = "TEMPLATE = '" + this.manager.selectedTemplate.fileName + "'\n"
-            tag = tag + "ORIGINAL_QUBITS = " + this.qubits + "\n"
-            //if (this.inParallel) 
-            //  tag = tag + "PARALLEL = True\n"
-            //else
-            //  tag = tag + "PARALLEL = False\n"
-            if (this.splitCircuits)
-              tag = tag + "SPLIT = True\n"
-            else
-              tag = tag + "SPLIT = False\n"
-            code = code?.replace("#INITIALIZE#", tag + this.responseReceived["#INITIALIZE#"])
-            code = code?.replace("#ALGORITHM#", tag + this.responseReceived["#ALGORITHM#"])
-          } else if (key!='tree' && key!='unitaryMatrix' && key!='QUIRK') {
-            let value = this.responseReceived[key]
-            code = code?.replace(key, value)
-          }
-        }
+
+        code = this.responseReceived.CODE
     } else {
-      for (let key in this.responseReceived) {
-        if (key!='tree' && key!='#INITIALIZE#' && key!='unitaryMatrix' && key!='QUIRK') {
-          let value = this.responseReceived[key]
-          code = code?.replace(key, value)
-        }
-      }
+      code = this.responseReceived.CODE
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
-    //this.goToCode()
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
     let quirks = this.responseReceived["QUIRK"]
     this.quirkCodes = []
-    for (let i=0; i<quirks.length; i++) {
+    for (let i = 0; i < quirks.length; i++) {
       let quirk = quirks[i]
       this.quirkCodes.push(JSON.stringify(quirk))
     }
   }
 
-  private drawMatrix(matrixReceived : any) : string {
+  private drawMatrix(matrixReceived: any): string {
     let matrix = []
-    for (let i=0; i<matrixReceived.numberOfRows; i++) {    
-      let row =  new Array(matrixReceived.numberOfRows).fill(0)
-      let colsWithData = Object.keys(matrixReceived.rows[i].values)      
-      for (let k=0; k<colsWithData.length; k++) {
+    for (let i = 0; i < matrixReceived.numberOfRows; i++) {
+      let row = new Array(matrixReceived.numberOfRows).fill(0)
+      let colsWithData = Object.keys(matrixReceived.rows[i].values)
+      for (let k = 0; k < colsWithData.length; k++) {
         let colIndex = parseInt(colsWithData[k])
         row[colIndex] = matrixReceived.rows[i].values[colIndex].re
       }
       matrix.push(row)
     }
 
-    let result : string = "U = Operator([\n"
-    for (let i=0; i<matrix.length; i++) {
+    let result: string = "U = Operator([\n"
+    for (let i = 0; i < matrix.length; i++) {
       result = result + "\t["
-      for (let j=0; j<matrix.length; j++)
+      for (let j = 0; j < matrix.length; j++)
         result = result + matrix[i][j] + ", "
       result = result + "],\n"
     }
@@ -470,57 +438,73 @@ export class DeterministicComponent extends GroverStyle {
     this.buildCode()
   }
 
-  getCircuit(asGrover? : boolean) {
+  getCircuit(asGrover?: boolean) {
     this.running = true;
-    this.state   = "Calculating";
-    this.error   = undefined;
+    this.state = "Calculating";
+    this.error = undefined;
     this.isLoadingQiskitCode = true;
     this.mostrarModal = true;
 
-    if (!asGrover) 
-      asGrover = false
-  
+    if (this.expectedFrequencies.getShots() === 0) {
+      if (this.userExpressions.length > 0) {
+        try {
+          this.setFrequenciesWithUserExpressions();
+        } catch (e) {
+          console.error("Error auto-filling frequencies:", e);
+        }
+      }
+
+      if (this.expectedFrequencies.getShots() === 0) {
+        this.error = "Please select at least one frequency or apply an expression before generating code.";
+        this.running = false;
+        this.isLoadingQiskitCode = false;
+        this.mostrarModal = false;
+        this.modalError = true;
+        return;
+      }
+    }
+
     this.service.calculate(
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
-      //this.isOriginalGR,
       this.inParallel,
       this.splitCircuits,
       this.selectedAlgorithm,
       this.useMCX,
-      this.prefix
+      this.prefix,
+      this.manager.selectedTemplate.fileName
     ).subscribe(
       blob => {
         blob.text().then(text => {
-          let response : any;
+          let response: any;
           try {
             response = JSON.parse(text);
           } catch (e) {
-            this.error   = 'Error parseando JSON: ' + e;
+            this.error = 'Error parseando JSON: ' + e;
             this.running = false;
             this.isLoadingQiskitCode = false;
             this.mostrarModal = false;
             return;
           }
-  
+
           this.responseReceived = response;
           this.buildCode();
-    
+
           const { svg, width, height } =
             this.generateSvgFromBottom(response.tree);
-          this.svgTree   = this.sanitizer.bypassSecurityTrustHtml(svg);
-          this.svgWidth  = width;
+          this.svgTree = this.sanitizer.bypassSecurityTrustHtml(svg);
+          this.svgWidth = width;
           this.svgHeight = height;
-          this.state     = undefined;
-          this.running   = false;
+          this.state = undefined;
+          this.running = false;
           this.isLoadingQiskitCode = false;
           this.mostrarModal = true;
           this.copiarCodigo();
         })
       },
       err => {
-        this.error   = err.error?.message || err.message;
+        this.error = err.error?.message || err.message;
         this.running = false;
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
@@ -533,38 +517,12 @@ export class DeterministicComponent extends GroverStyle {
       }
     );
   }
-  
-
-  /*getCircuit() {
-    this.running = true
-    this.state = "Calculating"
-    this.error = undefined
-
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.inParallel, this.splitCircuits, this.prefix).subscribe(
-      response=> {
-        this.responseReceived = response
-        this.buildCode()
-
-        const { svg, width, height } = this.generateSvgFromBottom(response.tree);
-        this.svgTree = this.sanitizer.bypassSecurityTrustHtml(svg);
-        this.svgWidth = width; // Define el ancho dinámico del SVG
-        this.svgHeight = height; // Define el alto dinámico del SVG
-        this.state = undefined
-      },
-      error => {
-        if (error.error && error.error.message)
-          this.error = error.error.message
-        else
-          this.error = error.message + " (is the server running?)"
-      }
-    )
-  }*/
 
   goToCode() {
     this.codeArea.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  private shouldDisplay(node : any) : boolean {
+  private shouldDisplay(node: any): boolean {
     return true // node && (node.leftProbability>0 || node.rightProbability>0)
   }
 
@@ -578,7 +536,7 @@ export class DeterministicComponent extends GroverStyle {
     const positions = new Map<any, Pos>();
     let maxX = 0;
     let maxLevel = 0;
-  
+
     // -------------------------
     // 1) CÁLCULO DE POSICIONES
     // -------------------------
@@ -588,11 +546,11 @@ export class DeterministicComponent extends GroverStyle {
       }
       maxLevel = Math.max(maxLevel, level);
       const y = level * levelHeight;
-  
+
       // Si es hoja visible, le damos la siguiente posición libre
       const left = calculate(node.leftChild, level + 1);
       const right = calculate(node.rightChild, level + 1);
-  
+
       let x: number;
       if (!left && !right) {
         // Hoja
@@ -606,26 +564,26 @@ export class DeterministicComponent extends GroverStyle {
           x = (left ?? right)!.x;
         }
       }
-  
+
       const pos = { x, y, level };
       positions.set(node, pos);
       return pos;
     };
-  
+
     calculate(tree, 0);
-  
+
     // -------------------
     // 2) GENERACIÓN DE SVG
     // -------------------
     const nodeW = 100, nodeH = 60;
     let svgContent = '';
-  
+
     // Primero las líneas de conexión
     positions.forEach((pos, node) => {
       const { x, y } = pos;
       const children = ['leftChild', 'rightChild'] as const;
       const midY = y + nodeH + 20;
-  
+
       children.forEach(dir => {
         const child = node[dir];
         const childPos = positions.get(child);
@@ -639,7 +597,7 @@ export class DeterministicComponent extends GroverStyle {
         }
       });
     });
-  
+
     // Después los nodos (rectángulos y texto)
     positions.forEach((pos, node) => {
       const { x, y } = pos;
@@ -648,27 +606,27 @@ export class DeterministicComponent extends GroverStyle {
       const rp = node.rightProbability?.toFixed(2) ?? '-';
       const la = node.leftAngle?.toFixed(2) ?? '-';
       const ra = node.rightAngle?.toFixed(2) ?? '-';
-  
+
       svgContent += `
         <!-- Nodo ${name} -->
-        <rect x="${x - nodeW/2}" y="${y}" width="${nodeW}" height="${nodeH + 20}"
+        <rect x="${x - nodeW / 2}" y="${y}" width="${nodeW}" height="${nodeH + 20}"
               fill="#f0f0f0" stroke="#000"/>
-        <rect x="${x - nodeW/2}" y="${y}" width="${nodeW}" height="20"
+        <rect x="${x - nodeW / 2}" y="${y}" width="${nodeW}" height="20"
               fill="#dff0d8" stroke="#000"/>
         <text x="${x}" y="${y + 15}" font-size="12" font-weight="bold" text-anchor="middle">
           ${name}
         </text>
-        <line x1="${x - nodeW/2}" y1="${y + 20}"
-              x2="${x + nodeW/2}" y2="${y + 20}" stroke="#000"/>
-        <line x1="${x - nodeW/2}" y1="${y + 40}"
-              x2="${x + nodeW/2}" y2="${y + 40}" stroke="#000"/>
+        <line x1="${x - nodeW / 2}" y1="${y + 20}"
+              x2="${x + nodeW / 2}" y2="${y + 20}" stroke="#000"/>
+        <line x1="${x - nodeW / 2}" y1="${y + 40}"
+              x2="${x + nodeW / 2}" y2="${y + 40}" stroke="#000"/>
         <line x1="${x}" y1="${y + 20}"
               x2="${x}" y2="${y + nodeH + 20}" stroke="#000"/>
   
         <!-- Bits y propiedades -->
-        <text x="${x - nodeW/4}" y="${y + 35}" font-size="12"
+        <text x="${x - nodeW / 4}" y="${y + 35}" font-size="12"
               text-anchor="middle">0</text>
-        <text x="${x + nodeW/4}" y="${y + 35}" font-size="12"
+        <text x="${x + nodeW / 4}" y="${y + 35}" font-size="12"
               text-anchor="middle">1</text>
         <text x="${x - 40}" y="${y + 55}" font-size="12">${lp}</text>
         <text x="${x + 10}" y="${y + 55}" font-size="12">${rp}</text>
@@ -676,41 +634,41 @@ export class DeterministicComponent extends GroverStyle {
         <text x="${x + 10}" y="${y + 75}" font-size="12">${ra}</text>
       `;
     });
-  
+
     // -----------------------
     // 3) ENVOLTORIO Y MEDIDAS
     // -----------------------
-    const svgWidth  = startX + maxX;
+    const svgWidth = startX + maxX;
     const svgHeight = (maxLevel + 1) * levelHeight + nodeH + 20;
-  
+
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg"
            width="${svgWidth}" height="${svgHeight}"
            viewBox="0 0 ${svgWidth} ${svgHeight}">
         ${svgContent}
       </svg>`.trim();
-  
+
     return { svg, width: svgWidth, height: svgHeight };
   }
-  
+
 
   updateOutputs() {
-    if(this.cambioInput) {
+    if (this.cambioInput) {
       this.mostrarTabla = false;
       this.cambioInput = false;
     }
-    
+
     this.expectedFrequencies.setQubits(this.qubits)
     this.calculateShots()
-    
+
     let shots = this.expectedFrequencies.getShots()
-   // for (let i=0; i<this.expectedFrequencies.rows; i++)
-     // this.relativeFrequencies.push(this.expectedFrequencies[i]*100/shots)
+    // for (let i=0; i<this.expectedFrequencies.rows; i++)
+    // this.relativeFrequencies.push(this.expectedFrequencies[i]*100/shots)
   }
 
   reset() {
     this.selectedOptionFreq = 'none'
-    if(this.selectedAlgorithm === 'grover') {
+    if (this.selectedAlgorithm === 'grover') {
       localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq)
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
@@ -728,14 +686,14 @@ export class DeterministicComponent extends GroverStyle {
     this.saveState();
   }
 
-  random(factor : number) {
+  random(factor: number) {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    for (let i=0; i<this.expectedFrequencies.rows; i++) {
+    for (let i = 0; i < this.expectedFrequencies.rows; i++) {
       if (this.selectedAlgorithm === 'grover') {
-        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*1*factor))
+        this.expectedFrequencies.setFreq(i, Math.round(Math.random() * 1 * factor))
       } else {
-        this.expectedFrequencies.setFreq(i, Math.round(Math.random()*100*factor))
+        this.expectedFrequencies.setFreq(i, Math.round(Math.random() * 100 * factor))
       }
     }
     this.calculateShots()
@@ -745,7 +703,7 @@ export class DeterministicComponent extends GroverStyle {
   zeroTo2N() {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    for (let i=0; i<this.expectedFrequencies.rows; i++)
+    for (let i = 0; i < this.expectedFrequencies.rows; i++)
       this.expectedFrequencies.setFreq(i, i)
     this.calculateShots()
     this.updateOutputs()
@@ -754,8 +712,8 @@ export class DeterministicComponent extends GroverStyle {
   fixedAmount() {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
-    let selectedIndexes : number[] = []
-    for (let i=0; i<this.amountOfValues; i++) {
+    let selectedIndexes: number[] = []
+    for (let i = 0; i < this.amountOfValues; i++) {
       let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
       while (selectedIndexes.includes(index)) {
         index = Math.floor(Math.random() * this.expectedFrequencies.rows)
@@ -766,7 +724,7 @@ export class DeterministicComponent extends GroverStyle {
       } else {
         this.expectedFrequencies.setFreq(index, 100)
       }
-      
+
     }
   }
 
@@ -774,12 +732,12 @@ export class DeterministicComponent extends GroverStyle {
     this.expectedFrequencies = new FreqTable()
     this.expectedFrequencies.setQubits(this.qubits)
 
-    let numberOfIndexes = (1-this.probOf0) * this.expectedFrequencies.rows
-    for (let i=0; i<numberOfIndexes; i++) {
+    let numberOfIndexes = (1 - this.probOf0) * this.expectedFrequencies.rows
+    for (let i = 0; i < numberOfIndexes; i++) {
       let index = Math.floor(Math.random() * this.expectedFrequencies.rows)
-      this.expectedFrequencies.setFreq(index, Math.round(Math.random()*100))
+      this.expectedFrequencies.setFreq(index, Math.round(Math.random() * 100))
     }
-  
+
     this.calculateShots()
     this.updateOutputs()
   }
@@ -794,10 +752,10 @@ export class DeterministicComponent extends GroverStyle {
     navigator.clipboard.writeText(text).then(() => {
       const originalTitle = copyTooltip.title;
       copyTooltip.title = 'Copied!';
-      
+
       // Opcional: forzar el tooltip actualizando el atributo
       copyTooltip.click(); // Algunos navegadores lo fuerzan así
-  
+
       setTimeout(() => {
         copyTooltip.title = originalTitle;
       }, 1500); // Vuelve al tooltip original después de 1.5 segundos
@@ -806,28 +764,30 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   onTemplateChange(selected: CodeTemplate) {
-    this.manager.selectedTemplate = this.manager.templates.find(t=> t.fileName==selected.fileName) || new CodeTemplate("", "", "")
+    this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName == selected.fileName) || new CodeTemplate("", "", "")
   }
 
-  setFreq(event : any, rowIndex : number) {
+  setFreq(event: any, rowIndex: number) {
     let freq = parseInt(event.target.value)
     this.expectedFrequencies.setFreq(rowIndex, freq)
   }
 
-  showQuirk(index? : number) {
-    if (index == undefined) 
+  showQuirk(index?: number) {
+    if (index == undefined)
       index = 0
-    let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
+    // let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
+    let url = " https://alarcosj.esi.uclm.es/quirk#circuit=" + this.quirkCodes[index]
+
     this.quirkURL = url
     window.open(url, "_blank")
-  }    
+  }
 
   resetValues() {
     // Eliminar valores guardados en localStorage
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrix');
-    if(this.selectedAlgorithm === 'grover') {
+    if (this.selectedAlgorithm === 'grover') {
       localStorage.removeItem('selectedOptionFreqGrover')
     } else {
       localStorage.removeItem('selectedOptionFreqAlgorithms')
@@ -905,7 +865,7 @@ export class DeterministicComponent extends GroverStyle {
 
     this.pageIndex = 0;
 
-    
+
     //this.getEmptyMatrix();
     // this.goToSpecifications();
     this.onAlgorithmChange(this.selectedAlgorithm);
@@ -966,7 +926,7 @@ export class DeterministicComponent extends GroverStyle {
       this.tooltipPiVisible = true;
     }
   }
-  
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     // Verifica si el clic fue fuera del tooltip y el botón
@@ -974,27 +934,27 @@ export class DeterministicComponent extends GroverStyle {
     const tooltipCustomElement = document.querySelector('.custom-tooltip');
     const buttonElement = document.querySelector('button');
     this.showRecommendations = false;
-      
-  
+
+
     if (this.tooltipVisible &&
-        tooltipElement && !tooltipElement.contains(event.target as Node) &&
-        buttonElement && !buttonElement.contains(event.target as Node)) {
+      tooltipElement && !tooltipElement.contains(event.target as Node) &&
+      buttonElement && !buttonElement.contains(event.target as Node)) {
       this.tooltipVisible = false;
     }
-  
+
     if (this.tooltipTableVisible &&
       tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
-        buttonElement && !buttonElement.contains(event.target as Node)) {
+      buttonElement && !buttonElement.contains(event.target as Node)) {
       this.tooltipTableVisible = false;
     }
 
     if (this.tooltipPiVisible &&
       tooltipCustomElement && !tooltipCustomElement.contains(event.target as Node) &&
-        buttonElement && !buttonElement.contains(event.target as Node)) {
+      buttonElement && !buttonElement.contains(event.target as Node)) {
       this.tooltipTableVisible = false;
     }
   }
-    
+
   onParallelCircuitsChange(): void {
     if (this.inParallel) {
       this.splitCircuits = false;
@@ -1023,11 +983,11 @@ export class DeterministicComponent extends GroverStyle {
         this.mostrarTabla = false;
       }
     }*/
-    
+
     /*  this.isGrover = algorithm === 'grover';
     this.isGrenoble = algorithm === 'grenoble';
     this.isOriginalGR = algorithm === 'originalGR';*/
-    
+
     //this.mostrarTabla = false;
 
     if (this.selectedAlgorithm === 'grover') {
@@ -1052,6 +1012,8 @@ export class DeterministicComponent extends GroverStyle {
 
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
     localStorage.removeItem('processedExpressionsDeterministic');
+    this.selectedProjectId = '';
+    this.loadProjectNames();
 
   }
 
@@ -1083,7 +1045,7 @@ export class DeterministicComponent extends GroverStyle {
     }
 
     localStorage.setItem("selectedAlgorithm", this.selectedAlgorithm);
-    
+
   }
 
   reloadChange() {
@@ -1094,14 +1056,14 @@ export class DeterministicComponent extends GroverStyle {
 
   onQuirkChange(index: number): void {
     this.selectedQuirk = index;
-  }  
+  }
 
   isAddDisabled(): boolean {
     return !this.currentUserExpression || this.currentUserExpression.trim() === '';
   }
 
   onOptionFreqChange(value: string): void {
-    
+
     this.isNone = value === 'none';
     this.isRandom = value === 'random';
     this.isRandom10 = value === 'random10';
@@ -1125,7 +1087,7 @@ export class DeterministicComponent extends GroverStyle {
       this.fixedAmount();
     }
 
-    if(this.selectedAlgorithm === 'grover') {
+    if (this.selectedAlgorithm === 'grover') {
       localStorage.setItem('selectedOptionFreqGrover', this.selectedOptionFreq);
     } else {
       localStorage.setItem('selectedOptionFreqAlgorithms', this.selectedOptionFreq);
@@ -1145,7 +1107,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   changeRowValue(rowIndex: number, event: any): void {
-    if(this.selectedAlgorithm === 'grover') {
+    if (this.selectedAlgorithm === 'grover') {
       if (this.expectedFrequencies.getFreq(rowIndex) === 0) {
         event.target.value = 1;
         this.setFreq({ target: { value: 1 } }, rowIndex);
@@ -1175,7 +1137,7 @@ export class DeterministicComponent extends GroverStyle {
     this.addExample(i);
     this.mensajeTemporal = 'Example added';
     setTimeout(() => {
-        this.mensajeTemporal = '';
+      this.mensajeTemporal = '';
     }, 2000);
   }
 
@@ -1189,14 +1151,14 @@ export class DeterministicComponent extends GroverStyle {
     let exprs = this.javaExamples[index].exprs;
 
     for (let i = 0; i < exprs.length; i++) {
-        if (exprs[i].trim().length === 0) continue;
+      if (exprs[i].trim().length === 0) continue;
 
-        // Agrega la expresión a la lista
-        this.userExpressions.push(exprs[i]);
+      // Agrega la expresión a la lista
+      this.userExpressions.push(exprs[i]);
     }
 
     if (exprs.length > 0) {
-        this.currentUserExpression = exprs[0];
+      this.currentUserExpression = exprs[0];
     }
 
     // Limpiar el campo de texto
@@ -1205,7 +1167,7 @@ export class DeterministicComponent extends GroverStyle {
     this.saveState();
   }
 
-  openTextArea(c : DeterministicComponent, e : Event, title : string, elementIndex? : number) {
+  openTextArea(c: DeterministicComponent, e: Event, title: string, elementIndex?: number) {
     let caja = e.target as any
     this.createDialog(c, caja, title, elementIndex)
     this.dialogo.showModal()
@@ -1214,109 +1176,109 @@ export class DeterministicComponent extends GroverStyle {
     this.dialogo.getElementsByTagName("textarea")[0].focus();
   }
 
-  protected createDialog(cc: DeterministicComponent, caja: any, title: string, parameterIndex? : number) {
+  protected createDialog(cc: DeterministicComponent, caja: any, title: string, parameterIndex?: number) {
     let selfCaja = caja
     let textArea: any
     if (!this.dialogo) {
-        this.dialogo = document.createElement("dialog")
-        this.dialogo.setAttribute("id", "dialogo");
+      this.dialogo = document.createElement("dialog")
+      this.dialogo.setAttribute("id", "dialogo");
 
-        // Estilos para el modal
-        this.dialogo.style.backgroundColor = "#eaf7f7";
-        this.dialogo.style.borderRadius = "12px";
-        this.dialogo.style.padding = "20px";
-        this.dialogo.style.maxWidth = "80%";
-        this.dialogo.style.boxShadow = "0px 10px 30px rgba(0, 0, 0, 0.2)";
-        this.dialogo.style.position = "relative";
-        this.dialogo.style.border = "2px solid #007d86";
+      // Estilos para el modal
+      this.dialogo.style.backgroundColor = "#eaf7f7";
+      this.dialogo.style.borderRadius = "12px";
+      this.dialogo.style.padding = "20px";
+      this.dialogo.style.maxWidth = "80%";
+      this.dialogo.style.boxShadow = "0px 10px 30px rgba(0, 0, 0, 0.2)";
+      this.dialogo.style.position = "relative";
+      this.dialogo.style.border = "2px solid #007d86";
 
-        // Crear y configurar el título
-        let label = document.createElement("strong")
-        label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+      // Crear y configurar el título
+      let label = document.createElement("strong")
+      label.innerHTML = title + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
 
-        // Crear y configurar la "X" para cerrar el modal
-        let a = document.createElement("u")
-        a.innerHTML = "&times;"
-        a.style.fontSize = "24px";
-        a.style.position = "absolute";
-        a.style.top = "10px";
-        a.style.right = "10px";
-        a.style.cursor = "pointer";
+      // Crear y configurar la "X" para cerrar el modal
+      let a = document.createElement("u")
+      a.innerHTML = "&times;"
+      a.style.fontSize = "24px";
+      a.style.position = "absolute";
+      a.style.top = "10px";
+      a.style.right = "10px";
+      a.style.cursor = "pointer";
 
-        let self = this
-        a.onclick = function() {
-            selfCaja.parentElement.removeChild(self.dialogo)
-            self.dialogo = null
-            selfCaja.focus()
-        }
+      let self = this
+      a.onclick = function () {
+        selfCaja.parentElement.removeChild(self.dialogo)
+        self.dialogo = null
+        selfCaja.focus()
+      }
 
-        // Agregar el título y la "X" al modal
-        this.dialogo.appendChild(label)
-        this.dialogo.appendChild(a)
+      // Agregar el título y la "X" al modal
+      this.dialogo.appendChild(label)
+      this.dialogo.appendChild(a)
 
-        this.dialogo.appendChild(document.createElement("br"))
+      this.dialogo.appendChild(document.createElement("br"))
 
-        // Crear y configurar el textarea
-        textArea = document.createElement("textarea");
-        textArea.style.width = "95%";
-        textArea.style.height = "150px";
-        textArea.style.padding = "10px";
-        textArea.style.fontSize = "16px";
-        textArea.style.borderRadius = "8px";
-        textArea.style.border = "2px solid #ccc";
-        textArea.style.backgroundColor = "#f9f9f9";
-        textArea.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
-        textArea.style.transition = "all 0.3s ease";
-        textArea.style.border = "2px solid #007d86";
+      // Crear y configurar el textarea
+      textArea = document.createElement("textarea");
+      textArea.style.width = "95%";
+      textArea.style.height = "150px";
+      textArea.style.padding = "10px";
+      textArea.style.fontSize = "16px";
+      textArea.style.borderRadius = "8px";
+      textArea.style.border = "2px solid #ccc";
+      textArea.style.backgroundColor = "#f9f9f9";
+      textArea.style.boxShadow = "0px 4px 8px rgba(0, 0, 0, 0.1)";
+      textArea.style.transition = "all 0.3s ease";
+      textArea.style.border = "2px solid #007d86";
 
-        this.dialogo.appendChild(textArea);
-        textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 == 1\n" +
-            "q4 == 0\ninput%2 == 0\n")
-        textArea.setAttribute("rows", "15");
-        textArea.setAttribute("cols", "60");
-        textArea.ondblclick = function() {
-            textArea.value = "q3 == 1\nq4 == 0\ninput%2 == 0\n"
-        }
+      this.dialogo.appendChild(textArea);
+      textArea.setAttribute("placeholder", "Write expressions in different lines. For example:\n\nq3 == 1\n" +
+        "q4 == 0\ninput%2 == 0\n")
+      textArea.setAttribute("rows", "15");
+      textArea.setAttribute("cols", "60");
+      textArea.ondblclick = function () {
+        textArea.value = "q3 == 1\nq4 == 0\ninput%2 == 0\n"
+      }
 
-        // Crear y configurar el botón "Add"
-        let addButton = document.createElement("button");
-        addButton.innerHTML = "Add";
-        addButton.style.marginTop = "10px";
-        addButton.style.padding = "8px 15px";
-        addButton.style.borderRadius = "5px";
-        addButton.style.border = "1px solid #ccc";
-        addButton.style.backgroundColor = "#008b95";
-        addButton.style.color = "#fff";
-        addButton.style.fontSize = "16px";
-        addButton.style.cursor = "pointer";
+      // Crear y configurar el botón "Add"
+      let addButton = document.createElement("button");
+      addButton.innerHTML = "Add";
+      addButton.style.marginTop = "10px";
+      addButton.style.padding = "8px 15px";
+      addButton.style.borderRadius = "5px";
+      addButton.style.border = "1px solid #ccc";
+      addButton.style.backgroundColor = "#008b95";
+      addButton.style.color = "#fff";
+      addButton.style.fontSize = "16px";
+      addButton.style.cursor = "pointer";
 
-        addButton.addEventListener("mouseenter", () => {
-          addButton.style.backgroundColor = "#006f78";
-          addButton.style.transform = "scale(1.05)";
-          addButton.style.transition = "all 0.3s ease";
+      addButton.addEventListener("mouseenter", () => {
+        addButton.style.backgroundColor = "#006f78";
+        addButton.style.transform = "scale(1.05)";
+        addButton.style.transition = "all 0.3s ease";
       });
 
       addButton.addEventListener("mouseleave", () => {
-          addButton.style.backgroundColor = "#008b95";
-          addButton.style.transform = "scale(1)";
+        addButton.style.backgroundColor = "#008b95";
+        addButton.style.transform = "scale(1)";
       });
 
-        addButton.onclick = function() {
-            if (textArea!.value.trim().length > 0) {
-                let expressions = textArea!.value.split("\n")
-                for (let i = 0; i < expressions.length; i++) {
-                    if (expressions[i].trim().length == 0)
-                        continue
-                    self.currentUserExpression = expressions[i]
-                    self.addUserExpression()
-                }
-            }
-            selfCaja.parentElement.removeChild(self.dialogo)
-            self.dialogo = null
-            selfCaja.focus()
+      addButton.onclick = function () {
+        if (textArea!.value.trim().length > 0) {
+          let expressions = textArea!.value.split("\n")
+          for (let i = 0; i < expressions.length; i++) {
+            if (expressions[i].trim().length == 0)
+              continue
+            self.currentUserExpression = expressions[i]
+            self.addUserExpression()
+          }
         }
+        selfCaja.parentElement.removeChild(self.dialogo)
+        self.dialogo = null
+        selfCaja.focus()
+      }
 
-        this.dialogo.appendChild(addButton);
+      this.dialogo.appendChild(addButton);
     }
 
     caja.parentElement.appendChild(this.dialogo);
@@ -1326,19 +1288,19 @@ export class DeterministicComponent extends GroverStyle {
   onSearchInput() {
 
     this.currentUserExpression = this.searchQuery;  // Mantiene ambas variables sincronizadas
-    
+
     this.filteredExpressions = [...this.expressions];
-    
+
     if (this.searchQuery.trim() != "") {
 
       if (this.selectedAlgorithm === 'grover') {
         this.filteredExpressions = this.expressions.filter(exp =>
-          exp.type === 'grover' && 
+          exp.type === 'grover' &&
           (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+            exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
         );
 
-        
+
         const foundExpression = this.manager.expressions.find(exp =>
           exp.type === 'grover' &&
           exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
@@ -1350,14 +1312,14 @@ export class DeterministicComponent extends GroverStyle {
         }
       } else {
         this.filteredExpressions = this.expressions.filter(exp =>
-          exp.type === 'grenoble' || exp.type === 'grover' && 
+          exp.type === 'grenoble' || exp.type === 'grover' &&
           (exp.jsExpression.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
+            exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase()))
         );
 
-        
+
         const foundExpression = this.manager.expressions.find(exp =>
-          exp.type === 'grenoble' || exp.type === 'grover' && 
+          exp.type === 'grenoble' || exp.type === 'grover' &&
           exp.expressionName.toLowerCase() === this.searchQuery.toLowerCase()
         );
 
@@ -1374,7 +1336,7 @@ export class DeterministicComponent extends GroverStyle {
   searchExpressions() {
     this.filteredExpressions = this.expressions;
 
-    if (this.searchQuery.trim() != ""){
+    if (this.searchQuery.trim() != "") {
       if (this.selectedAlgorithm === 'grover') {
         this.filteredExpressions = this.expressions.filter(exp =>
           exp.type === 'grover' &&
@@ -1382,11 +1344,11 @@ export class DeterministicComponent extends GroverStyle {
         );
       } else {
         this.filteredExpressions = this.expressions.filter(exp =>
-          exp.type === 'grenoble' || exp.type === 'grover' && 
+          exp.type === 'grenoble' || exp.type === 'grover' &&
           exp.expressionName.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
       }
-      
+
     }
   }
 
@@ -1467,7 +1429,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   transpile() {
-    try{
+    try {
       const backendsToTranspile = this.selectedBackends.map(b => b.name);
       this.transpileService.transpile(this.qiskitCode.lines.join('\n'), backendsToTranspile, this.circuitName).subscribe(result => {
         this.transpiledCode = result;
@@ -1476,7 +1438,7 @@ export class DeterministicComponent extends GroverStyle {
       setTimeout(() => {
         this.mensajeTemporal = '';
       }
-      , 2000);
+        , 2000);
     } catch (error) {
       console.error('Error during transpilation:', error);
       this.mensajeTemporal = 'Error during transpilation. Please try again.';
@@ -1484,7 +1446,7 @@ export class DeterministicComponent extends GroverStyle {
         this.mensajeTemporal = '';
       }, 2000);
     }
-    
+
   }
 
 
@@ -1499,74 +1461,74 @@ export class DeterministicComponent extends GroverStyle {
 
   save() {
     if (this.isValid()) {
-      
+
       const existingExpressionIndex = this.expressions.findIndex(exp => exp.expressionName === this.expressionToSave.expressionName);
 
       if (existingExpressionIndex !== -1) {
-          // Si la expresión existe, actualizamos los datos
-          if (this.fromEdit) {
-            
-            const updatedExpression = { ...this.expressions[existingExpressionIndex], ...this.expressionToSave };
+        // Si la expresión existe, actualizamos los datos
+        if (this.fromEdit) {
 
-            this.expService.updateExpression(updatedExpression).subscribe(
-              data => {
-                // Actualizamos la expresión en el array
-                this.expressions[existingExpressionIndex] = data;
+          const updatedExpression = { ...this.expressions[existingExpressionIndex], ...this.expressionToSave };
 
-                // Ordenamos las expresiones por nombre
-                this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+          this.expService.updateExpression(updatedExpression).subscribe(
+            data => {
+              // Actualizamos la expresión en el array
+              this.expressions[existingExpressionIndex] = data;
 
-                // Limpiamos el formulario y cerramos el modal
-                this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
-                this.creatingExpression = false;
-                this.mostrarModalCrearExp = false;
-                this.mensajeTemporal = 'Expression updated successfully';
-                setTimeout(() => {
-                  this.mensajeTemporal = '';
-                }, 2000);
-              },
-              error => {
-                console.error(error);
-              }
-            );
-            this.fromEdit = false;
-            this.isNameDisabled = false;
-          } else {
-            // Si la expresión existe y no estamos editando, mostramos un mensaje de error
-            alert("Expression with this name already exists. Please choose a different name.");
-          }      
+              // Ordenamos las expresiones por nombre
+              this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+              // Limpiamos el formulario y cerramos el modal
+              this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
+              this.creatingExpression = false;
+              this.mostrarModalCrearExp = false;
+              this.mensajeTemporal = 'Expression updated successfully';
+              setTimeout(() => {
+                this.mensajeTemporal = '';
+              }, 2000);
+            },
+            error => {
+              console.error(error);
+            }
+          );
+          this.fromEdit = false;
+          this.isNameDisabled = false;
         } else {
-            // Si la expresión no existe, creamos una nueva
-            this.expService.createExpression({
-              expressionName: this.expressionToSave.expressionName,
-              jsExpression: this.expressionToSave.jsExpression,
-              description: this.expressionToSave.description,
-              type: this.expressionToSave.type
-            }).subscribe(
-                data => {
-                    // Aseguramos que `this.expressions` esté inicializado
-                    if (!this.expressions) {
-                        this.expressions = [];
-                    }
-
-                    // Agregar la nueva expresión a la lista
-                    this.expressions.push(data);
-                    this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
-
-                    // Limpiamos el formulario y cerramos el modal
-                    this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
-                    this.creatingExpression = false;
-                    this.mostrarModalCrearExp = false;
-                    this.mensajeTemporal = 'Expression created successfully';
-                    setTimeout(() => {
-                      this.mensajeTemporal = '';
-                    }, 2000);
-                },
-                error => {
-                    console.error(error);
-                }
-            );
+          // Si la expresión existe y no estamos editando, mostramos un mensaje de error
+          alert("Expression with this name already exists. Please choose a different name.");
         }
+      } else {
+        // Si la expresión no existe, creamos una nueva
+        this.expService.createExpression({
+          expressionName: this.expressionToSave.expressionName,
+          jsExpression: this.expressionToSave.jsExpression,
+          description: this.expressionToSave.description,
+          type: this.expressionToSave.type
+        }).subscribe(
+          data => {
+            // Aseguramos que `this.expressions` esté inicializado
+            if (!this.expressions) {
+              this.expressions = [];
+            }
+
+            // Agregar la nueva expresión a la lista
+            this.expressions.push(data);
+            this.expressions.sort((a, b) => a.expressionName.localeCompare(b.expressionName));
+
+            // Limpiamos el formulario y cerramos el modal
+            this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
+            this.creatingExpression = false;
+            this.mostrarModalCrearExp = false;
+            this.mensajeTemporal = 'Expression created successfully';
+            setTimeout(() => {
+              this.mensajeTemporal = '';
+            }, 2000);
+          },
+          error => {
+            console.error(error);
+          }
+        );
+      }
     }
   }
 
@@ -1603,7 +1565,7 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarModalCrearExp = false;
     this.creatingExpression = false;
     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: '' };
-    if(this.selectedAlgorithm === 'grover') {
+    if (this.selectedAlgorithm === 'grover') {
       this.expressionToSave.type = 'grover';
     } else {
       this.expressionToSave.type = 'grenoble';
@@ -1667,13 +1629,13 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendOrExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const orExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a | b, 0) == 1`;
-  
+
     this.recommendation = orExpression;
     this.showRecommendations = true;
   }
@@ -1686,16 +1648,16 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendAndExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const andExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a & b, 1) == 1`;
-  
+
     this.recommendation = andExpression;
     this.showRecommendations = true;
-  }  
+  }
 
   isPrimeNumber() {
     if (/is\s*prime/i.test(this.currentUserExpression) && this.currentUserExpression !== this.recommendation) {
@@ -1705,13 +1667,13 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendIsPrimeExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
-  
+
     const isPrimeLogic = `(function(n) {
       if (n < 2) return false;
       for (let i = 2; i * i <= n; i++) {
@@ -1719,11 +1681,11 @@ export class DeterministicComponent extends GroverStyle {
       }
       return true;
     })(${binaryToDecimal}) == true`;
-  
+
     this.recommendation = isPrimeLogic;
     this.showRecommendations = true;
   }
-  
+
 
   isEvenNumber() {
     if (this.currentUserExpression.includes('isEven') && this.currentUserExpression !== this.recommendation) {
@@ -1733,40 +1695,40 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendIsEvenExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].map(Number).join(''), 2)`;
-  
+
     const isEvenExpression = `(${binaryToDecimal} % 2 == 0)`;
-  
+
     this.recommendation = isEvenExpression;
     this.showRecommendations = true;
   }
-  
+
 
   sumQubits() {
     if (this.currentUserExpression.includes('sum') && this.currentUserExpression !== this.recommendation) {
       this.recommendSumQubitsExpression();
     }
   }
-  
+
   // Comprueba si la suma es 1 (si hay solo un 1 en los qubits)
   recommendSumQubitsExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const sumExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a + b, 0) == 1`;
-  
+
     this.recommendation = sumExpression;
     this.showRecommendations = true;
   }
-  
+
 
   xorExpression() {
     if (this.currentUserExpression.includes('xor') && this.currentUserExpression !== this.recommendation) {
@@ -1776,16 +1738,16 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendXorExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const xorExpression = `[${qubitIndices.join(', ')}].map(Number).reduce((a, b) => a ^ b, 0) == 1`;
-  
+
     this.recommendation = xorExpression;
     this.showRecommendations = true;
-  }  
+  }
 
   isPowerOfTwo() {
     if (this.currentUserExpression.includes('two') && this.currentUserExpression !== this.recommendation) {
@@ -1795,20 +1757,20 @@ export class DeterministicComponent extends GroverStyle {
 
   recommendIsPowerOfTwoExpression() {
     const qubitIndices = [];
-  
+
     for (let i = 0; i < this.qubits; i++) {
       qubitIndices.push(`q${i}`);
     }
-  
+
     const binaryToDecimal = `parseInt([${qubitIndices.join(', ')}].join(''), 2)`;
-  
+
     const isPowerOfTwoExpression = `(function(n) { return (n > 0 && (n & (n - 1)) === 0); })(${binaryToDecimal}) == true`;
-  
+
     this.recommendation = isPowerOfTwoExpression;
     this.showRecommendations = true;
   }
-  
-  isGroverOption (): boolean {
+
+  isGroverOption(): boolean {
     return this.selectedAlgorithm === 'grover';
   }
 
@@ -1852,7 +1814,7 @@ export class DeterministicComponent extends GroverStyle {
 
   createArray(length: number): number[] {
     return Array.from({ length }, (_, i) => i);
-  }  
+  }
 
   pageInput = 1;
 
@@ -1861,45 +1823,52 @@ export class DeterministicComponent extends GroverStyle {
     this.pageIndex = target - 1;
   }
 
-
+  type: string = '';
 
 
 
   getAuthRequestBody(projectId?: string): any {
-    const instanceId = window.crypto.randomUUID(); 
-    
+    const instanceId = window.crypto.randomUUID();
+
     const body: any = {
-        email: this.userEmail,
-        token: this.userToken,
-        instanceId: instanceId
+      email: this.userEmail,
+      token: this.userToken,
+      instanceId: instanceId
     };
 
     if (projectId) {
-        body.projectId = projectId;
+      body.projectId = projectId;
     }
     return body;
   }
 
   loadProjectNames(): void {
     if (this.userEmail && this.userToken) {
-        const requestBody = this.getAuthRequestBody();
+      const requestBody = this.getAuthRequestBody();
 
-        this.projectService.getProjectsName(requestBody).subscribe({
-            next: (data: ProjectListItem[]) => {
-                const requiredType = this.mapAlgorithmToRequiredType(this.selectedAlgorithm);
-                this.projectList = data.filter(project => 
-                    project.type === requiredType
-                );
+      console.log("Algotirmo: ", this.selectedAlgorithm)
 
-                console.log("Project names loaded.", this.projectList);
-            },
-            error: (err) => {
-                console.error('Error al cargar nombres de proyectos:', err);
-                this.projectList = []; 
-            }
-        });
+      if (this.selectedAlgorithm === 'grover') {
+        this.type = 'GROVER'
+      } else if (this.selectedAlgorithm === 'grenoble' || this.selectedAlgorithm === 'originalGR') {
+        this.type = 'GRENOBLE'
+      }
 
-        
+      this.projectService.getProjectsName(requestBody).subscribe({
+        next: (data: ProjectListItem[]) => {
+          this.projectList = data.filter(project =>
+            project.type === this.type
+          );
+          this.projectList.sort((a, b) => a.name.localeCompare(b.name));
+          console.log("Project names loaded.", this.projectList);
+        },
+        error: (err) => {
+          console.error('Error al cargar nombres de proyectos:', err);
+          this.projectList = [];
+        }
+      });
+
+
     }
   }
 
@@ -1909,29 +1878,29 @@ export class DeterministicComponent extends GroverStyle {
     const requestBody = this.getAuthRequestBody(this.selectedProjectId);
 
     this.projectService.getProject(requestBody).subscribe({
-        next: (project: StoredProject) => {
-            //alert(`Proyecto "${project.name}" cargando...`);
-            this.mensajeTemporal2 = `Loading project "${project.name}"...`;
-            setTimeout(() => {
-              this.mensajeTemporal2 = '';
-            }, 1000);
-            setTimeout(() => {
-              this.loadProjectDataToComponent(project);
-            }, 1000);
-            
-            this.mostrarTabla = true;
-        },
-        error: (err) => {
-            console.error('Error al cargar detalles del proyecto:', err);
-            alert(`Error loading project details.`);
-        }
+      next: (project: StoredProject) => {
+        //alert(`Proyecto "${project.name}" cargando...`);
+        this.mensajeTemporal2 = `Loading project "${project.name}"...`;
+        setTimeout(() => {
+          this.mensajeTemporal2 = '';
+        }, 1000);
+        setTimeout(() => {
+          this.loadProjectDataToComponent(project);
+        }, 1000);
+
+        this.mostrarTabla = true;
+      },
+      error: (err) => {
+        console.error('Error al cargar detalles del proyecto:', err);
+        alert(`Error loading project details.`);
+      }
     });
   }
 
   loadProjectDataToComponent(project: StoredProject): void {
     if (!project.qProgram) return;
 
-    this.lastSavedCircuitState = ''; 
+    this.lastSavedCircuitState = '';
     this.isCircuitModified = false;
 
     const qp = project.qProgram;
@@ -1945,13 +1914,13 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem(nombreLocal, project.id);*/
 
     if (qp.generator && qp.generator.type) {
-        this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
+      this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
     }
-    
+
     this.qubits = qp.qubits;
     this.expectedFrequencies = new FreqTable();
     this.expectedFrequencies.setQubits(this.qubits);
-    
+
     /*if (project.notes && Array.isArray(project.notes)) {
       const notesForStorage = project.notes.map((n: any) => ({
         text: n.text,
@@ -1969,82 +1938,82 @@ export class DeterministicComponent extends GroverStyle {
     const incomingNotes = project.projectNotes || project.projectNotes;
 
     if (incomingNotes && Array.isArray(incomingNotes)) {
-        
-        const newNotes = incomingNotes.map((n: any) => ({
-            title: n.title,
-            text: n.text,
-            type: n.type,
-            timestamp: n.timestamp
-        }));
 
-        const storedNotesStr = localStorage.getItem('project_notes');
-        const tipoLocal = 'quco_' + this.selectedAlgorithm;
-        let existingNotes: any[] = [];
-        
-        if (storedNotesStr) {
-            try {
-                existingNotes = JSON.parse(storedNotesStr);
-            } catch (e) {
-                console.error("Error parsing existing notes", e);
-                existingNotes = [];
-            }
+      const newNotes = incomingNotes.map((n: any) => ({
+        title: n.title,
+        text: n.text,
+        type: n.type,
+        timestamp: n.timestamp
+      }));
+
+      const storedNotesStr = localStorage.getItem('project_notes');
+      const tipoLocal = 'quco_' + this.selectedAlgorithm;
+      let existingNotes: any[] = [];
+
+      if (storedNotesStr) {
+        try {
+          existingNotes = JSON.parse(storedNotesStr);
+        } catch (e) {
+          console.error("Error parsing existing notes", e);
+          existingNotes = [];
         }
+      }
 
-        const notesToKeep = existingNotes.filter((n: any) => 
-            (n.type || '').toLowerCase() !== tipoLocal.toLowerCase()
-        );
+      const notesToKeep = existingNotes.filter((n: any) =>
+        (n.type || '').toLowerCase() !== tipoLocal.toLowerCase()
+      );
 
-        const finalNotesList = [...notesToKeep, ...newNotes];
+      const finalNotesList = [...notesToKeep, ...newNotes];
 
-        localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
-        
-        console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${tipoLocal}.`);
+      localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
+
+      console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${tipoLocal}.`);
 
     } else {
-        
-        /* const storedNotesStr = localStorage.getItem('project_notes');
-        if (storedNotesStr) {
-            const existingNotes = JSON.parse(storedNotesStr);
-            const notesToKeep = existingNotes.filter((n: any) => 
-                (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
-            );
-            localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
-        }
-        */
+
+      /* const storedNotesStr = localStorage.getItem('project_notes');
+      if (storedNotesStr) {
+          const existingNotes = JSON.parse(storedNotesStr);
+          const notesToKeep = existingNotes.filter((n: any) => 
+              (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
+          );
+          localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
+      }
+      */
     }
 
     const generator = qp.generator;
 
-    if (generator.type === 'GROVER' && generator.truePositions) {
-        generator.truePositions.forEach((pos: number) => {
-            this.expectedFrequencies.setFreq(pos, 1);
-        });
-    // } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
-    } else if (generator.type === 'GRENOBLE') {
-        const positions = generator.positionValue;
-        
-        if (positions) {
-            for (const key in positions) {
-                if (positions.hasOwnProperty(key)) {
-                    const rowIndex = parseInt(key, 10);
-                    const frequencyValue = positions[key];
-                    this.expectedFrequencies.setFreq(rowIndex, frequencyValue);
-                }
-            }
+    if (generator.type === 'edu.uclm.reper.model.Grover' && generator.truePositions) {
+      generator.truePositions.forEach((pos: number) => {
+        this.expectedFrequencies.setFreq(pos, 1);
+      });
+      // } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
+    } else if (generator.type === 'edu.uclm.reper.model.Grenoble') {
+      const positions = generator.positionValue;
+
+      if (positions) {
+        for (const key in positions) {
+          if (positions.hasOwnProperty(key)) {
+            const rowIndex = parseInt(key, 10);
+            const frequencyValue = positions[key];
+            this.expectedFrequencies.setFreq(rowIndex, frequencyValue);
+          }
         }
-        
-        if (generator.physicalAngle !== undefined) this.physicalAngle = generator.physicalAngle;
-        if (generator.parallel !== undefined) this.inParallel = generator.parallel;
-        if (generator.splitted !== undefined) this.splitCircuits = generator.splitted;
+      }
+
+      if (generator.physicalAngle !== undefined) this.physicalAngle = generator.physicalAngle;
+      if (generator.parallel !== undefined) this.inParallel = generator.parallel;
+      if (generator.splitted !== undefined) this.splitCircuits = generator.splitted;
     }
-    
+
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
 
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
     this.updateOutputs();
     this.updateTotalSelectedElements();
-    this.mostrarTabla = true; 
+    this.mostrarTabla = true;
     this.goToTable();
 
     /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
@@ -2053,14 +2022,22 @@ export class DeterministicComponent extends GroverStyle {
     }, 1000);*/
 
     setTimeout(() => {
-        this.updateOutputs();
-        this.updateTotalSelectedElements();
-        
-        this.lastSavedCircuitState = this.captureCircuitState(); 
-        this.isCircuitModified = false;
-        
-        this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
-        setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+      this.updateOutputs();
+      this.updateTotalSelectedElements();
+
+      this.lastSavedCircuitState = this.captureCircuitState();
+      this.isCircuitModified = false;
+
+      if (this.type === 'edu.uclm.reper.model.Grover') {
+        this.selectedAlgorithm = 'grover';
+
+      } else if (this.type === 'edu.uclm.reper.model.Grenoble') {
+        this.selectedAlgorithm = 'grenoble';
+      }
+
+      this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
+      setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
+
     }, 200);
 
     this.saveInLocal();
@@ -2075,15 +2052,34 @@ export class DeterministicComponent extends GroverStyle {
     localStorage.setItem('deterministicSplitCircuits', this.splitCircuits.toString());
     localStorage.setItem('deterministicSelectedAlgorithm', this.selectedAlgorithm);
   }
-  
+
   setInfoLocal(): void {
     this.userExpressions = JSON.parse(localStorage.getItem('processedExpressionsDeterministic') || '[]');
-    this.expectedFrequencies = JSON.parse(localStorage.getItem('deterministicFrequencies') || '{}');
+
+    const storedFreqs = localStorage.getItem('deterministicFrequencies');
+    if (storedFreqs) {
+      try {
+        const plainFreqs = JSON.parse(storedFreqs);
+        this.expectedFrequencies = new FreqTable();
+        this.expectedFrequencies.setQubits(plainFreqs.qubits || 4);
+        if (plainFreqs.pairs && Array.isArray(plainFreqs.pairs)) {
+          plainFreqs.pairs.forEach((p: any) => {
+            this.expectedFrequencies.setFreq(p.index, p.freq);
+          });
+        }
+      } catch (e) {
+        console.error("Error parsing stored frequencies", e);
+        this.expectedFrequencies = new FreqTable();
+      }
+    } else {
+      this.expectedFrequencies = new FreqTable();
+    }
+
     this.qubits = parseInt(localStorage.getItem('qubits') || '3', 10);
     this.physicalAngle = parseFloat(localStorage.getItem('deterministicPhysicalAngle') || '0');
-    this.inParallel = localStorage.getItem('deterministicInParallel') === 'false';
-    this.splitCircuits = localStorage.getItem('deterministicSplitCircuits') === 'false';
-    if(this.selectedAlgorithm === 'grover') {
+    this.inParallel = localStorage.getItem('deterministicInParallel') === 'true';
+    this.splitCircuits = localStorage.getItem('deterministicSplitCircuits') === 'true';
+    if (this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
@@ -2096,33 +2092,33 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   cancelarSaveModal(): void {
-      this.mostrarModalGuardarProyecto = false;
-      this.saveError = '';
-      this.circuitName = ''; 
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+    this.circuitName = '';
   }
 
   confirmarGuardarProyecto(): void {
-      if (!this.circuitName || this.circuitName.trim().length === 0) {
-          this.saveError = "The project name is mandatory.";
-          return;
-      }
+    if (!this.circuitName || this.circuitName.trim().length === 0) {
+      this.saveError = "The project name is mandatory.";
+      return;
+    }
 
-      this.mostrarModalGuardarProyecto = false;
-      this.saveError = '';
-      
-      this.guardarProyecto();
+    this.mostrarModalGuardarProyecto = false;
+    this.saveError = '';
+
+    this.guardarProyecto();
   }
 
   getTruePositions(): number[] {
     const positions: number[] = [];
     if (this.expectedFrequencies && this.expectedFrequencies.rows) {
-        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
-            if (this.expectedFrequencies.getFreq(i) === 1) {
-                positions.push(i);
-            }
+      for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+        if (this.expectedFrequencies.getFreq(i) === 1) {
+          positions.push(i);
         }
+      }
     } else {
-        console.warn("Tabla de frecuencias no inicializada; usando truePositions vacías.");
+      console.warn("Tabla de frecuencias no inicializada; usando truePositions vacías.");
     }
     return positions;
   }
@@ -2130,39 +2126,39 @@ export class DeterministicComponent extends GroverStyle {
   getInterestingRowsCount(): number {
     let count = 0;
     if (this.expectedFrequencies && this.expectedFrequencies.rows > 0) {
-        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
-            if (this.expectedFrequencies.getFreq(i) > 0) {
-                count++;
-            }
+      for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+        if (this.expectedFrequencies.getFreq(i) > 0) {
+          count++;
         }
+      }
     }
     return count;
   }
 
   getPositionValueData(): { [key: number]: number } {
     const positionValue: { [key: number]: number } = {};
-    
+
     if (this.expectedFrequencies && this.expectedFrequencies.rows > 0) {
-        for (let i = 0; i < this.expectedFrequencies.rows; i++) {
-            let frequency = this.expectedFrequencies.getFreq(i);
-            
-            if (frequency > 0) {
-                //positionValue[i] = Math.round(frequency);
-                positionValue[i] =frequency;
-            }
+      for (let i = 0; i < this.expectedFrequencies.rows; i++) {
+        let frequency = this.expectedFrequencies.getFreq(i);
+
+        if (frequency > 0) {
+          //positionValue[i] = Math.round(frequency);
+          positionValue[i] = frequency;
         }
+      }
     }
     return positionValue;
-}
+  }
 
   getGeneratorData(algorithm: string): any {
     const interestingRows = this.getInterestingRowsCount();
     const positionValueData: { [key: number]: number } = {};
     const rawData = this.getPositionValueData();
     for (const key in rawData) {
-        if (rawData.hasOwnProperty(key)) {
-            positionValueData[Number(key)] = rawData[key];
-        }
+      if (rawData.hasOwnProperty(key)) {
+        positionValueData[Number(key)] = rawData[key];
+      }
     }
 
     switch (algorithm) {
@@ -2187,48 +2183,48 @@ export class DeterministicComponent extends GroverStyle {
           "positionValue": this.getPositionValueData(),
         };*/
       default:
-        return {}; 
+        return {};
     }
   }
-  
+
   mapAlgorithmToRequiredType(algorithm: string): string {
-     /*switch (algorithm) {
-        case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
-        case 'grover': return 'edu.uclm.reper.model.Grover';
-        case 'originalGR': return 'edu.uclm.reper.model.Grenoble';*/
-        // case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
-        //default: return '';
-     //}
-     switch (algorithm) {
-        case 'grenoble':
-        case 'originalGR': 
-            return 'edu.uclm.reper.model.Grenoble';
-        case 'grover': 
-            return 'edu.uclm.reper.model.Grover';
-        default: return '';
-     }
+    /*switch (algorithm) {
+       case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
+       case 'grover': return 'edu.uclm.reper.model.Grover';
+       case 'originalGR': return 'edu.uclm.reper.model.Grenoble';*/
+    // case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
+    //default: return '';
+    //}
+    switch (algorithm) {
+      case 'grenoble':
+      case 'originalGR':
+        return 'Grenoble';
+      case 'grover':
+        return 'Grover';
+      default: return '';
+    }
   }
 
-  quirkURL? : SafeResourceUrl
+  quirkURL?: SafeResourceUrl
 
   guardarProyecto(): void {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
     //const idCircuit = crypto.randomUUID();
     let idCircuit: string;
     if (this.applyChanges) {
-        idCircuit = this.selectedProjectId;
-        this.applyChanges = false;
+      idCircuit = this.selectedProjectId;
+      this.applyChanges = false;
     } else {
-        idCircuit = crypto.randomUUID();
+      idCircuit = crypto.randomUUID();
     }
-    
+
     const generatorData = this.getGeneratorData(this.selectedAlgorithm);
 
     const qProgramExpressions: QProgramExpression[] = this.userExpressions.map((expr: string, index: number) => ({
-        name: `UserExpr${index + 1}`,
-        expr: expr,
-        description: `User Expression ${index + 1}`,
-        type: generatorData.type.toUpperCase()
+      name: `UserExpr${index + 1}`,
+      expr: expr,
+      description: `User Expression ${index + 1}`,
+      type: generatorData.type.toUpperCase()
     }));
 
     let quirkCircuitData: any = {};
@@ -2245,32 +2241,32 @@ export class DeterministicComponent extends GroverStyle {
     }*/
 
     if (this.responseReceived && this.responseReceived["QUIRK"] && this.responseReceived["QUIRK"].length > 0) {
-        quirkCircuitData = this.responseReceived["QUIRK"][0]; 
+      quirkCircuitData = this.responseReceived["QUIRK"][0];
     }
 
-    const generatedCode = this.qiskitCode && this.qiskitCode.lines 
-                            ? this.qiskitCode.lines.join('\n') 
-                            : "No Qiskit code generated yet.";
+    const generatedCode = this.qiskitCode && this.qiskitCode.lines
+      ? this.qiskitCode.lines.join('\n')
+      : "No Qiskit code generated yet.";
 
     let finalQuirkPayload: any = quirkCircuitData;
 
     if (finalQuirkPayload.cols) {
-        finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
-             if (col.some(item => item === "…")) {
-                 return col;
-             }
-             
-             let lastSignificantIndex = col.length - 1;
-             while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
-                 lastSignificantIndex--;
-             }
-             
-             return col.slice(0, lastSignificantIndex + 1);
-        });
+      finalQuirkPayload.cols = finalQuirkPayload.cols.map((col: any[]) => {
+        if (col.some(item => item === "…")) {
+          return col;
+        }
+
+        let lastSignificantIndex = col.length - 1;
+        while (lastSignificantIndex >= 0 && col[lastSignificantIndex] === 1) {
+          lastSignificantIndex--;
+        }
+
+        return col.slice(0, lastSignificantIndex + 1);
+      });
     }
 
     if (!finalQuirkPayload.cols && !finalQuirkPayload.gates) {
-        finalQuirkPayload = { cols: [] };
+      finalQuirkPayload = { cols: [] };
     }
 
     console.log('Final quirk payload to be sent:', finalQuirkPayload);
@@ -2282,11 +2278,11 @@ export class DeterministicComponent extends GroverStyle {
       shots: 0,
       generator: generatorData,
       qcodes: [{ platform: "AerSimulator", code: generatedCode }],
-      inputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
-      outputQubits: Array.from({length: this.qubits}, (_, i) => i).join(','),
-      qCircuit: { 
-        id: idCircuit, 
-        qbits: this.qubits, 
+      inputQubits: Array.from({ length: this.qubits }, (_, i) => i).join(','),
+      outputQubits: Array.from({ length: this.qubits }, (_, i) => i).join(','),
+      qCircuit: {
+        id: idCircuit,
+        qbits: this.qubits,
         quirkCode: finalQuirkPayload
       }
     };
@@ -2294,43 +2290,43 @@ export class DeterministicComponent extends GroverStyle {
     let notesPayload: any[] = [];
     const allNotesSaved = localStorage.getItem('project_notes');
     const tipoLocal = 'quco_' + this.selectedAlgorithm;
-    
-    if (allNotesSaved) {
-        try {
-            const allNotes = JSON.parse(allNotesSaved);
-            
-            notesPayload = allNotes
-                .filter((n: any) => n.type.toLowerCase() === tipoLocal.toLowerCase())
-                .map((n: any, index: number) => ({
-                    //id: `note_${Date.now()}_${index}`,
-                    id: crypto.randomUUID(),
-                    title: n.title,
-                    text: n.text,
-                    type: n.type,
-                    timestamp: n.timestamp
-                }));
-                
-        } catch (e) {
-            console.error("Error procesando las notas del localStorage", e);
-        }
-    }
-    
-    const projectDtoForMapping: any = {
-        id: idCircuit,
-        name: this.circuitName,
-        qProgram: qProgram,
-        userEmail: this.userEmail,
 
-        mutantCycles: [], 
-        testSuite: null,
-        projectNotes: notesPayload
+    if (allNotesSaved) {
+      try {
+        const allNotes = JSON.parse(allNotesSaved);
+
+        notesPayload = allNotes
+          .filter((n: any) => n.type.toLowerCase() === tipoLocal.toLowerCase())
+          .map((n: any, index: number) => ({
+            //id: `note_${Date.now()}_${index}`,
+            id: crypto.randomUUID(),
+            title: n.title,
+            text: n.text,
+            type: n.type,
+            timestamp: n.timestamp
+          }));
+
+      } catch (e) {
+        console.error("Error procesando las notas del localStorage", e);
+      }
+    }
+
+    const projectDtoForMapping: any = {
+      id: idCircuit,
+      name: this.circuitName,
+      qProgram: qProgram,
+      userEmail: this.userEmail,
+
+      mutantCycles: [],
+      testSuite: null,
+      projectNotes: notesPayload
     };
-    
+
     const finalPayload: any = {
-        circuit: projectDtoForMapping, 
-        user: { id: this.userEmail } 
+      circuit: projectDtoForMapping,
+      user: { id: this.userEmail }
     };
-    
+
     console.log('Objeto JSON a guardar:', JSON.stringify(finalPayload, null, 2));
 
     this.projectService.saveProject(finalPayload).subscribe({
@@ -2361,43 +2357,43 @@ export class DeterministicComponent extends GroverStyle {
     if (!allNotesStr) return '[]';
 
     try {
-        const tipoLocal = 'quco_' + this.selectedAlgorithm;
-        const allNotes = JSON.parse(allNotesStr);
-        const editorNotes = allNotes
-            .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
-            .map((n: any) => ({
-                title: n.title,
-                text: n.text,
-                type: n.type,
-            }));
-        editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
-        
-        return JSON.stringify(editorNotes);
+      const tipoLocal = 'quco_' + this.selectedAlgorithm;
+      const allNotes = JSON.parse(allNotesStr);
+      const editorNotes = allNotes
+        .filter((n: any) => (n.type || '').toLowerCase() === tipoLocal.toLowerCase())
+        .map((n: any) => ({
+          title: n.title,
+          text: n.text,
+          type: n.type,
+        }));
+      editorNotes.sort((a: any, b: any) => (a.title + a.text).localeCompare(b.title + b.text));
+
+      return JSON.stringify(editorNotes);
     } catch (e) {
-        console.error("Error capturing notes state:", e);
-        return '[]';
+      console.error("Error capturing notes state:", e);
+      return '[]';
     }
   }
 
   private captureCircuitState(): string {
     const state = {
-        qubits: this.qubits,
-        algorithm: this.selectedAlgorithm,
-        physicalAngle: this.physicalAngle,
-        inParallel: this.inParallel,
-        splitCircuits: this.splitCircuits,
-        frequencies: JSON.stringify(this.expectedFrequencies),
-        expressions: this.userExpressions.slice().sort().join('|'),
-        template: this.manager.selectedTemplate.fileName,
-        currentNotes: this.captureNotesState()
+      qubits: this.qubits,
+      algorithm: this.selectedAlgorithm,
+      physicalAngle: this.physicalAngle,
+      inParallel: this.inParallel,
+      splitCircuits: this.splitCircuits,
+      frequencies: JSON.stringify(this.expectedFrequencies),
+      expressions: this.userExpressions.slice().sort().join('|'),
+      template: this.manager.selectedTemplate.fileName,
+      currentNotes: this.captureNotesState()
     };
     return JSON.stringify(state);
   }
 
   private checkForChanges() {
     if (!this.selectedProjectId || !this.lastSavedCircuitState) {
-        this.isCircuitModified = false;
-        return;
+      this.isCircuitModified = false;
+      return;
     }
     const currentState = this.captureCircuitState();
     this.isCircuitModified = currentState !== this.lastSavedCircuitState;
@@ -2424,26 +2420,26 @@ export class DeterministicComponent extends GroverStyle {
     const requestBody = { projectId: projectIdToDelete };
 
     this.projectService.deleteProject(requestBody).subscribe({
-        next: () => {
-            this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
-            setTimeout(() => this.mensajeTemporal2 = '', 3000);
-            
-            this.showDeleteProjectModal = false;
-            
-            this.selectedProjectId = '';
-            this.circuitName = '';
-            this.lastSavedCircuitState = '';
-            this.isCircuitModified = false;
-            localStorage.removeItem('selectedProjectId_algorithm');
+      next: () => {
+        this.mensajeTemporal2 = `Project "${this.circuitName}" deleted successfully!`;
+        setTimeout(() => this.mensajeTemporal2 = '', 3000);
 
-            this.resetValues();
-            this.loadProjectNames();
-        },
-        error: (err: any) => {
-            console.error('Error deleting project:', err);
-            alert('Error deleting project. Check console.');
-            this.showDeleteProjectModal = false;
-        }
+        this.showDeleteProjectModal = false;
+
+        this.selectedProjectId = '';
+        this.circuitName = '';
+        this.lastSavedCircuitState = '';
+        this.isCircuitModified = false;
+        localStorage.removeItem('selectedProjectId_algorithm');
+
+        this.resetValues();
+        this.loadProjectNames();
+      },
+      error: (err: any) => {
+        console.error('Error deleting project:', err);
+        alert('Error deleting project. Check console.');
+        this.showDeleteProjectModal = false;
+      }
     });
   }
 
@@ -2464,29 +2460,33 @@ export class DeterministicComponent extends GroverStyle {
 
   openSaveOrSaveAsNewModal(isNew: boolean) {
     this.saveError = '';
-    
+
     if (isNew) {
-        //this.selectedProjectId = '';
-        this.circuitName = this.circuitName || `New ${this.selectedAlgorithm} Project`;
+      //this.selectedProjectId = '';
+      this.circuitName = this.circuitName || `New ${this.selectedAlgorithm} Project`;
     } else if (this.selectedProjectId) {
-        this.circuitName = this.circuitName || '';
+      this.circuitName = this.circuitName || '';
     } else {
-        this.circuitName = '';
+      this.circuitName = '';
     }
-    
+
     this.mostrarModalGuardarProyecto = true;
   }
 
   checkNotesChangeAndClose(event: any) {
     this.mostrarNotasModal = false;
-    
+
     if (this.selectedProjectId) {
-        this.checkForChanges();
-        
-        if (this.isCircuitModified) {
-             this.mensajeTemporal = 'Notes changed, save required.';
-             setTimeout(() => this.mensajeTemporal = '', 2000);
-        }
+      this.checkForChanges();
+
+      if (this.isCircuitModified) {
+        this.mensajeTemporal = 'Notes changed, save required.';
+        setTimeout(() => this.mensajeTemporal = '', 2000);
+      }
     }
+  }
+
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
   }
 }

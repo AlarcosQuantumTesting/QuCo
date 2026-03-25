@@ -2,12 +2,12 @@
     <div class="modal ejemplos" *ngIf="mostrarModal">
         <div class="modal-content ejemplos" 
         cdkDrag 
-        cdkDragRootElement=".modal-content">
+        #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
 
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Execution instructions</h2>
                 <button class="close">
-                    <i class="close-i" (click)="cerrarModal()">&times;</i>
+                    <i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="cerrarModal()">&times;</i>
                 </button>
             </div>
             <div class="intructions-content">

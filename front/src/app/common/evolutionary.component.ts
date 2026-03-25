@@ -10,6 +10,7 @@ import { Component, ViewChildren, ElementRef, QueryList } from '@angular/core';
 Chart.register(...registerables)
 
 import { Directive } from '@angular/core';
+import { Subject, Observable } from 'rxjs';
 
 @Directive()
 export abstract class EvolutionaryComponent {
@@ -24,7 +25,47 @@ export abstract class EvolutionaryComponent {
   remoteFitnessers: RemoteFitnesser[] = []
   selectedRemoteFitnessers: RemoteFitnesser[] = []
 
+  showMsgModal: boolean = false;
+  msgModalTitle: string = '';
+  msgModalMessage: string = '';
+  msgModalType: 'info' | 'error' | 'success' = 'info';
+
+  showConfirmModal: boolean = false;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  private confirmSubject: Subject<boolean> | null = null;
+
   gates: Gate[] = []
+
+  // ... (existing state) ...
+
+  showMessage(title: string, message: string, type: 'info' | 'error' | 'success' = 'info') {
+    this.msgModalTitle = title;
+    this.msgModalMessage = message;
+    this.msgModalType = type;
+    this.showMsgModal = true;
+  }
+
+  closeMsgModal() {
+    this.showMsgModal = false;
+  }
+
+  showConfirmation(title: string, message: string): Observable<boolean> {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.showConfirmModal = true;
+    this.confirmSubject = new Subject<boolean>();
+    return this.confirmSubject.asObservable();
+  }
+
+  onConfirmModalChoice(choice: boolean) {
+    this.showConfirmModal = false;
+    if (this.confirmSubject) {
+      this.confirmSubject.next(choice);
+      this.confirmSubject.complete();
+      this.confirmSubject = null;
+    }
+  }
 
   lastBestFitness: number = 0
   lastMeanFitness: number = 0
@@ -372,20 +413,24 @@ export abstract class EvolutionaryComponent {
   }
 
   stop() {
-    if (confirm('Are you sure you want to stop the execution?')) {
-      this.service.resetSession().subscribe(
-        result => {
-          this.running = false
-          this.state = "Process stopped"
-          this.substate = undefined
-        },
-        error => {
-          this.state = undefined
-          this.substate = undefined
-          this.error = error.error.message
+    this.showConfirmation('Stop execution', 'Are you sure you want to stop the execution?').subscribe(
+      (confirmed) => {
+        if (confirmed) {
+          this.service.resetSession().subscribe(
+            result => {
+              this.running = false
+              this.state = "Process stopped"
+              this.substate = undefined
+            },
+            error => {
+              this.state = undefined
+              this.substate = undefined
+              this.error = error.error.message
+            }
+          )
         }
-      )
-    }
+      }
+    )
   }
 
   abstract generateInitialPopulation(): void
@@ -542,12 +587,17 @@ export abstract class EvolutionaryComponent {
     window.getSelection()!.removeAllRanges()
   }
 
+  getOutputQubitsCount(): number {
+    return this.pc.inputConfiguration.outputs.filter(o => o).length;
+  }
+
   protected prepareCharts() {
     let rrff = this.selectedRemoteFitnessers
     for (let i = 0; i < rrff.length; i++)
       rrff[i].prepareChart("chart" + i, rrff[i].shortName!)
     if (this.timesChart)
       this.timesChart.destroy()
+
     this.timesChart = new Chart("timesChart",
       {
         type: "line",
@@ -566,22 +616,26 @@ export abstract class EvolutionaryComponent {
             {
               data: [],
               label: "Execution time",
-              backgroundColor: "orange"
+              backgroundColor: "#ea580c", // Deep Orange
+              borderColor: "#ea580c"
             },
             {
               data: [],
               label: "Calculus time",
-              backgroundColor: "red"
+              backgroundColor: "#dc2626", // Deep Red
+              borderColor: "#dc2626"
             },
             {
               data: [],
               label: "Strategy application time",
-              backgroundColor: "blue"
+              backgroundColor: "#2563eb", // Deep Blue
+              borderColor: "#2563eb"
             },
             {
               data: [],
               label: "Rendering (UA) time",
-              backgroundColor: "green"
+              backgroundColor: "#16a34a", // Deep Green
+              borderColor: "#16a34a"
             }
           ]
         }

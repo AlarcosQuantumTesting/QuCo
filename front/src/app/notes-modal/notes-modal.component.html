@@ -1,11 +1,11 @@
 <div class="modal redimensionar" *ngIf="mostrarModal">
     <div class="modal-content redimensionar"
     cdkDrag
-    cdkDragRootElement=".modal-content"
+    #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content"
              style="max-height: 90%;">
         <div class="modal-header" cdkDragHandle>
             <h2 class="title-modal"><i class="fas fa-clipboard-list"></i> Project notes</h2>
-            <button class="close"><i class="close-i" (click)="cerrarModal.emit()">&times;</i></button>
+            <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="cerrarModal.emit()">&times;</i></button>
         </div>
         <div class="notes-section-modal">
             <input 

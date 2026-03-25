@@ -19,6 +19,9 @@
 
     <div class="titulo">
         <h1>Transpilation</h1>
+        <button class="btn-toggle-help" style="margin-left: 15px; margin-top: 8px;" (click)="toggleHelp()">
+            ?
+        </button>
     </div>
 
     <div class="container search-container">
@@ -33,16 +36,13 @@
             <div class="section inputsContainer">
                 <div class="input-group">
                     <label>Transpilations stored:</label>
-                    <input type="text"
-                        [(ngModel)]="searchQuery"
-                        (input)="onSearchInput()"
-                        (keydown)="onTabPress($event)"
-                        (focus)="onFocusInput()"
-                        placeholder="Search for a transpilation.."
-                        list="transpilationsList">
-            
+                    <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()"
+                        (keydown)="onTabPress($event)" (focus)="onFocusInput()"
+                        placeholder="Search for a transpilation.." list="transpilationsList">
+
                     <datalist id="transpilationsList">
-                        <option class="transpilationOpt" *ngFor="let transpilation of transpilationWorks" [value]="transpilation.name"></option>
+                        <option class="transpilationOpt" *ngFor="let transpilation of transpilationWorks"
+                            [value]="transpilation.name"></option>
                     </datalist>
 
                     <div>
@@ -50,7 +50,7 @@
                             <i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
-            
+
                 </div>
 
                 <div class="buttons-container">
@@ -70,9 +70,10 @@
 
         <div class="template-header">
             <h2>Transpilation specifications</h2>
-          
+
             <div class="template-buttons">
-              <button *ngIf="!mostrarTabla" class="btn-cancel" title="Cancel editing" (click)="deleteModal()"><i class="bi bi-trash3-fill"></i> Delete</button>
+                <button *ngIf="!mostrarTabla" class="btn-cancel" title="Cancel editing" (click)="deleteModal()"><i
+                        class="bi bi-trash3-fill"></i> Delete</button>
             </div>
         </div>
 
@@ -93,40 +94,39 @@
 
                 <div class="info-block">
 
-                        <div *ngIf="transpilationSelected?.statusLines?.length">
-                            <label for="backendSelect">Backend:</label>
-                            <select id="backendSelect"
-                                    [ngModel]="selectedBackend"
-                                    (ngModelChange)="onBackendChange($event)"
-                                    name="backend">
+                    <div *ngIf="transpilationSelected?.statusLines?.length">
+                        <label for="backendSelect">Backend:</label>
+                        <select id="backendSelect" [ngModel]="selectedBackend" (ngModelChange)="onBackendChange($event)"
+                            name="backend">
 
-                                <option *ngFor="let statusLine of transpilationSelected.statusLines"
-                                        [value]="statusLine.id"
-                                        [disabled]="!statusLine.finished">
+                            <option *ngFor="let statusLine of transpilationSelected.statusLines" [value]="statusLine.id"
+                                [disabled]="!statusLine.finished">
                                 {{ statusLine.backend }}
-                                </option>
-                            </select>
-                        </div>
+                            </option>
+                        </select>
+                    </div>
 
                 </div>
 
                 <div class="info-block">
-                    <button class="apply-button" title="Copy code" [disabled]="!transpiledCode" (click)="copiarCodigo()"><i class="fas fa-copy"></i></button>
+                    <button class="apply-button" title="Copy code" [disabled]="!transpiledCode"
+                        (click)="copiarCodigo()"><i class="fas fa-copy"></i></button>
                 </div>
 
             </div>
-                    
+
             <div *ngIf="transpiledCode" style="width: 100%; margin: 0px !important;">
                 <pre class="template-code">
                     {{ transpiledCode }}
                 </pre>
             </div>
             <div *ngIf="!transpiledCode" style="width: 100%; margin: 0px !important;">
-                <a class="template-code" style="display: flex; justify-content: left; align-items: center; font-size: medium;">
+                <a class="template-code"
+                    style="display: flex; justify-content: left; align-items: center; font-size: medium;">
                     <i>No code generated.</i>
                 </a>
             </div>
-            
+
         </div>
     </div>
 
@@ -139,29 +139,25 @@
                     <th>Name</th>
                     <th>Date</th>
                     <th>Backends</th>
-                    
+
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let transpilation of transpilationWorks">
                     <td>
-                        <button 
-                            class="btn-cancel" 
-                            title="Cancel transpilation"
-                            *ngIf="transpilation.progress < transpilation.statusLines.length" 
+                        <button class="btn-cancel" title="Cancel transpilation"
+                            *ngIf="transpilation.progress < transpilation.statusLines.length"
                             (click)="cancelTranspilation(transpilation)">
                             <i class="bi bi-stop-fill"></i>
-                            </button>
-                            <button 
-                            class="btn-cancel" 
-                            title="Delete transpilation"
-                            *ngIf="transpilation.progress === transpilation.statusLines.length" 
+                        </button>
+                        <button class="btn-cancel" title="Delete transpilation"
+                            *ngIf="transpilation.progress === transpilation.statusLines.length"
                             (click)="seleccionarTranspilation(transpilation)">
                             <i class="bi bi-trash3-fill"></i>
-                            </button>
+                        </button>
                     </td>
                     <td>
-                         <div>
+                        <div>
                             {{ transpilation.id }}
                         </div>
                     </td>
@@ -173,19 +169,18 @@
                         <div *ngFor="let statusLine of transpilation.statusLines" class="mb-2">
                             <ng-container *ngIf="statusLine.id; else loadingBackend">
                                 <ng-container *ngIf="statusLine.finished && !statusLine.hasErrors">
-                                    <a 
-                                    class="text-decoration-none text-success fw-semibold">
-                                    <i class="bi bi-check-circle-fill me-1"></i> {{ statusLine.backend }}
+                                    <a class="text-decoration-none text-success fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ statusLine.backend }}
                                     </a>
                                     <span class="badge bg-primary ms-2">{{ statusLine.size }} MB</span>
-                                    <button title="See code" class="apply-button" style="margin-left: 10px;" (click)="showModalCode(statusLine.id)"><i class="fa fa-code"></i></button>
+                                    <button title="See code" class="apply-button" style="margin-left: 10px;"
+                                        (click)="showModalCode(statusLine.id)"><i class="fa fa-code"></i></button>
                                 </ng-container>
 
                                 <ng-container *ngIf="statusLine.finished && statusLine.hasErrors">
-                                    <a 
-                                    (click)="getErrors(statusLine.id)" 
-                                    class="text-decoration-none text-danger fw-semibold">
-                                    <i class="bi bi-x-circle-fill me-1"></i>{{ statusLine.backend }}
+                                    <a (click)="getErrors(statusLine.id)"
+                                        class="text-decoration-none text-danger fw-semibold">
+                                        <i class="bi bi-x-circle-fill me-1"></i>{{ statusLine.backend }}
                                     </a>
                                 </ng-container>
 
@@ -211,15 +206,17 @@
     <!-- Modales -->
 
     <div *ngIf="modalDelete" class="modal-delete">
-       <div class="modal-content-delete">
+        <div class="modal-content-delete">
             <div class="modal-header" style="background-color: rgb(201, 46, 46);">
                 <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete transpilation</h2>
                 <button class="close"><i class="close-i" (click)="modalDelete = false">&times;</i></button>
             </div>
             <div class="modal-message-delete">
-                <p>Are you sure you want to delete the transpilation <strong>{{transpilationSelected.name}}</strong>?</p>
+                <p>Are you sure you want to delete the transpilation <strong>{{transpilationSelected.name}}</strong>?
+                </p>
                 <div class="modal-buttons">
-                    <button class="btn btn-delete-modal" (click)="confirmDelete(transpilationSelected.id)">Yes, delete</button>
+                    <button class="btn btn-delete-modal" (click)="confirmDelete(transpilationSelected.id)">Yes,
+                        delete</button>
                     <button class="btn btn-cancel-delete-modal" (click)="modalDelete = false">Cancel</button>
                 </div>
             </div>
@@ -227,9 +224,7 @@
     </div>
 
     <div class="modal instrucciones" *ngIf="modalCodigo">
-        <div class="modal-content ejemplos"
-        cdkDrag
-        cdkDragRootElement="modal-content">
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Qiskit Code</h2>
 
@@ -237,13 +232,75 @@
             </div>
 
             <div class="code-output">
-                    <pre>
+                <pre>
                     {{ transpiledCode }}
                     </pre>
             </div>
 
             <div class="modal-footer">
+                <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+    </div>
+    <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
+        [qiskitCode]="transpiledCode || ''" style="width: 100%; height: 100%;"></app-download-code-modal>
+
+    <div class="help-modal" *ngIf="showHelp">
+        <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
+            <div class="help-modal-header" cdkDragHandle>
+                <h2 class="help-title-modal">Help</h2>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="toggleHelp()">&times;</i></button>
+            </div>
+            <div class="help-text">
+                <h2 class="help-heading" style="color: #0a6369;">How to use 'Transpilation'</h2>
+                <div class="help-intro">
+                    Transpilation is the process of rewriting a quantum circuit to match the specific constraints and
+                    topology of a target hardware (backend).
+                </div>
+                <div class="help-section">
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-search"></i></div>
+                        <div class="help-content-desc">
+                            <h3>1. Search & Filter</h3>
+                            <p>Use the search bar to find specific transpilation jobs by name. Click <b>"Show all"</b>
+                                to reset the view and see every stored transpilation.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="help-content-desc">
+                            <h3>2. Monitor Progress</h3>
+                            <p>Track the status of your transpilation requests. See real-time progress for each backend,
+                                including transpilation time and resource usage.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-file-code"></i></div>
+                        <div class="help-content-desc">
+                            <h3>3. View Optimized Code</h3>
+                            <p>Click the <b>code icon</b> (<i class="fa fa-code"></i>) to view the final Qiskit code
+                                optimized for a specific backend. If a job fails, click the error icon to see logs.</p>
+                        </div>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-trash-alt"></i></div>
+                        <div class="help-content-desc">
+                            <h3>4. Manage & Cleanup</h3>
+                            <p>Use the <b>stop icon</b> (<i class="bi bi-stop-fill"></i>) to cancel ongoing
+                                transpilations. Use the <b>trash icon</b> (<i class="bi bi-trash3-fill"></i>) to
+                                permanently remove old records.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="help-actions">
+                <button class="action-btn" (click)="toggleHelp()">Got it!</button>
             </div>
         </div>
     </div>
@@ -251,3 +308,4 @@
 </body>
 
 <img [src]="'data:image/png;base64,' + svgCircuit" *ngIf="svgCircuit">
+
