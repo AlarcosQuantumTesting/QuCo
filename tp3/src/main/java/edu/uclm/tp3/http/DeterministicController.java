@@ -43,7 +43,7 @@ public class DeterministicController {
 	private HammingService hammingService;
 	@Autowired
 	private TemplateDao templateDao;
-	
+
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
 		return this.service.getTemplates();
@@ -66,8 +66,8 @@ public class DeterministicController {
 		String functionPrefix = (String) info.getOrDefault("functionPrefix", "");
 		String algorithm = (String) info.getOrDefault("algorithm", "grenoble");
 		boolean originalGR = algorithm.equals("originalGR");
-		boolean useMCX = jso.optBoolean("useMCX", false);
-		String templateName = jso.getString("template");
+		boolean useMCX = (Boolean) info.getOrDefault("useMCX", false);
+		String templateName = (String) info.getOrDefault("template", "");
 
 		boolean steaking = false;
 
@@ -75,7 +75,7 @@ public class DeterministicController {
 		if (optTemplateCode.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, templateName + " not found");
 		String templateCode = optTemplateCode.get().getCode();
-		
+
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = null;
@@ -93,11 +93,14 @@ public class DeterministicController {
 			} else {
 				String backend = "qiskit";
 				if (inParallel)
-					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
+					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle,
+							functionPrefix, originalGR, backend);
 				else if (splitCircuits)
-					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
+					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix,
+							originalGR, backend);
 				else
-					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
+					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix,
+							originalGR, backend);
 			}
 			return this.buildResponse(result);
 		} catch (Exception e) {
