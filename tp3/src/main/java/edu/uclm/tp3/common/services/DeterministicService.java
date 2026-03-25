@@ -33,7 +33,7 @@ public class DeterministicService {
 		BinaryTree tree = BinaryTreesUtils.buildTree(this.btDao, qubits, expectedFrequencies.getPairs(), prefix, originalGR, physicalAngle);
 
 		QCircuit quirkCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, -1, originalGR);
-		
+
 		int shots = expectedFrequencies.getShots();
 		UnifierSolver solver = new UnifierSolver(tree, prefix, originalGR);
 		Map<String, Object> result = solver.solve(shots, backend);
@@ -132,15 +132,15 @@ public class DeterministicService {
 	public List<Map<String, String>> getTemplates() throws IOException {
 		List<Map<String, String>> templates = new ArrayList<>();
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources = resolver.getResources("classpath*:d.*");
-        for (Resource resource : resources) {
-        	String fn = resource.getFilename();
-        	HashMap<String, String> template = new HashMap<>();
-        	template.put("code", Utils.readFileAsString(this, resource.getFilename()));
-        	fn = fn.substring(fn.lastIndexOf(File.separatorChar)+1);
-        	template.put("name", fn);
-            templates.add(template);
-        }
+		Resource[] resources = resolver.getResources("classpath*:d.*");
+		for (Resource resource : resources) {
+			String fn = resource.getFilename();
+			HashMap<String, String> template = new HashMap<>();
+			template.put("code", Utils.readFileAsString(this, resource.getFilename()));
+			fn = fn.substring(fn.lastIndexOf(File.separatorChar) + 1);
+			template.put("name", fn);
+			templates.add(template);
+		}
 		return templates;
 	}
 

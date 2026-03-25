@@ -181,3 +181,53 @@ code {
     border: 1px solid #ccc;
 }
 */
+
+/* --- DARK MODE OVERRIDES PARA MODAL DESCARGA --- */
+
+/* Modal Content and Backgrounds */
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content.ejemplos {
+    background-color: #172424 !important;
+    border-color: #008b95 !important;
+    box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+    color: #f0f4f4 !important;
+}
+
+:host-context(body.dark-mode) .modal-header {
+    background-color: #0a4d52 !important;
+    color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .modal-footer {
+    background-color: #1a2a2a !important;
+    border-top: 1px solid #386161 !important;
+}
+
+/* Typography and Texts */
+:host-context(body.dark-mode) .title-modal {
+    color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) p.text-instructions,
+:host-context(body.dark-mode) .list-instructions li {
+    color: #f0f4f4 !important;
+}
+
+/* Code Snippets */
+:host-context(body.dark-mode) code {
+    background-color: #233737 !important;
+    color: #4ade80 !important; /* Resalta el código en turquesa/verde estilo terminal */
+    border: 1px solid #386161 !important;
+}
+
+/* Botones */
+:host-context(body.dark-mode) .download-btn {
+    background-color: #008b95 !important;
+    color: white !important;
+    border: none !important;
+}
+
+:host-context(body.dark-mode) .download-btn:hover {
+    background-color: #0f5d63 !important;
+}

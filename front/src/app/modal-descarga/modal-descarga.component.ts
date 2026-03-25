@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MinimizeDirective } from '../common/minimize.directive';
 
 
 @Component({
   selector: 'app-modal-descarga',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, MinimizeDirective],
   templateUrl: './modal-descarga.component.html',
   styleUrl: './modal-descarga.component.scss'
 })

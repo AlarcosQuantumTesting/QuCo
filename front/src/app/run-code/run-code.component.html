@@ -1,7 +1,7 @@
 <div class="modal ejemplos" *ngIf="mostrarModal">
   <div class="modal-content ejemplos"
     cdkDrag
-    cdkDragRootElement=".modal-content">
+    #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
 
     <div class="modal-header" cdkDragHandle>
       <h2 class="title-modal">Run code configuration</h2>

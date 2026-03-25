@@ -8,16 +8,17 @@ import { QubitsConfigurationService } from '../qubits-configuration.service';
   styleUrls: ['./qubits-configuration.component.css']
 })
 export class QubitsConfigurationComponent {
-  selectedQubitsConfigurationName : string | null = null
-  existingConfigurationNames : string[] = []
-  qubitsConfiguration : QubitsConfiguration = new QubitsConfiguration();
-  error? : any
+  selectedQubitsConfigurationName: string | null = null
+  existingConfigurationNames: string[] = []
+  qubitsConfiguration: QubitsConfiguration = new QubitsConfiguration();
+  error?: any
 
   mensajeTemporal: string = '';
   searchQuery: string = "";
   isConfigSelected: boolean = false;
+  showHelp: boolean = false;
 
-  constructor(private qubitsConfigurationService: QubitsConfigurationService) { 
+  constructor(private qubitsConfigurationService: QubitsConfigurationService) {
     this.error = undefined
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
       qubitsConfigurations => {
@@ -29,19 +30,19 @@ export class QubitsConfigurationComponent {
   }
 
   randomize() {
-    if (this.qubitsConfiguration.name.length>0) 
+    if (this.qubitsConfiguration.name.length > 0)
       this.qubitsConfiguration.randomize()
-  }    
+  }
 
-  onQubitsConfigurationChange(cfgName : string) {
+  onQubitsConfigurationChange(cfgName: string) {
     this.qubitsConfigurationService.getQubitsConfiguration(cfgName).subscribe(
       qubitsConfiguration => {
         this.qubitsConfiguration = new QubitsConfiguration()
         this.qubitsConfiguration.name = qubitsConfiguration.name
         this.qubitsConfiguration.matrix = qubitsConfiguration.matrix
-        this.qubitsConfiguration.qubits = qubitsConfiguration.qubits    
+        this.qubitsConfiguration.qubits = qubitsConfiguration.qubits
       },
-      error => { 
+      error => {
         this.error = error.error.message
       })
   }
@@ -50,8 +51,8 @@ export class QubitsConfigurationComponent {
     this.qubitsConfigurationService.saveQubitsConfiguration(this.qubitsConfiguration).subscribe(
       qubitsConfiguration => {
         alert("Configuration saved")
-      }, 
-      error => { 
+      },
+      error => {
         this.error = error.error.message
       })
   }
@@ -67,17 +68,17 @@ export class QubitsConfigurationComponent {
   }
 
   isConflictMatrix(): boolean {
-  const counts: Record<number, number> = {};
-  for (const colIndex of this.qubitsConfiguration.matrix) {
-    if (colIndex != null) {
-      counts[colIndex] = (counts[colIndex] || 0) + 1;
-      if (counts[colIndex] > 1) {
-        return true;
+    const counts: Record<number, number> = {};
+    for (const colIndex of this.qubitsConfiguration.matrix) {
+      if (colIndex != null) {
+        counts[colIndex] = (counts[colIndex] || 0) + 1;
+        if (counts[colIndex] > 1) {
+          return true;
+        }
       }
     }
+    return false;
   }
-  return false;
-}
 
   onSearchInput() {
     // Aquí normalmente no se hace nada porque el <datalist> ya lo hace
@@ -90,7 +91,7 @@ export class QubitsConfigurationComponent {
   }
 
   onFocusInput() {
-    
+
   }
 
   selectConfigIfMatch() {
@@ -114,7 +115,7 @@ export class QubitsConfigurationComponent {
             }
           );
           //console.log('Template seleccionado:', match);
-        } 
+        }
       },
       error => {
         this.error = error.error.message;
@@ -133,7 +134,7 @@ export class QubitsConfigurationComponent {
           (configName: string) => configName.toLowerCase() === this.searchQuery.trim().toLowerCase()
         );
         if (match) {
-          
+
           this.selectedQubitsConfigurationName = match;
           this.qubitsConfigurationService.getQubitsConfiguration(match).subscribe(
             qubitsConfiguration => {
@@ -170,17 +171,17 @@ export class QubitsConfigurationComponent {
   isInvalid: boolean = false;
 
   cancelEdit() {
-      this.editingConfig = false;
-      if (this.isConfigSelected) {
-        this.searchConfig();
-      }
-      this.nameConfig = this.qubitsConfiguration.name?.trim();
-      this.qubisConfig = this.qubitsConfiguration.qubits;
-      // this.qubitsConfigTable = this.qubitsConfiguration.?.trim();
-      // this.templateToSave = new CodeTemplate("", "", "");
+    this.editingConfig = false;
+    if (this.isConfigSelected) {
+      this.searchConfig();
     }
+    this.nameConfig = this.qubitsConfiguration.name?.trim();
+    this.qubisConfig = this.qubitsConfiguration.qubits;
+    // this.qubitsConfigTable = this.qubitsConfiguration.?.trim();
+    // this.templateToSave = new CodeTemplate("", "", "");
+  }
 
-    onNameChange(value: string) {
+  onNameChange(value: string) {
     this.nameConfig = value;
     this.isExistingConfig = this.configExists();
     this.isInvalid = this.nameConfig.trim() === '';
@@ -206,8 +207,8 @@ export class QubitsConfigurationComponent {
           }, 3000);
           this.editingConfig = false;
           this.isConfigSelected = true;
-        }, 
-        error => { 
+        },
+        error => {
           this.error = error.error.message;
         }
       );
@@ -229,8 +230,11 @@ export class QubitsConfigurationComponent {
   }
 
   canEdit(): boolean {
-  return this.editingConfig || !this.isConfigSelected;
+    return this.editingConfig || !this.isConfigSelected;
   }
 
+  toggleHelp() {
+    this.showHelp = !this.showHelp;
+  }
 
 }
