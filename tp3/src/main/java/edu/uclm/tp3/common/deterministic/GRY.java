@@ -26,8 +26,13 @@ public class GRY extends GRGate {
         return theta;
     }
 
-    @Override
+    @Override  // Qiskit
     public String toString() {
         return "\tU.ry(" + this.theta + ", " + this.qubit + ")\n";
+    }
+
+    @Override
+    protected String getCirqCode() {
+        return "\tc.append(cirq.ry(" + this.theta + ").on(q" + this.qubit + "))\n";
     }
 }

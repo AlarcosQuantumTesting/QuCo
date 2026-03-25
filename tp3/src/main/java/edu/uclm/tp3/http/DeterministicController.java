@@ -3,6 +3,7 @@ package edu.uclm.tp3.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -23,9 +24,11 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.uclm.tp3.common.deterministic.FreqTable;
+import edu.uclm.tp3.common.model.CodeTemplate;
 import edu.uclm.tp3.common.services.DeterministicService;
 import edu.uclm.tp3.common.services.GroverService;
 import edu.uclm.tp3.common.services.HammingService;
+import edu.uclm.tp3.dao.TemplateDao;
 
 @RestController
 @RequestMapping("deterministic")
@@ -38,7 +41,9 @@ public class DeterministicController {
 	private GroverService groverService;
 	@Autowired
 	private HammingService hammingService;
-
+	@Autowired
+	private TemplateDao templateDao;
+	
 	@GetMapping("/getTemplates")
 	public List<Map<String, String>> getTemplates() throws IOException {
 		return this.service.getTemplates();
@@ -61,30 +66,38 @@ public class DeterministicController {
 		String functionPrefix = (String) info.getOrDefault("functionPrefix", "");
 		String algorithm = (String) info.getOrDefault("algorithm", "grenoble");
 		boolean originalGR = algorithm.equals("originalGR");
-		boolean useMCX = (Boolean) info.getOrDefault("useMCX", false);
+		boolean useMCX = jso.optBoolean("useMCX", false);
+		String templateName = jso.getString("template");
 
+		boolean steaking = false;
+
+		Optional<CodeTemplate> optTemplateCode = this.templateDao.findById(templateName);
+		if (optTemplateCode.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, templateName + " not found");
+		String templateCode = optTemplateCode.get().getCode();
+		
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = null;
 			if (algorithm.equals("grover")) {
 				if (inParallel)
-					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX, templateCode);
 				else if (splitCircuits)
-					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX, templateCode);
+				else if (steaking)
+					result = this.groverService.calculateSteaking(qubits, expectedFrequencies, useMCX, templateCode);
 				else
-					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX, templateCode);
 			} else if (algorithm.equals("hamming")) {
 				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
 			} else {
+				String backend = "qiskit";
 				if (inParallel)
-					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle,
-							functionPrefix, originalGR);
+					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else if (splitCircuits)
-					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix,
-							originalGR);
+					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else
-					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix,
-							originalGR);
+					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 			}
 			return this.buildResponse(result);
 		} catch (Exception e) {

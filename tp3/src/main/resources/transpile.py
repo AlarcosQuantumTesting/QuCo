@@ -3,6 +3,8 @@ import os
 import sys
 from qiskit import QuantumCircuit, transpile
 from qiskit_ibm_runtime.fake_provider import *
+from qiskit.converters import circuit_to_dag
+
 
 def local_transpile(code_path: str, backend, backend_name):
     with open(code_path, 'r', encoding='utf-8') as f:
@@ -31,9 +33,13 @@ def local_transpile(code_path: str, backend, backend_name):
         f.write(generate_python_code(transpiled))
         f.write("\n")
 
+    dag = circuit_to_dag(transpiled)
+    for i, layer in enumerate(dag.layers()):
+        print("Layer", i)
+        for node in layer["graph"].op_nodes():
+            print(node.op.name, [q.index for q in node.qargs])
 
 def generate_python_code(circuit: QuantumCircuit) -> str:
-    
     lines = [
         "from qiskit import QuantumCircuit",
         "",

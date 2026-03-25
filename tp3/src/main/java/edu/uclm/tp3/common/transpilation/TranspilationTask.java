@@ -74,7 +74,6 @@ public class TranspilationTask implements Runnable {
         baseCommand.add(transpileScript.getAbsolutePath());
         baseCommand.add(this.sourceFile.getAbsolutePath());
 
-
         for (int i=0; i<this.backends.size(); i++) {
             if (stop)
                 return;

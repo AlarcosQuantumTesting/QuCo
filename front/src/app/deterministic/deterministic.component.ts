@@ -20,7 +20,6 @@ interface QProgramExpression { name: string; expr: string; description: string; 
 interface QProgram { id: string; qubits: number; expressions: QProgramExpression[]; shots: number; generator: any; qcodes: { platform: string, code: string }[]; inputQubits: string; outputQubits: string; qCircuit: any; }
 interface ProjectListItem { id: string; name: string; type: string; }
 interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
-interface FinalPayload { circuit: any; user: { id: string }; }
 
 Chart.register(...registerables)
 
@@ -191,15 +190,9 @@ export class DeterministicComponent extends GroverStyle {
 
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
 
-    //this.setInfoLocal();
-
     this.onAlgorithmChange2(this.selectedAlgorithm);
-
-    /*this.isGrover = this.selectedAlgorithm === 'grover';
-    this.isGrenoble = this.selectedAlgorithm === 'grenoble';
-    this.isOriginalGR = this.selectedAlgorithm === 'originalGR';*/
-
-    if (this.selectedAlgorithm === 'grover') {
+    
+    if(this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
@@ -241,24 +234,6 @@ export class DeterministicComponent extends GroverStyle {
       });
     }
 
-
-    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
-
-    const savedProjectId = localStorage.getItem(nombreLocal);
-
-    if (savedProjectId && this.userEmail && this.userToken) {
-      if (this.selectedAlgorithm === 'grover' && nombreLocal === 'selectedProjectId_grover') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'grenoble' && nombreLocal === 'selectedProjectId_grenoble') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      } else if (this.selectedAlgorithm === 'originalgr' && nombreLocal === 'selectedProjectId_originalgr') {
-        this.selectedProjectId = savedProjectId;
-        this.onProjectSelected();
-      }
-    }*/
-
     let sessionAttempts = 0;
     const initSession = setInterval(() => {
       this.userEmail = localStorage.getItem('userEmail') || '';
@@ -268,7 +243,7 @@ export class DeterministicComponent extends GroverStyle {
         this.loadProjectNames();
 
         const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
-        if (savedProjectId) {
+        if (savedProjectId  && this.userEmail && this.userToken) {
           this.selectedProjectId = savedProjectId;
           this.onProjectSelected();
         }
@@ -276,16 +251,17 @@ export class DeterministicComponent extends GroverStyle {
         clearInterval(initSession);
       }
     }, 250);
+  } 
+    this.loadProjectNames();
   }
 
   override tryFill(index: number): void {
-    this.reset()
-    this.mostrarTabla = true;
-    let exprs = this.javaExamples[index].exprs
-    this.userExpressions = []
-    this.userExpressions = this.userExpressions.concat(exprs)
-    // this.markElementsWithUserExpressions()
-    this.fillTableWithUserExpressions()
+      this.reset()
+      this.mostrarTabla = true;
+      let exprs = this.javaExamples[index].exprs
+      this.userExpressions = []
+      this.userExpressions = this.userExpressions.concat(exprs)
+      this.fillTableWithUserExpressions()
   }
 
   setFrequenciesWithUserExpressions() {
@@ -412,40 +388,17 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   buildCode() {
-    let code = this.manager.selectedTemplate.code
+    let code
     if (!this.responseReceived)
       return
 
     if (this.codeAsFunctions) {
-      for (let key in this.responseReceived) {
-        if (key == "#INITIALIZE#") {
-          let tag = "TEMPLATE = '" + this.manager.selectedTemplate.fileName + "'\n"
-          tag = tag + "ORIGINAL_QUBITS = " + this.qubits + "\n"
-          //if (this.inParallel) 
-          //  tag = tag + "PARALLEL = True\n"
-          //else
-          //  tag = tag + "PARALLEL = False\n"
-          if (this.splitCircuits)
-            tag = tag + "SPLIT = True\n"
-          else
-            tag = tag + "SPLIT = False\n"
-          code = code?.replace("#INITIALIZE#", tag + this.responseReceived["#INITIALIZE#"])
-          code = code?.replace("#ALGORITHM#", tag + this.responseReceived["#ALGORITHM#"])
-        } else if (key != 'tree' && key != 'unitaryMatrix' && key != 'QUIRK') {
-          let value = this.responseReceived[key]
-          code = code?.replace(key, value)
-        }
-      }
+
+        code = this.responseReceived.CODE
     } else {
-      for (let key in this.responseReceived) {
-        if (key != 'tree' && key != '#INITIALIZE#' && key != 'unitaryMatrix' && key != 'QUIRK') {
-          let value = this.responseReceived[key]
-          code = code?.replace(key, value)
-        }
-      }
+      code = this.responseReceived.CODE
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
     }
-    //this.goToCode()
     this.qiskitCode = new QiskitCode()
     this.qiskitCode.lines = code?.split("\n") || []
 
@@ -515,12 +468,12 @@ export class DeterministicComponent extends GroverStyle {
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
-      //this.isOriginalGR,
       this.inParallel,
       this.splitCircuits,
       this.selectedAlgorithm,
       this.useMCX,
-      this.prefix
+      this.prefix,
+      this.manager.selectedTemplate.fileName
     ).subscribe(
       blob => {
         blob.text().then(text => {
@@ -564,32 +517,6 @@ export class DeterministicComponent extends GroverStyle {
       }
     );
   }
-
-
-  /*getCircuit() {
-    this.running = true
-    this.state = "Calculating"
-    this.error = undefined
-
-    this.service.calculate(this.qubits, this.expectedFrequencies, this.physicalAngle, this.originalGR, this.inParallel, this.splitCircuits, this.prefix).subscribe(
-      response=> {
-        this.responseReceived = response
-        this.buildCode()
-
-        const { svg, width, height } = this.generateSvgFromBottom(response.tree);
-        this.svgTree = this.sanitizer.bypassSecurityTrustHtml(svg);
-        this.svgWidth = width; // Define el ancho dinámico del SVG
-        this.svgHeight = height; // Define el alto dinámico del SVG
-        this.state = undefined
-      },
-      error => {
-        if (error.error && error.error.message)
-          this.error = error.error.message
-        else
-          this.error = error.message + " (is the server running?)"
-      }
-    )
-  }*/
 
   goToCode() {
     this.codeArea.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });

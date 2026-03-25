@@ -2,16 +2,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  //private baseUrl = 'http://localhost:8081/projects';
-  //private baseUrl = 'https://alarcosj.esi.uclm.es/qsauronback/projects';
-  private baseUrl = 'https://alarcosj.esi.uclm.es/qsauronback/projects/';
-  private baseUrl2 = 'https://alarcosj.esi.uclm.es/qsauronback/qucoreper/';
-  //private baseUrl = 'https://c9x3lxf0-8080.uks1.devtunnels.ms/projects';
+
+  private baseUrl = environment.qsauronUrl + '/projects';
 
   constructor(private http: HttpClient) { }
 
