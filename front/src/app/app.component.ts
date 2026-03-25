@@ -507,6 +507,9 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
+    
+    this.tokenStored = null;
+    this.emailUsuario = '';
   }
 
   logout(): void {

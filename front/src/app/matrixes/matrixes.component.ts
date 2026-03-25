@@ -143,6 +143,7 @@ export class MatrixesComponent implements AfterViewInit {
 
   modalError: boolean = false;
   mostrarInstEjecucion = false;
+  mostrarDownloadModal = false;
   mostrarEjecucionRemote = false;
   mostrarModalGuardarProyecto: boolean = false;
   saveError: string = '';

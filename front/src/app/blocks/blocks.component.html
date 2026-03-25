@@ -782,6 +782,7 @@
                         class="fas fa-rocket"></i> Execute remote</button>
                 <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
                     Transpile</button>
+                <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
             </div>
         </div>
@@ -789,6 +790,8 @@
 
     <app-modal-descarga [mostrarModal]="mostrarInstEjecucion" (cerrar)="mostrarInstEjecucion = false"
         style="width: 100%; height: 100%;"></app-modal-descarga>
+    <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
+        [qiskitCode]="code || ''" style="width: 100%; height: 100%;"></app-download-code-modal>
     <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
         [qiskitCode]="code || ''"></app-run-code>
 

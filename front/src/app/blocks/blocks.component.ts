@@ -59,6 +59,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   startingColumns: BlockColumn[] = [];
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
+  mostrarDownloadModal = false;
 
   projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';

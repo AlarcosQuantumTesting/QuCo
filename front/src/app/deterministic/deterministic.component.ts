@@ -141,6 +141,7 @@ export class DeterministicComponent extends GroverStyle {
   selectedBackends: Backend[] = [];
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
+  mostrarDownloadModal = false;
 
   userEmail: string = localStorage.getItem('userEmail') || '';
   userToken: string = localStorage.getItem('userToken') || '';

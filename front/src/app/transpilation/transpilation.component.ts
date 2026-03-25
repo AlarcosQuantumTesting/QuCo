@@ -15,6 +15,7 @@ export class TranspilationComponent {
   mensajeTemporal: string = '';
   mensajeTemporal2: string = '';
   searchQuery: string = "";
+  mostrarDownloadModal: boolean = false;
   transpilationSelected: any = null;
   transpilationFiltered: any[] = [];
   selectedBackend: string | null = null;

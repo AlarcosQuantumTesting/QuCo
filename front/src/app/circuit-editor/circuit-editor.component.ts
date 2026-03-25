@@ -71,6 +71,8 @@ export class CircuitEditorComponent {
   currentColumn: number | null = null;
   qubitsConsecutivos: boolean = false;
   mostrarEjecucionRemote = false;
+  mostrarDownloadModal = false;
+  mostrarDownloadModalGate = false;
 
   projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';

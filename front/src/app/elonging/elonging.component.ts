@@ -35,6 +35,7 @@ export class ElongingComponent extends EvolutionaryComponent {
   selectedBackends: Backend[] = [];
   mostrarInstEjecucion = false;
   mostrarEjecucionRemote = false;
+  mostrarDownloadModal = false;
 
   projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';
