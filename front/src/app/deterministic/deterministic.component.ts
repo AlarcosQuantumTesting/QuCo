@@ -191,8 +191,8 @@ export class DeterministicComponent extends GroverStyle {
     this.selectedAlgorithm = localStorage.getItem('selectedAlgorithm') || 'grover';
 
     this.onAlgorithmChange2(this.selectedAlgorithm);
-    
-    if(this.selectedAlgorithm === 'grover') {
+
+    if (this.selectedAlgorithm === 'grover') {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqGrover') || 'none';
     } else {
       this.selectedOptionFreq = localStorage.getItem('selectedOptionFreqAlgorithms') || 'none';
@@ -243,7 +243,7 @@ export class DeterministicComponent extends GroverStyle {
         this.loadProjectNames();
 
         const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
-        if (savedProjectId  && this.userEmail && this.userToken) {
+        if (savedProjectId && this.userEmail && this.userToken) {
           this.selectedProjectId = savedProjectId;
           this.onProjectSelected();
         }
@@ -251,17 +251,17 @@ export class DeterministicComponent extends GroverStyle {
         clearInterval(initSession);
       }
     }, 250);
-  } 
+
     this.loadProjectNames();
   }
 
   override tryFill(index: number): void {
-      this.reset()
-      this.mostrarTabla = true;
-      let exprs = this.javaExamples[index].exprs
-      this.userExpressions = []
-      this.userExpressions = this.userExpressions.concat(exprs)
-      this.fillTableWithUserExpressions()
+    this.reset()
+    this.mostrarTabla = true;
+    let exprs = this.javaExamples[index].exprs
+    this.userExpressions = []
+    this.userExpressions = this.userExpressions.concat(exprs)
+    this.fillTableWithUserExpressions()
   }
 
   setFrequenciesWithUserExpressions() {
@@ -394,7 +394,7 @@ export class DeterministicComponent extends GroverStyle {
 
     if (this.codeAsFunctions) {
 
-        code = this.responseReceived.CODE
+      code = this.responseReceived.CODE
     } else {
       code = this.responseReceived.CODE
       code = code?.replace("#INITIALIZE#", this.drawMatrix(this.responseReceived["unitaryMatrix"]))
