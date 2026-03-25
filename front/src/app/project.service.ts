@@ -9,7 +9,8 @@ import { environment } from '../environments/environment';
 })
 export class ProjectService {
 
-  private baseUrl = environment.qsauronUrl + '/projects';
+  private baseUrl = environment.qsauronUrl + 'projects';
+  private baseUrl2 = environment.qsauronUrl + 'qucoreper';
 
   constructor(private http: HttpClient) { }
 
