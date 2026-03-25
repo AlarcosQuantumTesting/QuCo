@@ -1,0 +1,80 @@
+<div class="modal redimensionar" *ngIf="mostrarModal">
+    <div class="modal-content redimensionar" cdkDrag #minDir="appMinimize" appMinimize
+        cdkDragRootElement=".modal-content">
+        <div class="modal-header" cdkDragHandle>
+            <h2 class="title-modal"><i class="fas fa-info-circle"></i> About us</h2>
+            <button class="close">
+                <i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+                <i class="close-i" (click)="cerrarModal.emit()">&times;</i>
+            </button>
+        </div>
+
+        <div class="modal-body about-body">
+
+            <div class="about-hero">
+                <img src="assets/img/logo1.png" alt="Logo" class="hero-logo">
+                <h3>Quantum Code Generation</h3>
+                <p class="about-intro">
+                    Welcome! This tool is designed to bridge the gap between classical software engineering and the
+                    quantum realm. It empowers researchers, students, and developers to intuitively design, simulate,
+                    and execute quantum circuits with unprecedented ease and efficiency.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-section">
+                    <div class="section-icon-container">
+                        <i class="fas fa-users section-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <h3>Research group</h3>
+                        <p>
+                            Developed by the <strong>Alarcos Research Group</strong> from the University of Castilla-La
+                            Mancha (UCLM). Alarcos focuses on transforming software quality, security, and the future of
+                            quantum software engineering.
+                        </p>
+                        <a href="https://alarcos.esi.uclm.es/" target="_blank" rel="noopener noreferrer"
+                            class="about-link">
+                            <i class="fas fa-external-link-alt"></i> Visit Alarcos website
+                        </a>
+                    </div>
+                </div>
+
+                <div class="about-section">
+                    <div class="section-icon-container">
+                        <i class="fas fa-project-diagram section-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <h3>Root system: QSauron</h3>
+                        <p>
+                            This code generation tool is a vital component of <strong>QSauron</strong>, a comprehensive
+                            lifecycle and management system for quantum software. QSauron integrates multiple modular
+                            tools to provide a seamless quantum development experience from start to finish.
+                        </p>
+                        <a href="https://alarcosj.esi.uclm.es/qsauron/" target="_blank" rel="noopener noreferrer"
+                            class="about-link">
+                            <i class="fas fa-external-link-alt"></i> Access QSauron platform
+                        </a>
+                    </div>
+                </div>
+
+                <!-- <div class="about-section full-width">
+                    <div class="section-icon-container">
+                        <i class="fas fa-user-astronaut section-icon"></i>
+                    </div>
+                    <div class="section-content">
+                        <h3>Developer</h3>
+                        <p>
+                            The conceptualization and development is spearheaded by <strong>Macario Polo
+                                Usaola</strong>.
+                        </p>
+                        <a href="https://alarcos.esi.uclm.es/?lang=es#page-wp?ID=191" target="_blank"
+                            rel="noopener noreferrer" class="about-link">
+                            <i class="fas fa-external-link-alt"></i> View profile
+                        </a>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+</div>

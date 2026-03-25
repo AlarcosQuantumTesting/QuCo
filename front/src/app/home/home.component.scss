@@ -1,152 +1,151 @@
-
-
 .container {
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
 }
 
-  h1 {
-    color: #2c3e50;
-    font-size: 2em;
-  }
+h1 {
+  color: #2c3e50;
+  font-size: 2em;
+}
 
-  p {
-    font-size: 1.2em;
-    color: #555;
-  }
+p {
+  font-size: 1.2em;
+  color: #555;
+}
 
-  h2 {
-    color: #34495e;
-    margin-top: 20px;
-  }
+h2 {
+  color: #34495e;
+  margin-top: 20px;
+}
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
+ul {
+  list-style-type: none;
+  padding: 0;
+}
 
-  li.option {
-    font-size: 1.1em;
-    background-color: rgba(255, 255, 255, 0.8);
-    color: #333;
-    padding: 5px;
-    margin: 10px 0;
-    border-radius: 8px;
-    text-align: left;
-    cursor: pointer;
-    text-decoration: none;
-    border-left: 4px solid #007d86;
-    border-right: 4px solid #007d86;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-  }
+li.option {
+  font-size: 1.1em;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  padding: 5px;
+  margin: 10px 0;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  border-left: 4px solid #007d86;
+  border-right: 4px solid #007d86;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-  li.option:hover {
-    background-color: #dbe4e4cb;
-    cursor: pointer;
-    transform: scale(1.02);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
-  }
+li.option:hover {
+  background-color: #dbe4e4cb;
+  cursor: pointer;
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
 
-  strong {
-    color: #007d86;
-  }
+strong {
+  color: #007d86;
+}
 
-  .option::before {
-    content: "●";
-    margin-right: 5px;
-    color: #007d86;
-  }
+.option::before {
+  content: "●";
+  margin-right: 5px;
+  color: #007d86;
+}
 
 
 div.titulo {
-    margin: 0;
-    margin-top: -40px;
+  margin: 0;
+  margin-top: -40px;
 }
 
-  .image-container {
-    flex-shrink: 0;
-    margin-top: 20px;
-    max-width: 210px;
-  }
-  
-  .posicionesQubit {
-    width: 250px;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-left: 20px;
-    margin-right: 20px;
-    max-width: 100%;
-  }
+.image-container {
+  flex-shrink: 0;
+  margin-top: 20px;
+  max-width: 210px;
+}
 
-  /* Quantum Code Info */
+.posicionesQubit {
+  width: 250px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-left: 20px;
+  margin-right: 20px;
+  max-width: 100%;
+}
+
+/* Quantum Code Info */
 
 .info-container {
-    display: flex;
-    justify-content: space-between; /* Separa los elementos */
-    align-items: flex-start;
-    gap: 20px;
-    width: 100%;
-    align-items: stretch;
+  display: flex;
+  justify-content: space-between;
+  /* Separa los elementos */
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  align-items: stretch;
 }
 
 .intro-section,
 .features-section {
-    max-width: 50%;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  max-width: 50%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .intro-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* background-color: #d7e7dc; */
-    background-color: #dceee4e5;
-    padding: 10px;
-    border-radius: 8px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* background-color: #d7e7dc; */
+  background-color: #dceee4e5;
+  padding: 10px;
+  border-radius: 8px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 }
-  
+
 .features-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* background-color: #d7e7dc; */
-    background-color: #d4d8d84d;
-    padding: 10px;
-    border-radius: 8px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* background-color: #d7e7dc; */
+  background-color: #d4d8d84d;
+  padding: 10px;
+  border-radius: 8px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 }
 
 .features-list {
-    margin-top: 0;
-    margin-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .intro-title {
-    margin: 0;
+  margin: 0;
 }
 
 .features-text {
-    margin: 0;
-    margin-top: 10px;
-    font-size: 1.1em;
-    color: #555;
-    line-height: 1.6;
-    text-align: justify;
+  margin: 0;
+  margin-top: 10px;
+  font-size: 1.1em;
+  color: #555;
+  line-height: 1.6;
+  text-align: justify;
 }
 
 .intro-text {
-    margin: 0;
-    margin-top: 10px;
-    font-size: 1.1em;
-    color: #555;
-    line-height: 1.6;
-    text-align: justify;
+  margin: 0;
+  margin-top: 10px;
+  font-size: 1.1em;
+  color: #555;
+  line-height: 1.6;
+  text-align: justify;
 }
 
 .content-container {
@@ -171,4 +170,63 @@ h2 {
 .fade-in.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* --- DARK MODE OVERRIDES --- */
+:host-context(body.dark-mode) {
+  h1 {
+    color: #a4e4eb;
+    /* Brighter pastel teal */
+  }
+
+  p {
+    color: #f0f4f4;
+    /* High contrast text */
+  }
+
+  h2 {
+    color: #8bd3d8;
+    /* Slightly brighter secondary header */
+  }
+
+  li.option {
+    background-color: #172424;
+    /* Elevated teal surface */
+    color: #ffffff;
+    /* pure white */
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    border-left: 4px solid #008b95;
+    border-right: 4px solid #008b95;
+  }
+
+  li.option:hover {
+    background-color: #1e3131;
+    /* clearer hover state */
+  }
+
+  .intro-section {
+    background-color: #172424;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .features-section {
+    background-color: #131d1d;
+    /* Slightly darker than intro for contrast */
+    border: 1px solid #1a2a2a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .features-text,
+  .intro-text {
+    color: #e0e8e8;
+    /* Bright text */
+  }
+}
+
+:host-context(body.dark-mode) strong {
+  color: #a4e4eb;
+}
+
+:host-context(body.dark-mode) .option::before {
+  color: #a4e4eb;
 }
