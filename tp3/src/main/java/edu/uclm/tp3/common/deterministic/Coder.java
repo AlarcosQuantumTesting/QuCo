@@ -22,4 +22,12 @@ public abstract class Coder {
 		return sb.toString();
 	}
 
+    public static String getTargetQubits(String prefix, int startQubit, int depth) {
+		StringBuilder sb = new StringBuilder();
+		for (int i=startQubit; i<depth-1; i++)
+			sb.append(prefix + i + ",");
+		sb.append(prefix + (depth-1));
+		return sb.toString();
+	}
+
 }

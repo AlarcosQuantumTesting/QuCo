@@ -16,31 +16,31 @@ export class QiskitService {
     code.lines = gate.code.split("\n")
     code.description = gate.description
     code.qubits = gate.qubits
-    return this.client.post<any>(environment.beUrl + "qiskit/saveCode", code)
+    return this.client.post<any>(environment.tp3Url + "qiskit/saveCode", code)
   }
 
   deleteFromServer(gate: EdGate) {
-    return this.client.delete<any>(environment.beUrl + "qiskit/deleteGate/" + gate.name)
+    return this.client.delete<any>(environment.tp3Url + "qiskit/deleteGate/" + gate.name)
   }
 
   getQiskitMatrix(info : any) {
-    return this.client.put<any>(environment.beUrl + "unitaryMatrix/getMatrix", info)
+    return this.client.put<any>(environment.tp3Url + "unitaryMatrix/getMatrix", info)
   }
 
   getCode(info : any) {
-    return this.client.put<any>(environment.beUrl + "qiskit/getCode", info)
+    return this.client.put<any>(environment.tp3Url + "qiskit/getCode", info)
   }
 
   getCodeByName(name: string) {
-    return this.client.get<any>(`${environment.beUrl}qiskit/getCodeByName/${name}`);
+    return this.client.get<any>(`${environment.tp3Url}qiskit/getCodeByName/${name}`);
   }
 
   saveCode(qiskitCode : QiskitCode) {
-    return this.client.post<any>(environment.beUrl + "qiskit/saveCode", qiskitCode)
+    return this.client.post<any>(environment.tp3Url + "qiskit/saveCode", qiskitCode)
   }
 
   getCustomizedGates() {
-    return this.client.get<any[]>(environment.beUrl + "qiskit/getCustomizedGates")
+    return this.client.get<any[]>(environment.tp3Url + "qiskit/getCustomizedGates")
   }
 }
 

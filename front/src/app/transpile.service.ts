@@ -13,7 +13,7 @@ export class TranspileService {
     constructor(private client: HttpClient) {}
 
     getBackends(): Observable<Backend[]> {
-        return this.client.get<Backend[]>(environment.beUrl + this.controller + "/getBackends", { responseType : 'json' })
+        return this.client.get<Backend[]>(environment.tp3Url + this.controller + "/getBackends", { responseType : 'json' })
     }
 
     transpile(code: string, backends: string[], name?: string): Observable<string> {
@@ -24,6 +24,6 @@ export class TranspileService {
         if (name) {
         body.name = name;
         }
-        return this.client.post(environment.beUrl + this.controller + "/transpile", body, { responseType: 'text' })
+        return this.client.post(environment.tp3Url + this.controller + "/transpile", body, { responseType: 'text' })
     }
 }

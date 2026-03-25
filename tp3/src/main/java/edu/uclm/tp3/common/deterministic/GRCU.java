@@ -34,11 +34,35 @@ public class GRCU extends GRGate {
         return jsa.toString();
     }
 
-    @Override
+    @Override // Devuelve Qiskit
     public String toString() {
         if (this.controlQubit==-1)
             return "\tU.append(get" + this.functionPrefix + this.childName + "(), [" + Coder.getTargetQubits(startQubit, endQubit) + "])\n";
         return "\tU.append(get" + this.functionPrefix + this.childName + "().control(" + this.controlQubit + "), [" + Coder.getTargetQubits(startQubit, endQubit) + "])\n";
+    }
+
+    @Override
+    protected String getCirqCode() {
+        String declaration;
+        if (this.controlQubit==-1) {
+            declaration = "\top_" + this.functionPrefix + this.childName + " = (\n";
+            declaration = declaration + "\t\tcirq.CircuitOperation(get" + this.functionPrefix + this.childName + "()).\n" +
+                "\t\twith_qubit_mapping({\n";
+            for (int i=startQubit; i<endQubit; i++)
+                declaration = declaration + "\t\t\tcirq.LineQubit(" + (i-1) + "): q" + i + ",\n";
+            declaration = declaration + "\t\t})\n\t)\n";
+            declaration = declaration + "\tc.append(op_" + this.functionPrefix + this.childName + ")\n";
+            return declaration;
+        }
+
+        declaration = "\top_" + this.functionPrefix + this.childName + " = (\n";
+        declaration = declaration + "\t\tcirq.CircuitOperation(get" + this.functionPrefix + this.childName + "()).\n";
+        declaration = declaration + "\t\twith_qubit_mapping({\n";
+        for (int i=startQubit+1; i<endQubit; i++)
+                declaration = declaration + "\t\t\tcirq.LineQubit(" + (i-1) + "): q" + i + ",\n";
+        declaration = declaration+ "\t\t}).controlled_by(q0)\n\t)\n";
+        declaration = declaration + "\tc.append(op_" + this.functionPrefix + this.childName + ")\n";
+        return declaration;
     }
 
     public String getFunctionPrefix() {

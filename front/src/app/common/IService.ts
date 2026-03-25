@@ -22,26 +22,26 @@ export abstract class IService {
 
     connectSSE(): EventSource {
         if (!this.eventSource) {
-            let url = environment.beUrl + "sse"
+            let url = environment.tp3Url + "sse"
             this.eventSource = new EventSource(url);
         }
         return this.eventSource;
     }
 
     resetSession() {
-        return this.client.get(environment.beUrl + this.controller + "/resetSession", { withCredentials: true, responseType: 'text' })
+        return this.client.get(environment.tp3Url + this.controller + "/resetSession", { withCredentials: true, responseType: 'text' })
     }
 
     getGates() {
-        return this.client.get<any>(environment.beUrl + this.controller + "/getGates", { withCredentials: true })
+        return this.client.get<any>(environment.tp3Url + this.controller + "/getGates", { withCredentials: true })
     }
 
     getStrategies() {
-        return this.client.get<any>(environment.beUrl + this.controller + "/getStrategies", { withCredentials: true })
+        return this.client.get<any>(environment.tp3Url + this.controller + "/getStrategies", { withCredentials: true })
     }
 
     updateDesiredError(desiredError: number) {
-        return this.client.get<any>(environment.beUrl + this.controller + "/updateDesiredError?desiredError=" + desiredError, { withCredentials: true })
+        return this.client.get<any>(environment.tp3Url + this.controller + "/updateDesiredError?desiredError=" + desiredError, { withCredentials: true })
     }
 
     updateExpectedFrequencies(expectedFrequencies: number[], shots: number) {
@@ -49,7 +49,7 @@ export abstract class IService {
             expectedFrequencies: expectedFrequencies,
             shots: shots
         }
-        return this.client.put<any>(environment.beUrl + this.controller + "/updateExpectedFrequencies", info,  { withCredentials: true });
+        return this.client.put<any>(environment.tp3Url + this.controller + "/updateExpectedFrequencies", info,  { withCredentials: true });
     }
 
 
@@ -62,15 +62,15 @@ export abstract class IService {
             expectedFrequencies: expectedFrequencies,
             populationSize: populationSize
         }
-        return this.client.put<any>(environment.beUrl + this.controller + "/selectFitnesser", info, { withCredentials: true })
+        return this.client.put<any>(environment.tp3Url + this.controller + "/selectFitnesser", info, { withCredentials: true })
     }
 
     generateInitialPopulation(pc: ProblemConfiguration) {
-        return this.client.put<any>(environment.beUrl + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
+        return this.client.put<any>(environment.tp3Url + this.controller + "/generateInitialPopulation", pc, { withCredentials: true })
     }
     
     firstRun() {
-        return this.client.get<any>(environment.beUrl + this.controller + "/firstRun", { withCredentials: true })
+        return this.client.get<any>(environment.tp3Url + this.controller + "/firstRun", { withCredentials: true })
     }
 
     runPopulation(pc: ProblemConfiguration, strategies : Strategy[], stratego : string) {
@@ -80,16 +80,16 @@ export abstract class IService {
             info.push({name : strategies[i].name, probability : strategies[i].probability/totalProbs})
         }
 
-        let localUrl = environment.beUrl + this.controller + "/runPopulation?desiredError=" + pc.desiredError + "&selectedStratego=" + stratego
+        let localUrl = environment.tp3Url + this.controller + "/runPopulation?desiredError=" + pc.desiredError + "&selectedStratego=" + stratego
         return this.client.post<any>(localUrl, info, { withCredentials: true })
     }
 
     getCode(generation: number, index: number, fitnesserName: string) {
-        return this.client.get(environment.beUrl + this.controller + "/getCode/" + generation + "/" + index + "?fitnesserName=" + fitnesserName,
+        return this.client.get(environment.tp3Url + this.controller + "/getCode/" + generation + "/" + index + "?fitnesserName=" + fitnesserName,
             { responseType: 'text', withCredentials: true })
     }
 
     getSimpleFitnesser() {
-        return this.client.get<any>(environment.beUrl + this.controller + "/getSimpleFitnesser", { withCredentials: true })
+        return this.client.get<any>(environment.tp3Url + this.controller + "/getSimpleFitnesser", { withCredentials: true })
     }
 }
