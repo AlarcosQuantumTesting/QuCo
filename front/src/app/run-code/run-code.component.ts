@@ -82,7 +82,7 @@ export class RunCodeComponent implements OnInit {
     }
     this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
 
-    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
+    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
     if (ibm_token) {
         url += `&ibm_token=${ibm_token}`; 
@@ -120,7 +120,7 @@ export class RunCodeComponent implements OnInit {
     const overwriteValue = override ? 'y' : 'n';
 
     this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
-    let finalUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    let finalUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
     if (ibm_token) {
       finalUrl += `&ibm_token=${encodeURIComponent(ibm_token)}`;

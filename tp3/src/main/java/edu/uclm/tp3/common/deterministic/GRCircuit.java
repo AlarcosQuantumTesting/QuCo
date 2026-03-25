@@ -22,7 +22,7 @@ public class GRCircuit {
     }
 
     public String getCode(String backend) {
-        if (backend.equalsIgnoreCase("qiskit"))
+        if (backend==null || backend.equalsIgnoreCase("qiskit"))
             return this.toString();
         return this.getCirqCode();
     }
@@ -39,9 +39,8 @@ public class GRCircuit {
 
     private String getCirqCode() {
         StringBuilder sb = new StringBuilder("def get" + this.functionPrefix + this.name + "() -> cirq.FrozenCircuit:\n\t");
-        for (int i=0; i<this.qubits-1; i++) {
+        for (int i=0; i<this.qubits-1; i++)
             sb.append("q" + i + ", ");
-        }
         sb.append("q" + (this.qubits-1) + " = cirq.LineQubit.range(" + this.qubits + ")\n");
         sb.append("\tc = cirq.Circuit()\n");
         for (GRGate gate : this.gates)

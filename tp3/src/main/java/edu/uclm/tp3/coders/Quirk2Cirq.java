@@ -1,7 +1,8 @@
 package edu.uclm.tp3.coders;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import edu.uclm.tp3.common.deterministic.Coder;
 import edu.uclm.tp3.common.deterministic.QCircuit;
 import edu.uclm.tp3.common.deterministic.QCircuitGate;
 import edu.uclm.tp3.common.deterministic.QColumn;
@@ -10,7 +11,7 @@ import edu.uclm.tp3.common.deterministic.QGateReference;
 import edu.uclm.tp3.common.deterministic.QMatrixGate;
 import edu.uclm.tp3.common.deterministic.QStdGate;
 
-public class Quirk2Qiskit {
+public class Quirk2Cirq {
 
     public static StringBuilder getGatesDeclaration(List<QCircuit> circuits) throws Exception {
         StringBuilder sb = new StringBuilder();
@@ -44,28 +45,13 @@ public class Quirk2Qiskit {
         return sb;
     }
 
-    public static List<StringBuilder> getGatesDeclarations(QCircuit circuit, String... excludedGates) {
-        List<QGate> gates = circuit.getGates();
-        List<StringBuilder> ssbb = new ArrayList<>();
-        for (int i=0; i<gates.size(); i++) {
-            QGate gate = gates.get(i);
-            boolean excluded = false;
-            for (int j=0; j<excludedGates.length; j++) 
-                if (gate.getName().equals(excludedGates[j])) {
-                    excluded = true;
-                    break;
-                }
-            if (excluded)
-                continue;
-            if (!(gate instanceof QStdGate))
-                ssbb.add(getFunctionCode(gate));
-        }
-        return ssbb;
-    }
-
     private static StringBuilder getFunctionCode(QGate gate) {
-        StringBuilder sb = new StringBuilder("def get" + gate.getName() + "() :\n");
-        sb.append("\tU = QuantumCircuit(" + gate.getQubits() + ", name=\"" + gate.getName() + "\")\n");
+        StringBuilder sb = new StringBuilder("def get" + gate.getName() + "() -> cirq.FrozenCircuit:\n\t(");
+        for (int i=0; i<gate.getQubits()-1; i++)
+            sb.append("q" + i + ", ");
+        sb.append("q" + (gate.getQubits()-1) + ",) = cirq.LineQubit.range(" + gate.getQubits() + ")\n");
+        sb.append("\tc = cirq.Circuit()\n");
+
         if (gate instanceof QCircuitGate) {
             QCircuitGate qcg = (QCircuitGate) gate;
             sb.append(getFunctionCode(qcg));
@@ -73,13 +59,13 @@ public class Quirk2Qiskit {
             QMatrixGate qmg = (QMatrixGate) gate;
             sb.append(getFunctionCode(qmg));
         }
-        sb.append("\treturn U.to_gate()\n\n");
+        sb.append("\treturn cirq.FrozenCircuit(c)\n\n");
         return sb;
     }
 
     private static StringBuilder getFunctionCode(QMatrixGate gate) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\tU.ry(" + gate.getTheta() + ", 0)\n");
+        sb.append("\tc.append(cirq.ry(" + gate.getTheta() + ").on(q0))\n");
         return sb;
     }
 
@@ -119,26 +105,17 @@ public class Quirk2Qiskit {
         controlledQubits = new StringBuilder(controlledQubits.substring(0, controlledQubits.length()-2));
 
         if (controlledGate.getName().equals("X")) {
-            if (numberOfControlQubits>1)
-                sb.append("mcx([" + controlQubits + "], [" + controlledQubits + "])\n");
-            else 
-                sb.append("cx([" + controlQubits + "], [" + controlledQubits + "])\n");
+            sb.append("cirq.X(" + controlledQubits + ").controlled_by(" + controlQubits + ")\n");
         } else if (controlledGate.getName().equals("Z")) {
-            if (numberOfControlQubits>1)
-                sb.append("mcp(pi, [" + controlQubits  + "], [" + controlledQubits + "])\n");
-            else
-                sb.append("cz(" + controlQubits + ", " + controlledQubits + ")\n");
+            sb.append("cirq.Z(" + controlledQubits + ").controlled_by(" + controlQubits + ")\n");
         }  else if (controlledGate.getName().equals("H")) {
-            if (numberOfControlQubits>1) {
-                sb.append("HGate().control(" + controlQubits + controlledQubits + ")    # Ojo a esta H multicontrolada, no estoy seguro de que funcione\n");
-            } else
-                sb.append("ch(" + controlQubits + controlledQubits + ")\n");
+            sb.append("cirq.H(" + controlledQubits + ").controlled_by(" + controlQubits + ")\n");
         } else if (controlledGate instanceof QGateReference || controlledGate instanceof QCircuitGate || controlledGate instanceof QMatrixGate) {
             sb.append("append(get" + controlledGate.getName() + "().control(" + numberOfControlQubits + "), [" + controlQubits + controlledQubits + "])\n");
         } else 
             sb = new StringBuilder("# " + circuitName + "." + controlledGate.getName() + "(" + controlledQubits + ")     # Ojo a esta puerta controlada ******** \n");
         if (circuitName.equals("circuit"))
-            sb.append(circuitName + ".barrier()\n");
+            sb.append(circuitName + ".Moment()\n");
         return sb;
     }
 
@@ -156,8 +133,16 @@ public class Quirk2Qiskit {
                     sb.append(getBasicGateCode("U", gateName, i));
                 startQubit = startQubit + 1;
             } else {
-                sb.append("\tU.append(get" + gateName + "(), range(" + startQubit + ", " + (startQubit + gate.getQubits()) + "))\n");
-                startQubit = startQubit + gate.getQubits();
+                sb.append("\tappend_subcircuit(c, get" + gate.getName() + "(), [");
+                sb.append(Coder.getTargetQubits("q", startQubit, startQubit + gate.getQubits()));
+                sb.append("])\n");
+                /*sb.append("\tc.append(\n");
+                sb.append("\t\tcirq.CircuitOperation(get" + gate.getName() + "()).with_qubit_mapping({\n");
+                for (int j=0; j<gate.getQubits(); j++)
+                    sb.append("\t\t\tcirq.LineQubit(" + j + ") : " + (j+1) + ",\n");
+                sb.append("\t\t})\n");
+                sb.append("\t)\n");
+                startQubit = startQubit + gate.getQubits();*/
             } 
         }
         return sb;

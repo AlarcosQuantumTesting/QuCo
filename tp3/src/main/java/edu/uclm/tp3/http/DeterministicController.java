@@ -65,34 +65,35 @@ public class DeterministicController {
 		String algorithm = jso.optString("algorithm", "grenoble");
 		boolean originalGR = algorithm.equals("originalGR");
 		boolean useMCX = jso.optBoolean("useMCX", false);
-		String template = jso.optString("template", null);
+		String templateName = jso.getString("template");
 
-		String backend = null;
-		if (template!=null) {
-			Optional<CodeTemplate> templateCode = this.templateDao.findById(template);
-			if (templateCode.isPresent() && templateCode.get().getCode().contains("import cirq"))
-				backend = "cirq";
-			else 
-				backend = "qiskit";
-		}
+		boolean steaking = false;
+
+		Optional<CodeTemplate> optTemplateCode = this.templateDao.findById(templateName);
+		if (optTemplateCode.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, templateName + " not found");
+		String templateCode = optTemplateCode.get().getCode();
 		
 		expectedFrequencies.sort();
 		try {
 			Map<String, Object> result = null;
 			if (algorithm.equals("grover")) {
 				if (inParallel)
-					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateInParallel(qubits, expectedFrequencies, useMCX, templateCode);
 				else if (splitCircuits)
-					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculateSplitting(qubits, expectedFrequencies, useMCX, templateCode);
+				else if (steaking)
+					result = this.groverService.calculateSteaking(qubits, expectedFrequencies, useMCX, templateCode);
 				else
-					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX);
+					result = this.groverService.calculate(qubits, expectedFrequencies, useMCX, templateCode);
 			} else if (algorithm.equals("hamming")) {
 				result = this.hammingService.calculate(qubits, expectedFrequencies, functionPrefix);
 			} else {
+				String backend = "qiskit";
 				if (inParallel)
-					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else if (splitCircuits)
-					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR);
+					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 				else
 					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix, originalGR, backend);
 			}

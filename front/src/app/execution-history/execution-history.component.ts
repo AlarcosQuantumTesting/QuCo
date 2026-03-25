@@ -46,7 +46,7 @@ export class ExecutionHistoryComponent implements OnInit {
   modalShare = false;
   generatedShareId: string = '';
   
-  private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8080/run_qiskit`; 
+  private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/run_qiskit`; 
 
   constructor(private http: HttpClient) { }
 

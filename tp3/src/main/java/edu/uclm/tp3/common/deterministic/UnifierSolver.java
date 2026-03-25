@@ -10,16 +10,14 @@ public class UnifierSolver {
 	protected BinaryTree tree;
 	private String functionPrefix;
 	private boolean originalGR;
-	private String backend;
 		
-	public UnifierSolver(BinaryTree tree, String functionPrefix, boolean originalGR, String backend) {
+	public UnifierSolver(BinaryTree tree, String functionPrefix, boolean originalGR) {
 		this.tree = tree;
 		this.functionPrefix = functionPrefix;
 		this.originalGR = originalGR;
-		this.backend = backend;
 	}
 
-	public Map<String, Object> solve(int shots) {
+	public Map<String, Object> solve(int shots, String backend) {
 		Map<String, BinaryTree> nodes = this.tree.getSeparatedNodes();
 
 		List<String> nodeNames = nodes.keySet().stream()
@@ -76,9 +74,9 @@ public class UnifierSolver {
 		QCircuit generalCircuit = new QCircuit();
 		Object[] initialize;
 		if (originalGR)
-			initialize = this.getInitialize(usedNodesList, generalCircuit);
+			initialize = this.getInitialize(usedNodesList, generalCircuit, backend);
 		else 
-			initialize = this.getInitialize(usedNodesMap, generalCircuit);
+			initialize = this.getInitialize(usedNodesMap, generalCircuit, backend);
 		
 		result.put("#INITIALIZE#", initialize[0]);
 
@@ -86,23 +84,23 @@ public class UnifierSolver {
 		return result;
 	}
 
-	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit) {
+	private Object[] getInitialize(List<BinaryTree> usedNodeList, QCircuit generalCircuit, String backend) {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		for (BinaryTree bt : usedNodeList) {
-			sbSubcircuits.append(bt.getCode(this.backend));
+			sbSubcircuits.append(bt.getCode(backend));
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 
 		return new Object[]{ sbSubcircuits + "\n", qCircuits };
 	}
 	
-	private Object[] getInitialize(Map<Integer, BinaryTree> usedNodesMap, QCircuit generalCircuit) {
+	private Object[] getInitialize(Map<Integer, BinaryTree> usedNodesMap, QCircuit generalCircuit, String backend) {
 		StringBuilder sbSubcircuits = new StringBuilder();
 		List<QCircuit> qCircuits = new ArrayList<>();
 		
 		for (BinaryTree bt : usedNodesMap.values()) {
-			sbSubcircuits.append(bt.getCode(this.backend));
+			sbSubcircuits.append(bt.getCode(backend));
 			qCircuits.add(this.buildQuirk(bt, generalCircuit));
 		}
 		
