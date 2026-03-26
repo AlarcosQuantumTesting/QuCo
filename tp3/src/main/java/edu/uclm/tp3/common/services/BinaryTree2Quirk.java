@@ -119,9 +119,9 @@ public class BinaryTree2Quirk {
         Map<String, BinaryTree> nodes = tree.getSeparatedNodes();
         for (String nodeName : nodes.keySet()) {
             BinaryTree node = nodes.get(nodeName);
-            if (node.depth == qubits) 
+            if (node.depth == qubits - 1) 
                 continue; // Skip leaf nodes
-            if (node.depth == qubits - 1) {
+            if (node.depth == qubits - 2) {
                 buildGatesDepth2(node, originalGR, gates, quirkCircuit);
             } else {
                 buildGatesDepthN(node, originalGR, gates, quirkCircuit);
