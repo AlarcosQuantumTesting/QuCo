@@ -31,8 +31,6 @@ export class RunCodeComponent implements OnInit {
 
   @Output() cerrar = new EventEmitter<void>();
 
-
-  executionUrl: string = 'https://alarcosj.esi.uclm.es/proxyaotro/proxyaotro/resend?url=';
   batchId?: string
 
   runWhat: string = 'qiskit';

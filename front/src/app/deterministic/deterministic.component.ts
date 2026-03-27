@@ -14,6 +14,7 @@ import { ExpressionsService } from '../expressions.service';
 import { TranspileService } from '../transpile.service';
 import { Backend } from './Backend';
 import { ProjectService } from '../project.service';
+import { environment } from '../../environments/environment';
 
 
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
@@ -753,12 +754,11 @@ export class DeterministicComponent extends GroverStyle {
       const originalTitle = copyTooltip.title;
       copyTooltip.title = 'Copied!';
 
-      // Opcional: forzar el tooltip actualizando el atributo
-      copyTooltip.click(); // Algunos navegadores lo fuerzan así
+      copyTooltip.click();
 
       setTimeout(() => {
         copyTooltip.title = originalTitle;
-      }, 1500); // Vuelve al tooltip original después de 1.5 segundos
+      }, 1500);
     }).catch(err => {
     });
   }
@@ -775,15 +775,13 @@ export class DeterministicComponent extends GroverStyle {
   showQuirk(index?: number) {
     if (index == undefined)
       index = 0
-    // let url = "https://algassert.com/quirk#circuit=" + this.quirkCodes[index]
-    let url = " https://alarcosj.esi.uclm.es/quirk#circuit=" + this.quirkCodes[index]
+    let url = environment.baseUrlQuirk + "=" + this.quirkCodes[index]
 
     this.quirkURL = url
     window.open(url, "_blank")
   }
 
   resetValues() {
-    // Eliminar valores guardados en localStorage
     localStorage.removeItem('qubits');
     localStorage.removeItem('processedExpressionsDeterministic');
     localStorage.removeItem('matrix');
@@ -866,16 +864,12 @@ export class DeterministicComponent extends GroverStyle {
     this.pageIndex = 0;
 
 
-    //this.getEmptyMatrix();
-    // this.goToSpecifications();
     this.onAlgorithmChange(this.selectedAlgorithm);
     this.goToTable();
-    // this.clearExpressions();
     this.saveState();
   }
 
   goToTable(): void {
-    // Encontramos el elemento con el id 'myTable' y desplazamos la página hacia él
     const table = document.getElementById('myTable');
     if (table) {
       table.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -883,7 +877,6 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   toggleTooltipTable(event: MouseEvent): void {
-    //this.tooltipVisible = !this.tooltipVisible;
     event.stopPropagation();
 
     if (this.tooltipTableVisible) {
@@ -898,7 +891,6 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   toggleTooltip(event: MouseEvent): void {
-    //this.tooltipVisible = !this.tooltipVisible;
     event.stopPropagation();
 
     if (this.tooltipVisible) {

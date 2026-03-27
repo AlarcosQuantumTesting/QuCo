@@ -12,6 +12,7 @@ import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { ProjectService } from '../project.service';
 import { QiskitCode } from '../grover/QiskitCode';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-matrixes',
@@ -432,11 +433,11 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
 
         this.quirkURL = url
         // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -464,11 +465,11 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
 
         this.quirkURL = url
         // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -489,10 +490,10 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
         this.quirkURL = url
         //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
