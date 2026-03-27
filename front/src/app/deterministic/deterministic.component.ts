@@ -119,6 +119,27 @@ export class DeterministicComponent extends GroverStyle {
   modalTranspile: boolean = false;
   modalError: boolean = false;
 
+  isEditingCode: boolean = false;
+
+  toggleEditCode() {
+    this.isEditingCode = !this.isEditingCode;
+  }
+
+  get qiskitCodeString(): string {
+    return this.qiskitCode?.lines ? this.qiskitCode.lines.join('\n') : '';
+  }
+
+  set qiskitCodeString(value: string) {
+    if (this.qiskitCode) {
+      this.qiskitCode.lines = value.split('\n');
+    }
+  }
+
+  get codeLinesCount(): number {
+    const lines = this.qiskitCode?.lines ? this.qiskitCode.lines.length : 15;
+    return lines > 5 ? lines : 5;
+  }
+
   expressionToDelete: any = null;
   deleteIndex: number = -1;
 
@@ -444,6 +465,7 @@ export class DeterministicComponent extends GroverStyle {
     this.state = "Calculating";
     this.error = undefined;
     this.isLoadingQiskitCode = true;
+    this.isEditingCode = false;
     this.mostrarModal = true;
 
     if (this.expectedFrequencies.getShots() === 0) {

@@ -44,6 +44,7 @@ export class CircuitEditorComponent {
   Math: any = Math
 
   customizedGates: EdGate[] = [];
+  defaultGates: EdGate[] = [new EdGate('M', 1)];
 
   mensajeTemporal: string = '';
   mensajeTemporal2: string = '';
@@ -112,6 +113,7 @@ export class CircuitEditorComponent {
     this.qiskitService.getCustomizedGates().subscribe(
       gates => {
         for (let i = 0; i < gates.length; i++) {
+          if (this.defaultGates.some(dg => dg.name === gates[i].name)) continue;
           let edGate = new EdGate(gates[i].name, gates[i].qubits)
           edGate.description = gates[i].description
           edGate.code = gates[i].code
@@ -738,16 +740,18 @@ export class CircuitEditorComponent {
   selectMeasurementGate() {
     if (!this.circuit)
       return;
-    if (this.gateMselected) {
+    const mGate = this.defaultGates.find(g => g.name === 'M');
+    if (!mGate) return;
+
+    if (this.selectedGate === mGate) {
       this.gateMselected = false;
       this.selectedGate = undefined;
     } else {
-      this.selectedGate = new EdGate('M', 1);
+      this.selectedGate = mGate;
       this.gateMselected = true;
       this.selectedGate.description = 'Measure this qubit';
       this.selectedGate.code = 'circuit.measure(' + this.circuit.qubits.length + ', ' + this.circuit.qubits.length + ')';
     }
-
   }
 
   createCustomizedGate() {
@@ -960,6 +964,7 @@ export class CircuitEditorComponent {
   }
 
   gateExists(): boolean {
+    if (this.defaultGates.some(dg => dg.name === this.selectedGate!.name)) return true;
     for (let i = 0; i < this.customizedGates.length; i++) {
       if (this.selectedGate!.name === this.customizedGates[i].name) {
         return true;
@@ -1009,6 +1014,16 @@ export class CircuitEditorComponent {
   codeShowGates(gate: any) {
     this.selectedGate = gate;
     this.modalCodigoGate = true;
+  }
+
+  showMeasurementCodeGate() {
+    const mGate = this.defaultGates.find(g => g.name === 'M');
+    if (mGate) {
+      this.selectedGate = mGate;
+      this.selectedGate.description = 'Measure this qubit';
+      this.selectedGate.code = 'circuit.measure(' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ', ' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ')';
+      this.modalCodigoGate = true;
+    }
   }
 
   transpileCodigo() {
@@ -1074,6 +1089,11 @@ export class CircuitEditorComponent {
 
   openPlacementChoice(startQubit: number, column: number) {
     if (!this.selectedGate) return;
+
+    if (this.selectedGate.qubits === 1) {
+      this.placeGate(startQubit, column);
+      return;
+    }
 
     this.currentStartQubit = startQubit;
     this.currentColumn = column;

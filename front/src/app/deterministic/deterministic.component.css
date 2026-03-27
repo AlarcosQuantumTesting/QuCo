@@ -2630,21 +2630,64 @@ select[disabled] {
 :host-context(body.dark-mode) .listaBackends .list-group-item .text-muted {
   color: #8fa8a8 !important;
 }
+
 .download-as-btn {
-    background-color: #15803d;
-    color: white;
-    border: none;
-    border-radius: 40px;
-    font-size: 14px;
-    transition: background-color 0.3s;
-    margin: 0;
-    margin-bottom: 15px;
-    margin-right: 15px;
-    padding: 10px 15px;
+  background-color: #15803d;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
 }
 
 .download-as-btn:hover {
-    background-color: #166534;
-    transform: scale(1.05);
-    cursor: pointer;
+  background-color: #166534;
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.code-editor-pre {
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  /* background-color: #f8f9fa; */
+  border: 1px solid transparent;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.code-editor-textarea {
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  background-color: #f8f9fa;
+  border: 1px solid #007d86;
+  border-radius: 5px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-y: hidden;
+}
+
+:host-context(body.dark-mode) .code-editor-pre {
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .code-editor-textarea {
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: #007d86 !important;
 }

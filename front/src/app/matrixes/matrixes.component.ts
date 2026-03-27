@@ -172,6 +172,18 @@ export class MatrixesComponent implements AfterViewInit {
   showApplyChangesModal: boolean = false;
   applyChanges: boolean = false;
 
+  isEditingCode: boolean = false;
+
+  toggleEditCode() {
+    this.isEditingCode = !this.isEditingCode;
+  }
+
+  get codeLinesCount(): number {
+    if (!this.qiskitCode) return 15;
+    const lines = this.qiskitCode.split('\n').length;
+    return lines > 5 ? lines : 5;
+  }
+
   constructor(private quirkService: QuirkService, private qiskitService: QiskitService, private fillingService: FillingService,
     public sanitizer: DomSanitizer, public manager: ManagerService, public service: ExpressionsService, public transpileService: TranspileService,
     private projectService: ProjectService) { }
@@ -535,6 +547,8 @@ export class MatrixesComponent implements AfterViewInit {
     }
     this.reset()
     this.isLoadingQiskitCode = true;
+    this.isEditingCode = false;
+
 
     let info = {
       matrix: matrix,
@@ -614,6 +628,8 @@ export class MatrixesComponent implements AfterViewInit {
 
     this.reset();
     this.isLoadingQiskitCode = true;
+    this.isEditingCode = false;
+
 
     let info = {
       matrix: matrix,
