@@ -130,8 +130,9 @@
               <div class="gates-section">
                 <div class="gate-category-title">Default gates</div>
                 <div class="gate-buttons">
-                  <button *ngFor="let dg of defaultGates" (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" 
-                    class="gate-btn" [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
+                  <button *ngFor="let dg of defaultGates"
+                    (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" class="gate-btn"
+                    [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
                     {{ dg.name }} <i *ngIf="dg.name === 'M'" class="fas fa-ruler"></i>
                   </button>
                 </div>
@@ -267,11 +268,9 @@
       </div>
 
       <div class="code-output">
-        <!-- <small id="codeArea"> -->
-        <pre>
-                    {{ code }}
-                    </pre>
-        <!-- </small> -->
+        <pre *ngIf="!isEditingCode" id="codeArea" class="code-editor-pre">{{ code }}</pre>
+        <textarea *ngIf="isEditingCode" [(ngModel)]="code" [rows]="codeLinesCount" class="code-editor-textarea"
+          spellcheck="false"></textarea>
       </div>
 
       <div class="modal-footer">
@@ -281,8 +280,13 @@
           Execute remote</button>
         <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
           Transpile</button>
-        <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
+        <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download
+          as</button>
         <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="copy-btn" style="background-color: #34495eba !important;" (click)="toggleEditCode()">
+          <i class="fas" [ngClass]="isEditingCode ? 'fa-check' : 'fa-edit'"></i>
+          {{ isEditingCode ? 'Finish editing' : 'Edit code' }}
+        </button>
       </div>
     </div>
   </div>
@@ -375,7 +379,8 @@
           </thead>
           <tbody>
             <tr *ngIf="customizedGates.length === 0">
-              <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.</td>
+              <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.
+              </td>
             </tr>
             <tr *ngFor="let cg of customizedGates; let i = index">
               <td>{{ cg.name }}</td>
@@ -408,7 +413,8 @@
               <td>{{ dg.qubits }}</td>
               <td>{{ dg.description || (dg.name === 'M' ? 'Measure this qubit' : '') }}</td>
               <td>
-                <button class="update-btn" title="See code" (click)="dg.name === 'M' ? showMeasurementCodeGate() : codeShowGates(dg); copiarCodigoGate()"
+                <button class="update-btn" title="See code"
+                  (click)="dg.name === 'M' ? showMeasurementCodeGate() : codeShowGates(dg); copiarCodigoGate()"
                   style="margin-right: 10px;"><i class="fa fa-code"></i></button>
               </td>
             </tr>
@@ -443,7 +449,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="download-as-btn" (click)="mostrarDownloadModalGate = true"><i class="fas fa-download"></i> Download as</button>
+        <button class="download-as-btn" (click)="mostrarDownloadModalGate = true"><i class="fas fa-download"></i>
+          Download as</button>
         <button class="copy-btn" (click)="copiarCodigoGate()"><i class="fas fa-copy"></i> Copy</button>
       </div>
     </div>

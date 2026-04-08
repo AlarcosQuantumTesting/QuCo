@@ -62,6 +62,7 @@ export class CircuitEditorComponent {
   modalCodigoGate: boolean = false;
   modalTranspile: boolean = false;
   mostrarInstEjecucion = false;
+  isEditingCode: boolean = false;
 
   circuitName: string = '';
   transpiledCode: string = '';
@@ -951,8 +952,19 @@ export class CircuitEditorComponent {
   }
 
   showModalCode() {
+    this.isEditingCode = false;
     this.modalCodigo = true;
     this.generateCode();
+  }
+
+  toggleEditCode() {
+    this.isEditingCode = !this.isEditingCode;
+  }
+
+  get codeLinesCount(): number {
+    if (!this.code) return 15;
+    const lines = this.code.split('\n').length;
+    return lines > 5 ? lines : 5;
   }
 
   copiarCodigo() {
