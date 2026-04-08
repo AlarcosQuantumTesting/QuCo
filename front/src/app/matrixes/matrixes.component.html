@@ -10,7 +10,8 @@
         <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
             <div class="help-modal-header" cdkDragHandle>
                 <h2 class="help-title-modal">Help</h2>
-                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="toggleHelp()">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)"
+                        title="Minimize"></i> <i class="close-i" (click)="toggleHelp()">&times;</i></button>
             </div>
             <div class="help-text">
                 <h2 class="help-heading" style="color: #0a6369;">
@@ -354,10 +355,13 @@
     <!-- Modales -->
 
     <div class="modal instrucciones" *ngIf="mostrarInstrucciones">
-        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content">
+        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+            cdkDragRootElement="modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Instructions</h2>
-                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="mostrarInstrucciones = false">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)"
+                        title="Minimize"></i> <i class="close-i"
+                        (click)="mostrarInstrucciones = false">&times;</i></button>
             </div>
             <div class="intructions-content">
                 <p class="text-instructions">The expressions you can introduce are processed by an extremely simple
@@ -400,10 +404,12 @@
 
     <div class="modal ejemplos" *ngIf="mostrarEjemplos">
 
-        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content">
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize
+            cdkDragRootElement=".modal-content">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Examples</h2>
-                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i> <i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
+                <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)"
+                        title="Minimize"></i> <i class="close-i" (click)="mostrarEjemplos = false">&times;</i></button>
             </div>
             <div class="intructions-content">
                 <ol>
@@ -466,7 +472,8 @@
             </div>
         </div>
 
-        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode"
+        <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize
+            cdkDragRootElement=".modal-content" *ngIf="!isLoadingQiskitCode"
             style="height: fit-content; max-height: 90%;">
             <!-- Botón para cerrar el modal -->
             <div class="modal-header" cdkDragHandle>
@@ -500,7 +507,9 @@
 
                 <div *ngIf="qiskitCode && qiskitCode.length>0">
                     <div style="margin: 20px;">
-                        <pre>{{ qiskitCode }}</pre>
+                        <pre *ngIf="!isEditingCode" class="code-editor-pre">{{ qiskitCode }}</pre>
+                        <textarea *ngIf="isEditingCode" [(ngModel)]="qiskitCode" [rows]="codeLinesCount"
+                            class="code-editor-textarea" spellcheck="false"></textarea>
                     </div>
                     <div class="mensaje-temporal" *ngIf="mensajeTemporal">
                         {{ mensajeTemporal }}
@@ -536,9 +545,15 @@
                         class="fas fa-rocket"></i> Execute remote</button>
                 <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
                     Transpile</button>
-                <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
+                <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i>
+                    Download as</button>
                 <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
                 <button class="save-code-btn" (click)="guardarCodigo()"><i class="fas fa-save"></i> Save</button>
+                <button class="copy-btn" style="background-color: #34495eba !important;" (click)="toggleEditCode()">
+                    <i class="fas" [ngClass]="isEditingCode ? 'fa-check' : 'fa-edit'"></i> {{ isEditingCode ?
+                    'Finish editing' : 'Edit code' }}
+                </button>
+
             </div>
         </div>
     </div>
@@ -699,7 +714,8 @@
 
     <div class="modal instrucciones" *ngIf="modalTranspile">
 
-        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content" style="min-width: 950px;">
+        <div class="modal-content instrucciones" cdkDrag #minDir="appMinimize" appMinimize
+            cdkDragRootElement="modal-content" style="min-width: 950px;">
             <div class="modal-header" cdkDragHandle>
                 <h2 class="title-modal">Transpile Code</h2>
                 <button class="close"><i class="close-i" (click)="modalTranspile = false">&times;</i></button>
@@ -877,4 +893,3 @@
     </div>
 
 </body>
-

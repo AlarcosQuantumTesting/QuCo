@@ -12,6 +12,7 @@ import { Backend } from '../deterministic/Backend';
 import { TranspileService } from '../transpile.service';
 import { ProjectService } from '../project.service';
 import { QiskitCode } from '../grover/QiskitCode';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-matrixes',
@@ -170,6 +171,18 @@ export class MatrixesComponent implements AfterViewInit {
   showDeleteProjectModal: boolean = false;
   showApplyChangesModal: boolean = false;
   applyChanges: boolean = false;
+
+  isEditingCode: boolean = false;
+
+  toggleEditCode() {
+    this.isEditingCode = !this.isEditingCode;
+  }
+
+  get codeLinesCount(): number {
+    if (!this.qiskitCode) return 15;
+    const lines = this.qiskitCode.split('\n').length;
+    return lines > 5 ? lines : 5;
+  }
 
   constructor(private quirkService: QuirkService, private qiskitService: QiskitService, private fillingService: FillingService,
     public sanitizer: DomSanitizer, public manager: ManagerService, public service: ExpressionsService, public transpileService: TranspileService,
@@ -432,11 +445,11 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
 
         this.quirkURL = url
         // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -464,11 +477,11 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
 
         this.quirkURL = url
         // window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -489,10 +502,10 @@ export class MatrixesComponent implements AfterViewInit {
           result = this.applyHadamardToQuirk(result);
         }
         // let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://algassert.com/quirk#circuit=" + JSON.stringify(result))
-        let url = this.sanitizer.bypassSecurityTrustResourceUrl("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result))
+        let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
         this.quirkURL = url
         //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open("https://alarcosj.esi.uclm.es/quirk#circuit=" + JSON.stringify(result), "_new")
+        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -534,6 +547,8 @@ export class MatrixesComponent implements AfterViewInit {
     }
     this.reset()
     this.isLoadingQiskitCode = true;
+    this.isEditingCode = false;
+
 
     let info = {
       matrix: matrix,
@@ -613,6 +628,8 @@ export class MatrixesComponent implements AfterViewInit {
 
     this.reset();
     this.isLoadingQiskitCode = true;
+    this.isEditingCode = false;
+
 
     let info = {
       matrix: matrix,

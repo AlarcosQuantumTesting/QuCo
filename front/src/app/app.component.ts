@@ -549,8 +549,9 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.errorToken = '';
 
     if (!sToken || !email) {
-      console.log("No token in localStorage. Attempting to restore from cookie...");
-      return await this.restoreSessionFromCookie(false);
+      console.log("No token in localStorage. Cannot restore session without JWT.");
+      this.clearUserStorage();
+      return false;
     }
 
     const cookieValid = await this.restoreSessionFromCookie(true);
@@ -558,6 +559,8 @@ export class AppComponent implements AfterViewInit, OnInit {
       console.log("Session cookie missing or invalid. Cleared local storage.");
       return false;
     }
+
+
 
     const validationData = {
       token: sToken,
@@ -594,13 +597,9 @@ export class AppComponent implements AfterViewInit, OnInit {
 
       if (response.ok) {
         const responseEmail = response.body;
-        if (responseEmail) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (responseEmail && emailRegex.test(responseEmail.trim())) {
           console.log("Session valid from cookie. Email:", responseEmail);
-          localStorage.setItem('userEmail', responseEmail);
-
-          if (!localStorage.getItem('userToken')) {
-            localStorage.setItem('userToken', 'COOKIE_SESSION');
-          }
 
           if (!silent) {
             this.mensajeExito = `Welcome back, ${responseEmail}!`;
