@@ -413,115 +413,22 @@ export class CircuitEditorComponent {
     if (!this.circuit)
       return
 
-    let maxQubitIndex = -1;
-    this.gateRegistry.forEach(registration => {
-      registration.qubits.forEach(q => {
-        if (q > maxQubitIndex) maxQubitIndex = q;
-      });
-    });
+    const payload = {
+        templateName: this.manager.selectedTemplate.fileName,
+        qubitsConfigurationName: this.qubitsConfiguration?.name,
+        circuit: this.circuit,
+        gateRegistry: this.gateRegistry
+    };
 
-    const usedQubitsCount = maxQubitIndex === -1 ? 0 : maxQubitIndex + 1;
-
-    this.code = this.manager.selectedTemplate.code
-    this.code = this.code?.replace("#QUBITS#", usedQubitsCount.toString())
-    this.code = this.code?.replace("#OUTPUT_QUBITS#", usedQubitsCount.toString())
-
-    if (this.qubitsConfiguration) {
-      this.code = this.code?.replace("#QUBITS_LAYOUT#", this.qubitsConfiguration.matrix.slice(0, usedQubitsCount).join(", "))
-    } else {
-      this.code = this.code?.replace(", initial_layout=[#QUBITS_LAYOUT#])", ")")
-    }
-
-    let usedGates = new Map<string, EdGate>()
-
-    for (let i = 0; i < this.circuit.qubits.length; i++) {
-      let qubit = this.circuit.qubits[i]
-      for (let j = 0; j < qubit.gates.length; j++) {
-        let gate = qubit.gates[j]
-        if (gate?.name && gate.name !== "I" && gate.name !== "M" && gate.name !== "0" && gate.name !== "H") {
-          usedGates.set(gate.name, gate)
-        }
+    this.circuitsService.generateCode(payload).subscribe(
+      response => {
+        this.responseReceived = response;
+        this.code = response.CODE;
+      },
+      error => {
+        this.error = error.error?.message || error.message || "Error generating code";
       }
-    }
-
-    let initialize = "";
-    const gateToFunctionMap = new Map<string, string>();
-    usedGates.forEach((gate) => {
-      const matchingGate = this.customizedGates?.find(g => g.name === gate.name);
-
-      let gateCode = matchingGate?.code || gate.code;
-      if (gateCode) {
-        initialize += gateCode + "\n\n";
-        const funcName = this.extractFunctionName(gateCode);
-        if (funcName) {
-          gateToFunctionMap.set(gate.name!, funcName);
-        }
-      } else {
-        initialize += `# Error loading gate ${gate.name}\n\n`;
-      }
-    });
-
-    let calculus = ""
-
-    let measures = ""
-    for (let i = 0; i < this.circuit.columns; i++) {
-      for (let j = 0; j < this.circuit.qubits.length; j++) {
-        let gate = this.circuit.qubits[j].gates[i]
-        if (!gate || gate.name == "I" || gate.name == "0" || !gate.name)
-          continue
-        if (gate.name == "M") {
-          measures += "circuit.measure(" + j + ", " + (usedQubitsCount - j - 1) + ")\n"
-        }
-      }
-    }
-
-    const consolidatedQubitSets = new Map<string, Set<number>>();
-
-    const sortedRegistry = [...this.gateRegistry].sort((a, b) => {
-      if (a.column !== b.column) {
-        return a.column - b.column;
-      }
-      return a.parentQubit - b.parentQubit;
-    });
-
-    sortedRegistry.forEach(registration => {
-      const key = `${registration.transactionId}_${registration.name}`;
-
-      if (!consolidatedQubitSets.has(key)) {
-        consolidatedQubitSets.set(key, new Set<number>());
-      }
-
-      const currentSet = consolidatedQubitSets.get(key)!;
-      registration.qubits.forEach(q => currentSet.add(q));
-    });
-
-    // Generar el código de append
-    consolidatedQubitSets.forEach((qubitsSet, key) => {
-      const gateName = key.substring(key.indexOf("_") + 1)
-
-      const sortedQubits = Array.from(qubitsSet).sort((a, b) => a - b);
-      const qubitsList = sortedQubits.join(', ');
-      console.log("GateName: ", gateName);
-      if (gateName === "M") {
-        //calculus += `circuit.measure(${gateName}(), [${qubitsList}])\n`;
-        sortedQubits.forEach(q => {
-          calculus += `circuit.measure(${q}, ${usedQubitsCount - q - 1})\n`;
-        });
-      } else if (gateName === "H") {
-        sortedQubits.forEach(q => {
-          calculus += `circuit.h(${q})\n`;
-        });
-      } else {
-        const displayGateName = gateToFunctionMap.get(gateName) || gateName;
-        calculus += `circuit.append(${displayGateName}(), [${qubitsList}])\n`;
-      }
-
-    });
-
-    this.code = this.code?.replace("#INITIALIZE#", initialize)
-    this.code = this.code?.replace("#CALCULUS#", calculus)
-    this.code = this.code?.replace("#MEASURES#", measures)
-    this.code = this.code?.replace("#SHOTS#", "1000")
+    );
   }
 
   extractFunctionName(code: string): string | null {
