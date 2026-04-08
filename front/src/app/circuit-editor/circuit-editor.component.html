@@ -103,34 +103,38 @@
                             <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-edit" style="cursor: pointer;"></i></button>
                           </div>
                         </div> -->
-            <div class="template-header"
-              style="display: flex; align-items: center; justify-content: space-between; padding: 8px;">
-              <div class="template-buttons">
-                <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp"
-                  style="cursor: pointer;"><i class="fa fa-plus" style="cursor: pointer !important;"
-                    (click)="createCustomizedGate()"></i></button>
+            <div class="gates-container">
+              <div class="gates-section">
+                <div class="gate-category-title">
+                  <span>User gates</span>
+                  <div class="gate-title-actions">
+                    <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp">
+                      <i class="fa fa-plus"></i>
+                    </button>
+                    <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp">
+                      <i class="fa fa-edit"></i>
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="customizedGates.length === 0" class="no-user-gates">
+                  No user gates yet
+                </div>
+                <div class="gate-buttons" *ngIf="customizedGates.length > 0">
+                  <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
+                    [ngClass]="{'selected-gate': selectedGate === cg}" class="gate-btn">
+                    {{ cg.name }}
+                  </button>
+                </div>
               </div>
 
-              <label style="font-size: 16px; font-weight: bold;">Gates
-              </label>
-
-              <div class="template-buttons">
-                <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp"
-                  style="cursor: pointer;"><i class="fa fa-edit" style="cursor: pointer;"></i></button>
-              </div>
-            </div>
-
-            <div *ngIf="customizedGates.length > 0" class="gates-container">
-              <div class="gate-buttons">
-                <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
-                  [ngClass]="{'selected-gate': selectedGate === cg}" class="gate-btn">
-                  {{ cg.name }}
-                </button>
-
-                <button (click)="selectMeasurementGate()" class="gate-btn measurement-btn"
-                  [ngClass]="{'selected-gate': gateMselected}">
-                  M <i class="fas fa-ruler"></i>
-                </button>
+              <div class="gates-section">
+                <div class="gate-category-title">Default gates</div>
+                <div class="gate-buttons">
+                  <button *ngFor="let dg of defaultGates" (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" 
+                    class="gate-btn" [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
+                    {{ dg.name }} <i *ngIf="dg.name === 'M'" class="fas fa-ruler"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -359,6 +363,7 @@
 
       <!-- Tabla de expresiones -->
       <div class="table-container-expressions">
+        <span class="modal-gate-category-title" style="margin-top: 0;">User gates</span>
         <table class="expressions-table">
           <thead>
             <tr>
@@ -369,6 +374,9 @@
             </tr>
           </thead>
           <tbody>
+            <tr *ngIf="customizedGates.length === 0">
+              <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.</td>
+            </tr>
             <tr *ngFor="let cg of customizedGates; let i = index">
               <td>{{ cg.name }}</td>
               <td>{{ cg.qubits }}</td>
@@ -379,6 +387,29 @@
                 <button class="delete-expression-btn" title="Delete gate" (click)="openDeleteModal(cg, i)">
                   <i class="fas fa-trash"></i>
                 </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <span class="modal-gate-category-title">Default gates</span>
+        <table class="expressions-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Qubits</th>
+              <th>Description</th>
+              <th style="min-width: 100px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dg of defaultGates">
+              <td>{{ dg.name }}</td>
+              <td>{{ dg.qubits }}</td>
+              <td>{{ dg.description || (dg.name === 'M' ? 'Measure this qubit' : '') }}</td>
+              <td>
+                <button class="update-btn" title="See code" (click)="dg.name === 'M' ? showMeasurementCodeGate() : codeShowGates(dg); copiarCodigoGate()"
+                  style="margin-right: 10px;"><i class="fa fa-code"></i></button>
               </td>
             </tr>
           </tbody>

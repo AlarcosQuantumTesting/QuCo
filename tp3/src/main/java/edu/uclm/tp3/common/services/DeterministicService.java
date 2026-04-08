@@ -29,7 +29,7 @@ public class DeterministicService {
 	@Autowired
 	private BinaryTreeDao btDao;
 	
-	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend) throws Exception {
+	public Map<String, Object> calculate(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend, String templateCode) throws Exception {
 		BinaryTree tree = BinaryTreesUtils.buildTree(this.btDao, qubits, expectedFrequencies.getPairs(), prefix, originalGR, physicalAngle);
 
 		QCircuit quirkCircuit = BinaryTree2Quirk.buildQuirk(tree, qubits, -1, originalGR);
@@ -40,17 +40,29 @@ public class DeterministicService {
 
 		Map<String, Object> cleanCircuit = quirkCircuit.toJson().toMap();
 
-		result.put("#QUBITS#", qubits);
-		result.put("#OUTPUT_QUBITS#", qubits);
-		result.put("#SHOTS#", Math.max(shots, 1024));
-		result.put("#EXPECTED#", getExpected(expectedFrequencies, shots, false, qubits));
-		result.put("#CIRCUITS_DECLARATION#", getCircuitsDeclaration(backend, qubits, false, expectedFrequencies.getPairs().size()));
-
 		String sCalculus = this.getFunction0(backend, qubits, prefix, 1);
 
-		result.put("#CALCULUS#", sCalculus);
+		StringBuilder initialize;
+		if (backend.equalsIgnoreCase("qiskit"))
+			initialize = Quirk2Qiskit.getGatesDeclaration(quirkCircuit); 
+		else
+			initialize = Quirk2Cirq.getGatesDeclaration(quirkCircuit);
+
+		String finalCode = this.replaceTokens(templateCode,
+			"#QUBITS#", qubits, 
+			"#OUTPUT_QUBITS#", qubits, 
+			"#ORIGINAL_QUBITS#", qubits, 
+			"#SPLIT#", "False", 
+			"#SHOTS#", Math.max(shots, 1024), 
+			"#EXPECTED#", getExpected(expectedFrequencies, shots, false, qubits),
+			"#CIRCUITS_DECLARATION#", getCircuitsDeclaration(backend, qubits, false, expectedFrequencies.getPairs().size()),
+			"#ALGORITHM#", originalGR ? "Grover and Rudolph" : "Greenoble",
+			"#INITIALIZE#", initialize.toString(),
+			"#CALCULUS#", sCalculus
+		);
+
+		result.put("CODE", finalCode);
 		result.put("tree", tree.toMap());
-		result.put("#ALGORITHM#", originalGR ? "Grover and Rudolph" : "Greenoble");
 
 		List<Map<String, Object>> partialCircuits = new ArrayList<>();
 		partialCircuits.add(cleanCircuit);
@@ -58,7 +70,7 @@ public class DeterministicService {
 		return result;
 	}
 
-	public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend) throws Exception {
+	public Map<String, Object> calculateInParallel(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend, String templateCode) throws Exception {
 		int numberOfPairs = expectedFrequencies.getPairs().size();
 		List<QCircuit> circuits = BinaryTree2Quirk.buildQuirkParallel(this.btDao, expectedFrequencies, qubits, originalGR, physicalAngle, prefix);
 
@@ -86,10 +98,26 @@ public class DeterministicService {
 
 		String sCalculus = this.getFunction0(backend, qubits, prefix, numberOfPairs);
 		result.put("#CALCULUS#", sCalculus);
+		
+		String finalCode = this.replaceTokens(templateCode,
+			"#QUBITS#", qubits*numberOfPairs, 
+			"#OUTPUT_QUBITS#", qubits*numberOfPairs, 
+			"#ORIGINAL_QUBITS#", qubits, 
+			"#SPLIT#", "False", 
+			"#SHOTS#", Math.max(1024, expectedFrequencies.getShots()), 
+			"#EXPECTED#", this.getExpected(expectedFrequencies, shots, true, qubits),
+			"#CIRCUITS_DECLARATION#", getCircuitsDeclaration(backend, qubits, false, numberOfPairs),
+			"#ALGORITHM#", originalGR ? "Grover and Rudolph parallel" : "Greenoble parallel",
+			"#INITIALIZE#", code.toString(),
+			"#CALCULUS#", sCalculus
+		);
+
+		result.put("CODE", finalCode);
+
 		return result;
 	}
 	
-	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend) throws Exception {
+	public Map<String, Object> calculateSplitting(int qubits, FreqTable expectedFrequencies, double physicalAngle, String prefix, boolean originalGR, String backend, String templateCode) throws Exception {
 		int numberOfPairs = expectedFrequencies.getPairs().size();
 
 		List<QCircuit> circuits = BinaryTree2Quirk.buildQuirkSplitting(this.btDao, expectedFrequencies, qubits, originalGR, physicalAngle, prefix);
@@ -126,8 +154,29 @@ public class DeterministicService {
 			code = Quirk2Cirq.getGatesDeclaration(circuits);
 		result.put("#INITIALIZE#", code);
 
+		String finalCode = this.replaceTokens(templateCode,
+			"#QUBITS#", qubits, 
+			"#OUTPUT_QUBITS#", qubits, 
+			"#ORIGINAL_QUBITS#", qubits, 
+			"#SPLIT#", "True", 
+			"#SHOTS#", Math.max(1024, expectedFrequencies.getShots()), 
+			"#EXPECTED#", sbExpected.toString(),
+			"#CIRCUITS_DECLARATION#", getCircuitsDeclaration(backend, qubits, true, numberOfPairs),
+			"#ALGORITHM#", originalGR ? "Grover and Rudolph split" : "Greenoble split",
+			"#INITIALIZE#", code.toString(),
+			"#CALCULUS#", sCalculus
+		);
+
+		result.put("CODE", finalCode);
+
 		return result;
 	}
+
+	private String replaceTokens(String templateCode, Object... kkvv) {
+        for (int i=0; i<kkvv.length; i++)
+            templateCode = templateCode.replace(kkvv[i].toString(), kkvv[++i].toString());
+        return templateCode;
+    }
 
 	public List<Map<String, String>> getTemplates() throws IOException {
 		List<Map<String, String>> templates = new ArrayList<>();
