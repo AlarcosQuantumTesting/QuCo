@@ -3205,25 +3205,26 @@ select[disabled] {
 
 /* --- DARK MODE OVERRIDES PARA EL MODAL DE TRANSPILE (Backends) --- */
 :host-context(body.dark-mode) .contenedorBackends {
-  background-color: #172424 !important;
-  border: 1px solid #386161 !important;
+    background-color: #172424 !important;
+    border: 1px solid #386161 !important;
 }
 
 :host-context(body.dark-mode) .form-row-backends h4 {
-  background-color: #0a4d52 !important;
-  color: #ffffff !important;
-  border-bottom: 1px solid #386161 !important;
+    background-color: #0a4d52 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #386161 !important;
 }
 
 :host-context(body.dark-mode) .listaBackends .list-group-item {
-  background-color: transparent !important;
-  border-bottom: 1px solid #386161 !important;
-  color: #e4eced !important;
+    background-color: transparent !important;
+    border-bottom: 1px solid #386161 !important;
+    color: #e4eced !important;
 }
 
 :host-context(body.dark-mode) .listaBackends .list-group-item .text-muted {
-  color: #8fa8a8 !important;
+    color: #8fa8a8 !important;
 }
+
 .download-as-btn {
     background-color: #15803d;
     color: white;
@@ -3241,4 +3242,46 @@ select[disabled] {
     background-color: #166534;
     transform: scale(1.05);
     cursor: pointer;
+}
+
+.code-editor-pre {
+    margin: 0;
+    padding: 10px;
+    font-family: monospace;
+    /*background-color: #f8f9fa;*/
+    border: 1px solid transparent;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.code-editor-textarea {
+    margin: 0;
+    padding: 10px;
+    font-family: monospace;
+    background-color: #f8f9fa;
+    border: 1px solid #007d86;
+    border-radius: 5px;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-y: hidden;
+}
+
+:host-context(body.dark-mode) .code-editor-pre {
+    background-color: #1a2525 !important;
+    color: #e4eced !important;
+    border-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .code-editor-textarea {
+    background-color: #1a2525 !important;
+    color: #e4eced !important;
+    border-color: #007d86 !important;
 }

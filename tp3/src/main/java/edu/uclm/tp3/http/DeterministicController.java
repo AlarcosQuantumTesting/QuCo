@@ -94,13 +94,13 @@ public class DeterministicController {
 				String backend = "qiskit";
 				if (inParallel)
 					result = this.service.calculateInParallel(qubits, expectedFrequencies, physicalAngle,
-							functionPrefix, originalGR, backend);
+							functionPrefix, originalGR, backend, templateCode);
 				else if (splitCircuits)
 					result = this.service.calculateSplitting(qubits, expectedFrequencies, physicalAngle, functionPrefix,
-							originalGR, backend);
+							originalGR, backend, templateCode);
 				else
 					result = this.service.calculate(qubits, expectedFrequencies, physicalAngle, functionPrefix,
-							originalGR, backend);
+							originalGR, backend, templateCode);
 			}
 			return this.buildResponse(result);
 		} catch (Exception e) {
