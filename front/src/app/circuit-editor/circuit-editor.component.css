@@ -336,6 +336,7 @@ label {
 
 .buildText {
   width: 30%;
+  flex: 0 0 30%;
   text-align: left;
   border-right: 3px dashed #197a81;
 }
@@ -996,6 +997,7 @@ ol.list-instructions {
 .qubitsContainer {
   width: 30%;
   max-width: 30%;
+  flex: 0 0 30%;
   padding-left: 10px;
   overflow-x: auto;
   white-space: nowrap;
@@ -1046,7 +1048,8 @@ ol.list-instructions {
   /*margin: 10px 0;*/
   flex-wrap: wrap;
   justify-content: center;
-  width: 80%;
+  width: 70%;
+  flex: 0 0 70%;
 }
 
 .inline-config-row input {
@@ -1532,45 +1535,45 @@ i:hover {
 }
 
 .code-editor-pre {
-    margin: 0;
-    padding: 10px;
-    font-family: monospace;
-    /*background-color: #f8f9fa;*/
-    border: 1px solid transparent;
-    border-radius: 5px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 14px;
-    line-height: 1.5;
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  /*background-color: #f8f9fa;*/
+  border: 1px solid transparent;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .code-editor-textarea {
-    margin: 0;
-    padding: 10px;
-    font-family: monospace;
-    background-color: #f8f9fa;
-    border: 1px solid #007d86;
-    border-radius: 5px;
-    resize: vertical;
-    width: 100%;
-    box-sizing: border-box;
-    font-size: 14px;
-    line-height: 1.5;
-    overflow-y: hidden;
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  background-color: #f8f9fa;
+  border: 1px solid #007d86;
+  border-radius: 5px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-y: hidden;
 }
 
 :host-context(body.dark-mode) .code-editor-pre {
-    background-color: #1a2525 !important;
-    color: #e4eced !important;
-    border-color: transparent !important;
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: transparent !important;
 }
 
 :host-context(body.dark-mode) .code-editor-textarea {
-    background-color: #1a2525 !important;
-    color: #e4eced !important;
-    border-color: #007d86 !important;
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: #007d86 !important;
 }
 
 

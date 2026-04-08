@@ -413,12 +413,21 @@ export class CircuitEditorComponent {
     if (!this.circuit)
       return
 
+    let maxQubitIndex = -1;
+    this.gateRegistry.forEach(registration => {
+      registration.qubits.forEach(q => {
+        if (q > maxQubitIndex) maxQubitIndex = q;
+      });
+    });
+
+    const usedQubitsCount = maxQubitIndex === -1 ? 0 : maxQubitIndex + 1;
+
     this.code = this.manager.selectedTemplate.code
-    this.code = this.code?.replace("#QUBITS#", this.circuit.qubits.length.toString())
-    this.code = this.code?.replace("#OUTPUT_QUBITS#", this.circuit.qubits.length.toString())
+    this.code = this.code?.replace("#QUBITS#", usedQubitsCount.toString())
+    this.code = this.code?.replace("#OUTPUT_QUBITS#", usedQubitsCount.toString())
 
     if (this.qubitsConfiguration) {
-      this.code = this.code?.replace("#QUBITS_LAYOUT#", this.qubitsConfiguration.matrix.join(", "))
+      this.code = this.code?.replace("#QUBITS_LAYOUT#", this.qubitsConfiguration.matrix.slice(0, usedQubitsCount).join(", "))
     } else {
       this.code = this.code?.replace(", initial_layout=[#QUBITS_LAYOUT#])", ")")
     }
@@ -429,20 +438,24 @@ export class CircuitEditorComponent {
       let qubit = this.circuit.qubits[i]
       for (let j = 0; j < qubit.gates.length; j++) {
         let gate = qubit.gates[j]
-        if (gate?.name && gate.name !== "I" && gate.name !== "M" && gate.name !== "0") {
+        if (gate?.name && gate.name !== "I" && gate.name !== "M" && gate.name !== "0" && gate.name !== "H") {
           usedGates.set(gate.name, gate)
         }
       }
     }
 
     let initialize = "";
+    const gateToFunctionMap = new Map<string, string>();
     usedGates.forEach((gate) => {
       const matchingGate = this.customizedGates?.find(g => g.name === gate.name);
 
-      if (matchingGate && matchingGate.code) {
-        initialize += matchingGate.code + "\n\n";
-      } else if (gate.code) {
-        initialize += gate.code + "\n\n";
+      let gateCode = matchingGate?.code || gate.code;
+      if (gateCode) {
+        initialize += gateCode + "\n\n";
+        const funcName = this.extractFunctionName(gateCode);
+        if (funcName) {
+          gateToFunctionMap.set(gate.name!, funcName);
+        }
       } else {
         initialize += `# Error loading gate ${gate.name}\n\n`;
       }
@@ -457,7 +470,7 @@ export class CircuitEditorComponent {
         if (!gate || gate.name == "I" || gate.name == "0" || !gate.name)
           continue
         if (gate.name == "M") {
-          measures += "circuit.measure(" + j + ", " + (this.circuit.qubits.length - j - 1) + ")\n"
+          measures += "circuit.measure(" + j + ", " + (usedQubitsCount - j - 1) + ")\n"
         }
       }
     }
@@ -492,14 +505,15 @@ export class CircuitEditorComponent {
       if (gateName === "M") {
         //calculus += `circuit.measure(${gateName}(), [${qubitsList}])\n`;
         sortedQubits.forEach(q => {
-          calculus += `circuit.measure(${q}, ${this.circuit!.qubits.length - q - 1})\n`;
+          calculus += `circuit.measure(${q}, ${usedQubitsCount - q - 1})\n`;
         });
       } else if (gateName === "H") {
         sortedQubits.forEach(q => {
           calculus += `circuit.h(${q})\n`;
         });
       } else {
-        calculus += `circuit.append(${gateName}(), [${qubitsList}])\n`;
+        const displayGateName = gateToFunctionMap.get(gateName) || gateName;
+        calculus += `circuit.append(${displayGateName}(), [${qubitsList}])\n`;
       }
 
     });
@@ -508,6 +522,11 @@ export class CircuitEditorComponent {
     this.code = this.code?.replace("#CALCULUS#", calculus)
     this.code = this.code?.replace("#MEASURES#", measures)
     this.code = this.code?.replace("#SHOTS#", "1000")
+  }
+
+  extractFunctionName(code: string): string | null {
+    const match = code.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
+    return match ? match[1] : null;
   }
 
   addColumn() {
