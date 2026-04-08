@@ -44,7 +44,10 @@ export class CircuitEditorComponent {
   Math: any = Math
 
   customizedGates: EdGate[] = [];
-  defaultGates: EdGate[] = [new EdGate('M', 1)];
+  defaultGates: EdGate[] = [
+    new EdGate('M', 1),
+    new EdGate('H', 1)
+  ];
 
   mensajeTemporal: string = '';
   mensajeTemporal2: string = '';
@@ -133,6 +136,12 @@ export class CircuitEditorComponent {
       circuits => {
         this.circuitNames = circuits
       })
+
+    const hGate = this.defaultGates.find(g => g.name === 'H');
+    if (hGate) {
+      hGate.description = 'Hadamard gate';
+      hGate.code = 'circuit.h(i)';
+    }
 
   }
 
@@ -480,7 +489,14 @@ export class CircuitEditorComponent {
       const qubitsList = sortedQubits.join(', ');
       console.log("GateName: ", gateName);
       if (gateName === "M") {
-        calculus += `circuit.measure(${gateName}(), [${qubitsList}])\n`;
+        //calculus += `circuit.measure(${gateName}(), [${qubitsList}])\n`;
+        sortedQubits.forEach(q => {
+          calculus += `circuit.measure(${q}, ${this.circuit!.qubits.length - q - 1})\n`;
+        });
+      } else if (gateName === "H") {
+        sortedQubits.forEach(q => {
+          calculus += `circuit.h(${q})\n`;
+        });
       } else {
         calculus += `circuit.append(${gateName}(), [${qubitsList}])\n`;
       }
@@ -749,8 +765,9 @@ export class CircuitEditorComponent {
     } else {
       this.selectedGate = mGate;
       this.gateMselected = true;
-      this.selectedGate.description = 'Measure this qubit';
-      this.selectedGate.code = 'circuit.measure(' + this.circuit.qubits.length + ', ' + this.circuit.qubits.length + ')';
+      this.selectedGate.description = 'Measure qubit';
+      //this.selectedGate.code = 'circuit.measure(' + this.circuit.qubits.length + ', ' + this.circuit.qubits.length + ')';
+      this.selectedGate.code = 'circuit.measure(i, ' + (this.circuit.qubits.length) + ' - i - 1)';
     }
   }
 
@@ -1021,7 +1038,8 @@ export class CircuitEditorComponent {
     if (mGate) {
       this.selectedGate = mGate;
       this.selectedGate.description = 'Measure this qubit';
-      this.selectedGate.code = 'circuit.measure(' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ', ' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ')';
+      //this.selectedGate.code = 'circuit.measure(' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ', ' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ')';
+      this.selectedGate.code = 'circuit.measure(i, ' + (this.circuit ? this.circuit.qubits.length : 'qubits') + ' - i - 1)';
       this.modalCodigoGate = true;
     }
   }
