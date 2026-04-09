@@ -273,7 +273,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   //   this.mostrarModalLogin = true;
   // }
   toggleLogin() {
-    window.open(environment.qsauronUrl, '_blank');
+    //window.open(environment.qsauronUrl, '_blank');
+    window.open('https://alarcosj.esi.uclm.es/qsauron/login', '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -505,7 +506,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
-    
+
     this.tokenStored = null;
     this.emailUsuario = '';
   }
