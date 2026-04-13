@@ -293,7 +293,7 @@
   <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
     [qiskitCode]="code || ''" style="width: 100%; height: 100%;"></app-download-code-modal>
   <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
-    [qiskitCode]="code || ''"></app-run-code>
+    [qiskitCode]="code || ''" runnerType="editor"></app-run-code>
 
   <div class="modal" *ngIf="mostrarModalCrear" style="z-index: 1001">
     <div class="modal-content">

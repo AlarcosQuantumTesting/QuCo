@@ -26,6 +26,7 @@ interface BatchInfo {
 export class RunCodeComponent implements OnInit {
 
   @Input() qiskitCode: string = '';
+  @Input() runnerType: 'qiskit' | 'cirq' | 'editor' = 'qiskit';
 
   @Input() mostrarModal = false;
 
@@ -84,10 +85,14 @@ export class RunCodeComponent implements OnInit {
     if (this.batchId) {
       this.batchId = '';
     }
-    this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
+    if (this.runnerType === 'editor') {
+      this.runWhat = 'run_qiskit_editor';
+    } else {
+      this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
+    }
 
-
-    let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
+    //let url = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
+    let url = `${environment.proxyAOtroUrl}${environment.remoteRunnerUrl}${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`
 
 
     if (ibm_token) {
@@ -125,8 +130,12 @@ export class RunCodeComponent implements OnInit {
     const runnerNumber = optionMatch ? optionMatch[0] : '1';
     const overwriteValue = override ? 'y' : 'n';
 
-    this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
-    let finalUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
+    if (this.runnerType === 'editor') {
+      this.runWhat = 'run_qiskit_editor';
+    } else {
+      this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
+    }
+    let finalUrl = `${environment.proxyAOtroUrl}${environment.remoteRunnerUrl}${this.runWhat}?iterations=${iterations}&overwrite=${overwriteValue}&runner=${runnerNumber}`;
 
 
     if (ibm_token) {
@@ -160,7 +169,8 @@ export class RunCodeComponent implements OnInit {
               iterations: iterations,
               optionSelected: this.formData.option,
               ibm_token_provided: ibm_token ? true : false,
-              ibm_instance_provided: ibm_instance ? true : false
+              ibm_instance_provided: ibm_instance ? true : false,
+              runnerType: this.runnerType
             }
           };
 
