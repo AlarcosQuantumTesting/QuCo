@@ -68,7 +68,6 @@ export class BlocksComponent extends EvolutionaryComponent {
   saveError: string = '';
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   BLOCKS_GENERATOR_FQCN = 'BLOCKS';
   REQUIRED_GENERATOR_TYPE = this.BLOCKS_GENERATOR_FQCN;
@@ -117,7 +116,6 @@ export class BlocksComponent extends EvolutionaryComponent {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     window.addEventListener('beforeunload', this.confirmExit);
     localStorage.removeItem('qucoConfigurationBlocks');
@@ -180,7 +178,7 @@ export class BlocksComponent extends EvolutionaryComponent {
     localStorage.setItem('isGenetic', "false");
 
     const savedProjectId = localStorage.getItem('selectedProjectId_blocks');
-    if (savedProjectId && this.userEmail && this.userToken) {
+    if (savedProjectId && this.userEmail) {
       this.selectedProjectId = savedProjectId;
       this.onProjectSelected();
     }
@@ -873,7 +871,6 @@ export class BlocksComponent extends EvolutionaryComponent {
     const instanceId = window.crypto.randomUUID();
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
     if (projectId) {
@@ -883,7 +880,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
   loadProjectNames(): void {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       const requestBody = this.getAuthRequestBody();
 
       this.projectService.getProjectsName(requestBody).subscribe({

@@ -44,7 +44,6 @@ export class ElongingComponent extends EvolutionaryComponent {
   saveError: string = '';
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   GENETIC_GENERATOR_FQCN = 'GENETIC';
   REQUIRED_GENERATOR_TYPE = this.GENETIC_GENERATOR_FQCN;
@@ -93,7 +92,6 @@ export class ElongingComponent extends EvolutionaryComponent {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     localStorage.removeItem('qucoConfigurationBlocks');
     localStorage.removeItem('qucoConfiguration');
@@ -101,8 +99,7 @@ export class ElongingComponent extends EvolutionaryComponent {
     let sessionAttempts = 0;
     const initSession = setInterval(() => {
       this.userEmail = localStorage.getItem('userEmail') || '';
-      this.userToken = localStorage.getItem('userToken') || '';
-      if (this.userEmail && this.userToken) {
+      if (this.userEmail) {
         clearInterval(initSession);
         this.loadProjectNames();
 
@@ -783,7 +780,7 @@ export class ElongingComponent extends EvolutionaryComponent {
 
 
   loadProjectNames(): void {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       const requestBody = this.getAuthRequestBody();
 
       this.projectService.getProjectsName(requestBody).subscribe({
@@ -947,7 +944,6 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
 

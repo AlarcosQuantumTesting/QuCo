@@ -169,24 +169,24 @@
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
                                 style="margin-top: 0px !important"
-                                *ngIf="userEmail && userToken"
+                                *ngIf="userEmail"
                             >
                                 <i class="fas fa-save"></i> Save project
                             </button> -->
 
             <button (click)="openSaveProjectModal()" class="btn-confirm-save" style="margin-top: 0px !important"
-              *ngIf="userEmail && userToken && !selectedProjectId" [disabled]="!circuit">
+              *ngIf="userEmail && !selectedProjectId" [disabled]="!circuit">
               <i class="fas fa-save"></i> Save
             </button>
 
             <button (click)="openApplyChangesModal()" class="btn-confirm-save update-btn"
               style="margin-top: 0px !important"
-              *ngIf="userEmail && userToken && selectedProjectId && isCircuitModified">
+              *ngIf="userEmail && selectedProjectId && isCircuitModified">
               <i class="fas fa-pen"></i> Update
             </button>
 
             <button (click)="openSaveAsNewModal()" class="btn-confirm-save"
-              style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && userToken && selectedProjectId"
+              style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && selectedProjectId"
               title="Save the current circuit state as a new project">
               <i class="fas fa-save"></i> Save as new
             </button>

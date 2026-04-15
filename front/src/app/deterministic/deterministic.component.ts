@@ -15,6 +15,8 @@ import { TranspileService } from '../transpile.service';
 import { Backend } from './Backend';
 import { ProjectService } from '../project.service';
 import { environment } from '../../environments/environment';
+import { firstValueFrom, Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 
 
 interface QProgramExpression { name: string; expr: string; description: string; type: string; }
@@ -165,7 +167,6 @@ export class DeterministicComponent extends GroverStyle {
   mostrarDownloadModal = false;
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   projectList: ProjectListItem[] = [];
   selectedProjectId: string = '';
@@ -196,7 +197,6 @@ export class DeterministicComponent extends GroverStyle {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -259,13 +259,12 @@ export class DeterministicComponent extends GroverStyle {
     let sessionAttempts = 0;
     const initSession = setInterval(() => {
       this.userEmail = localStorage.getItem('userEmail') || '';
-      this.userToken = localStorage.getItem('userToken') || '';
-      if (this.userEmail && this.userToken) {
+      if (this.userEmail) {
         clearInterval(initSession);
         this.loadProjectNames();
 
         const savedProjectId = localStorage.getItem('selectedProjectId_algorithm');
-        if (savedProjectId && this.userEmail && this.userToken) {
+        if (savedProjectId && this.userEmail) {
           this.selectedProjectId = savedProjectId;
           this.onProjectSelected();
         }
@@ -460,7 +459,7 @@ export class DeterministicComponent extends GroverStyle {
     this.buildCode()
   }
 
-  getCircuit(asGrover?: boolean) {
+  getCircuit(asGrover?: boolean): Observable<any> {
     this.running = true;
     this.state = "Calculating";
     this.error = undefined;
@@ -483,11 +482,11 @@ export class DeterministicComponent extends GroverStyle {
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
         this.modalError = true;
-        return;
+        return new Observable(subscriber => subscriber.error(this.error));
       }
     }
 
-    this.service.calculate(
+    const obs = this.service.calculate(
       this.qubits,
       this.expectedFrequencies,
       this.physicalAngle,
@@ -497,8 +496,10 @@ export class DeterministicComponent extends GroverStyle {
       this.useMCX,
       this.prefix,
       this.manager.selectedTemplate.fileName
-    ).subscribe(
-      blob => {
+    ).pipe(shareReplay(1));
+
+    obs.subscribe({
+      next: blob => {
         blob.text().then(text => {
           let response: any;
           try {
@@ -524,21 +525,18 @@ export class DeterministicComponent extends GroverStyle {
           this.isLoadingQiskitCode = false;
           this.mostrarModal = true;
           this.copiarCodigo();
-        })
+        });
       },
-      err => {
+      error: err => {
         this.error = err.error?.message || err.message;
         this.running = false;
         this.isLoadingQiskitCode = false;
         this.mostrarModal = false;
-        /*this.mensajeTemporal = 'Error generating code';
-        setTimeout(() => {
-            this.mensajeTemporal = '';
-        }, 2000);*/
-
         this.modalError = true;
       }
-    );
+    });
+
+    return obs;
   }
 
   goToCode() {
@@ -1846,7 +1844,6 @@ export class DeterministicComponent extends GroverStyle {
 
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
 
@@ -1857,7 +1854,7 @@ export class DeterministicComponent extends GroverStyle {
   }
 
   loadProjectNames(): void {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       const requestBody = this.getAuthRequestBody();
 
       console.log("Algotirmo: ", this.selectedAlgorithm)
@@ -1923,36 +1920,24 @@ export class DeterministicComponent extends GroverStyle {
 
     localStorage.setItem('selectedProjectId_algorithm', project.id);
 
-    /*const nombreLocal = 'selectedProjectId_' + this.selectedAlgorithm.toLowerCase();
-    
-    localStorage.setItem(nombreLocal, project.id);*/
-
-    if (qp.generator && qp.generator.type) {
-      this.selectedAlgorithm = qp.generator.type.toLowerCase() as any;
+    const generator = qp.generator;
+    if (generator && generator.type) {
+      this.type = generator.type;
+      const lowerType = generator.type.toLowerCase();
+      if (lowerType.includes('grover')) {
+        this.selectedAlgorithm = 'grover';
+      } else if (lowerType.includes('grenoble')) {
+        this.selectedAlgorithm = 'grenoble';
+      }
     }
 
     this.qubits = qp.qubits;
     this.expectedFrequencies = new FreqTable();
     this.expectedFrequencies.setQubits(this.qubits);
 
-    /*if (project.notes && Array.isArray(project.notes)) {
-      const notesForStorage = project.notes.map((n: any) => ({
-        text: n.text,
-        type: n.type,
-        timestamp: n.timestamp
-      }));
-
-      localStorage.setItem('project_notes', JSON.stringify(notesForStorage));
-      console.log(`Loaded ${notesForStorage.length} notes from project.`);
-      console.log("Notes content:", notesForStorage);
-    } else {
-      // localStorage.removeItem('project_notes');
-    }*/
-
-    const incomingNotes = project.projectNotes || project.projectNotes;
+    const incomingNotes = project.projectNotes;
 
     if (incomingNotes && Array.isArray(incomingNotes)) {
-
       const newNotes = incomingNotes.map((n: any) => ({
         title: n.title,
         text: n.text,
@@ -1978,51 +1963,36 @@ export class DeterministicComponent extends GroverStyle {
       );
 
       const finalNotesList = [...notesToKeep, ...newNotes];
-
       localStorage.setItem('project_notes', JSON.stringify(finalNotesList));
-
-      console.log(`Notes updated. Total: ${finalNotesList.length}. Loaded ${newNotes.length} for ${tipoLocal}.`);
-
-    } else {
-
-      /* const storedNotesStr = localStorage.getItem('project_notes');
-      if (storedNotesStr) {
-          const existingNotes = JSON.parse(storedNotesStr);
-          const notesToKeep = existingNotes.filter((n: any) => 
-              (n.type || '').toLowerCase() !== this.tipoLocal.toLowerCase()
-          );
-          localStorage.setItem('project_notes', JSON.stringify(notesToKeep));
-      }
-      */
     }
 
-    const generator = qp.generator;
+    if (generator) {
+      const isGrover = generator.type === 'GROVER' || generator.type === 'GROVER' || generator.type === 'Grover';
+      const isGrenoble = generator.type === 'GRENOBLE' || generator.type === 'GRENOBLE' || generator.type === 'Grenoble';
 
-    if (generator.type === 'edu.uclm.reper.model.Grover' && generator.truePositions) {
-      generator.truePositions.forEach((pos: number) => {
-        this.expectedFrequencies.setFreq(pos, 1);
-      });
-      // } else if (generator.type === 'GRENOBLE' || generator.type === 'GROVER_RUDOLPH') {
-    } else if (generator.type === 'edu.uclm.reper.model.Grenoble') {
-      const positions = generator.positionValue;
-
-      if (positions) {
-        for (const key in positions) {
-          if (positions.hasOwnProperty(key)) {
-            const rowIndex = parseInt(key, 10);
-            const frequencyValue = positions[key];
-            this.expectedFrequencies.setFreq(rowIndex, frequencyValue);
+      if (isGrover && generator.truePositions) {
+        generator.truePositions.forEach((pos: number) => {
+          this.expectedFrequencies.setFreq(pos, 1);
+        });
+      } else if (isGrenoble) {
+        const positions = generator.positionValue;
+        if (positions) {
+          for (const key in positions) {
+            if (positions.hasOwnProperty(key)) {
+              const rowIndex = parseInt(key, 10);
+              const frequencyValue = positions[key];
+              this.expectedFrequencies.setFreq(rowIndex, frequencyValue);
+            }
           }
         }
-      }
 
-      if (generator.physicalAngle !== undefined) this.physicalAngle = generator.physicalAngle;
-      if (generator.parallel !== undefined) this.inParallel = generator.parallel;
-      if (generator.splitted !== undefined) this.splitCircuits = generator.splitted;
+        if (generator.physicalAngle !== undefined) this.physicalAngle = generator.physicalAngle;
+        if (generator.parallel !== undefined) this.inParallel = generator.parallel;
+        if (generator.splitted !== undefined) this.splitCircuits = generator.splitted;
+      }
     }
 
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
-
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
 
     this.updateOutputs();
@@ -2030,28 +2000,14 @@ export class DeterministicComponent extends GroverStyle {
     this.mostrarTabla = true;
     this.goToTable();
 
-    /*this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
-    setTimeout(() => {
-      this.mensajeTemporal2 = '';
-    }, 1000);*/
-
     setTimeout(() => {
       this.updateOutputs();
       this.updateTotalSelectedElements();
-
       this.lastSavedCircuitState = this.captureCircuitState();
       this.isCircuitModified = false;
 
-      if (this.type === 'edu.uclm.reper.model.Grover') {
-        this.selectedAlgorithm = 'grover';
-
-      } else if (this.type === 'edu.uclm.reper.model.Grenoble') {
-        this.selectedAlgorithm = 'grenoble';
-      }
-
       this.mensajeTemporal2 = `Project "${project.name}" loaded successfully.`;
       setTimeout(() => { this.mensajeTemporal2 = ''; }, 2000);
-
     }, 200);
 
     this.saveInLocal();
@@ -2191,37 +2147,25 @@ export class DeterministicComponent extends GroverStyle {
           "type": "GROVER",
           "truePositions": this.getTruePositions()
         };
-      /*case 'originalGR':
-        return {
-          "type": "GROVER_RUDOLPH",
-          "positionValue": this.getPositionValueData(),
-        };*/
       default:
         return {};
     }
   }
 
   mapAlgorithmToRequiredType(algorithm: string): string {
-    /*switch (algorithm) {
-       case 'grenoble': return 'edu.uclm.reper.model.Grenoble';
-       case 'grover': return 'edu.uclm.reper.model.Grover';
-       case 'originalGR': return 'edu.uclm.reper.model.Grenoble';*/
-    // case 'originalGR': return 'edu.uclm.reper.model.GroverAndRudolph';
-    //default: return '';
-    //}
     switch (algorithm) {
       case 'grenoble':
       case 'originalGR':
-        return 'Grenoble';
+        return 'GRENOBLE';
       case 'grover':
-        return 'Grover';
+        return 'GROVER';
       default: return '';
     }
   }
 
   quirkURL?: SafeResourceUrl
 
-  guardarProyecto(): void {
+  async guardarProyecto(): Promise<void> {
     if (!this.circuitName || this.circuitName.trim().length === 0) return;
     //const idCircuit = crypto.randomUUID();
     let idCircuit: string;
@@ -2230,6 +2174,19 @@ export class DeterministicComponent extends GroverStyle {
       this.applyChanges = false;
     } else {
       idCircuit = crypto.randomUUID();
+    }
+
+    try {
+      this.mensajeTemporal2 = "Generating code and quirk...";
+      await firstValueFrom(this.getCircuit());
+      this.mensajeTemporal2 = "";
+      // we need a small delay to let buildCode and blob.text() finish
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (e) {
+      console.error("Error generating code before save:", e);
+      this.mensajeTemporal2 = "";
+      alert("Error generating code before saving project.");
+      return;
     }
 
     const generatorData = this.getGeneratorData(this.selectedAlgorithm);

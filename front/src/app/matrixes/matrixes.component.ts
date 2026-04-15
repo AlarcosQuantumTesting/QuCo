@@ -156,7 +156,6 @@ export class MatrixesComponent implements AfterViewInit {
   projectList: ProjectListItem[] = [];
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   REQUIRED_GENERATOR_TYPE: string = 'MATRIX';
 
@@ -655,7 +654,7 @@ export class MatrixesComponent implements AfterViewInit {
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
         }
         this.hasHadamardGates = false;
-        
+
         if (this.hasCountLastQubit) {
           this.isDisabled2 = false; // Allow addition
           this.addCountLastQubit();
@@ -761,7 +760,7 @@ export class MatrixesComponent implements AfterViewInit {
   removeCountLastQubit() {
     if (this.qiskitCode) {
       let lines = this.qiskitCode.split('\n');
-      lines = lines.filter(line => 
+      lines = lines.filter(line =>
         !line.includes("counts_output_qubit = absolute_frequencies.get") &&
         !line.includes("probability_output_qubit = counts_output_qubit / 1000") &&
         !line.includes("* probability_output_qubit") &&
@@ -871,16 +870,13 @@ export class MatrixesComponent implements AfterViewInit {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     console.log("User email in matrixes:", this.userEmail);
-    console.log("User token in matrixes:", this.userToken);
 
     let sessionAttempts = 0;
     const initSession = setInterval(() => {
       this.userEmail = localStorage.getItem('userEmail') || '';
-      this.userToken = localStorage.getItem('userToken') || '';
-      if (this.userEmail && this.userToken) {
+      if (this.userEmail) {
         clearInterval(initSession);
         this.loadProjectNames();
 
@@ -1942,7 +1938,6 @@ export class MatrixesComponent implements AfterViewInit {
 
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
 
@@ -1953,7 +1948,7 @@ export class MatrixesComponent implements AfterViewInit {
   }
 
   loadProjectNames(): void {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       const requestBody = this.getAuthRequestBody();
 
       this.projectService.getProjectsName(requestBody).subscribe({

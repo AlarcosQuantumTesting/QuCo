@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { firstValueFrom, Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { EdCircuit, EdGate } from './EdCircuit';
 import * as jsonData from '../../assets/factorize667.json';
 import { ManagerService } from '../manager.service';
@@ -86,7 +88,6 @@ export class CircuitEditorComponent {
   saveError: string = '';
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   EDITOR_GENERATOR_FQCN = 'EDITOR';
   REQUIRED_GENERATOR_TYPE = this.EDITOR_GENERATOR_FQCN;
@@ -149,7 +150,6 @@ export class CircuitEditorComponent {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     this.transpileService.getBackends().subscribe(backends => {
       this.availableBackends = backends;
@@ -193,8 +193,7 @@ export class CircuitEditorComponent {
     let sessionAttempts = 0;
     const initSession = setInterval(() => {
       this.userEmail = localStorage.getItem('userEmail') || '';
-      this.userToken = localStorage.getItem('userToken') || '';
-      if (this.userEmail && this.userToken) {
+      if (this.userEmail) {
         clearInterval(initSession);
         this.loadProjectNames();
 
@@ -409,9 +408,9 @@ export class CircuitEditorComponent {
     return this.qubitsConfiguration.matrix[qubit]
   }
 
-  generateCode() {
+  generateCode(): Observable<any> {
     if (!this.circuit)
-      return
+      return new Observable(s => s.error("No circuit"));
 
     const payload = {
         templateName: this.manager.selectedTemplate.fileName,
@@ -420,15 +419,17 @@ export class CircuitEditorComponent {
         gateRegistry: this.gateRegistry
     };
 
-    this.circuitsService.generateCode(payload).subscribe(
-      response => {
+    const obs = this.circuitsService.generateCode(payload).pipe(shareReplay(1));
+    obs.subscribe({
+      next: response => {
         this.responseReceived = response;
         this.code = response.CODE;
       },
-      error => {
+      error: error => {
         this.error = error.error?.message || error.message || "Error generating code";
       }
-    );
+    });
+    return obs;
   }
 
   extractFunctionName(code: string): string | null {
@@ -1164,7 +1165,7 @@ export class CircuitEditorComponent {
     this.guardarProyecto();
   }
 
-  guardarProyecto() {
+  async guardarProyecto() {
     if (!this.circuit) return;
 
     let idCircuit: string;
@@ -1176,7 +1177,16 @@ export class CircuitEditorComponent {
       idCircuit = crypto.randomUUID();
     }
 
-    this.generateCode();
+    try {
+      this.mensajeTemporal2 = "Generating code and quirk...";
+      await firstValueFrom(this.generateCode());
+      this.mensajeTemporal2 = "";
+    } catch (e) {
+      console.error("Error generating code before save:", e);
+      this.mensajeTemporal2 = "";
+      alert("Error generating code before saving project.");
+      return;
+    }
 
     const gatesPayload = this.gateRegistry.map(g => ({
       id: g.id,
@@ -1216,7 +1226,7 @@ export class CircuitEditorComponent {
       qCircuit: {
         id: idCircuit,
         qbits: this.circuit.qubits.length,
-        quirkCode: { cols: [] }
+        quirkCode: this.responseReceived?.QUIRK || { cols: [] }
       }
     };
 
@@ -1282,7 +1292,6 @@ export class CircuitEditorComponent {
     const instanceId = window.crypto.randomUUID();
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
     if (projectId) body.projectId = projectId;
@@ -1290,7 +1299,7 @@ export class CircuitEditorComponent {
   }
 
   loadProjectNames() {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       this.projectService.getProjectsName(this.getAuthRequestBody()).subscribe({
         next: (data: ProjectListItem[]) => {
           this.projectList = data.filter(p => p.type === this.EDITOR_GENERATOR_FQCN);
