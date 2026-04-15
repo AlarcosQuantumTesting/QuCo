@@ -348,8 +348,6 @@ label {
   align-items: center;
 }
 
-
-
 .input-group {
   display: flex;
   align-items: center;
@@ -936,6 +934,9 @@ ol.list-instructions {
   margin-top: 10px;
   padding: 5px;
   margin-bottom: 10px;
+  min-height: calc(100vh - 300px);
+  display: flex;
+  flex-direction: column;
 }
 
 .info1 {
@@ -997,6 +998,7 @@ ol.list-instructions {
 .qubitsContainer {
   width: 30%;
   max-width: 30%;
+  /* flex: 1; */
   flex: 0 0 30%;
   padding-left: 10px;
   overflow-x: auto;
@@ -1007,7 +1009,6 @@ ol.list-instructions {
   justify-content: flex-start !important;
   align-items: flex-start !important;
   text-align: left !important;
-
   border-right: 3px dashed #197a81;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -1025,7 +1026,8 @@ ol.list-instructions {
   max-width: 100%;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 400px;
+  max-height: calc(100vh - 320px);
+  min-height: 400px;
 }
 
 /* Opcional: para que las tablas grandes no se expandan más allá del contenedor */
@@ -1049,7 +1051,7 @@ ol.list-instructions {
   flex-wrap: wrap;
   justify-content: center;
   width: 70%;
-  flex: 0 0 70%;
+  flex: 1;
 }
 
 .inline-config-row input {

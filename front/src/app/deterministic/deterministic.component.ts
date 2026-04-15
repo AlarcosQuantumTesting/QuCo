@@ -274,6 +274,10 @@ export class DeterministicComponent extends GroverStyle {
     }, 250);
 
     this.loadProjectNames();
+
+    this.manager.templatesLoaded.subscribe(() => {
+      this.selectDefaultTemplate();
+    });
   }
 
   override tryFill(index: number): void {
@@ -785,6 +789,17 @@ export class DeterministicComponent extends GroverStyle {
 
   onTemplateChange(selected: CodeTemplate) {
     this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName == selected.fileName) || new CodeTemplate("", "", "")
+  }
+
+  private selectDefaultTemplate() {
+    let prefixes = ['matrixes', 'grover'];
+    if (this.selectedAlgorithm === 'grover') {
+      prefixes = ['grover'];
+    }
+    const templates = this.manager.getTemplatesStartingBy(prefixes);
+    if (templates && templates.length > 0) {
+      this.onTemplateChange(templates[0]);
+    }
   }
 
   setFreq(event: any, rowIndex: number) {

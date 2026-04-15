@@ -949,6 +949,10 @@ export class MatrixesComponent implements AfterViewInit {
       //this.lastSavedCircuitState = this.captureCircuitState();
     }
 
+    this.manager.templatesLoaded.subscribe(() => {
+      this.selectDefaultTemplate();
+    });
+
     //this.lastSavedCircuitState = this.captureCircuitState();
 
     console.log("last saved: ", this.lastSavedCircuitState);
@@ -978,8 +982,15 @@ export class MatrixesComponent implements AfterViewInit {
   }
 
   onTemplateChange(selected: CodeTemplate) {
-    this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName == selected.fileName) || new CodeTemplate("", "", "");
+    this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName == selected.fileName) || new CodeTemplate("", "", "")
     this.saveState();
+  }
+
+  private selectDefaultTemplate() {
+    const templates = this.manager.getTemplatesStartingBy(['matrixes']);
+    if (templates && templates.length > 0) {
+      this.onTemplateChange(templates[0]);
+    }
   }
 
   goToTable(): void {

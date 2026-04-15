@@ -143,26 +143,21 @@ export class ElongingComponent extends EvolutionaryComponent {
     });
 
     this.templateSelected = localStorage.getItem('templateSelected') === 'true' || false;
-    if (this.templateSelected) {
+
+    this.manager.templatesLoaded.subscribe(() => {
       const savedTemplate = localStorage.getItem('selectedTemplate');
-      if (savedTemplate) {
+      if (this.templateSelected && savedTemplate) {
         try {
           const template = JSON.parse(savedTemplate);
-          setTimeout(() => {
-            this.onTemplateChange(template);
-          }, 1000);
-          console.log('Nombre:', template.fileName);
-          this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === template.fileName) || new CodeTemplate("", "", "");
-          console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
+          this.onTemplateChange(template);
         } catch (error) {
           console.error('Error al parsear plantilla desde localStorage:', error);
+          this.selectDefaultTemplate();
         }
       } else {
-        console.log('No hay plantilla guardada en localStorage');
+        this.selectDefaultTemplate();
       }
-    } else {
-      console.log('No hay plantilla seleccionada');
-    }
+    });
 
     this.validarDatos()
     this.tieneFrecuenciasEsperadas()
@@ -289,6 +284,15 @@ export class ElongingComponent extends EvolutionaryComponent {
 
     localStorage.setItem('templateSelected', JSON.stringify(this.templateSelected));
     localStorage.setItem('selectedTemplate', JSON.stringify(this.manager.selectedTemplate));
+  }
+
+  private selectDefaultTemplate() {
+    const templates = this.manager.getTemplatesStartingExactlyBy(['elonging']);
+    if (templates && templates.length > 0) {
+      // Prioritize "elonging" (the simple template) if available, otherwise just the first one
+      const defaultTemplate = templates.find((t: any) => t.fileName === 'elonging') || templates[0];
+      this.onTemplateChange(defaultTemplate);
+    }
   }
 
   toggleTooltipGeneration(event: MouseEvent): void {
