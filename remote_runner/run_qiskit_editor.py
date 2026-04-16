@@ -144,8 +144,8 @@ if __name__ == "__main__":
     summary_path = os.path.join(out_dir, 'summary.csv')
     details_path = os.path.join(out_dir, 'all_results.csv')
 
-    summary_hdr = ['Iteration','Problem','QPU','Qubits','Searched','T_transp','T_exec','T_res','G_orig','G_transp','depth_orig','depth_transp','Mean_err','Job id','Algorithm']
-    details_hdr = ['Iter','Problem','QPU','Qubits','Searched','Dec','Bin','Expected','Obtained','Error']
+    summary_hdr = ['Iteration','Problem','QPU','Qubits','Searched','T_transp','T_exec','T_res','G_orig','G_transp','depth_orig','depth_transp','Job id','Algorithm']
+    details_hdr = ['Iter','Problem','QPU','Qubits','Dec','Bin','Obtained']
 
     with open(summary_path, 'a' if append_mode else 'w', newline='', buffering=1) as sf, \
          open(details_path, 'a' if append_mode else 'w', newline='', buffering=1) as df:
@@ -180,12 +180,12 @@ if __name__ == "__main__":
                             # Registramos detalles
                             for binary_key, count in sorted(counts.items()):
                                 decimal_key = int(binary_key, 2)
-                                dw.writerow([iteration, problem_name, qpu, circuit.num_qubits, 0, decimal_key, "'" + binary_key, 0, count, 0])
+                                dw.writerow([iteration, problem_name, qpu, circuit.num_qubits, decimal_key, "'" + binary_key, count])
                             
                             # Registramos resumen
                             sw.writerow([iteration, problem_name, qpu, circuit.num_qubits, 0, 
                                          f"{t_t:.4f}".replace('.',','), f"{t_e:.4f}".replace('.',','), f"{t_r:.4f}".replace('.',','),
-                                         g_o, g_t, d_o, d_t, "0,000000", job_id, "Editor"])
+                                         g_o, g_t, d_o, d_t, job_id, "Editor"])
                         except Exception as e:
                             print(f"Error executing on {qpu}: {e}", file=sys.stderr)
                             
