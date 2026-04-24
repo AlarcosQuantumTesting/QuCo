@@ -433,8 +433,9 @@ export class CircuitEditorComponent {
   }
 
   extractFunctionName(code: string): string | null {
-    const match = code.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
-    return match ? match[1] : null;
+    if (!code) return null;
+    const match = code.match(/def\s+([^\(]+)\(/);
+    return match ? match[1].trim() : null;
   }
 
   addColumn() {

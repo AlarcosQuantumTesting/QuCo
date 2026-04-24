@@ -157,7 +157,7 @@ public class CircuitEditorService {
                         calculus.append("circuit.h(").append(q).append(")\n");
                     }
                 } else {
-                    String displayGateName = gateToFunctionMap.getOrDefault(gateName, gateName);
+                    String displayGateName = findFunctionName(gateToFunctionMap, gateName);
                     calculus.append("circuit.append(").append(displayGateName).append("(), [").append(qubitsList).append("])\n");
                 }
             }
@@ -202,11 +202,28 @@ public class CircuitEditorService {
         return templateCode;
     }
 
+    private String findFunctionName(Map<String, String> gateToFunctionMap, String gateName) {
+        if (gateToFunctionMap.containsKey(gateName)) {
+            return gateToFunctionMap.get(gateName);
+        }
+        // Case-insensitive and space/underscore flexible lookup
+        for (Map.Entry<String, String> entry : gateToFunctionMap.entrySet()) {
+            String key = entry.getKey();
+            if (key.equalsIgnoreCase(gateName) || 
+                key.replace(" ", "_").equalsIgnoreCase(gateName.replace(" ", "_"))) {
+                return entry.getValue();
+            }
+        }
+        return gateName;
+    }
+
     private String extractFunctionName(String code) {
-        Pattern pattern = Pattern.compile("def\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(");
+        if (code == null) return null;
+        // Permissive regex: find 'def', skip spaces, capture everything until '('
+        Pattern pattern = Pattern.compile("def\\s+([^\\(]+)\\(");
         Matcher matcher = pattern.matcher(code);
         if (matcher.find()) {
-            return matcher.group(1);
+            return matcher.group(1).trim();
         }
         return null;
     }
