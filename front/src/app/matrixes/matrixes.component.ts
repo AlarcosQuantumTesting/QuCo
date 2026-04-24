@@ -566,8 +566,11 @@ export class MatrixesComponent implements AfterViewInit {
         this.isLoadingQiskitCode = true;
         this.qiskitCode = result.code
         if (this.qiskitCode) {
-          this.qiskitCode = this.qiskitCode.replace("#SHOTS#", "1000")
-          this.qiskitCode = this.qiskitCode.replace("#ALGORITHM#", "Matrixes")
+          this.qiskitCode = this.qiskitCode.replace(/#SHOTS#/g, "1000")
+          this.qiskitCode = this.qiskitCode.replace(/#ALGORITHM#/g, "Matrixes")
+          this.qiskitCode = this.qiskitCode.replace(/#ORIGINAL_QUBITS#/g, (this.inputQubits + this.outputQubits).toString())
+          this.qiskitCode = this.qiskitCode.replace(/#SPLIT#/g, "False")
+          this.qiskitCode = this.qiskitCode.replace(/#PARALLEL#/g, "True")
 
           this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
@@ -649,8 +652,13 @@ export class MatrixesComponent implements AfterViewInit {
       next: result => {
         this.qiskitCode = result.code;
         if (this.qiskitCode) {
-          this.qiskitCode = this.qiskitCode.replace("#SHOTS#", "1000")
-          this.qiskitCode = this.qiskitCode.replace("#ALGORITHM#", "Matrixes")
+          this.qiskitCode = this.qiskitCode.replace(/#SHOTS#/g, "1000")
+          this.qiskitCode = this.qiskitCode.replace(/#ALGORITHM#/g, "Matrixes")
+          this.qiskitCode = this.qiskitCode.replace(/#ORIGINAL_QUBITS#/g, (this.inputQubits + this.outputQubits).toString())
+          this.qiskitCode = this.qiskitCode.replace(/#SPLIT#/g, "False")
+          this.qiskitCode = this.qiskitCode.replace(/#PARALLEL#/g, "True")
+
+          this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
         }
         this.hasHadamardGates = false;
