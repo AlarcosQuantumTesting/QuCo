@@ -504,7 +504,6 @@ export class MatrixesComponent implements AfterViewInit {
         let url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.baseUrlQuirk + "=" + JSON.stringify(result))
         this.quirkURL = url
         //window.open("https://algassert.com/quirk#circuit=" + JSON.stringify(result), "_new")
-        window.open(environment.baseUrlQuirk + "=" + JSON.stringify(result), "_new")
       }
     )
   }
@@ -575,6 +574,11 @@ export class MatrixesComponent implements AfterViewInit {
           this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
 
+        }
+
+        if (this.hasHadamardGates) {
+          this.addHadamardGates();
+          this.mensajeTemporal = '';
         }
 
         if (this.hasCountLastQubit) {
@@ -661,7 +665,11 @@ export class MatrixesComponent implements AfterViewInit {
           this.qiskitCode = this.qiskitCode.replace("[#CIRCUITS_DECLARATION#]", "[#CIRCUITS_DECLARATION#]\nSPLIT = False\nPARALLEL = True\nORIGINAL_QUBITS=" + (this.inputQubits + this.outputQubits) + "\n")
           this.qiskitCode = this.qiskitCode.replace("#CIRCUITS_DECLARATION#", "QuantumCircuit(" + (this.inputQubits + this.outputQubits) + ", " + this.outputQubits + ")")
         }
-        this.hasHadamardGates = false;
+
+        if (this.hasHadamardGates) {
+          this.addHadamardGates();
+          this.mensajeTemporal = '';
+        }
 
         if (this.hasCountLastQubit) {
           this.isDisabled2 = false; // Allow addition
@@ -1198,7 +1206,6 @@ export class MatrixesComponent implements AfterViewInit {
     this.mostrarModal = false;
     this.isDisabled = false;
     this.isDisabled2 = false;
-    this.hasHadamardGates = false;
     this.fromEdit = false;
     this.isNameDisabled = false;
     this.expressionToSave = { expressionName: '', jsExpression: '', description: '', type: 'matrixes' };

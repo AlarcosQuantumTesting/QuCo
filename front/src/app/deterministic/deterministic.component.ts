@@ -463,13 +463,15 @@ export class DeterministicComponent extends GroverStyle {
     this.buildCode()
   }
 
-  getCircuit(asGrover?: boolean): Observable<any> {
+  getCircuit(asGrover?: boolean, showModal: boolean = true): Observable<any> {
     this.running = true;
     this.state = "Calculating";
     this.error = undefined;
     this.isLoadingQiskitCode = true;
     this.isEditingCode = false;
-    this.mostrarModal = true;
+    if (showModal) {
+      this.mostrarModal = true;
+    }
 
     if (this.expectedFrequencies.getShots() === 0) {
       if (this.userExpressions.length > 0) {
@@ -484,7 +486,9 @@ export class DeterministicComponent extends GroverStyle {
         this.error = "Please select at least one frequency or apply an expression before generating code.";
         this.running = false;
         this.isLoadingQiskitCode = false;
-        this.mostrarModal = false;
+        if (showModal) {
+          this.mostrarModal = false;
+        }
         this.modalError = true;
         return new Observable(subscriber => subscriber.error(this.error));
       }
@@ -512,7 +516,9 @@ export class DeterministicComponent extends GroverStyle {
             this.error = 'Error parseando JSON: ' + e;
             this.running = false;
             this.isLoadingQiskitCode = false;
-            this.mostrarModal = false;
+            if (showModal) {
+              this.mostrarModal = false;
+            }
             return;
           }
 
@@ -527,7 +533,9 @@ export class DeterministicComponent extends GroverStyle {
           this.state = undefined;
           this.running = false;
           this.isLoadingQiskitCode = false;
-          this.mostrarModal = true;
+          if (showModal) {
+            this.mostrarModal = true;
+          }
           this.copiarCodigo();
         });
       },
@@ -535,7 +543,9 @@ export class DeterministicComponent extends GroverStyle {
         this.error = err.error?.message || err.message;
         this.running = false;
         this.isLoadingQiskitCode = false;
-        this.mostrarModal = false;
+        if (showModal) {
+          this.mostrarModal = false;
+        }
         this.modalError = true;
       }
     });
@@ -2193,7 +2203,7 @@ export class DeterministicComponent extends GroverStyle {
 
     try {
       this.mensajeTemporal2 = "Generating code and quirk...";
-      await firstValueFrom(this.getCircuit());
+      await firstValueFrom(this.getCircuit(undefined, false));
       this.mensajeTemporal2 = "";
       // we need a small delay to let buildCode and blob.text() finish
       await new Promise(resolve => setTimeout(resolve, 500));
