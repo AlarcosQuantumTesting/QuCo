@@ -17,6 +17,9 @@ export class AppComponent implements AfterViewInit, OnInit {
   mostrarInicio = true;
 
   ngOnInit(): void {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('email');
+
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       this.darkMode = savedTheme === 'dark';
