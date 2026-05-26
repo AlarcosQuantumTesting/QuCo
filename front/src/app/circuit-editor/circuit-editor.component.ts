@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { EdCircuit, EdGate } from './EdCircuit';
+import { EdCircuit, EdGate, EdQubit } from './EdCircuit';
 import * as jsonData from '../../assets/factorize667.json';
 import { ManagerService } from '../manager.service';
 import { CodeTemplate } from '../templates/CodeTemplate';
@@ -228,8 +228,11 @@ export class CircuitEditorComponent {
     }
 
     if (occupied && allMeasures) {
-      for (let i = 0; i < this.circuit.qubits.length; i++)
-        this.circuit.qubits[i].gates[column] = new EdGate('I', 1);
+      for (let i = 0; i < this.circuit.qubits.length; i++) {
+        const gate = new EdGate('I', 1);
+        gate.columnIndex = column;
+        this.circuit.qubits[i].gates[column] = gate;
+      }
 
       this.gateRegistry = this.gateRegistry.filter(r => r.column !== column);
       this.saveState();
@@ -242,8 +245,11 @@ export class CircuitEditorComponent {
         return;
     }
 
-    for (let i = 0; i < this.circuit.qubits.length; i++)
-      this.circuit.qubits[i].gates[column] = new EdGate('I', 1);
+    for (let i = 0; i < this.circuit.qubits.length; i++) {
+      const gate = new EdGate('I', 1);
+      gate.columnIndex = column;
+      this.circuit.qubits[i].gates[column] = gate;
+    }
 
     this.gateRegistry = this.gateRegistry.filter(r => r.column !== column);
 
@@ -321,14 +327,18 @@ export class CircuitEditorComponent {
             loadedCircuit.name = loadedCircuitData.name;
             loadedCircuit.columns = loadedCircuitData.columns;
 
-            loadedCircuit.qubits = loadedCircuitData.qubits.map((qubitData: { gates: any[]; }) => ({
-              ...qubitData,
-              gates: qubitData.gates.map((gateData: any) => {
+            loadedCircuit.qubits = loadedCircuitData.qubits.map((qubitData: any) => {
+              const qubit = new EdQubit();
+              qubit.gates = qubitData.gates.map((gateData: any, colIndex: number) => {
                 const gate = new EdGate(gateData.name, gateData.qubits);
                 Object.assign(gate, gateData);
+                if (gate.columnIndex === undefined) {
+                  gate.columnIndex = colIndex;
+                }
                 return gate;
-              })
-            }));
+              });
+              return qubit;
+            });
 
             this.circuit = loadedCircuit;
 
@@ -364,7 +374,9 @@ export class CircuitEditorComponent {
 
     for (let i = 0; i < this.circuit.qubits.length; i++) {
       for (let j = 0; j < this.circuit.columns; j++) {
-        this.circuit.qubits[i].gates[j] = new EdGate('I', 1);
+        const gate = new EdGate('I', 1);
+        gate.columnIndex = j;
+        this.circuit.qubits[i].gates[j] = gate;
       }
     }
 
@@ -382,6 +394,7 @@ export class CircuitEditorComponent {
         (gate as any).transactionId = transactionId;
         gate.targetQubits = qubits.slice(1);
         gate.parentQubit = undefined;
+        gate.columnIndex = column;
 
         if (parentQubit < this.circuit!.qubits.length) {
           this.circuit!.qubits[parentQubit].gates[column] = gate;
@@ -394,6 +407,7 @@ export class CircuitEditorComponent {
             filler.parentQubit = parentQubit;
             (filler as any).gateId = registration.id;
             (filler as any).transactionId = transactionId;
+            filler.columnIndex = column;
             this.circuit!.qubits[q].gates[column] = filler;
           }
         }
@@ -528,6 +542,7 @@ export class CircuitEditorComponent {
     this.circuit!.qubits[mainQubit].gates[column] = gate;
     this.circuit!.qubits[mainQubit].gates[column].targetQubits = selectedQubits.slice(1);
     this.circuit!.qubits[mainQubit].gates[column].parentQubit = undefined;
+    this.circuit!.qubits[mainQubit].gates[column].columnIndex = column;
 
 
     for (let i = 1; i < selectedQubits.length; i++) {
@@ -536,6 +551,7 @@ export class CircuitEditorComponent {
       filler.parentQubit = mainQubit;
       (filler as any).gateId = uniqueGateId;
       (filler as any).transactionId = newGateId;
+      filler.columnIndex = column;
 
       this.circuit!.qubits[q].gates[column] = filler;
     }
@@ -627,6 +643,7 @@ export class CircuitEditorComponent {
       this.circuit!.qubits[mainQubit].gates[column] = gate;
       this.circuit!.qubits[mainQubit].gates[column].targetQubits = group.slice(1);
       this.circuit!.qubits[mainQubit].gates[column].parentQubit = undefined;
+      this.circuit!.qubits[mainQubit].gates[column].columnIndex = column;
 
       for (let i = 1; i < group.length; i++) {
         const q = group[i];
@@ -634,6 +651,7 @@ export class CircuitEditorComponent {
         filler.parentQubit = mainQubit;
         (filler as any).gateId = uniqueGateId;
         (filler as any).transactionId = transactionId;
+        filler.columnIndex = column;
 
         this.circuit!.qubits[q].gates[column] = filler;
       }
@@ -778,7 +796,9 @@ export class CircuitEditorComponent {
 
       for (const q of qubits) {
         if (q >= 0 && q < this.circuit.qubits.length) {
-          this.circuit.qubits[q].gates[column] = new EdGate('I', 1);
+          const gate = new EdGate('I', 1);
+          gate.columnIndex = column;
+          this.circuit.qubits[q].gates[column] = gate;
         }
       }
 
