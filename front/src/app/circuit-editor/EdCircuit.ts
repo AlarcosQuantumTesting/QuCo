@@ -12,7 +12,9 @@ export class EdCircuit {
             for (let i = this.qubits.length; i < qubits; i++) {
                 this.qubits.push(new EdQubit());
                 for (let j = 0; j < this.columns; j++) {
-                    this.qubits[i].add(new EdGate('I', 1));
+                    const gate = new EdGate('I', 1);
+                    gate.columnIndex = j;
+                    this.qubits[i].add(gate);
                 }
             }
         }
@@ -21,7 +23,9 @@ export class EdCircuit {
     addColumn() {
         this.columns++;
         for (let i = 0; i < this.qubits.length; i++) {
-            this.qubits[i].add(new EdGate('I', 1));
+            const gate = new EdGate('I', 1);
+            gate.columnIndex = this.columns - 1;
+            this.qubits[i].add(gate);
         }
     }
 

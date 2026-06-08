@@ -336,6 +336,7 @@ label {
 
 .buildText {
   width: 30%;
+  flex: 0 0 30%;
   text-align: left;
   border-right: 3px dashed #197a81;
 }
@@ -346,8 +347,6 @@ label {
   flex-wrap: wrap;
   align-items: center;
 }
-
-
 
 .input-group {
   display: flex;
@@ -935,6 +934,9 @@ ol.list-instructions {
   margin-top: 10px;
   padding: 5px;
   margin-bottom: 10px;
+  min-height: calc(100vh - 300px);
+  display: flex;
+  flex-direction: column;
 }
 
 .info1 {
@@ -996,6 +998,8 @@ ol.list-instructions {
 .qubitsContainer {
   width: 30%;
   max-width: 30%;
+  /* flex: 1; */
+  flex: 0 0 30%;
   padding-left: 10px;
   overflow-x: auto;
   white-space: nowrap;
@@ -1005,7 +1009,6 @@ ol.list-instructions {
   justify-content: flex-start !important;
   align-items: flex-start !important;
   text-align: left !important;
-
   border-right: 3px dashed #197a81;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -1023,19 +1026,22 @@ ol.list-instructions {
   max-width: 100%;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 400px;
+  height: calc(100vh - 350px);
+  min-height: 400px;
 }
 
 /* Opcional: para que las tablas grandes no se expandan más allá del contenedor */
 .table-wrapper table {
   width: 100%;
   min-width: max-content;
+  height: 100%;
 }
 
 
 .table-wrapper {
   overflow-x: auto;
   max-width: 100%;
+  height: 100%;
   border-color: rgba(255, 255, 255, 0) !important;
 }
 
@@ -1046,7 +1052,8 @@ ol.list-instructions {
   /*margin: 10px 0;*/
   flex-wrap: wrap;
   justify-content: center;
-  width: 80%;
+  width: 70%;
+  flex: 1;
 }
 
 .inline-config-row input {
@@ -1529,6 +1536,48 @@ i:hover {
 .transpile-code-btn:disabled {
   background-color: #7e838482;
   cursor: not-allowed;
+}
+
+.code-editor-pre {
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  /*background-color: #f8f9fa;*/
+  border: 1px solid transparent;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.code-editor-textarea {
+  margin: 0;
+  padding: 10px;
+  font-family: monospace;
+  background-color: #f8f9fa;
+  border: 1px solid #007d86;
+  border-radius: 5px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-y: hidden;
+}
+
+:host-context(body.dark-mode) .code-editor-pre {
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .code-editor-textarea {
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: #007d86 !important;
 }
 
 

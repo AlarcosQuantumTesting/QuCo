@@ -4,6 +4,8 @@ import { TemplatesService } from './templates.service';
 import { Expression } from './matrixes/Expression';
 import { ExpressionsService } from './expressions.service';
 
+import { ReplaySubject } from 'rxjs';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,11 +14,13 @@ export class ManagerService {
   selectedTemplate: CodeTemplate = new CodeTemplate("", "", "")
   templates: CodeTemplate[] = []
   expressions: Expression[] = []
+  templatesLoaded: ReplaySubject<void> = new ReplaySubject<void>(1);
 
   constructor(templateService: TemplatesService, expressionService: ExpressionsService) {
     templateService.getTemplates().subscribe((data) => {
       this.templates = data.map(t => new CodeTemplate(t.fileName, t.description, t.code))
       this.selectedTemplate = this.templates[0]
+      this.templatesLoaded.next();
     })
 
     expressionService.getExpressions().subscribe((data) => {
