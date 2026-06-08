@@ -53,6 +53,12 @@
             <span *ngIf="menuAbierto">Circuits editor</span>
           </a>
         </li>
+        <li>
+          <a routerLink="annealing" routerLinkActive="active" (click)="navigateAndReload('annealing')">
+            <i class="fas fa-wave-square" title="Quantum annealing"></i>
+            <span *ngIf="menuAbierto">Quantum annealing</span>
+          </a>
+        </li>
         <li class="separador">
           <a class="separador">
             <i *ngIf="!menuAbierto">——</i>
@@ -108,8 +114,10 @@
               <i class="fas fa-adjust" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">{{
                 darkMode ? 'Light Theme' : 'Dark Theme' }}</span>
             </a>
-            <a (click)="toggleAccessibilityPanel(); toggleUserDropdown()" class="dropdown-item" style="cursor: pointer;">
-              <i class="fas fa-cog" style="font-size: 16px; width: 25px;"></i> <span class="dropdown-text">Settings</span>
+            <a (click)="toggleAccessibilityPanel(); toggleUserDropdown()" class="dropdown-item"
+              style="cursor: pointer;">
+              <i class="fas fa-cog" style="font-size: 16px; width: 25px;"></i> <span
+                class="dropdown-text">Settings</span>
             </a>
           </div>
 

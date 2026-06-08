@@ -1,0 +1,809 @@
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+  <div class="mensaje-temporal" *ngIf="mensajeTemporal">
+    {{ mensajeTemporal }}
+  </div>
+
+  <div class="titulo">
+    <h1>Quantum annealing
+    </h1>
+    <button class="btn-toggle-help" style="margin-left: 15px; margin-top: -20px;" (click)="toggleHelp()">
+      ?
+    </button>
+  </div>
+
+  <div class="container search-container">
+    <div class="form-row">
+      <div class="section buildText">
+        <p>
+          In this section you can define and solve binary optimization problems using quantum annealing models.
+
+          Define your optimization problem below. The first line represents the cost function to minimize, and
+          subsequent lines define penalization restrictions with their weights.
+        </p>
+      </div>
+      <div class="section inputsContainer">
+        <div class="input-group quaco-group">
+          <span class="quaco-info-text">
+            To obtain the formulation of a generic problem, you can visit the <strong>QuaCo</strong> tool, copy it, and
+            paste it in the text box.
+          </span>
+          <a href="https://alarcosj.esi.uclm.es/quaco/" target="_blank" class="btn-quaco" title="Go to QuaCo">
+            <i class="fas fa-external-link-alt" style="margin-right: 6px;"></i> Go to QuaCo
+          </a>
+        </div>
+
+        <div class="input-group">
+          <label>Available templates:</label>
+          <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
+            <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['annealing'])" [ngValue]="template">
+              {{ template.displayName }}
+            </option>
+          </select>
+          <button routerLink="/templates" class="btn-templates-link" title="Go to Templates">
+            <i class="fas fa-file-code"></i>
+          </button>
+          <div>
+            <button class="btn-search" title="See code" (click)="mostrarCodigoModal = !mostrarCodigoModal"
+              [disabled]="!code">
+              <i class="fa fa-code"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="help-modal" *ngIf="showHelp">
+    <div class="help-content" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement=".help-content">
+      <div class="help-modal-header" cdkDragHandle>
+        <h2 class="help-title-modal">Help: Quantum Annealing & QAOA</h2>
+        <button class="close"><i class="minimize-i fas fa-minus" (click)="minDir.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="toggleHelp()">&times;</i></button>
+      </div>
+      <div class="help-text">
+        <h2 class="help-heading" style="color: #0a6369;">How to use 'Annealing Solver'</h2>
+        <div class="help-intro">
+          This solver translates binary optimization problems into quantum models (Ising Hamiltonians) and generates
+          Qiskit circuits to solve them via Quantum Approximate Optimization Algorithm (QAOA).
+        </div>
+        <div class="help-section">
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-edit"></i></div>
+            <div class="help-content-desc">
+              <h3>1. Define Objective</h3>
+              <p>Write the linear objective function to minimize on the <b>first line</b>. Variables must be of form
+                <code>x0</code>, <code>x1</code>, etc. Example: <code>12x0 + 14x1 + 16x2 + 3x3</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-balance-scale"></i></div>
+            <div class="help-content-desc">
+              <h3>2. Add Constraints & Penalties</h3>
+              <p>Add equality constraints on subsequent lines. Format: <code>expression=value, lambda</code>. The
+                <code>lambda</code> weight represents the penalty stiffness. Example:
+                <code>7x0+20x1+3x2+2x3=1, 10</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-calculator"></i></div>
+            <div class="help-content-desc">
+              <h3>3. QUBO & Ising Mapping</h3>
+              <p>The system expands constraint equations, applies quadratic penalty rules, and maps variables
+                x<sub>i</sub> &isin; [0, 1] to spin variables s<sub>i</sub> &isin; [-1, +1]. This creates the transverse
+                field Ising Hamiltonian H = &sum; h<sub>i</sub> Z<sub>i</sub> + &sum; J<sub>ij</sub> Z<sub>i</sub>
+                Z<sub>j</sub>.</p>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-icon"><i class="fas fa-microchip"></i></div>
+            <div class="help-content-desc">
+              <h3>4. Generate Qiskit Circuit</h3>
+              <p>Generates full, executable Qiskit code. The circuit includes state preparation (H), cost layer
+                rotations (R<sub>Z</sub> for linear, R<sub>ZZ</sub> for quadratic interactions), and mixer rotations
+                (R<sub>X</sub>).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="help-actions">
+        <button class="action-btn" (click)="toggleHelp()">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Examples Modal (Resizable & Movable) -->
+  <div class="modal ejemplos" *ngIf="mostrarEjemplos" style="z-index: 1001">
+    <div class="modal-content ejemplos" cdkDrag #minDirEx="appMinimize" appMinimize cdkDragRootElement=".modal-content"
+      style="width: 600px; height: auto; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header" cdkDragHandle>
+        <h2 class="title-modal">Preconfigured examples</h2>
+        <button class="close">
+          <i class="minimize-i fas fa-minus" (click)="minDirEx.toggle($event)" title="Minimize"></i>
+          <i class="close-i" (click)="mostrarEjemplos = false">&times;</i>
+        </button>
+      </div>
+      <div class="help-text" style="padding: 20px;">
+        <p style="color: #475569; font-size: 13.5px; margin-bottom: 15px;">
+          Select one of the preconfigured annealing problems below to load it into the editor.
+        </p>
+        <div class="example-list" style="overflow-y: auto; max-height: calc(90vh - 150px); padding-right: 10px;">
+          <div class="example-item-card" *ngFor="let ex of examples; let idx = index"
+            style="margin-bottom: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px;">
+            <div class="example-header"
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <strong style="color: #1e293b; font-size: 14px;">{{ ex.title }}</strong>
+              <button (click)="loadExample(idx)"
+                style="background-color: #4c9696; color: white; padding: 5px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.2s ease-in-out; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#386161'; this.style.transform='scale(1.05)'"
+                onmouseout="this.style.backgroundColor='#4c9696'; this.style.transform='scale(1)'">
+                Try
+              </button>
+            </div>
+            <p class="example-desc" style="color: #64748b; font-size: 12.5px; margin: 0; line-height: 1.5;">{{
+              ex.description }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="help-actions">
+        <button class="action-btn" (click)="mostrarEjemplos = false">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container main-solver-container">
+    <div class="form-row">
+      <!-- Left side: Inputs -->
+      <div class="section inputs-section">
+
+        <div class="input-card">
+          <!-- Title and Examples button in flex layout -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center;">
+              <h3 style="margin: 0; font-size: 15px;"><strong><i class="fas fa-edit" style="margin-right: 5px;"></i>
+                  Optimization problem</strong></h3>
+              <button class="action-button"
+                style="background: none; border: none; color: #008b95; padding: 0; cursor: pointer; font-size: 16px; margin-left: 8px; box-shadow: none;"
+                (click)="mostrarOptimizationInfoModal = true" title="Information about the Optimization problem">
+                <i class="fas fa-info-circle"></i>
+              </button>
+            </div>
+            <button class="action-button"
+              style="background-color: #008b95; border: none; color: white; width: 26px; height: 26px; min-width: 26px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; box-sizing: border-box;"
+              (click)="mostrarEjemplos = true" title="Examples">
+              <i class="fas fa-lightbulb"></i>
+            </button>
+          </div>
+
+          <!-- Objective function field -->
+          <label style="font-size: 13.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 5px;">Minimize cost function:</label>
+          <div style="position: relative; margin-bottom: 15px;">
+            <input type="text" [(ngModel)]="objectiveInput" (input)="generateQiskitCode()" class="template-dropdown"
+              placeholder="e.g. 12x0+14x1+16x2+3x3"
+              style="padding: 10px; padding-right: 85px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13.5px; font-family: inherit; font-weight: normal; background-color: #f8fafc; color: #000000 !important; outline: none; width: 100%; box-sizing: border-box;"
+              spellcheck="false" autocomplete="off" />
+            <button class="action-button" style="position: absolute; right: 8px; top: 7px; background: #fef2f2; color: #f87171; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);"
+              onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5'; this.style.color='#ef4444'"
+              onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca'; this.style.color='#f87171'"
+              (click)="objectiveInput=''; generateQiskitCode()" title="Clear objective function">
+              <i class="fas fa-eraser"></i> Clean
+            </button>
+          </div>
+
+          <!-- Constraints field -->
+          <label style="font-size: 13.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 5px;">Subject to constraints:</label>
+          <div style="position: relative;">
+            <textarea id="problemInput" class="problem-textarea" [(ngModel)]="problemInput" (input)="generateQiskitCode()"
+              placeholder="Introduce constraints here..."
+              style="margin-top: 0; padding-right: 85px; color: #000000 !important; font-weight: normal; font-family: inherit;"
+              spellcheck="false"></textarea>
+            <button class="action-button" style="position: absolute; right: 8px; top: 8px; background: #fef2f2; color: #f87171; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02);"
+              onmouseover="this.style.background='#fee2e2'; this.style.borderColor='#fca5a5'; this.style.color='#ef4444'"
+              onmouseout="this.style.background='#fef2f2'; this.style.borderColor='#fecaca'; this.style.color='#f87171'"
+              (click)="problemInput=''; generateQiskitCode()" title="Clear constraints">
+              <i class="fas fa-eraser"></i> Clean
+            </button>
+          </div>
+
+          <div class="error-box" *ngIf="errorMessage">
+            <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+          </div>
+
+          <!-- Global Lambda Input -->
+          <div class="lambda-input-group" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 13.5px; font-weight: 600; color: #475569;">Lambda Global (&lambda;):</label>
+            <input type="number" [(ngModel)]="globalLambda" (input)="generateQiskitCode()" class="template-dropdown"
+              style="padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-size: 13.5px; font-family: inherit; font-weight: normal; background-color: #f8fafc; color: #000000 !important; outline: none; width: 100%; box-sizing: border-box;"
+              min="0" step="1" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: Code view & Math details -->
+      <div class="section outputs-section" *ngIf="!errorMessage && code">
+        <!-- Math parameters breakdown -->
+        <div class="math-card" style="width: 100%;">
+          <div class="math-header"
+            style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center;">
+              <h3 style="margin: 0;"><i class="fas fa-microchip"></i> Hardware resource estimation</h3>
+              <button class="action-button"
+                style="background: none; border: none; color: #008b95; padding: 0; cursor: pointer; font-size: 16px; margin-left: 8px; box-shadow: none;"
+                (click)="mostrarHardwareInfoModal = true" title="Information about Hardware resource estimation">
+                <i class="fas fa-info-circle"></i>
+              </button>
+            </div>
+            <span class="qubits-badge">{{ numQubits }} Logical Qubits</span>
+          </div>
+
+          <!-- Resource Analysis -->
+          <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+            <div class="resource-box">
+              <span class="resource-value">{{ numQubits }}</span>
+              <span class="resource-label">Qubits</span>
+            </div>
+            <div class="resource-box">
+              <span class="resource-value">{{ getNumCouplings() }}</span>
+              <span class="resource-label">Couplings</span>
+            </div>
+            <div class="resource-box" style="position: relative;">
+              <i class="fas fa-info-circle"
+                style="position: absolute; top: 10px; right: 10px; font-size: 14px; color: #008b95; cursor: pointer; transition: all 0.2s ease-in-out;"
+                onmouseover="this.style.transform='scale(1.15)'; this.style.color='#005a61'"
+                onmouseout="this.style.transform='scale(1)'; this.style.color='#008b95'"
+                (click)="mostrarDensityModal = true" title="View detailed density calculation"></i>
+              <span class="resource-value">{{ getDensity() | number:'1.0-1' }}%</span>
+              <span class="resource-label">Density</span>
+            </div>
+          </div>
+
+          <div class="math-header"
+            style="margin-bottom: 15px; border-top: 1px solid #e2e8f0; padding-top: 20px; display: flex; align-items: center;">
+            <div style="display: flex; align-items: center;">
+              <h3 style="margin: 0;"><i class="fas fa-project-diagram"></i> Problem topology graph</h3>
+              <button class="action-button"
+                style="background: none; border: none; color: #008b95; padding: 0; cursor: pointer; font-size: 16px; margin-left: 8px; box-shadow: none;"
+                (click)="mostrarTopologyInfoModal = true" title="Information about the topology graph">
+                <i class="fas fa-info-circle"></i>
+              </button>
+            </div>
+          </div>
+
+          <div
+            style="display: flex; justify-content: center; align-items: center; width: 100%; height: 300px; background: #f8fafc; border-radius: 8px; border: 1.5px solid #e2e8f0; overflow: hidden;"
+            class="topology-container">
+            <svg width="300" height="300" viewBox="0 0 300 300" *ngIf="numQubits > 0">
+              <!-- Edges -->
+              <g *ngFor="let edge of getGraphEdges()" class="edge-group">
+                <line [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2" stroke="#cbd5e1"
+                  stroke-width="4" class="graph-edge" style="cursor: pointer;" (click)="openEdgeMathModal(edge)"></line>
+                <!-- Invisible wider line for easier hover targeting -->
+                <line [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2"
+                  stroke="rgba(0, 0, 0, 0.01)" stroke-width="12" style="cursor: pointer; pointer-events: stroke;"
+                  (click)="openEdgeMathModal(edge)">
+                  <title>Coupling Q{{edge.key}}: {{edge.weight}}</title>
+                </line>
+              </g>
+
+              <!-- Nodes -->
+              <g *ngFor="let node of getGraphNodes()">
+                <circle [attr.cx]="node.x" [attr.cy]="node.y" r="18" fill="#008b95" stroke="#ffffff" stroke-width="3"
+                  style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));"></circle>
+                <text [attr.x]="node.x" [attr.y]="node.y" text-anchor="middle" dy=".35em" fill="white" font-size="13px"
+                  font-weight="bold" font-family="'Fira Code', monospace">x{{node.id}}</text>
+              </g>
+            </svg>
+            <div *ngIf="numQubits === 0" style="color: #94a3b8; font-style: italic; font-weight: 500;">No variables
+              defined yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Floating non-blocking Code Modal (Identical styling to Matrixes/Editor Qiskit Modal) -->
+  <div class="modal ejemplos" *ngIf="mostrarCodigoModal" style="z-index: 1002;">
+    <div class="modal-content ejemplos" cdkDrag #minDirCode="appMinimize" appMinimize
+      cdkDragRootElement=".modal-content" style="height: fit-content; max-height: 90%;">
+      <div class="modal-header" style="padding: 15px 20px;" cdkDragHandle>
+        <h2 class="title-modal">Qiskit Code</h2>
+        <button class="close">
+          <i class="minimize-i fas fa-minus" (click)="minDirCode.toggle($event)" title="Minimize"
+            style="margin-right: 10px; cursor: pointer; color: white;"></i>
+          <i class="close-i" (click)="mostrarCodigoModal = false" style="cursor: pointer;">&times;</i>
+        </button>
+      </div>
+
+      <!-- Modal Content: Dynamic view depending on code editing mode -->
+      <div class="code-output" style="overflow-y: auto; flex: 1;">
+        <div *ngIf="code && code.length > 0">
+          <div style="margin: 20px;">
+            <pre *ngIf="!isEditingCode" class="code-editor-pre">{{ code }}</pre>
+            <textarea *ngIf="isEditingCode" [(ngModel)]="code" [rows]="codeLinesCount" class="code-editor-textarea"
+              spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identical Premium Modal Footer (Matching the rest of QuCo) -->
+      <div class="modal-footer"
+        style="padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: flex-end; align-items: center; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; flex-wrap: wrap; gap: 5px;">
+        <button class="execute-code-btn" (click)="mostrarInstEjecucion = true">
+          <i class="fas fa-rocket"></i> Execute local
+        </button>
+        <button class="execute-remote-code-btn" (click)="mostrarEjecucionRemote = true">
+          <i class="fas fa-rocket"></i> Execute remote
+        </button>
+        <button class="transpile-code-btn" (click)="transpileCodigo()">
+          <i class="fas fa-exchange-alt"></i> Transpile
+        </button>
+        <button class="download-as-btn" (click)="mostrarDownloadModal = true">
+          <i class="fas fa-download"></i> Download as
+        </button>
+        <button class="copy-btn" (click)="copiarCodigo()">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+        <button class="copy-btn" style="background-color: #34495eba !important;" (click)="toggleEditCode()">
+          <i class="fas" [ngClass]="isEditingCode ? 'fa-check' : 'fa-edit'"></i> {{ isEditingCode ? 'Finish editing' :
+          'Edit code' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transpile Modal -->
+  <div class="modal instrucciones" *ngIf="modalTranspile" style="z-index: 1003;">
+    <div class="modal-content instrucciones" cdkDrag #minDirTranspile="appMinimize" appMinimize
+      cdkDragRootElement=".instrucciones"
+      style="min-width: 800px; background-color: white; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 20px; font-weight: bold;">Transpile Code</h2>
+        <button class="close" style="background: none; border: none; cursor: pointer; color: white;"><i class="close-i"
+            (click)="modalTranspile = false" style="font-size: 24px;">&times;</i></button>
+      </div>
+
+      <div class="instructions-content" style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+        <div class="form-row"
+          style="display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%;">
+          <label style="color: #334155; margin-bottom: 0px; font-weight: 600; font-size: 14.5px;">Circuit name:</label>
+          <input id="circuitName" class="input-function form-control" type="text" [(ngModel)]="circuitName"
+            placeholder="circuit name..."
+            style="max-width: 40%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; font-family: inherit; width: 100%; outline: none; color: #000000 !important; font-weight: normal;" />
+        </div>
+
+        <div class="form-row-backends" style="display: flex; gap: 20px; justify-content: center; width: 100%;">
+          <div class="section contenedorBackends"
+            style="flex: 1; background-color: #f8fafc; border-radius: 8px; padding: 15px; border: 1.5px solid #e2e8f0; height: 300px; display: flex; flex-direction: column;">
+            <h4 class="text-center"
+              style="width: 100%; text-align: center; margin-top: 0; margin-bottom: 12px; font-weight: 600; color: #0b555a; font-size: 15px;">
+              Available Backends</h4>
+            <ul class="listaBackends" style="list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1;">
+              <li *ngFor="let backend of availableBackends" class="list-group-item"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13.5px;">
+                <div>{{ backend.name }} <small class="text-muted" style="color: #64748b;">({{ backend.qubits }}
+                    qubits)</small></div>
+                <button type="button" class="apply-button"
+                  style="padding: 4px 8px; background-color: #10989c; border: none; border-radius: 4px; color: white; cursor: pointer; transition: all 0.2s;"
+                  (click)="selectBackend(backend)">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <div class="section contenedorBackends"
+            style="flex: 1; background-color: #f8fafc; border-radius: 8px; padding: 15px; border: 1.5px solid #e2e8f0; height: 300px; display: flex; flex-direction: column;">
+            <h4 class="text-center"
+              style="width: 100%; text-align: center; margin-top: 0; margin-bottom: 12px; font-weight: 600; color: #0b555a; font-size: 15px;">
+              Selected Backends</h4>
+            <ul class="listaBackends" style="list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1;">
+              <li *ngFor="let backend of selectedBackends" class="list-group-item"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13.5px;">
+                <div>{{ backend.name }} <small class="text-muted" style="color: #64748b;">({{ backend.qubits }}
+                    qubits)</small></div>
+                <button type="button" class="deselect-button"
+                  style="padding: 4px 8px; background-color: #dc3545; border: none; border-radius: 4px; color: white; cursor: pointer; transition: all 0.2s;"
+                  (click)="deselectBackend(backend)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer"
+        style="padding: 15px 20px; border-top: 1px solid #cbd5e1; display: flex; justify-content: flex-end; background-color: #f8fafc; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+        <button class="transpile-code-btn"
+          style="padding: 10px 20px; background-color: #10989c; border: none; border-radius: 40px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+          [disabled]="circuitName.trim() === '' || selectedBackends.length <= 0" (click)="transpile()"><i
+            class="fas fa-exchange-alt"></i> Transpile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared modals inclusion -->
+  <app-modal-descarga [mostrarModal]="mostrarInstEjecucion"
+    (cerrar)="mostrarInstEjecucion = false"></app-modal-descarga>
+
+  <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
+    [qiskitCode]="code"></app-download-code-modal>
+
+  <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false" [qiskitCode]="code"
+    runnerType="editor"></app-run-code>
+
+  <!-- Edge Math Breakdown Modal -->
+  <div class="modal ejemplos" *ngIf="mostrarMathModal" style="z-index: 1004;">
+    <div class="modal-content ejemplos" cdkDrag #minDirMath="appMinimize" appMinimize cdkDragRootElement=".ejemplos"
+      style="min-width: 600px; max-width: 800px; height: auto; max-height: 90vh; background-color: #ffffff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #007a83;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+          Coupling
+          Q<sub>{{selectedEdgeMath?.v1}},{{selectedEdgeMath?.v2}}</sub>
+        </h2>
+        <div class="close" style="display: flex; gap: 15px; align-items: center;">
+          <i class="minimize-i fas fa-minus" (click)="minDirMath.toggle($event)" title="Minimize"
+            style="cursor: pointer; color: white; font-size: 18px;"></i>
+          <i class="close-i fas fa-times" (click)="mostrarMathModal = false"
+            style="cursor: pointer; color: white; font-size: 20px;"></i>
+        </div>
+      </div>
+      <div class="modal-body"
+        style="padding: 25px; overflow-y: auto; background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+        <!-- Step-by-step Breakdown -->
+        <div>
+
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div *ngFor="let derivation of selectedEdgeMath?.derivations"
+              style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+              <div
+                style="font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Source constraint</div>
+              <div class="math-expression-display"
+                style="margin-bottom: 15px; background: #f1f5f9; border-color: #e2e8f0;">
+                {{ derivation.rawConstraint }}
+              </div>
+
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                <div
+                  style="font-family: 'Fira Code', monospace; font-size: 14px; color: #334155; display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #008b95; font-weight: bold;">2</span> &times;
+                  <span style="color: #b45309;" title="Global Lambda">&lambda;({{ derivation.lambda }})</span> &times;
+                  <span style="color: #1d4ed8;" title="Coefficient of x{{selectedEdgeMath?.v1}}">A({{ derivation.a
+                    }})</span> &times;
+                  <span style="color: #1d4ed8;" title="Coefficient of x{{selectedEdgeMath?.v2}}">B({{ derivation.b
+                    }})</span>
+                </div>
+                <div style="font-size: 18px; font-weight: 800; font-family: 'Fira Code', monospace; color: #0f172a;">
+                  = <span
+                    [ngStyle]="{'color': derivation.contribution > 0 ? '#16a34a' : (derivation.contribution < 0 ? '#dc2626' : '#64748b')}">{{
+                    derivation.contribution > 0 ? '+' : '' }}{{ derivation.contribution }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="margin-top: 25px; padding: 15px 20px; background: #008b95; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px rgba(0, 139, 149, 0.2);">
+            <span style="font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total
+              Coupling Weight</span>
+            <span style="font-family: 'Fira Code', monospace; font-size: 24px; font-weight: 800; color: white;">{{
+              selectedEdgeMath?.weight }}</span>
+          </div>
+        </div> <!-- Closes Section 3 div -->
+      </div>
+    </div>
+  </div>
+  <!-- Topology Information Modal -->
+  <div class="modal ejemplos" *ngIf="mostrarTopologyInfoModal" style="z-index: 1004;">
+    <div class="modal-content ejemplos" cdkDrag #minDirTopoInfo="appMinimize" appMinimize cdkDragRootElement=".ejemplos"
+      style="min-width: 600px; max-width: 800px; height: auto; max-height: 90vh; background-color: #ffffff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #007a83;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+          <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Problem topology graph explained
+        </h2>
+        <button class="close" style="background: none; border: none; cursor: pointer; color: white;"
+          (click)="mostrarTopologyInfoModal = false">
+          <i class="fas fa-times" style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body"
+        style="padding: 25px; overflow-y: auto; background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+        <!-- What is the graph for? -->
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-project-diagram" style="color: #008b95; margin-right: 8px;"></i> What is this graph for?
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            The <strong>'Problem topology graph'</strong> is a visual representation of how your mathematical problem
+            maps
+            onto a quantum computer's architecture. It helps you quickly understand which variables (qubits) are
+            interacting with each other, identifying subproblems and heavily constrained variables at a glance.
+          </p>
+        </div>
+
+        <!-- What it represents -->
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-network-wired" style="color: #008b95; margin-right: 8px;"></i> What do the nodes and lines
+            represent?
+          </h3>
+          <ul style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+            <li style="margin-bottom: 8px;"><strong>Nodes (Circles):</strong> Each circle represents one of the binary
+              variables from your equations (e.g., x0, x1). In the quantum hardware, these will be assigned to physical
+              <strong>Qubits</strong>.
+            </li>
+            <li><strong>Edges (Lines):</strong> The lines connecting the nodes represent the
+              <strong>relationship</strong> or dependency between those two variables. If two variables appear together
+              in any of your constraints, they are connected by a line.
+            </li>
+          </ul>
+        </div>
+
+        <!-- What is a Coupling and how is it calculated? -->
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-square-root-alt" style="color: #008b95; margin-right: 8px;"></i> What is calculated
+            (Couplings)?
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;">
+            The value hidden in each line is called a <strong>Coupling Weight</strong>. It represents the physical
+            interaction strength between two qubits. To translate your mathematical constraints into quantum physics,
+            the system squares each equation to create a "penalty function" (so violations increase the quantum energy
+            cost). Squaring a polynomial generates cross-multiplications (quadratic terms) between variables. The
+            universal formula we use to extract this coupling strength from any constraint is:
+          </p>
+          <div
+            style="background: #e2e8f0; padding: 12px 15px; border-radius: 6px; font-weight: 600; font-family: 'Fira Code', monospace; color: #0f172a; text-align: center; border: 1px solid #cbd5e1; font-size: 14px;">
+            Coupling = 2 &times; &lambda; &times; Coef(A) &times; Coef(B)
+          </div>
+          <ul style="color: #475569; font-size: 13.5px; margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li><strong>&lambda; (Lambda):</strong> The penalty weight you assigned to the constraint.</li>
+            <li><strong>Coef(A) & Coef(B):</strong> The numbers multiplying the variables inside your equation.</li>
+            <li><strong>2:</strong> Comes from the mathematical expansion of a squared binomial:
+              <div
+                style="background: #f1f5f9; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; font-family: 'Fira Code', monospace; color: #334155; text-align: center; margin-top: 6px; font-size: 13px;">
+                (A + B)<sup>2</sup> = A<sup>2</sup> + B<sup>2</sup> + <span
+                  style="color: #008b95; font-weight: bold; font-size: 14px;">2</span>AB
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Why is it calculated? -->
+        <div>
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-microchip" style="color: #008b95; margin-right: 8px;"></i> Why do we calculate this?
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            Quantum annealers (like D-Wave) solve optimization problems by finding the lowest energy state of a physical
+            system. They cannot read your human-written equations natively. They only understand <strong>linear
+              biases</strong> (applied to single qubits) and <strong>quadratic couplings</strong> (the physical
+            connections between pairs of qubits). We calculate these couplings so the hardware knows exactly how
+            strongly to link the qubits to accurately reflect your constraints.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- Optimization Problem Information Modal -->
+  <div class="modal ejemplos" *ngIf="mostrarOptimizationInfoModal" style="z-index: 1004;">
+    <div class="modal-content ejemplos" cdkDrag #minDirOptInfo="appMinimize" appMinimize cdkDragRootElement=".ejemplos"
+      style="min-width: 600px; max-width: 800px; height: auto; max-height: 90vh; background-color: #ffffff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #007a83;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+          <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Optimization problem explained
+        </h2>
+        <button class="close" style="background: none; border: none; cursor: pointer; color: white;"
+          (click)="mostrarOptimizationInfoModal = false">
+          <i class="fas fa-times" style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body"
+        style="padding: 25px; overflow-y: auto; background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-edit" style="color: #008b95; margin-right: 8px;"></i> What is this section for?
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            This section allows you to define your mathematical model in a human-readable format. Quantum annealers are
+            specifically designed to solve <strong>optimization problems</strong>: finding the best possible solution
+            out of many combinations while respecting certain rules.
+          </p>
+        </div>
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-sort-amount-down" style="color: #008b95; margin-right: 8px;"></i> Cost function
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            The <strong>Cost Function</strong> (or objective function) is the equation you want to minimize. For
+            example, if you are planning a delivery route, the variables might represent paths, and the cost function
+            calculates the total distance. The quantum computer will try to find the variable configuration that results
+            in the lowest possible mathematical value.
+          </p>
+        </div>
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-balance-scale" style="color: #008b95; margin-right: 8px;"></i> Constraints
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            <strong>Constraints</strong> are the strict rules your solution must follow (e.g., "A truck cannot carry
+            more than 50kg", or "City A must be visited exactly once"). The system will automatically convert these
+            human-readable inequalities or equalities into "quantum penalties".
+          </p>
+        </div>
+        <div>
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-weight-hanging" style="color: #008b95; margin-right: 8px;"></i> Lambda (&lambda;)
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            <strong>Lambda</strong> is the penalty weight. If the quantum hardware breaks a constraint, we penalize it
+            by adding a huge number to its cost function. Lambda determines how big that penalty is. If Lambda is too
+            low, the hardware might ignore your rules to get a cheaper score. If it's too high, the hardware might only
+            focus on the rules and ignore the actual cost function.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hardware Resource Estimation Information Modal -->
+  <div class="modal ejemplos" *ngIf="mostrarHardwareInfoModal" style="z-index: 1004;">
+    <div class="modal-content ejemplos" cdkDrag #minDirHardInfo="appMinimize" appMinimize cdkDragRootElement=".ejemplos"
+      style="min-width: 600px; max-width: 800px; height: auto; max-height: 90vh; background-color: #ffffff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #007a83;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+          <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Hardware resource estimation explained
+        </h2>
+        <button class="close" style="background: none; border: none; cursor: pointer; color: white;"
+          (click)="mostrarHardwareInfoModal = false">
+          <i class="fas fa-times" style="font-size: 20px;"></i>
+        </button>
+      </div>
+      <div class="modal-body"
+        style="padding: 25px; overflow-y: auto; background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-microchip" style="color: #008b95; margin-right: 8px;"></i> What is this section for?
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            This section analyzes your problem and estimates the raw hardware capabilities required to map it onto a
+            quantum processing unit (QPU). Since modern quantum hardware has strict physical limitations, estimating
+            these resources beforehand is crucial.
+          </p>
+        </div>
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-dot-circle" style="color: #008b95; margin-right: 8px;"></i> Qubits
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            <strong>Logical Qubits</strong> represent the minimum number of quantum bits needed. This is calculated by
+            counting all the unique binary variables (x0, x1, etc.) that appear in your cost function and constraints.
+            Note that in real hardware, due to limited physical connectivity, one "logical" qubit might need to be
+            chained across multiple "physical" qubits (a process called minor-embedding).
+          </p>
+        </div>
+        <div style="margin-bottom: 25px;">
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-project-diagram" style="color: #008b95; margin-right: 8px;"></i> Couplings
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            <strong>Couplings</strong> are the physical connections required between pairs of qubits. If two variables
+            interact in your mathematical model (by being multiplied together or appearing in the same constraint), a
+            coupling is generated. Hardware with more native connections (like D-Wave's Pegasus architecture) can handle
+            problems with more couplings.
+          </p>
+        </div>
+        <div>
+          <h3
+            style="color: #0f172a; font-size: 15px; margin-top: 0; margin-bottom: 8px; display: flex; align-items: center;">
+            <i class="fas fa-network-wired" style="color: #008b95; margin-right: 8px;"></i> Density
+          </h3>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
+            <strong>Density</strong> is the percentage of possible connections that are actually used. A density of 100%
+            means every single variable interacts with every other variable (a fully connected graph). High density
+            problems are notoriously difficult to embed on real quantum hardware because physical qubits typically only
+            connect to a small neighborhood of adjacent qubits (around 15 connections per qubit on modern chips).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Density Information Modal -->
+  <div class="modal ejemplos" *ngIf="mostrarDensityModal" style="z-index: 1004;">
+    <div class="modal-content ejemplos" cdkDrag #minDirDensityInfo="appMinimize" appMinimize
+      cdkDragRootElement=".ejemplos"
+      style="min-width: 500px; max-width: 600px; height: auto; max-height: 90vh; background-color: #ffffff; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" cdkDragHandle
+        style="background-color: #008b95; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #007a83;">
+        <h2 class="title-modal" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+          <i class="fas fa-network-wired" style="margin-right: 8px;"></i> Graph density details
+        </h2>
+        <div class="close" style="display: flex; gap: 15px; align-items: center;">
+          <i class="minimize-i fas fa-minus" (click)="minDirDensityInfo.toggle($event)" title="Minimize"
+            style="cursor: pointer; color: white; font-size: 18px;"></i>
+          <i class="close-i fas fa-times" (click)="mostrarDensityModal = false"
+            style="cursor: pointer; color: white; font-size: 20px;"></i>
+        </div>
+      </div>
+      <div class="modal-body" style="padding: 25px; overflow-y: auto; font-family: 'Inter', sans-serif;">
+        <p style="color: #475569; font-size: 14.5px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">
+          <strong>Density</strong> measures how interconnected your quantum variables are. A fully connected problem
+          (100% density) means every variable interacts with every other variable. High density graphs are harder to
+          solve on real quantum hardware.
+        </p>
+
+        <div
+          style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 10px;">
+          <h3
+            style="margin-top: 0; color: #0f172a; font-size: 15px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            Calculation</h3>
+
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="color: #64748b; font-size: 14px;">Total qubits (N):</span>
+            <span style="font-weight: 600; color: #0f172a;">{{ numQubits }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="color: #64748b; font-size: 14px;">Current couplings (E):</span>
+            <span style="font-weight: 600; color: #0f172a;">{{ getNumCouplings() }}</span>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 10px;">
+            <span style="color: #64748b; font-size: 14px;">Max possible couplings [N &times; (N-1) / 2]:</span>
+            <span style="font-weight: 600; color: #0f172a;">{{ numQubits > 1 ? (numQubits * (numQubits - 1) / 2) : 0
+              }}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #64748b; font-size: 14px;">Missing / Unpaired couplings:</span>
+              <span style="font-weight: 600; color: #dc2626;">{{ numQubits > 1 ? ((numQubits * (numQubits - 1) / 2) -
+                getNumCouplings()) : 0 }}</span>
+            </div>
+            <div *ngIf="getMissingCouplings().length > 0"
+              style="font-size: 13px; color: #64748b; background: #ffffff; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 6px; max-height: 80px; overflow-y: auto;">
+              <span *ngFor="let missing of getMissingCouplings(); let last = last"
+                style="font-family: 'Fira Code', monospace; display: inline-block; margin-right: 6px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px;">{{
+                missing }}</span>
+            </div>
+          </div>
+          <div
+            style="display: flex; justify-content: space-between; margin-top: 15px; background: #e0f2fe; padding: 10px; border-radius: 6px;">
+            <span style="color: #0369a1; font-weight: 600; font-size: 14px;">Final density:</span>
+            <span style="font-weight: 800; color: #0369a1; font-size: 16px;">{{ getDensity() | number:'1.0-1' }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>

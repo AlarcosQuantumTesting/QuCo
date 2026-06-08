@@ -2204,7 +2204,7 @@ input[type="checkbox"] {
 /* TABLAS - CRÍTICO PARA CONTRASTE */
 :host-context(body.dark-mode) table {
   background-color: #172424 !important;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.6) !important;
+
   border: 1px solid #233737 !important;
 }
 
@@ -2558,21 +2558,22 @@ input[type="checkbox"] {
   filter: invert(0.85) hue-rotate(180deg) brightness(1.2);
   transition: filter 0.3s ease;
 }
+
 .download-as-btn {
-    background-color: #15803d;
-    color: white;
-    border: none;
-    border-radius: 40px;
-    font-size: 14px;
-    transition: background-color 0.3s;
-    margin: 0;
-    margin-bottom: 15px;
-    margin-right: 15px;
-    padding: 10px 15px;
+  background-color: #15803d;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  margin: 0;
+  margin-bottom: 15px;
+  margin-right: 15px;
+  padding: 10px 15px;
 }
 
 .download-as-btn:hover {
-    background-color: #166534;
-    transform: scale(1.05);
-    cursor: pointer;
+  background-color: #166534;
+  transform: scale(1.05);
+  cursor: pointer;
 }
