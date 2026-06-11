@@ -62,11 +62,12 @@ if __name__ == "__main__":
                     
                     print(f"--- Finished {path} in {duration:.4f}s with return code {proc.returncode} ---\n", flush=True)
 
-                    fval = ""
-                    status = ""
-                    variables = ""
+                    solutions = []
                     for line in proc.stdout.split('\n'):
                         if line.startswith("fval="):
+                            fval = ""
+                            status = ""
+                            variables = ""
                             parts = line.split(", ")
                             for p in parts:
                                 if p.startswith("fval="):
@@ -75,18 +76,38 @@ if __name__ == "__main__":
                                     status = p.split("=")[1]
                                 else:
                                     variables += p + " "
+                            solutions.append((fval, status, variables.strip()))
+                    
+                    # If we found ALL_SOLUTIONS block, we might have multiple solutions.
+                    # Wait, if there are multiple lines with fval=, we'll get all of them.
+                    # The first one might be the best one from print(result), and then ALL_SOLUTIONS lines.
+                    # To avoid duplicates, we can use a set, keeping order.
+                    unique_solutions = []
+                    seen = set()
+                    for sol in solutions:
+                        if sol not in seen:
+                            seen.add(sol)
+                            unique_solutions.append(sol)
                     
                     problem = os.path.basename(path)
-                    dw.writerow([iteration, problem, fval, status, variables.strip()])
+                    
+                    if not unique_solutions:
+                        unique_solutions = [("", "", "")]
+                    
+                    for fval, status, variables in unique_solutions:
+                        dw.writerow([iteration, problem, fval, status, variables])
+                    
+                    # For stats, we can just take the first solution (best)
+                    best_fval, best_status, _ = unique_solutions[0]
                     
                     if problem not in stats:
                         stats[problem] = {'success': 0, 'sum_fval': 0.0, 'total': 0}
                     
                     stats[problem]['total'] += 1
-                    if status == "SUCCESS":
+                    if best_status == "SUCCESS":
                         stats[problem]['success'] += 1
                     try:
-                        stats[problem]['sum_fval'] += float(fval)
+                        stats[problem]['sum_fval'] += float(best_fval)
                     except ValueError:
                         pass
                     

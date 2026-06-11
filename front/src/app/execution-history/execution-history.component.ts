@@ -6,7 +6,7 @@ import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MinimizeDirective } from '../common/minimize.directive';
 import { environment } from '../../environments/environment';
 import { ExecutionPollingService, ExecutionHistory } from '../execution-polling.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 export interface ParsedAnnealingResult {
   raw: string;
@@ -14,11 +14,11 @@ export interface ParsedAnnealingResult {
   qubo?: any;
   hamiltonian?: any;
   offset?: string;
-  result?: {
+  results?: {
     fval: string;
     variables: { name: string; value: string }[];
     status: string;
-  };
+  }[];
   time?: string;
 }
 
@@ -54,6 +54,92 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
 
   showHelp: boolean = false;
 
+  showAllSolutions: boolean = false;
+  showFilters: boolean = false;
+  
+  filterFvalMin: number | null = null;
+  filterFvalMax: number | null = null;
+  filterIncludedVar: string = '';
+  filterExcludedVar: string = '';
+  filterNumIncludedMin: number | null = null;
+  filterNumIncludedMax: number | null = null;
+  filterNumExcludedMin: number | null = null;
+  filterNumExcludedMax: number | null = null;
+
+  clearFilters(): void {
+    this.clearCostFilters();
+    this.clearIncludedFilters();
+    this.clearExcludedFilters();
+  }
+
+  clearCostFilters(): void {
+    this.filterFvalMin = null;
+    this.filterFvalMax = null;
+  }
+
+  clearIncludedFilters(): void {
+    this.filterIncludedVar = '';
+    this.filterNumIncludedMin = null;
+    this.filterNumIncludedMax = null;
+  }
+
+  clearExcludedFilters(): void {
+    this.filterExcludedVar = '';
+    this.filterNumExcludedMin = null;
+    this.filterNumExcludedMax = null;
+  }
+
+  get bestSolution() {
+    return this.parsedStdoutResult?.results?.[0];
+  }
+
+  get otherSolutions() {
+    if (!this.parsedStdoutResult?.results || this.parsedStdoutResult.results.length <= 1) {
+      return [];
+    }
+
+    let solutions = this.parsedStdoutResult.results.slice(1);
+
+    if (this.filterFvalMin !== null && this.filterFvalMin !== undefined && this.filterFvalMin.toString() !== '') {
+      solutions = solutions.filter(s => parseFloat(s.fval) >= this.filterFvalMin!);
+    }
+    
+    if (this.filterFvalMax !== null && this.filterFvalMax !== undefined && this.filterFvalMax.toString() !== '') {
+      solutions = solutions.filter(s => parseFloat(s.fval) <= this.filterFvalMax!);
+    }
+
+    if (this.filterIncludedVar) {
+      const incVars = this.filterIncludedVar.split(',').map(v => v.trim()).filter(v => v);
+      solutions = solutions.filter(s => 
+        incVars.every(incVar => s.variables.some(v => v.name === incVar && v.value === '1.0'))
+      );
+    }
+
+    if (this.filterExcludedVar) {
+      const excVars = this.filterExcludedVar.split(',').map(v => v.trim()).filter(v => v);
+      solutions = solutions.filter(s => 
+        excVars.every(excVar => s.variables.some(v => v.name === excVar && v.value === '0.0'))
+      );
+    }
+
+    if (this.filterNumIncludedMin !== null && this.filterNumIncludedMin !== undefined && this.filterNumIncludedMin.toString() !== '') {
+      solutions = solutions.filter(s => s.variables.filter(v => v.value === '1.0').length >= this.filterNumIncludedMin!);
+    }
+    
+    if (this.filterNumIncludedMax !== null && this.filterNumIncludedMax !== undefined && this.filterNumIncludedMax.toString() !== '') {
+      solutions = solutions.filter(s => s.variables.filter(v => v.value === '1.0').length <= this.filterNumIncludedMax!);
+    }
+
+    if (this.filterNumExcludedMin !== null && this.filterNumExcludedMin !== undefined && this.filterNumExcludedMin.toString() !== '') {
+      solutions = solutions.filter(s => s.variables.filter(v => v.value === '0.0').length >= this.filterNumExcludedMin!);
+    }
+
+    if (this.filterNumExcludedMax !== null && this.filterNumExcludedMax !== undefined && this.filterNumExcludedMax.toString() !== '') {
+      solutions = solutions.filter(s => s.variables.filter(v => v.value === '0.0').length <= this.filterNumExcludedMax!);
+    }
+
+    return solutions;
+  }
   //private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081}/run_qiskit``;
   private readonly serverUrl = `${environment.proxyAOtroUrl}${environment.remoteRunnerUrl}run_qiskit`;
 
@@ -67,7 +153,7 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
   }
   stdoutExecutionName: string = '';
 
-  constructor(private http: HttpClient, private executionPollingService: ExecutionPollingService, private route: ActivatedRoute) { }
+  constructor(private http: HttpClient, private executionPollingService: ExecutionPollingService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
     this.executionPollingService.executions$.subscribe(executions => {
@@ -82,6 +168,13 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
         const exec = this.executionWorks.find(e => e.id === selectedId);
         if (exec) {
           this.selectExecution(exec);
+          
+          // Clear query params to prevent auto-opening on reload
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { selectedId: null },
+            queryParamsHandling: 'merge'
+          });
         }
       }
     });
@@ -648,24 +741,40 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
         this.parsedStdoutResult.offset = offsetMatch[1].trim();
       }
 
-      const resultMatch = text.match(/Resultado:\n([^\n]+)/);
-      if (resultMatch && resultMatch[1]) {
-        const resultLine = resultMatch[1].trim();
-        const parts = resultLine.split(',').map(p => p.trim());
-        const variables: { name: string, value: string }[] = [];
-        let fval = '';
-        let status = '';
-        for (const p of parts) {
-          const splitPart = p.split('=');
-          if (splitPart.length === 2) {
-            const k = splitPart[0].trim();
-            const v = splitPart[1].trim();
-            if (k === 'fval') fval = v;
-            else if (k === 'status') status = v;
-            else if (k.startsWith('x')) variables.push({ name: k, value: v });
+      const results: { fval: string; variables: { name: string; value: string }[]; status: string; }[] = [];
+      const lines = text.split('\n');
+      let collectResults = false;
+      for (const line of lines) {
+        if (line.includes('Resultado:') || line.includes('---Todas_las_soluciones---') || line.includes('---ALL_SOLUTIONS---')) {
+          collectResults = true;
+          continue;
+        }
+        if (collectResults && line.includes('fval=')) {
+          const resultLine = line.trim();
+          const parts = resultLine.split(',').map(p => p.trim());
+          const variables: { name: string, value: string }[] = [];
+          let fval = '';
+          let status = '';
+          for (const p of parts) {
+            const splitPart = p.split('=');
+            if (splitPart.length === 2) {
+              const k = splitPart[0].trim();
+              const v = splitPart[1].trim();
+              if (k === 'fval') fval = v;
+              else if (k === 'status') status = v;
+              else if (k.startsWith('x')) variables.push({ name: k, value: v });
+            }
+          }
+          // Avoid pushing exact duplicates
+          const isDuplicate = results.some(r => r.fval === fval && r.status === status && JSON.stringify(r.variables) === JSON.stringify(variables));
+          if (!isDuplicate) {
+            results.push({ fval, variables, status });
           }
         }
-        this.parsedStdoutResult.result = { fval, variables, status };
+      }
+      
+      if (results.length > 0) {
+        this.parsedStdoutResult.results = results;
       }
 
       const timeMatch = text.match(/Finished.*?in\s+([\d\.]+s)/);

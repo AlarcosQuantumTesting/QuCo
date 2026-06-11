@@ -55,6 +55,13 @@ def run_qiskit_annealing():
     batch_id = os.path.basename(batch_dir)
 
     for i, code in enumerate(payload, start=1):
+        # Inyectar código para imprimir todas las soluciones si las hay
+        code += "\nprint('---ALL_SOLUTIONS---')\n"
+        code += "if hasattr(result, 'samples'):\n"
+        code += "    for sample in result.samples:\n"
+        code += "        var_str = ', '.join([f'{qp.variables[j].name}={sample.x[j]}' for j in range(len(sample.x))])\n"
+        code += "        print(f'fval={sample.fval}, status={sample.status.name}, {var_str}')\n"
+
         fpath = os.path.join(batch_dir, f"p{i}.py")
         with open(fpath, "w", encoding="utf-8") as f:
             f.write(code)
