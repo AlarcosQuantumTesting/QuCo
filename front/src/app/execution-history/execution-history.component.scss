@@ -36,10 +36,10 @@ body {
 
 div.titulo {
   display: flex;
-  /* justify-content: center;
-    align-items: center; */
+  align-items: center;
   margin: 0;
   margin-top: -20px;
+  margin-bottom: 20px;
 }
 
 h1 {
@@ -54,7 +54,7 @@ h1 {
   position: relative;
   letter-spacing: 2px;
   margin-top: 0px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 
 h2 {
@@ -1632,4 +1632,7 @@ tr.table-active {
 
 :host-context(body.dark-mode) .section-title {
   border-bottom: 1px dashed #386161 !important;
+}
+.text-running-dark {
+  color: #b45309 !important;
 }

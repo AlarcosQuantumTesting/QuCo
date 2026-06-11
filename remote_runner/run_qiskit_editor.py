@@ -6,7 +6,14 @@ import time
 import csv
 import importlib
 import importlib.util
+import warnings
+warnings.filterwarnings('ignore')
+
 from qiskit import QuantumCircuit, transpile
+
+import logging
+logging.getLogger('matplotlib').setLevel(logging.ERROR)
+logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 # Configuración de Matplotlib para evitar bloqueos y capturar imágenes
 plot_count = 0

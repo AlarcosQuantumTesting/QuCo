@@ -7,7 +7,7 @@ import { TranspileService } from '../transpile.service';
 
 interface Term {
   coef: number;
-  var1: number;
+  var1: string;
 }
 
 interface Constraint {
@@ -33,6 +33,7 @@ export class AnnealingComponent implements OnInit {
 
   // Parsed representation
   numQubits: number = 0;
+  varList: string[] = [];
   objTerms: Term[] = [];
   constraints: Constraint[] = [];
   quboLinear: number[] = [];
@@ -48,9 +49,18 @@ export class AnnealingComponent implements OnInit {
   code: string = '';
   errorMessage: string = '';
   mensajeTemporal: string = '';
+
+  // Graph filtering
+  graphVarStart: number | null = null;
+  graphVarEnd: number | null = null;
+
+  // Direct coupling lookup
+  lookupVar1: string = '';
+  lookupVar2: string = '';
   showHelp: boolean = false;
   mostrarEjemplos: boolean = false;
   globalLambda: number = 10;
+  edgeMathDerivations: any = {};
 
   // Formalized problem strings
   formattedObjective: string = '';
@@ -102,12 +112,111 @@ export class AnnealingComponent implements OnInit {
       constraints: `1x0+1x1+1x2=2
 1x2+1x3+1x4=1`,
       lambda: 13
+    },
+    {
+      title: 'Staff scheduling (6 Qubits)',
+      description: 'Assign shifts to 6 employees to minimize costs while meeting minimum coverage requirements across different time slots.',
+      objective: `10x0+12x1+15x2+11x3+14x4+9x5`,
+      constraints: `1x0+1x1+1x2=2
+1x3+1x4+1x5=1
+1x1+1x2+1x4=2`,
+      lambda: 15
+    },
+    {
+      title: 'Financial portfolio (7 Qubits)',
+      description: 'Select a combination of 7 assets to minimize cost subject to budget constraints and risk diversification rules.',
+      objective: `4x0+7x1+2x2+5x3+6x4+3x5+8x6`,
+      constraints: `1x0+1x1+1x2+1x3=2
+1x4+1x5+1x6=1
+1x0+1x3+1x4+1x6=2`,
+      lambda: 21
+    },
+    {
+      title: 'Network routing (8 Qubits)',
+      description: 'Find optimal paths in an 8-node network routing problem, minimizing latency while ensuring critical nodes are traversed.',
+      objective: `5x0+2x1+8x2+4x3+3x4+7x5+6x6+1x7`,
+      constraints: `1x0+1x1+1x2+1x3=1
+1x4+1x5+1x6+1x7=2
+1x0+1x2+1x4+1x6=2
+1x1+1x3+1x5+1x7=1`,
+      lambda: 18
+    },
+    {
+      title: 'Logistics distribution (9 Qubits)',
+      description: 'Distribute goods across 9 different warehouses, optimizing for minimal transport costs while ensuring that specific delivery capacity constraints are met.',
+      objective: `3x0+8x1+5x2+9x3+2x4+4x5+7x6+6x7+1x8`,
+      constraints: `1x0+1x1+1x2=1
+1x3+1x4+1x5=1
+1x6+1x7+1x8=1
+1x0+1x3+1x6=1
+1x1+1x4+1x7=1`,
+      lambda: 12
+    },
+    {
+      title: 'Task clustering (10 Qubits)',
+      description: 'Group 10 distinct computational tasks into execution clusters. The cost function minimizes overall execution time, while the constraints ensure that conflicting tasks are not clustered together.',
+      objective: `4x0+2x1+6x2+3x3+7x4+5x5+9x6+1x7+8x8+10x9`,
+      constraints: `1x0+1x1+1x2+1x3=2
+1x4+1x5+1x6=1
+1x7+1x8+1x9=1
+1x0+1x4+1x7=1`,
+      lambda: 15
+    },
+    {
+      title: 'Smart grid energy distribution (11 Qubits)',
+      description: 'Optimize power distribution across an 11-node smart grid. The objective minimizes power loss, while the constraints simulate base load requirements across different city zones.',
+      objective: `5x0+10x1+2x2+8x3+4x4+7x5+3x6+9x7+6x8+1x9+11x10`,
+      constraints: `1x0+1x1+1x2=1
+1x3+1x4+1x5+1x6=2
+1x7+1x8+1x9+1x10=1
+1x0+1x3+1x7=1
+1x2+1x6+1x10=1`,
+      lambda: 18
+    },
+    {
+      title: 'Factory line scheduling (12 Qubits)',
+      description: 'Schedule 12 manufacturing jobs across multiple assembly lines. The constraints ensure that sequential jobs respect timing dependencies, while the objective minimizes machine idle time.',
+      objective: `8x0+3x1+5x2+12x3+7x4+1x5+9x6+4x7+11x8+2x9+6x10+10x11`,
+      constraints: `1x0+1x1+1x2+1x3=1
+1x4+1x5+1x6+1x7=1
+1x8+1x9+1x10+1x11=1
+1x0+1x4+1x8=1
+1x1+1x5+1x9=1
+1x2+1x6+1x10=1`,
+      lambda: 20
+    },
+    {
+      title: 'Large dense problem (13 Qubits)',
+      description: 'A highly complex and dense optimization problem involving 13 variables and 13 equations. It tests the limits of the problem topology graph and edge math visualizations.',
+      objective: `4x0+20x1+13x2+12x3+2x4+5x5+3x6+10x7+13x8+15x9+7x10+8x11+11x12`,
+      constraints: `12x0+6x1+11x2+7x3+11x4+12x5+2x6+1x7+13x8+13x9+7x10+15x11+15x12=1
+10x0+11x1+13x2+6x4+1x5+18x6+8x7+16x8+6x9+5x10+5x11+18x12=1
+13x0+15x1+19x3+5x4+14x5+10x6+9x7+7x8+3x9+19x10+16x12=1
+15x0+13x1+13x2+13x3+15x4+3x5+16x6+2x7+19x8+1x9+18x10+11x11+4x12=1
+10x0+15x1+14x2+20x3+20x4+5x5+13x6+10x7+3x8+4x9+5x10+15x11+11x12=1
+16x0+2x1+13x2+7x3+20x4+1x5+5x6+20x7+1x8+7x9+5x10+18x11+14x12=1
+20x0+17x1+1x2+19x3+12x4+1x5+16x6+6x7+18x8+19x9+13x10+9x11+6x12=1
+16x0+16x1+18x2+8x3+6x4+4x5+14x7+16x8+18x9+13x10+15x11=1
+11x0+12x1+11x2+6x3+13x4+5x5+12x6+20x7+14x8+6x9+10x10+20x11+5x12=1
+15x0+16x1+15x2+10x3+16x4+9x5+4x6+7x7+4x8+5x9+5x10+3x11+16x12=1
+11x0+7x1+2x3+4x4+15x5+8x6+6x7+5x8+8x9+20x10+1x11+3x12=1
+4x0+16x1+1x2+18x3+6x4+12x5+18x6+10x7+20x8+9x9+14x10+9x11+16x12=1
+3x1+2x3+7x4+8x5+7x6+2x7+11x8+7x9+12x10+17x11+5x12=1`,
+      lambda: 10
     }
   ];
 
   constructor(private http: HttpClient, public manager: ManagerService, public transpileService: TranspileService) { }
 
   ngOnInit(): void {
+    const savedObj = localStorage.getItem('annealing_objective');
+    const savedProb = localStorage.getItem('annealing_constraints');
+    const savedLambda = localStorage.getItem('annealing_lambda');
+
+    if (savedObj !== null) this.objectiveInput = savedObj;
+    if (savedProb !== null) this.problemInput = savedProb;
+    if (savedLambda !== null) this.globalLambda = Number(savedLambda);
+
     this.manager.templatesLoaded.subscribe(() => {
       this.selectDefaultTemplate();
     });
@@ -147,11 +256,7 @@ export class AnnealingComponent implements OnInit {
     setTimeout(() => this.mensajeTemporal = '', 2000);
   }
 
-  openEdgeMathModal(edge: any): void {
-    const parts = edge.key.split(',');
-    const v1 = parseInt(parts[0]);
-    const v2 = parseInt(parts[1]);
-
+  calculateAndOpenMathModal(v1: number, v2: number): void {
     const derivations: any[] = [];
     let totalWeight = 0;
 
@@ -159,8 +264,9 @@ export class AnnealingComponent implements OnInit {
       let a = 0;
       let b = 0;
       for (const term of c.terms) {
-        if (term.var1 === v1) a += term.coef;
-        if (term.var1 === v2) b += term.coef;
+        const termIdx = this.varList.indexOf(term.var1);
+        if (termIdx === v1) a += term.coef;
+        if (termIdx === v2) b += term.coef;
       }
 
       if (a !== 0 && b !== 0) {
@@ -176,14 +282,38 @@ export class AnnealingComponent implements OnInit {
       }
     }
 
+    if (derivations.length === 0) {
+      this.errorMessage = `No coupling exists between x${this.varList[v1]} and x${this.varList[v2]}.`;
+      setTimeout(() => this.errorMessage = '', 3000);
+      return;
+    }
+
     this.selectedEdgeMath = {
-      v1: v1,
-      v2: v2,
+      v1: this.varList[v1],
+      v2: this.varList[v2],
       weight: totalWeight,
       derivations: derivations
     };
 
     this.mostrarMathModal = true;
+  }
+
+  openEdgeMathModal(edge: any) {
+    const parts = edge.key.split(',');
+    const v1 = parseInt(parts[0]);
+    const v2 = parseInt(parts[1]);
+    this.calculateAndOpenMathModal(v1, v2);
+  }
+
+  openMathModalByVars() {
+    if (!this.lookupVar1 || !this.lookupVar2) return;
+    const idx1 = this.varList.indexOf(this.lookupVar1);
+    const idx2 = this.varList.indexOf(this.lookupVar2);
+    if (idx1 === -1 || idx2 === -1) return;
+
+    const minIdx = Math.min(idx1, idx2);
+    const maxIdx = Math.max(idx1, idx2);
+    this.calculateAndOpenMathModal(minIdx, maxIdx);
   }
 
   getNumCouplings(): number {
@@ -205,10 +335,24 @@ export class AnnealingComponent implements OnInit {
     const radius = 110;
     const centerX = 150;
     const centerY = 150;
+
+    const start = this.graphVarStart !== null ? this.graphVarStart : 0;
+    const end = this.graphVarEnd !== null ? this.graphVarEnd : 999999;
+
+    const visibleIndices = [];
     for (let i = 0; i < this.numQubits; i++) {
-      const angle = (i / this.numQubits) * 2 * Math.PI - Math.PI / 2;
+      const varNum = parseInt(this.varList[i]);
+      if (varNum >= start && varNum <= end) {
+        visibleIndices.push(i);
+      }
+    }
+
+    for (let i = 0; i < visibleIndices.length; i++) {
+      const origIndex = visibleIndices[i];
+      const angle = (i / visibleIndices.length) * 2 * Math.PI - Math.PI / 2;
       nodes.push({
-        id: i,
+        id: origIndex,
+        label: this.varList[origIndex],
         x: centerX + radius * Math.cos(angle),
         y: centerY + radius * Math.sin(angle)
       });
@@ -219,19 +363,25 @@ export class AnnealingComponent implements OnInit {
   getGraphEdges() {
     const edges = [];
     const nodes = this.getGraphNodes();
+    const nodeMap = new Map();
+    nodes.forEach(n => nodeMap.set(n.id, n));
+
     for (const key of this.getQuadraticKeys()) {
       const parts = key.split(',');
       if (parts.length === 2) {
         const n1 = parseInt(parts[0]);
         const n2 = parseInt(parts[1]);
-        if (nodes[n1] && nodes[n2]) {
+        const node1 = nodeMap.get(n1);
+        const node2 = nodeMap.get(n2);
+        if (node1 && node2) {
           edges.push({
             key: key,
+            labelKey: `${this.varList[n1]},${this.varList[n2]}`,
             weight: this.quboQuadratic[key],
-            x1: nodes[n1].x,
-            y1: nodes[n1].y,
-            x2: nodes[n2].x,
-            y2: nodes[n2].y
+            x1: node1.x,
+            y1: node1.y,
+            x2: node2.x,
+            y2: node2.y
           });
         }
       }
@@ -245,7 +395,7 @@ export class AnnealingComponent implements OnInit {
     for (let i = 0; i < this.numQubits; i++) {
       for (let j = i + 1; j < this.numQubits; j++) {
         if (!keys.includes(`${i},${j}`) && !keys.includes(`${j},${i}`)) {
-          missing.push(`Q${i},${j}`);
+          missing.push(`Q<sub>${this.varList[i]},${this.varList[j]}</sub>`);
         }
       }
     }
@@ -315,25 +465,34 @@ export class AnnealingComponent implements OnInit {
     }
 
     // Determine total number of variables/qubits
-    let maxVar = -1;
+    const varSet = new Set<string>();
     for (const term of this.objTerms) {
-      if (term.var1 > maxVar) maxVar = term.var1;
+      varSet.add(term.var1);
     }
     for (const c of this.constraints) {
       for (const term of c.terms) {
-        if (term.var1 > maxVar) maxVar = term.var1;
+        varSet.add(term.var1);
       }
     }
 
-    if (maxVar === -1) {
+    if (varSet.size === 0) {
       throw new Error("No variables found. Variables must be of format 'xN' (e.g., 'x0', 'x1').");
     }
 
-    this.numQubits = maxVar + 1;
+    this.varList = Array.from(varSet).sort((a, b) => {
+      // Try parsing as numbers to sort correctly (e.g., x2 before x10)
+      const numA = parseFloat(a.replace(/_/g, '.'));
+      const numB = parseFloat(b.replace(/_/g, '.'));
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      return a.localeCompare(b);
+    });
+    this.numQubits = this.varList.length;
   }
 
   private parseTerms(expr: string): Term[] {
-    const termRegex = /([+-]?)\s*(\d*\.?\d*)\s*x(\d+)/g;
+    const termRegex = /([+-]?)\s*(\d*\.?\d*)\s*x([a-zA-Z0-9_]+)/g;
     const terms: Term[] = [];
     let match;
 
@@ -344,11 +503,11 @@ export class AnnealingComponent implements OnInit {
       const sign = match[1] === '-' ? -1 : 1;
       const coefStr = match[2];
       const coef = coefStr === '' ? 1 : parseFloat(coefStr);
-      const varIdx = parseInt(match[3]);
+      const varIdxStr = match[3];
 
       terms.push({
         coef: sign * coef,
-        var1: varIdx
+        var1: varIdxStr
       });
     }
 
@@ -367,7 +526,8 @@ export class AnnealingComponent implements OnInit {
 
     // 1) Add objective function terms
     for (const term of this.objTerms) {
-      this.quboLinear[term.var1] += term.coef;
+      const idx = this.varList.indexOf(term.var1);
+      this.quboLinear[idx] += term.coef;
     }
 
     // 2) Add constraint penalty expansions: lambda * (sum a_i x_i - C)^2
@@ -375,10 +535,11 @@ export class AnnealingComponent implements OnInit {
       const lambda = c.lambda;
       const C = c.target;
 
-      // Map variable indices to coefficients for easy lookup inside this constraint
+      // Map internal variable indices to coefficients for easy lookup inside this constraint
       const coefMap: { [key: number]: number } = {};
       for (const term of c.terms) {
-        coefMap[term.var1] = (coefMap[term.var1] || 0) + term.coef;
+        const idx = this.varList.indexOf(term.var1);
+        coefMap[idx] = (coefMap[idx] || 0) + term.coef;
       }
 
       // Linear terms penalty: lambda * (a_i^2 - 2 * C * a_i) * x_i
@@ -489,6 +650,10 @@ export class AnnealingComponent implements OnInit {
 
   generateQiskitCode(): void {
     try {
+      localStorage.setItem('annealing_objective', this.objectiveInput);
+      localStorage.setItem('annealing_constraints', this.problemInput);
+      localStorage.setItem('annealing_lambda', this.globalLambda.toString());
+
       this.parseInput();
       this.buildFormattedProblem();
       this.calculateQUBO();
@@ -497,7 +662,7 @@ export class AnnealingComponent implements OnInit {
       // 1) Build variables code block
       let variablesStr = '';
       for (let i = 0; i < this.numQubits; i++) {
-        variablesStr += `qp.binary_var("x${i}")\n`;
+        variablesStr += `qp.binary_var("x${this.varList[i]}")\n`;
       }
       variablesStr = variablesStr.trim();
 

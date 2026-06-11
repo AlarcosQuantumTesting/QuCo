@@ -1,30 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MinimizeDirective } from '../common/minimize.directive';
 import { environment } from '../../environments/environment';
+import { ExecutionPollingService, ExecutionHistory } from '../execution-polling.service';
+import { ActivatedRoute } from '@angular/router';
 
-
-interface ExecutionHistory {
-  id: string;
-  name: string;
-  creationDateTime: string;
-  status: 'PENDING' | 'RUNNING' | 'FINISHED' | 'ERROR' | 'UNKNOWN';
-  details?: {
-    runner?: string;
-    iterations?: number;
-    optionSelected?: string;
-    ibm_token_provided?: boolean;
-    ibm_instance_provided?: boolean;
-    files?: { name: string; size: number }[];
-    started_at?: string;
-    finished_at?: string;
-    stderr_path?: string;
-    stdout_path?: string;
-    runnerType?: 'qiskit' | 'cirq' | 'editor';
+export interface ParsedAnnealingResult {
+  raw: string;
+  originalProblem?: any;
+  qubo?: any;
+  hamiltonian?: any;
+  offset?: string;
+  result?: {
+    fval: string;
+    variables: { name: string; value: string }[];
+    status: string;
   };
+  time?: string;
 }
 
 @Component({
@@ -34,7 +29,7 @@ interface ExecutionHistory {
   templateUrl: './execution-history.component.html',
   styleUrls: ['./execution-history.component.scss']
 })
-export class ExecutionHistoryComponent implements OnInit {
+export class ExecutionHistoryComponent implements OnInit, OnDestroy {
 
   executionWorks: ExecutionHistory[] = [];
 
@@ -44,10 +39,18 @@ export class ExecutionHistoryComponent implements OnInit {
   isLoading: boolean = false;
   mensajeTemporal: string = '';
   modalDelete = false;
+
+  elapsedTimes: { [id: string]: number } = {};
+  timerInterval: any;
+
   modalDetails = false;
   enLocal: boolean = false;
   modalShare = false;
   generatedShareId: string = '';
+
+  parsedStdoutResult: ParsedAnnealingResult | null = null;
+  infoState: { original: boolean; qubo: boolean; hamiltonian: boolean } = { original: false, qubo: false, hamiltonian: false };
+  mostrarResultadosStdout: boolean = false;
 
   showHelp: boolean = false;
 
@@ -62,26 +65,58 @@ export class ExecutionHistoryComponent implements OnInit {
     }
     return `${baseUrl}/run_qiskit`;
   }
+  stdoutExecutionName: string = '';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private executionPollingService: ExecutionPollingService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.loadExecutionHistory();
+    this.executionPollingService.executions$.subscribe(executions => {
+      this.executionWorks = executions;
+    });
     this.refreshAllStatuses();
     this.searchQuery = '';
+
+    this.route.queryParams.subscribe(params => {
+      if (params['selectedId']) {
+        const selectedId = params['selectedId'];
+        const exec = this.executionWorks.find(e => e.id === selectedId);
+        if (exec) {
+          this.selectExecution(exec);
+        }
+      }
+    });
+
+    this.timerInterval = setInterval(() => {
+      this.executionWorks.forEach(exec => {
+        if (exec.status === 'RUNNING' || exec.status === 'PENDING') {
+          const start = new Date(exec.creationDateTime).getTime();
+          const now = new Date().getTime();
+          this.elapsedTimes[exec.id] = Math.floor((now - start) / 1000);
+        }
+      });
+    }, 1000);
   }
 
-  loadExecutionHistory(): void {
-    const historyJson = localStorage.getItem('execution_batches');
-    if (historyJson) {
-      this.executionWorks = JSON.parse(historyJson).reverse();
-    } else {
-      this.executionWorks = [];
+  ngOnDestroy(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
     }
   }
 
+  formatElapsed(seconds: number): string {
+    if (!seconds) return '00:00';
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+
+  loadExecutionHistory(): void {
+    this.executionPollingService.loadExecutionHistory();
+  }
+
   private saveExecutionHistory(): void {
-    localStorage.setItem('execution_batches', JSON.stringify(this.executionWorks.slice().reverse()));
+    this.executionPollingService.saveExecutionHistory(this.executionWorks);
   }
 
   refresExecutionData(): void {
@@ -205,6 +240,20 @@ export class ExecutionHistoryComponent implements OnInit {
     });
   }
 
+
+
+  deleteSelectedExecution(): void {
+    if (!this.executionSelected) return;
+
+    this.executionWorks = this.executionWorks.filter(e => e.id !== this.executionSelected!.id);
+
+    this.saveExecutionHistory();
+
+    this.showMessage(`Execution batch ${this.executionSelected.id} deleted locally.`);
+    this.executionSelected = null;
+    this.modalDelete = false;
+  }
+
   confirmDelete(id: string): void {
     this.executionWorks = this.executionWorks.filter(e => e.id !== id);
 
@@ -324,6 +373,24 @@ export class ExecutionHistoryComponent implements OnInit {
     this.enLocal = false;
   }
 
+  formatTimeDisplay(secondsStr: string): string {
+    const totalSeconds = parseFloat(secondsStr.replace('s', ''));
+    if (isNaN(totalSeconds)) return secondsStr;
+
+    if (totalSeconds < 60) {
+      return totalSeconds.toFixed(2) + ' s';
+    } else if (totalSeconds < 3600) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      return `${minutes} m ${seconds} s`;
+    } else {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      return `${hours} h ${minutes} m ${seconds} s`;
+    }
+  }
+
   calculateExecutionTime(): string | null {
     const details = this.executionSelected?.details;
 
@@ -332,10 +399,9 @@ export class ExecutionHistoryComponent implements OnInit {
       const startedTime = new Date(details.started_at).getTime();
 
       const durationMs = finishedTime - startedTime;
+      const durationSeconds = (durationMs / 1000).toString() + 's';
 
-      const durationSeconds = (durationMs / 1000).toFixed(2);
-
-      return durationSeconds + ' s';
+      return this.formatTimeDisplay(durationSeconds);
     }
 
     return null;
@@ -432,10 +498,9 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   clearAllHistory(): void {
-
     localStorage.removeItem('execution_batches');
-
     this.executionWorks = [];
+    this.executionPollingService.updateExecutionsFromLocal([]);
     this.executionSelected = null;
     this.searchQuery = '';
     this.modalDetails = false;
@@ -477,6 +542,145 @@ export class ExecutionHistoryComponent implements OnInit {
         this.showMessage(`Failed to download ${fileName}. Status: ${err.status}`, true);
       }
     });
+  }
+
+  viewStdoutResults(batchId: string, fileName: string): void {
+    const execution = this.executionWorks.find(e => e.id === batchId);
+    if (!execution) return;
+
+    this.stdoutExecutionName = execution.name;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_file/${batchId}/${fileName}`;
+
+    this.showMessage(`Fetching ${fileName} for parsing (ID ${batchId})...`);
+
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'text' })
+      : this.http.post(downloadUrl, null, { responseType: 'text' });
+
+    request.subscribe({
+      next: (responseText: string) => {
+        this.parseStdout(responseText);
+        this.mostrarResultadosStdout = true;
+      },
+      error: (err) => {
+        console.error(`Error fetching ${fileName}:`, err);
+        this.showMessage(`Failed to load ${fileName} for viewing. Status: ${err.status}`, true);
+      }
+    });
+  }
+
+  private parseMathLine(line: string): any {
+    let probText = line.trim();
+    let numVars = '';
+    let numConstraints = '';
+    
+    const statsMatch = probText.match(/\((.*?)\)$/);
+    if (statsMatch) {
+        const statsStr = statsMatch[1];
+        const parts = statsStr.split(',');
+        for (let part of parts) {
+           part = part.trim();
+           if (part.includes('variables')) {
+               numVars = part;
+           } else if (part.includes('constraints')) {
+               numConstraints = part;
+           }
+        }
+        probText = probText.replace(/\((.*?)\)$/, '').trim();
+    }
+    
+    let action = '';
+    if (probText.toLowerCase().startsWith('minimize')) {
+       action = 'minimize';
+       probText = probText.substring('minimize'.length).trim();
+    } else if (probText.toLowerCase().startsWith('maximize')) {
+       action = 'maximize';
+       probText = probText.substring('maximize'.length).trim();
+    }
+
+    return {
+       action: action,
+       equation: probText,
+       variables: numVars,
+       constraints: numConstraints
+    };
+  }
+
+  parseStdout(text: string): void {
+    this.parsedStdoutResult = { raw: text };
+
+    try {
+      const problemMatch = text.match(/Problema original:\n([\s\S]*?)QUBO:/);
+      if (problemMatch && problemMatch[1]) {
+        this.parsedStdoutResult.originalProblem = this.parseMathLine(problemMatch[1]);
+      }
+
+      const quboMatch = text.match(/QUBO:\n([\s\S]*?)Hamiltoniano:/);
+      if (quboMatch && quboMatch[1]) {
+        this.parsedStdoutResult.qubo = this.parseMathLine(quboMatch[1]);
+      }
+
+      const hamMatch = text.match(/Hamiltoniano:\n([\s\S]*?)Offset:/);
+      if (hamMatch && hamMatch[1]) {
+        let hamStr = hamMatch[1].trim();
+        const pauliMatch = hamStr.match(/SparsePauliOp\(\[([\s\S]*?)\]/);
+        const coeffMatch = hamStr.match(/coeffs=\[([\s\S]*?)\]/);
+        
+        if (pauliMatch && coeffMatch) {
+            const paulis = pauliMatch[1].split(',').map(s => s.replace(/['"\s]/g, ''));
+            const coeffs = coeffMatch[1].split(',').map(s => s.replace(/\s*\+0\.j/, '').trim());
+            
+            const terms = [];
+            for (let i = 0; i < paulis.length; i++) {
+                if (paulis[i] && coeffs[i]) {
+                    terms.push({ pauli: paulis[i], coeff: coeffs[i] });
+                }
+            }
+            this.parsedStdoutResult.hamiltonian = { terms, raw: hamStr };
+        } else {
+            this.parsedStdoutResult.hamiltonian = { raw: hamStr };
+        }
+      }
+
+      const offsetMatch = text.match(/Offset:\s*([^\n]+)/);
+      if (offsetMatch && offsetMatch[1]) {
+        this.parsedStdoutResult.offset = offsetMatch[1].trim();
+      }
+
+      const resultMatch = text.match(/Resultado:\n([^\n]+)/);
+      if (resultMatch && resultMatch[1]) {
+        const resultLine = resultMatch[1].trim();
+        const parts = resultLine.split(',').map(p => p.trim());
+        const variables: { name: string, value: string }[] = [];
+        let fval = '';
+        let status = '';
+        for (const p of parts) {
+          const splitPart = p.split('=');
+          if (splitPart.length === 2) {
+            const k = splitPart[0].trim();
+            const v = splitPart[1].trim();
+            if (k === 'fval') fval = v;
+            else if (k === 'status') status = v;
+            else if (k.startsWith('x')) variables.push({ name: k, value: v });
+          }
+        }
+        this.parsedStdoutResult.result = { fval, variables, status };
+      }
+
+      const timeMatch = text.match(/Finished.*?in\s+([\d\.]+s)/);
+      if (timeMatch && timeMatch[1]) {
+        this.parsedStdoutResult.time = this.formatTimeDisplay(timeMatch[1].trim());
+      }
+    } catch (e) {
+      console.error("Error parsing stdout:", e);
+    }
+  }
+
+  closeStdoutModal(): void {
+    this.mostrarResultadosStdout = false;
+    this.parsedStdoutResult = null;
+    this.stdoutExecutionName = '';
   }
 
   getFileListColorClass(): string {

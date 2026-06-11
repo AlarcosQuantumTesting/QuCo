@@ -11,29 +11,18 @@ body {
 
 /* Temp alert message block */
 .mensaje-temporal {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
   position: fixed;
   top: 20px;
-  right: 20px;
-  background: linear-gradient(135deg, #008b95 0%, #00b4c4 100%);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(0, 139, 149, 0.3);
-  z-index: 10000;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.5s;
+  opacity: 0.9;
+  z-index: 9999;
 }
 
 /* Master Solver Flex Layout */

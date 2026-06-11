@@ -342,5 +342,19 @@
     <p style="color: white;">{{ mensajeError }}</p>
   </div>
 
+  <div class="toast-container"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;">
+        <div *ngFor="let toast of toastService.toasts$ | async"
+            style="background-color: #008b95; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; min-width: 250px; font-size: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span><i class="fas fa-info-circle" style="margin-right: 8px;"></i>{{ toast.message }}</span>
+                <button *ngIf="toast.executionId" (click)="openExecutionDetailsFromToast(toast)"
+                    style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s;">Check results</button>
+            </div>
+            <button (click)="removeToast(toast)"
+                style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; margin-left: 15px; padding: 0;">&times;</button>
+        </div>
+    </div>
+
   <app-about-us [mostrarModal]="showAboutUsModal" (cerrarModal)="showAboutUsModal = false"></app-about-us>
 </body>
