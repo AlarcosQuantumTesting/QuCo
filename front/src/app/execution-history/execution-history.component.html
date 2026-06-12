@@ -496,15 +496,25 @@
                 </div>
                 <ng-template #solutionTemplate let-result="result" let-title="title">
                     <div
-                        style="margin-bottom: 30px; padding: 25px; background: #ffffff; border-radius: 12px; border: 2px solid #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+                        [ngStyle]="{'margin-bottom': '30px', 'padding': '25px', 'background': '#ffffff', 'border-radius': '12px', 'border': title === 'Best solution' ? '2px solid #10b981' : '1px solid #cbd5e1', 'box-shadow': title === 'Best solution' ? '0 4px 12px rgba(16, 185, 129, 0.1)' : '0 2px 8px rgba(0,0,0,0.03)'}">
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h3
-                                style="color: #047857; font-size: 18px; margin: 0; display: flex; align-items: center; font-weight: 700;">
-                                <i class="fas fa-trophy" style="margin-right: 10px; font-size: 20px;"></i> {{ title }}
-                            </h3>
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; gap: 15px; flex-wrap: wrap;">
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <h3
+                                    [ngStyle]="{'color': title === 'Best solution' ? '#047857' : '#334155', 'font-size': '18px', 'margin': '0', 'display': 'flex', 'align-items': 'center', 'font-weight': '700'}">
+                                    <i class="fas" [ngClass]="title === 'Best solution' ? 'fa-trophy' : 'fa-lightbulb'" style="margin-right: 10px; font-size: 20px;" [ngStyle]="{'color': title === 'Best solution' ? '' : '#f59e0b'}"></i> 
+                                    {{ title }}
+                                </h3>
+                                
+                                <div *ngIf="result?.qpu && result.qpu.toLowerCase() !== 'unknown'" style="display: inline-flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 6px; width: fit-content;">
+                                    <i class="fas fa-microchip" style="color: #94a3b8; font-size: 11px; margin-right: 6px;"></i>
+                                    <span style="font-family: 'Fira Code', monospace; color: #475569; font-size: 12px; font-weight: 600;">{{ result.qpu }}</span>
+                                </div>
+                            </div>
+
                             <span
-                                style="font-size: 13px; font-weight: 700; background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;"
+                                style="font-size: 13px; font-weight: 700; background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;"
                                 *ngIf="result?.status === 'SUCCESS'">
                                 <i class="fas fa-check-circle" style="margin-right: 5px;"></i> Success
                             </span>
@@ -577,14 +587,18 @@
                     </div>
                 </ng-template>
 
-                <!-- Best Solution -->
-                <div *ngIf="bestSolution">
-                    <ng-container
-                        *ngTemplateOutlet="solutionTemplate; context: { result: bestSolution, title: 'Best solution' }"></ng-container>
+                <!-- Best Solutions (Unified) -->
+                <div *ngIf="bestSolutions.length > 0" style="margin-bottom: 30px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                        <div *ngFor="let best of bestSolutions">
+                            <ng-container
+                                *ngTemplateOutlet="solutionTemplate; context: { result: best, title: 'Best solution' }"></ng-container>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- View more solutions & Filters toggle buttons -->
-                <div *ngIf="parsedStdoutResult?.results && parsedStdoutResult!.results!.length > 1"
+                <div *ngIf="parsedStdoutResult?.results && parsedStdoutResult!.results!.length > bestSolutions.length"
                     style="position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 35px; margin-top: 10px;">
                     <button (click)="showAllSolutions = !showAllSolutions"
                         style="background: transparent; color: #334155; border: 1px solid #cbd5e1; padding: 10px 24px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;"
@@ -592,7 +606,7 @@
                         <i class="fas" [ngClass]="showAllSolutions ? 'fa-chevron-up' : 'fa-chevron-down'"
                             style="font-size: 14px;"></i>
                         {{ showAllSolutions ? 'Hide alternative solutions' : 'View ' +
-                        (parsedStdoutResult!.results!.length - 1) + ' alternative solutions' }}
+                        (parsedStdoutResult!.results!.length - bestSolutions.length) + ' alternative solutions' }}
                     </button>
 
                     <button *ngIf="showAllSolutions" (click)="showFilters = !showFilters"
@@ -603,162 +617,192 @@
                     </button>
                 </div>
 
-                <!-- Filters and Other Solutions -->
-                <div *ngIf="showAllSolutions">
-                    <!-- Filters Panel -->
-                    <div *ngIf="showFilters"
-                        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <!-- Filters Panel -->
+                <div *ngIf="showAllSolutions && showFilters"
+                    style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                        <h4
+                            style="margin: 0; color: #0f172a; font-size: 17px; display: flex; align-items: center; gap: 10px; font-weight: 700;">
+                            <i class="fas fa-sliders-h" style="color: #3b82f6;"></i> Filter configuration
+                        </h4>
+                        <button (click)="clearFilters()" title="Clear all filters"
+                            style="background: transparent; color: #ef4444; border: none; padding: 8px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#fee2e2'"
+                            onmouseout="this.style.background='transparent'">
+                            <i class="fas fa-eraser" style="margin-right: 6px;"></i> Clear all
+                        </button>
+                    </div>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                        <!-- Cost Group -->
                         <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4
-                                style="margin: 0; color: #0f172a; font-size: 17px; display: flex; align-items: center; gap: 10px; font-weight: 700;">
-                                <i class="fas fa-sliders-h" style="color: #3b82f6;"></i> Filter configuration
-                            </h4>
-                            <button (click)="clearFilters()" title="Clear all filters"
-                                style="background: transparent; color: #ef4444; border: none; padding: 8px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                                onmouseover="this.style.background='#fee2e2'"
-                                onmouseout="this.style.background='transparent'">
-                                <i class="fas fa-eraser" style="margin-right: 6px;"></i> Clear all
-                            </button>
+                            style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h5
+                                    style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-dollar-sign" style="color: #64748b;"></i> Cost function (fval)
+                                </h5>
+                                <button (click)="clearCostFilters()" title="Clear Cost filters"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
+                                    onmouseover="this.style.color='#ef4444'"
+                                    onmouseout="this.style.color='#94a3b8'">
+                                    <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
+                                </button>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min</label>
+                                    <input type="number" [(ngModel)]="filterFvalMin" placeholder="e.g. -5.0"
+                                        style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                        onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                        onblur="this.style.borderColor='#cbd5e1'">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max</label>
+                                    <input type="number" [(ngModel)]="filterFvalMax" placeholder="e.g. 0.0"
+                                        style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                        onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                        onblur="this.style.borderColor='#cbd5e1'">
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- Included Variables Group -->
                         <div
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                            <!-- Cost Group -->
+                            style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
                             <div
-                                style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <h5
-                                        style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
-                                        <i class="fas fa-dollar-sign" style="color: #64748b;"></i> Cost function (fval)
-                                    </h5>
-                                    <button (click)="clearCostFilters()" title="Clear Cost filters"
-                                        style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
-                                        onmouseover="this.style.color='#ef4444'"
-                                        onmouseout="this.style.color='#94a3b8'">
-                                        <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
-                                    </button>
-                                </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min</label>
-                                        <input type="number" [(ngModel)]="filterFvalMin" placeholder="e.g. -5.0"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max</label>
-                                        <input type="number" [(ngModel)]="filterFvalMax" placeholder="e.g. 0.0"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
-                                </div>
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h5
+                                    style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-check-circle" style="color: #64748b;"></i> Included variables
+                                    (1.0)
+                                </h5>
+                                <button (click)="clearIncludedFilters()" title="Clear Included filters"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
+                                    onmouseover="this.style.color='#ef4444'"
+                                    onmouseout="this.style.color='#94a3b8'">
+                                    <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
+                                </button>
                             </div>
-
-                            <!-- Included Variables Group -->
-                            <div
-                                style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <h5
-                                        style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
-                                        <i class="fas fa-check-circle" style="color: #64748b;"></i> Included variables
-                                        (1.0)
-                                    </h5>
-                                    <button (click)="clearIncludedFilters()" title="Clear Included filters"
-                                        style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
-                                        onmouseover="this.style.color='#ef4444'"
-                                        onmouseout="this.style.color='#94a3b8'">
-                                        <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
-                                    </button>
-                                </div>
-                                <div style="margin-bottom: 12px;">
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Required
+                                    Variable names</label>
+                                <input type="text" [(ngModel)]="filterIncludedVar" placeholder="e.g. x0, x1"
+                                    style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                    onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                    onblur="this.style.borderColor='#cbd5e1'">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
                                     <label
-                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Required
-                                        Variable names</label>
-                                    <input type="text" [(ngModel)]="filterIncludedVar" placeholder="e.g. x0, x1"
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min
+                                        count</label>
+                                    <input type="number" [(ngModel)]="filterNumIncludedMin" placeholder="e.g. 1"
                                         style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
                                         onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
                                         onblur="this.style.borderColor='#cbd5e1'">
                                 </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min
-                                            count</label>
-                                        <input type="number" [(ngModel)]="filterNumIncludedMin" placeholder="e.g. 1"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max
-                                            count</label>
-                                        <input type="number" [(ngModel)]="filterNumIncludedMax" placeholder="e.g. 3"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Excluded Variables Group -->
-                            <div
-                                style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                                <div
-                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <h5
-                                        style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
-                                        <i class="fas fa-times-circle" style="color: #64748b;"></i> Excluded variables
-                                        (0.0)
-                                    </h5>
-                                    <button (click)="clearExcludedFilters()" title="Clear Excluded filters"
-                                        style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
-                                        onmouseover="this.style.color='#ef4444'"
-                                        onmouseout="this.style.color='#94a3b8'">
-                                        <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
-                                    </button>
-                                </div>
-                                <div style="margin-bottom: 12px;">
+                                <div style="flex: 1;">
                                     <label
-                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Required
-                                        Variable names</label>
-                                    <input type="text" [(ngModel)]="filterExcludedVar" placeholder="e.g. x2"
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max
+                                        count</label>
+                                    <input type="number" [(ngModel)]="filterNumIncludedMax" placeholder="e.g. 3"
                                         style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
                                         onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
                                         onblur="this.style.borderColor='#cbd5e1'">
                                 </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min
-                                            count</label>
-                                        <input type="number" [(ngModel)]="filterNumExcludedMin" placeholder="e.g. 1"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <label
-                                            style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max
-                                            count</label>
-                                        <input type="number" [(ngModel)]="filterNumExcludedMax" placeholder="e.g. 3"
-                                            style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
-                                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
-                                            onblur="this.style.borderColor='#cbd5e1'">
-                                    </div>
+                            </div>
+                        </div>
+
+                        <!-- Excluded Variables Group -->
+                        <div
+                            style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h5
+                                    style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-times-circle" style="color: #64748b;"></i> Excluded variables
+                                    (0.0)
+                                </h5>
+                                <button (click)="clearExcludedFilters()" title="Clear Excluded filters"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
+                                    onmouseover="this.style.color='#ef4444'"
+                                    onmouseout="this.style.color='#94a3b8'">
+                                    <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
+                                </button>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Required
+                                    Variable names</label>
+                                <input type="text" [(ngModel)]="filterExcludedVar" placeholder="e.g. x2"
+                                    style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                    onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                    onblur="this.style.borderColor='#cbd5e1'">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Min
+                                        count</label>
+                                    <input type="number" [(ngModel)]="filterNumExcludedMin" placeholder="e.g. 1"
+                                        style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                        onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                        onblur="this.style.borderColor='#cbd5e1'">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px;">Max
+                                        count</label>
+                                    <input type="number" [(ngModel)]="filterNumExcludedMax" placeholder="e.g. 3"
+                                        style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; box-sizing: border-box; transition: border-color 0.2s;"
+                                        onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none'"
+                                        onblur="this.style.borderColor='#cbd5e1'">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- QPU Filter Group -->
+                        <div *ngIf="availableQpus.length > 1"
+                            style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; grid-column: 1 / -1;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h5
+                                    style="margin: 0; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-microchip" style="color: #64748b;"></i> Backend / QPU
+                                </h5>
+                                <button (click)="filterQpus = []" title="Clear QPU filter"
+                                    style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0; font-size: 12px; font-weight: 600; transition: color 0.2s;"
+                                    onmouseover="this.style.color='#ef4444'"
+                                    onmouseout="this.style.color='#94a3b8'">
+                                    <i class="fas fa-eraser" style="margin-right: 4px;"></i> Clear
+                                </button>
+                            </div>
+                            <div>
+                                <label
+                                    style="display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 8px;">Select multiple backends</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <button *ngFor="let qpu of availableQpus"
+                                        (click)="toggleQpuFilter(qpu)"
+                                        [style.background]="filterQpus.includes(qpu) ? '#1c8b94' : '#f1f5f9'"
+                                        [style.color]="filterQpus.includes(qpu) ? 'white' : '#64748b'"
+                                        [style.border]="filterQpus.includes(qpu) ? '1px solid #1c8b94' : '1px solid #cbd5e1'"
+                                        style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        {{ qpu }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Filtered Solutions -->
+                <!-- Filtered Solutions (Unified) -->
+                <div *ngIf="showAllSolutions">
                     <div *ngIf="otherSolutions.length === 0"
                         style="text-align: center; padding: 20px; color: #64748b; font-size: 14px; background: #f1f5f9; border-radius: 8px; margin-bottom: 25px;">
                         No alternative solutions match your filters.

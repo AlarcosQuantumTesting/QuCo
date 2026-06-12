@@ -15,6 +15,7 @@ export interface ParsedAnnealingResult {
   hamiltonian?: any;
   offset?: string;
   results?: {
+    qpu?: string;
     fval: string;
     variables: { name: string; value: string }[];
     status: string;
@@ -67,6 +68,7 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
   filterNumExcludedMax: number | null = null;
 
   clearFilters(): void {
+    this.filterQpus = [];
     this.clearCostFilters();
     this.clearIncludedFilters();
     this.clearExcludedFilters();
@@ -75,6 +77,16 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
   clearCostFilters(): void {
     this.filterFvalMin = null;
     this.filterFvalMax = null;
+  }
+
+  filterQpus: string[] = [];
+
+  toggleQpuFilter(qpu: string) {
+    if (this.filterQpus.includes(qpu)) {
+      this.filterQpus = this.filterQpus.filter(q => q !== qpu);
+    } else {
+      this.filterQpus.push(qpu);
+    }
   }
 
   clearIncludedFilters(): void {
@@ -89,16 +101,44 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
     this.filterNumExcludedMax = null;
   }
 
-  get bestSolution() {
-    return this.parsedStdoutResult?.results?.[0];
+  get availableQpus(): string[] {
+    if (!this.parsedStdoutResult?.results) return [];
+    const qpus = this.parsedStdoutResult.results
+      .map(r => r.qpu)
+      .filter(q => q && q.trim() !== '' && q.trim().toLowerCase() !== 'unknown') as string[];
+    return Array.from(new Set(qpus)).sort();
+  }
+
+  get bestSolutions() {
+    if (!this.parsedStdoutResult?.results || this.parsedStdoutResult.results.length === 0) {
+      return [];
+    }
+    
+    let minFval = Infinity;
+    for (const r of this.parsedStdoutResult.results) {
+      const v = parseFloat(r.fval);
+      if (v < minFval) minFval = v;
+    }
+    
+    return this.parsedStdoutResult.results.filter(r => parseFloat(r.fval) === minFval);
   }
 
   get otherSolutions() {
-    if (!this.parsedStdoutResult?.results || this.parsedStdoutResult.results.length <= 1) {
+    if (!this.parsedStdoutResult?.results || this.parsedStdoutResult.results.length === 0) {
       return [];
     }
 
-    let solutions = this.parsedStdoutResult.results.slice(1);
+    let minFval = Infinity;
+    for (const r of this.parsedStdoutResult.results) {
+      const v = parseFloat(r.fval);
+      if (v < minFval) minFval = v;
+    }
+
+    let solutions = this.parsedStdoutResult.results.filter(r => parseFloat(r.fval) > minFval);
+
+    if (this.filterQpus.length > 0) {
+      solutions = solutions.filter(s => s.qpu && this.filterQpus.includes(s.qpu));
+    }
 
     if (this.filterFvalMin !== null && this.filterFvalMin !== undefined && this.filterFvalMin.toString() !== '') {
       solutions = solutions.filter(s => parseFloat(s.fval) >= this.filterFvalMin!);
@@ -111,33 +151,34 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
     if (this.filterIncludedVar) {
       const incVars = this.filterIncludedVar.split(',').map(v => v.trim()).filter(v => v);
       solutions = solutions.filter(s => 
-        incVars.every(incVar => s.variables.some(v => v.name === incVar && v.value === '1.0'))
+        incVars.every(incVar => s.variables.some((v: any) => v.name === incVar && v.value === '1.0'))
       );
     }
 
     if (this.filterExcludedVar) {
       const excVars = this.filterExcludedVar.split(',').map(v => v.trim()).filter(v => v);
       solutions = solutions.filter(s => 
-        excVars.every(excVar => s.variables.some(v => v.name === excVar && v.value === '0.0'))
+        excVars.every(excVar => s.variables.some((v: any) => v.name === excVar && v.value === '0.0'))
       );
     }
 
     if (this.filterNumIncludedMin !== null && this.filterNumIncludedMin !== undefined && this.filterNumIncludedMin.toString() !== '') {
-      solutions = solutions.filter(s => s.variables.filter(v => v.value === '1.0').length >= this.filterNumIncludedMin!);
+      solutions = solutions.filter(s => s.variables.filter((v: any) => v.value === '1.0').length >= this.filterNumIncludedMin!);
     }
     
     if (this.filterNumIncludedMax !== null && this.filterNumIncludedMax !== undefined && this.filterNumIncludedMax.toString() !== '') {
-      solutions = solutions.filter(s => s.variables.filter(v => v.value === '1.0').length <= this.filterNumIncludedMax!);
+      solutions = solutions.filter(s => s.variables.filter((v: any) => v.value === '1.0').length <= this.filterNumIncludedMax!);
     }
 
     if (this.filterNumExcludedMin !== null && this.filterNumExcludedMin !== undefined && this.filterNumExcludedMin.toString() !== '') {
-      solutions = solutions.filter(s => s.variables.filter(v => v.value === '0.0').length >= this.filterNumExcludedMin!);
+      solutions = solutions.filter(s => s.variables.filter((v: any) => v.value === '0.0').length >= this.filterNumExcludedMin!);
     }
 
     if (this.filterNumExcludedMax !== null && this.filterNumExcludedMax !== undefined && this.filterNumExcludedMax.toString() !== '') {
-      solutions = solutions.filter(s => s.variables.filter(v => v.value === '0.0').length <= this.filterNumExcludedMax!);
+      solutions = solutions.filter(s => s.variables.filter((v: any) => v.value === '0.0').length <= this.filterNumExcludedMax!);
     }
 
+    solutions.sort((a, b) => parseFloat(a.fval) - parseFloat(b.fval));
     return solutions;
   }
   //private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081}/run_qiskit``;
@@ -741,10 +782,17 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
         this.parsedStdoutResult.offset = offsetMatch[1].trim();
       }
 
-      const results: { fval: string; variables: { name: string; value: string }[]; status: string; }[] = [];
+      const results: { qpu: string; fval: string; variables: { name: string; value: string }[]; status: string; }[] = [];
       const lines = text.split('\n');
       let collectResults = false;
+      let currentQpu = 'unknown';
+
       for (const line of lines) {
+        const qpuMatch = line.match(/--- Running .* on (.*) \(Iteration/);
+        if (qpuMatch && qpuMatch[1]) {
+           currentQpu = qpuMatch[1].trim();
+        }
+
         if (line.includes('Resultado:') || line.includes('---Todas_las_soluciones---') || line.includes('---ALL_SOLUTIONS---')) {
           collectResults = true;
           continue;
@@ -765,16 +813,16 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
               else if (k.startsWith('x')) variables.push({ name: k, value: v });
             }
           }
-          // Avoid pushing exact duplicates
-          const isDuplicate = results.some(r => r.fval === fval && r.status === status && JSON.stringify(r.variables) === JSON.stringify(variables));
+          // Avoid pushing exact duplicates for the same QPU
+          const isDuplicate = results.some(r => r.qpu === currentQpu && r.fval === fval && r.status === status && JSON.stringify(r.variables) === JSON.stringify(variables));
           if (!isDuplicate) {
-            results.push({ fval, variables, status });
+            results.push({ qpu: currentQpu, fval, variables, status });
           }
         }
       }
       
       if (results.length > 0) {
-        this.parsedStdoutResult.results = results;
+        this.parsedStdoutResult.results = results as any;
       }
 
       const timeMatch = text.match(/Finished.*?in\s+([\d\.]+s)/);
@@ -790,6 +838,9 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
     this.mostrarResultadosStdout = false;
     this.parsedStdoutResult = null;
     this.stdoutExecutionName = '';
+    this.showAllSolutions = false;
+    this.showFilters = false;
+    this.clearFilters();
   }
 
   getFileListColorClass(): string {
