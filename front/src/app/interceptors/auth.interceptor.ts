@@ -14,13 +14,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         catchError((error: HttpErrorResponse) => {
             if (error.status === 401) {
                 // Clear local storage if session expired
-                localStorage.removeItem('userToken');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('selectedProjectId_blocks');
-                localStorage.removeItem('selectedProjectId_editor');
-                localStorage.removeItem('selectedProjectId_genetic');
-                localStorage.removeItem('selectedProjectId_algorithm');
-                localStorage.removeItem('selectedProjectId_matrices');
+                const keysToRemove = [
+                    'userToken', 'userEmail', 'email',
+                    'selectedProjectId_blocks', 'selectedProjectId_editor',
+                    'selectedProjectId_genetic', 'selectedProjectId_algorithm',
+                    'selectedProjectId_matrices', 'userEmail_matrices'
+                ];
+                keysToRemove.forEach(key => localStorage.removeItem(key));
             }
             return throwError(() => error);
         })

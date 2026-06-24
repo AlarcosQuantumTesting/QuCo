@@ -23,6 +23,7 @@ interface ExecutionHistory {
     finished_at?: string;
     stderr_path?: string;
     stdout_path?: string;
+    runnerType?: 'qiskit' | 'cirq' | 'editor';
   };
 }
 
@@ -49,8 +50,18 @@ export class ExecutionHistoryComponent implements OnInit {
   generatedShareId: string = '';
 
   showHelp: boolean = false;
-  
-  private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081/run_qiskit`; 
+
+  //private readonly serverUrl = `${environment.proxyAOtroUrl}http://172.20.48.130:8081}/run_qiskit``;
+  private readonly serverUrl = `${environment.proxyAOtroUrl}${environment.remoteRunnerUrl}run_qiskit`;
+
+  getServerUrl(execution: ExecutionHistory): string {
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const baseUrl = `${environment.proxyAOtroUrl}${environment.remoteRunnerUrl}`;
+    if (runnerType === 'editor') {
+      return `${baseUrl}/run_qiskit_editor`;
+    }
+    return `${baseUrl}/run_qiskit`;
+  }
 
   constructor(private http: HttpClient) { }
 
@@ -140,14 +151,19 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   checkStatus(id: string): void {
-    const statusUrl = `${this.serverUrl}/status/${id}`;
     const execution = this.executionWorks.find(e => e.id === id);
-
     if (!execution) return;
+
+    const statusUrl = `${this.getServerUrl(execution)}/status/${id}`;
 
     execution.status = 'UNKNOWN';
 
-    this.http.post(statusUrl, null).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(statusUrl)
+      : this.http.post(statusUrl, null);
+
+    request.subscribe({
       next: (result: any) => {
 
         let newStatus: 'PENDING' | 'RUNNING' | 'FINISHED' | 'ERROR' | 'UNKNOWN' = 'UNKNOWN';
@@ -215,14 +231,21 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   downloadSummary(id: string): void {
-    const downloadUrl = `${this.serverUrl}/get_summary/${id}`;
+    const execution = this.executionWorks.find(e => e.id === id);
+    if (!execution) return;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_summary/${id}`;
 
     console.log('sumary');
     console.log(`Downloading summary for Batch ID ${id}...`);
 
     this.showMessage(`Initiating download for Batch ID ${id}...`);
 
-    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'blob' })
+      : this.http.post(downloadUrl, null, { responseType: 'blob' });
+
+    request.subscribe({
       next: (responseBlob: Blob) => {
         const downloadLink = document.createElement('a');
         const url = window.URL.createObjectURL(responseBlob);
@@ -254,11 +277,18 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   downloadResults(id: string): void {
-    const downloadUrl = `${this.serverUrl}/get_results/${id}`;
+    const execution = this.executionWorks.find(e => e.id === id);
+    if (!execution) return;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_results/${id}`;
 
     this.showMessage(`Initiating download for All Results (ID ${id})...`);
 
-    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'blob' })
+      : this.http.post(downloadUrl, null, { responseType: 'blob' });
+
+    request.subscribe({
       next: (responseBlob: Blob) => {
         const downloadLink = document.createElement('a');
         const url = window.URL.createObjectURL(responseBlob);
@@ -315,11 +345,18 @@ export class ExecutionHistoryComponent implements OnInit {
 
 
   downloadStdout(id: string): void {
-    const downloadUrl = `${this.serverUrl}/get_stdout/${id}`;
+    const execution = this.executionWorks.find(e => e.id === id);
+    if (!execution) return;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_stdout/${id}`;
 
     this.showMessage(`Initiating download for STDOUT Log (ID ${id})...`);
 
-    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'blob' })
+      : this.http.post(downloadUrl, null, { responseType: 'blob' });
+
+    request.subscribe({
       next: (responseBlob: Blob) => {
         const downloadLink = document.createElement('a');
         const url = window.URL.createObjectURL(responseBlob);
@@ -352,11 +389,18 @@ export class ExecutionHistoryComponent implements OnInit {
 
 
   downloadStderr(id: string): void {
-    const downloadUrl = `${this.serverUrl}/get_stderr/${id}`;
+    const execution = this.executionWorks.find(e => e.id === id);
+    if (!execution) return;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_stderr/${id}`;
 
     this.showMessage(`Initiating download for STDERR Log (ID ${id})...`);
 
-    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'blob' })
+      : this.http.post(downloadUrl, null, { responseType: 'blob' });
+
+    request.subscribe({
       next: (responseBlob: Blob) => {
         const downloadLink = document.createElement('a');
         const url = window.URL.createObjectURL(responseBlob);
@@ -402,11 +446,18 @@ export class ExecutionHistoryComponent implements OnInit {
   }
 
   downloadGenericFile(batchId: string, fileName: string): void {
-    const downloadUrl = `${this.serverUrl}/get_file/${batchId}/${fileName}`;
+    const execution = this.executionWorks.find(e => e.id === batchId);
+    if (!execution) return;
+    const downloadUrl = `${this.getServerUrl(execution)}/get_file/${batchId}/${fileName}`;
 
     this.showMessage(`Initiating download for ${fileName} (ID ${batchId})...`);
 
-    this.http.post(downloadUrl, null, { responseType: 'blob' }).subscribe({
+    const runnerType = execution.details?.runnerType || 'qiskit';
+    const request = (runnerType === 'editor')
+      ? this.http.get(downloadUrl, { responseType: 'blob' })
+      : this.http.post(downloadUrl, null, { responseType: 'blob' });
+
+    request.subscribe({
       next: (responseBlob: Blob) => {
         const downloadLink = document.createElement('a');
         const url = window.URL.createObjectURL(responseBlob);

@@ -8,5 +8,6 @@ export const environment = {
   tp3Url: "http://localhost:8080/",
   qsauronUrl: "https://alarcosj.esi.uclm.es/qsauronback/",
   proxyAOtroUrl : "http://localhost:8000/proxyaotro/resend?url=",
+  remoteRunnerUrl: "http://localhost:8081/",
   baseUrlQuirk: "https://alarcosj.esi.uclm.es/quirk#circuit"
 };

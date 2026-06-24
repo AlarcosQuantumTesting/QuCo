@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, OnInit, HostListener } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -15,9 +15,11 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   menuAbierto = false;
   mostrarInicio = true;
-  tokenStored: string | null = localStorage.getItem('userToken');
 
   ngOnInit(): void {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('email');
+
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       this.darkMode = savedTheme === 'dark';
@@ -83,6 +85,14 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   toggleUserDropdown() {
     this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const clickedInside = this.el.nativeElement.querySelector('.user')?.contains(event.target);
+    if (!clickedInside) {
+      this.isUserDropdownOpen = false;
+    }
   }
 
   toggleDarkMode() {
@@ -273,7 +283,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   //   this.mostrarModalLogin = true;
   // }
   toggleLogin() {
-    window.open(environment.qsauronUrl, '_blank');
+    //window.open(environment.qsauronUrl, '_blank');
+    window.open('https://alarcosj.esi.uclm.es/qsauron', '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -483,7 +494,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('userToken');
+    return !!localStorage.getItem('userEmail');
   }
 
   mostrarModalLogoutConfirmacion: boolean = false;
@@ -499,14 +510,15 @@ export class AppComponent implements AfterViewInit, OnInit {
   clearUserStorage(): void {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('email');
 
     localStorage.removeItem('selectedProjectId_blocks');
     localStorage.removeItem('selectedProjectId_editor');
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
-    
-    this.tokenStored = null;
+
+    //this.tokenStored = null;
     this.emailUsuario = '';
   }
 
@@ -543,49 +555,22 @@ export class AppComponent implements AfterViewInit, OnInit {
   errorToken: string = '';
 
   async checkTokenValidity(): Promise<boolean> {
-    const sToken = localStorage.getItem('userToken');
     const email = localStorage.getItem('userEmail');
 
     this.errorToken = '';
 
-    if (!sToken || !email) {
-      console.log("No token in localStorage. Cannot restore session without JWT.");
-      this.clearUserStorage();
-      return false;
+    // If we have an email, we can try to validate or just restore
+    // But per user request, we should call getUser to verify session
+    const cookieValid = await this.restoreSessionFromCookie(false);
+
+    if (cookieValid) {
+      console.log("Session valid from cookie.");
+      return true;
     }
 
-    const cookieValid = await this.restoreSessionFromCookie(true);
-    if (!cookieValid) {
-      console.log("Session cookie missing or invalid. Cleared local storage.");
-      return false;
-    }
-
-
-
-    const validationData = {
-      token: sToken,
-      email: email
-    };
-
-    try {
-      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/validate`, validationData, {
-        observe: 'response',
-        responseType: 'json'
-      }));
-
-      if (response.ok) {
-        console.log("Token válido y activo.");
-        return true;
-      }
-
-      this.clearUserStorage();
-      return false;
-
-    } catch (error: any) {
-      console.log("Token validation failed.", error);
-      this.clearUserStorage();
-      return false;
-    }
+    console.log("No valid session found.");
+    this.clearUserStorage();
+    return false;
   }
 
   async restoreSessionFromCookie(silent: boolean = false): Promise<boolean> {
@@ -596,10 +581,14 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        const responseEmail = response.body;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (responseEmail && emailRegex.test(responseEmail.trim())) {
+        let responseEmail = response.body;
+        if (responseEmail && responseEmail.trim()) {
+          responseEmail = responseEmail.trim();
           console.log("Session valid from cookie. Email:", responseEmail);
+
+          localStorage.setItem('userEmail', responseEmail);
+          localStorage.setItem('email', responseEmail); // Consistency with other methods
+          this.emailUsuario = responseEmail;
 
           if (!silent) {
             this.mensajeExito = `Welcome back, ${responseEmail}!`;
@@ -612,7 +601,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     } catch (error) {
       console.log("Could not restore session from cookie:", error);
     }
-    this.clearUserStorage();
+    // Only clear if we explicitly failed to restore and weren't just checking
     return false;
   }
 

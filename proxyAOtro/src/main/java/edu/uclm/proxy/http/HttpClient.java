@@ -26,7 +26,20 @@ public class HttpClient {
 	
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	
-	public String resend(String url, Object oPayload) throws JsonProcessingException {
+	public static class RemoteResponse {
+		private byte[] bytes;
+		private String contentType;
+
+		public RemoteResponse(byte[] bytes, String contentType) {
+			this.bytes = bytes;
+			this.contentType = contentType;
+		}
+
+		public byte[] getBytes() { return bytes; }
+		public String getContentType() { return contentType; }
+	}
+
+	public RemoteResponse resend(String url, Object oPayload) throws JsonProcessingException {
 		HttpRequestBase method;
 		if (oPayload==null) {
 			method = new HttpGet(url);
@@ -46,8 +59,12 @@ public class HttpClient {
 				throw new ResponseStatusException(status, errorMessage);
 			}
 			HttpEntity entity = response.getEntity();
-			String responseText = EntityUtils.toString(entity);
-			return responseText;
+			String contentType = "application/json";
+			if (entity.getContentType()!=null)
+				contentType = entity.getContentType().getValue();
+			
+			byte[] bytes = EntityUtils.toByteArray(entity);
+			return new RemoteResponse(bytes, contentType);
 		} catch (IOException e1) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e1.getMessage());
 		}

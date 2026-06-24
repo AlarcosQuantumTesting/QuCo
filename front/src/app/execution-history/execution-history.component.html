@@ -268,10 +268,11 @@
                                         (click)="downloadGenericFile(executionSelected!.id, file.name)"
                                         style="padding: 5px 10px; margin-left: 10px;">
 
-                                        <!-- <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
+                                        <i *ngIf="file.name.endsWith('.png') || file.name.endsWith('.jpg')" class="fas fa-file-image"></i>
+                                        <i *ngIf="file.name.endsWith('.csv')" class="fas fa-file-csv"></i>
                                         <i *ngIf="file.name.endsWith('.txt')" class="fas fa-file-alt"></i>
-                                        <i *ngIf="!file.name.endsWith('.csv') && !file.name.endsWith('.txt')" class="fas fa-download"></i> -->
-                                        <i class="fas fa-download"></i>
+                                        <i *ngIf="file.name.endsWith('.py')" class="fas fa-file-code"></i>
+                                        <i *ngIf="!file.name.endsWith('.png') && !file.name.endsWith('.jpg') && !file.name.endsWith('.csv') && !file.name.endsWith('.txt') && !file.name.endsWith('.py')" class="fas fa-download"></i>
 
                                     </button>
 
