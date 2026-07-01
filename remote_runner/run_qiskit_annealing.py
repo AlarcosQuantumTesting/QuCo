@@ -55,6 +55,7 @@ if __name__ == "__main__":
         wrapper_code = """
 from qiskit_ibm_runtime import SamplerV2
 from qiskit import transpile
+from qiskit_optimization.algorithms import MinimumEigenOptimizer
 
 class TranspiledSamplerV2(SamplerV2):
     def __init__(self, mode, **kwargs):
@@ -72,6 +73,14 @@ class TranspiledSamplerV2(SamplerV2):
                 from qiskit.primitives.containers import SamplerPub
                 transpiled_pubs.append(SamplerPub(tc, pub.parameter_values, pub.shots))
         return super().run(transpiled_pubs, **kwargs)
+
+# Qiskit-optimization bugfix for SamplerV2 and large probability dictionaries
+orig_func = MinimumEigenOptimizer._eigenvector_to_solutions
+def new_func(cls, eigenvector, qubo, min_probability=1e-6):
+    if isinstance(eigenvector, dict):
+        eigenvector = {k: v**0.5 for k, v in eigenvector.items()}
+    return orig_func(eigenvector, qubo, min_probability)
+MinimumEigenOptimizer._eigenvector_to_solutions = classmethod(new_func)
 """
 
         for iteration in range(1, iterations + 1):
@@ -89,8 +98,39 @@ class TranspiledSamplerV2(SamplerV2):
                         modified_code = original_code
                         
                         if qpu == "aer_simulator":
-                            # Default StatevectorSampler works fine for the ideal simulator
-                            pass
+                            aer_injection = """
+from qiskit_aer.primitives import SamplerV2
+from qiskit import transpile
+from qiskit_optimization.algorithms import MinimumEigenOptimizer
+
+class AerTranspiledSamplerV2(SamplerV2):
+    def run(self, pubs, **kwargs):
+        new_pubs = []
+        for pub in pubs:
+            if isinstance(pub, tuple):
+                circ = pub[0]
+                t_circ = transpile(circ, basis_gates=['cx', 'rz', 'sx', 'x', 'rx', 'ry'])
+                new_pubs.append((t_circ,) + pub[1:])
+            elif hasattr(pub, 'circuit'):
+                circ = pub.circuit
+                t_circ = transpile(circ, basis_gates=['cx', 'rz', 'sx', 'x', 'rx', 'ry'])
+                new_pubs.append((t_circ, getattr(pub, 'parameter_values', None), getattr(pub, 'shots', None)))
+            else:
+                t_circ = transpile(pub, basis_gates=['cx', 'rz', 'sx', 'x', 'rx', 'ry'])
+                new_pubs.append(t_circ)
+        return super().run(new_pubs, **kwargs)
+
+sampler = AerTranspiledSamplerV2()
+
+# Qiskit-optimization bugfix for SamplerV2 and large probability dictionaries
+orig_func = MinimumEigenOptimizer._eigenvector_to_solutions
+def new_func(cls, eigenvector, qubo, min_probability=1e-6):
+    if isinstance(eigenvector, dict):
+        eigenvector = {k: v**0.5 for k, v in eigenvector.items()}
+    return orig_func(eigenvector, qubo, min_probability)
+MinimumEigenOptimizer._eigenvector_to_solutions = classmethod(new_func)
+"""
+                            modified_code = re.sub(r'sampler\s*=\s*StatevectorSampler\(\)', aer_injection, modified_code)
                         elif "fake" in qpu.lower():
                             remote_runner_dir = os.path.dirname(os.path.abspath(__file__))
                             injection = wrapper_code + f"\nimport sys\nsys.path.append(r'{remote_runner_dir}')\nfrom _fake_backends import backends as fake_backends\nbackend_fake = next(b for b in fake_backends if getattr(b, 'backend_name', getattr(b, 'name', '')) == '{qpu}')\nsampler = TranspiledSamplerV2(mode=backend_fake)\n"
