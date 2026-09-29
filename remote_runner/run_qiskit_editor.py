@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import time
+_T_START = time.time()
 import sys
 import glob
 import os
-import time
 import csv
 import importlib
 import importlib.util
@@ -130,6 +131,8 @@ def parse_cli_args(argv):
     ibm_instance = argv[6] if len(argv) >= 7 else None
     return pattern, iterations, append_mode, runner, ibm_token, ibm_instance
 
+_T_IMPORTS = time.time() - _T_START
+
 if __name__ == "__main__":
     pattern, iterations, append_mode, runner, token, instance = parse_cli_args(sys.argv)
     if token: IBM_TOKEN = token
@@ -168,7 +171,9 @@ if __name__ == "__main__":
                     # Cargamos el script generado. 
                     # NOTA: Si el script ya tiene ejecución (Sampler.run), se ejecutará al importar.
                     # Pero aquí lo re-ejecutamos en los backends seleccionados.
+                    t_load_start = time.time()
                     module = load_module_from_path(path)
+                    t_load = time.time() - t_load_start
                     
                     if not hasattr(module, 'circuit'):
                         print(f"File {path} does not have a 'circuit' variable.", file=sys.stderr)
@@ -181,7 +186,10 @@ if __name__ == "__main__":
                     for backend in backends:
                         qpu = qpu_name(backend)
                         try:
+                            t_backend_start = time.time()
                             transpiled, counts, (t_t, t_e, t_r), job_id = execute_on_backend(circuit, backend, shots)
+                            t_backend = time.time() - t_backend_start
+                            print(f"[PERF] problem={problem_name} load={t_load:.3f}s backend_run={t_backend:.3f}s", file=sys.stderr)
                             g_o, g_t, d_o, d_t = compute_metrics(circuit, transpiled)
                             
                             # Registramos detalles
@@ -198,3 +206,5 @@ if __name__ == "__main__":
                             
                 except Exception as e:
                     print(f"Error loading {path}: {e}", file=sys.stderr)
+
+        print(f"[PERF] imports={_T_IMPORTS:.3f}s total={time.time()-_T_START:.3f}s n={len(py_paths)}", file=sys.stderr)
