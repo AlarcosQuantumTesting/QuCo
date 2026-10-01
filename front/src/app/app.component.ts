@@ -4,6 +4,8 @@ import { AccessibilityService } from './accessibility.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
+import { ToastService, Toast } from './toast.service';
+import { ExecutionPollingService } from './execution-polling.service';
 
 @Component({
   selector: 'app-root',
@@ -28,13 +30,24 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.checkTokenValidity();
   }
 
-  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient) {
+  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient, public toastService: ToastService, private executionPollingService: ExecutionPollingService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         // this.mostrarInicio = this.router.url === '/quco';
         this.mostrarInicio = this.router.url === '/home';
       }
     });
+  }
+
+  removeToast(toast: Toast): void {
+    this.toastService.removeToast(toast.id);
+  }
+
+  openExecutionDetailsFromToast(toast: Toast): void {
+    if (toast.executionId) {
+      this.router.navigate(['/execution-history'], { queryParams: { selectedId: toast.executionId } });
+    }
+    this.removeToast(toast);
   }
 
   ngAfterViewInit() {

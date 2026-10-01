@@ -2422,6 +2422,7 @@ table {
 :host-context(body.dark-mode) .contenedorBackends {
   background-color: #172424 !important;
   border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
   /* box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important; */
 }
 

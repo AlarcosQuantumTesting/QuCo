@@ -2035,7 +2035,34 @@ export class MatrixesComponent implements AfterViewInit {
     localStorage.setItem('selectedProjectName_matrices', project.name);
 
     this.userExpressions = qp.expressions.map((exp: any) => exp.expr);
-    this.fillTableWithUserExpressions();
+
+    // Reconstruir la tabla a partir de positionValue
+    let newMatrix: any[] = [];
+    let positionValue = qp.generator?.positionValue || {};
+    let totalRows = Math.pow(2, this.inputQubits);
+    for(let i=0; i<totalRows; i++) {
+       let row = [];
+       let binaryString = i.toString(2);
+       let zeros = this.inputQubits - binaryString.length;
+       for(let j=0; j<zeros; j++) row.push(0);
+       for(let j=0; j<binaryString.length; j++) row.push(parseInt(binaryString.charAt(j)));
+       
+       let outVal = positionValue[i.toString()] || 0;
+       let outBin = outVal.toString(2);
+       let outZeros = this.outputQubits - outBin.length;
+       for(let j=0; j<outZeros; j++) row.push(0);
+       for(let j=0; j<outBin.length; j++) row.push(parseInt(outBin.charAt(j)));
+
+       newMatrix.push(row);
+    }
+    
+    this.rows = newMatrix.length;
+    this.cols = newMatrix.length > 0 ? newMatrix[0].length : 0;
+    this.load(newMatrix);
+
+    if (this.userExpressions && this.userExpressions.length > 0) {
+      this.fillTableWithUserExpressions();
+    }
     this.saveInLocal();
 
     this.qiskitCode = qp.QCodes && qp.QCodes.length > 0 ? qp.QCodes[0].code : '';
@@ -2107,9 +2134,6 @@ export class MatrixesComponent implements AfterViewInit {
       this.mensajeTemporal2 = `Project "${project.name}" loaded successfully!`;
       this.projectLoaded = true;
       localStorage.setItem('projectLoadedMatrices', 'true');
-      setTimeout(() => {
-        location.reload();
-      }, 100);
     }, 200);
 
   }

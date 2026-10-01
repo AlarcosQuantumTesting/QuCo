@@ -23,11 +23,13 @@ import { NotesModalComponent } from "./notes-modal/notes-modal.component";
 import { MinimizeDirective } from './common/minimize.directive';
 import { AboutUsComponent } from './about-us/about-us.component';
 import { DownloadCodeModalComponent } from './download-code-modal/download-code-modal.component';
+import { AnnealingComponent } from './annealing/annealing.component';
 
 const appRoutes: Routes = [
   { path: 'matrixes', component: MatrixesComponent },
   { path: 'elonging', component: ElongingComponent },
   { path: 'blocks', component: BlocksComponent },
+  { path: 'annealing', component: AnnealingComponent },
   { path: 'home', component: HomeComponent },
   // { path : 'quco', component : AppComponent }
   { path: '', redirectTo: '/', pathMatch: 'full' }
@@ -48,7 +50,8 @@ import { authInterceptor } from './interceptors/auth.interceptor';
     QubitsConfigurationComponent,
     EditorComponent,
     HomeComponent,
-    TranspilationComponent
+    TranspilationComponent,
+    AnnealingComponent
   ],
   imports: [
     BrowserModule,

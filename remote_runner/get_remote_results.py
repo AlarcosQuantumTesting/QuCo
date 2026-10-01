@@ -1,4 +1,7 @@
 # get_remote_results.py
+import warnings
+warnings.filterwarnings('ignore')
+
 from qiskit_ibm_runtime import QiskitRuntimeService
 from collections import defaultdict
 import sys

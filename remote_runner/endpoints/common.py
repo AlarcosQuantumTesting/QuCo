@@ -1,6 +1,10 @@
 import os
 
-TEMP_SCRIPTS_DIR = "/home/qexec/temp_scripts"
+TEMP_SCRIPTS_DIR = os.environ.get(
+    "TEMP_SCRIPTS_DIR",
+    "/home/qexec/temp_scripts" if os.path.exists("/home/qexec") else os.path.expanduser("~/Desktop/temp_scripts")
+)
+
 os.makedirs(TEMP_SCRIPTS_DIR, exist_ok=True)
 
 def next_sequential_dir(base_dir: str) -> str:
