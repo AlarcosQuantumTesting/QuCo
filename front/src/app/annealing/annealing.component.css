@@ -486,44 +486,44 @@ body.dark-mode .btn-templates-link-inline:hover {
   font-size: 14px;
 }
 
-body.dark-mode .resource-box {
-  background: #172424 !important;
-  border-color: #334155 !important;
+:host-context(body.dark-mode) .resource-box {
+  background: #1a2a2a !important;
+  border-color: #386161 !important;
 }
 
-body.dark-mode .resource-value {
+:host-context(body.dark-mode) .resource-value {
   color: #a4e4eb !important;
 }
 
-body.dark-mode .resource-label {
+:host-context(body.dark-mode) .resource-label {
   color: #94a3b8 !important;
 }
 
-body.dark-mode .qubo-term-item {
-  border-color: #334155 !important;
-  background: #1e293b !important;
+:host-context(body.dark-mode) .qubo-term-item {
+  border-color: #386161 !important;
+  background: #1a2a2a !important;
 }
 
-body.dark-mode .qubo-var {
+:host-context(body.dark-mode) .qubo-var {
   background: #008b95 !important;
   color: #ffffff !important;
 }
 
-body.dark-mode .qubo-val {
+:host-context(body.dark-mode) .qubo-val {
   color: #e2e8f0 !important;
 }
 
-body.dark-mode .topology-container {
-  background: #172424 !important;
-  border-color: #334155 !important;
+:host-context(body.dark-mode) .topology-container {
+  background: #1a2a2a !important;
+  border-color: #386161 !important;
 }
 
-body.dark-mode .topology-container line.graph-edge {
-  stroke: #334155 !important;
+:host-context(body.dark-mode) .topology-container line.graph-edge {
+  stroke: #386161 !important;
 }
 
-body.dark-mode .topology-container circle {
-  stroke: #1e293b !important;
+:host-context(body.dark-mode) .topology-container circle {
+  stroke: #233737 !important;
 }
 
 /* Topology Graph Hover Effects */
@@ -537,7 +537,194 @@ body.dark-mode .topology-container circle {
   filter: drop-shadow(0px 0px 5px rgba(0, 139, 149, 0.4));
 }
 
-body.dark-mode .edge-group:hover .graph-edge {
+:host-context(body.dark-mode) .edge-group:hover .graph-edge {
   stroke: #00b4c4 !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 180, 196, 0.6));
+  filter: drop-shadow(0px 0px 6px rgba(0, 180, 196, 0.6)) !important;
+}
+
+/* --- COMPREHENSIVE DARK MODE OVERRIDES PARA ANNEALING --- */
+
+/* Textos generales y headers */
+:host-context(body.dark-mode) h1,
+:host-context(body.dark-mode) h2,
+:host-context(body.dark-mode) h3,
+:host-context(body.dark-mode) h4,
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .title-modal,
+:host-context(body.dark-mode) .help-heading,
+:host-context(body.dark-mode) .quaco-info-text,
+:host-context(body.dark-mode) strong,
+:host-context(body.dark-mode) .math-header h3,
+:host-context(body.dark-mode) .code-card-header h3,
+:host-context(body.dark-mode) span {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) p,
+:host-context(body.dark-mode) label,
+:host-context(body.dark-mode) .help-intro,
+:host-context(body.dark-mode) .example-desc {
+  color: #cddbda !important;
+}
+
+/* Contenedores principales y modales */
+:host-context(body.dark-mode) .search-container,
+:host-context(body.dark-mode) .main-solver-container,
+:host-context(body.dark-mode) .help-content,
+:host-context(body.dark-mode) .modal-content,
+:host-context(body.dark-mode) .modal-content.ejemplos,
+:host-context(body.dark-mode) .modal-content.instrucciones,
+:host-context(body.dark-mode) .modal-body {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 4px 10px rgba(0, 5, 5, 0.5) !important;
+}
+
+/* Cards y Bloques */
+:host-context(body.dark-mode) .code-card,
+:host-context(body.dark-mode) .help-card,
+:host-context(body.dark-mode) .example-item-card,
+:host-context(body.dark-mode) .contenedorBackends,
+:host-context(body.dark-mode) .error-box {
+  background-color: #1a2a2a !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .help-card:hover,
+:host-context(body.dark-mode) .example-item-card:hover {
+  border-color: #58a597 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+  background-color: #233737 !important;
+}
+
+/* Inputs, Selects y Textareas */
+:host-context(body.dark-mode) input[type="text"],
+:host-context(body.dark-mode) input[type="number"],
+:host-context(body.dark-mode) select,
+:host-context(body.dark-mode) .template-dropdown,
+:host-context(body.dark-mode) .problem-textarea,
+:host-context(body.dark-mode) .code-editor-textarea {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) input:focus,
+:host-context(body.dark-mode) select:focus,
+:host-context(body.dark-mode) textarea:focus,
+:host-context(body.dark-mode) .problem-textarea:focus {
+  border-color: #58a597 !important;
+  box-shadow: 0 0 5px rgba(88, 165, 151, 0.5) !important;
+  outline: none !important;
+  background-color: #233737 !important;
+}
+
+/* Botones de acción general */
+:host-context(body.dark-mode) .action-button,
+:host-context(body.dark-mode) .btn-try-example,
+:host-context(body.dark-mode) .execute-code-btn,
+:host-context(body.dark-mode) .execute-remote-code-btn,
+:host-context(body.dark-mode) .transpile-code-btn,
+:host-context(body.dark-mode) .download-as-btn,
+:host-context(body.dark-mode) .copy-btn {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .action-button:hover,
+:host-context(body.dark-mode) .btn-try-example:hover,
+:host-context(body.dark-mode) .execute-code-btn:hover,
+:host-context(body.dark-mode) .execute-remote-code-btn:hover,
+:host-context(body.dark-mode) .transpile-code-btn:hover,
+:host-context(body.dark-mode) .download-as-btn:hover,
+:host-context(body.dark-mode) .copy-btn:hover {
+  background-color: #008b95 !important;
+  color: #ffffff !important;
+  border-color: #008b95 !important;
+}
+
+/* Modal Headers & Footers */
+:host-context(body.dark-mode) .modal-header,
+:host-context(body.dark-mode) .help-modal-header {
+  background-color: #0a4d52 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .modal-footer {
+  background-color: #172424 !important;
+  border-top: 1px solid #386161 !important;
+}
+
+/* Elementos Matemáticos y Displays */
+:host-context(body.dark-mode) .math-expression-display,
+:host-context(body.dark-mode) .math-constraint-item,
+:host-context(body.dark-mode) .code-wrapper {
+  background-color: #162424 !important;
+  color: #a4e4eb !important;
+  border: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .math-header {
+  border-bottom-color: #386161 !important;
+  border-top-color: #386161 !important;
+}
+
+/* Quaco info text e icon */
+:host-context(body.dark-mode) .help-icon {
+  background-color: rgba(0, 139, 149, 0.3) !important;
+  color: #a4e4eb !important;
+}
+
+:host-context(body.dark-mode) .qubits-badge {
+  background-color: rgba(0, 139, 149, 0.3) !important;
+  color: #a4e4eb !important;
+}
+
+/* Backends List */
+:host-context(body.dark-mode) .listaBackends li {
+  border-bottom: 1px solid #386161 !important;
+}
+
+:host-context(body.dark-mode) .listaBackends li:hover {
+  background-color: #233737 !important;
+}
+
+:host-context(body.dark-mode) .text-muted {
+  color: #a4e4eb !important;
+}
+
+/* Sobreescribir estilos en línea conflictivos en dark mode */
+:host-context(body.dark-mode) [style*="color: #475569"],
+:host-context(body.dark-mode) [style*="color: #64748b"],
+:host-context(body.dark-mode) [style*="color: #0f172a"],
+:host-context(body.dark-mode) [style*="color: #334155"],
+:host-context(body.dark-mode) [style*="color: #000000"] {
+  color: #e2e8f0 !important;
+}
+
+:host-context(body.dark-mode) [style*="background: #f8fafc"],
+:host-context(body.dark-mode) [style*="background-color: #f8fafc"],
+:host-context(body.dark-mode) [style*="background: #ffffff"],
+:host-context(body.dark-mode) [style*="background-color: #ffffff"],
+:host-context(body.dark-mode) [style*="background: #f1f5f9"] {
+  background-color: #1a2a2a !important;
+  border-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) [style*="background: #fef2f2"] {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: #ef4444 !important;
+}
+
+:host-context(body.dark-mode) [style*="background: #e2e8f0"] {
+  background-color: #233737 !important;
+  border-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) code {
+  background-color: #233737 !important;
+  color: #a4e4eb !important;
 }

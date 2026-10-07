@@ -495,19 +495,19 @@
                     </div>
                 </div>
                 <ng-template #solutionTemplate let-result="result" let-title="title">
-                    <div
-                        [ngStyle]="{'margin-bottom': '30px', 'padding': '25px', 'background': '#ffffff', 'border-radius': '12px', 'border': title === 'Best solution' ? '2px solid #10b981' : '1px solid #cbd5e1', 'box-shadow': title === 'Best solution' ? '0 4px 12px rgba(16, 185, 129, 0.1)' : '0 2px 8px rgba(0,0,0,0.03)'}">
+                    <div class="solution-card" [class.best-solution]="title === 'Best solution'"
+                        [ngStyle]="{'margin-bottom': '30px', 'padding': '25px', 'border-radius': '12px', 'border': title === 'Best solution' ? '2px solid #10b981' : '1px solid #cbd5e1', 'box-shadow': title === 'Best solution' ? '0 4px 12px rgba(16, 185, 129, 0.1)' : '0 2px 8px rgba(0,0,0,0.03)'}">
                         <div
                             style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; gap: 15px; flex-wrap: wrap;">
                             
                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <h3
-                                    [ngStyle]="{'color': title === 'Best solution' ? '#047857' : '#334155', 'font-size': '18px', 'margin': '0', 'display': 'flex', 'align-items': 'center', 'font-weight': '700'}">
+                                <h3 class="solution-title" [class.best]="title === 'Best solution'"
+                                    [ngStyle]="{'font-size': '18px', 'margin': '0', 'display': 'flex', 'align-items': 'center', 'font-weight': '700'}">
                                     <i class="fas" [ngClass]="title === 'Best solution' ? 'fa-trophy' : 'fa-lightbulb'" style="margin-right: 10px; font-size: 20px;" [ngStyle]="{'color': title === 'Best solution' ? '' : '#f59e0b'}"></i> 
                                     {{ title }}
                                 </h3>
                                 
-                                <div *ngIf="result?.qpu && result.qpu.toLowerCase() !== 'unknown'" style="display: inline-flex; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 6px; width: fit-content;">
+                                <div *ngIf="result?.qpu && result.qpu.toLowerCase() !== 'unknown'" class="qpu-badge" style="display: inline-flex; align-items: center; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 6px; width: fit-content;">
                                     <i class="fas fa-microchip" style="color: #94a3b8; font-size: 11px; margin-right: 6px;"></i>
                                     <span style="font-family: 'Fira Code', monospace; color: #475569; font-size: 12px; font-weight: 600;">{{ result.qpu }}</span>
                                 </div>
@@ -522,13 +522,13 @@
 
                         <div style="display: flex; flex-direction: column; gap: 25px;">
 
-                            <div
-                                style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <span
-                                    style="font-weight: 600; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Cost
+                            <div class="cost-container"
+                                style="border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <span class="cost-label"
+                                    style="font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;">Cost
                                     function</span>
-                                <span
-                                    style="font-family: 'Fira Code', monospace; font-size: 32px; font-weight: 800; color: #047857; text-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <span class="cost-value"
+                                    style="font-family: 'Fira Code', monospace; font-size: 32px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                                     {{ result?.fval }}
                                 </span>
                             </div>
@@ -543,17 +543,17 @@
 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                                     <!-- Columna de Seleccionadas -->
-                                    <div
-                                        style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                        <span
-                                            style="font-weight: 600; color: #0369a1; font-size: 13.5px; display: flex; align-items: center; margin-bottom: 12px;">
+                                    <div class="variables-col included-col"
+                                        style="padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span class="col-title"
+                                            style="font-weight: 600; font-size: 13.5px; display: flex; align-items: center; margin-bottom: 12px;">
                                             <i class="fas fa-check-circle" style="margin-right: 6px;"></i> Included in
                                             optimal solution (1.0)
                                         </span>
                                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                             <ng-container *ngFor="let v of result?.variables">
-                                                <div *ngIf="v.value === '1.0'"
-                                                    style="background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; padding: 5px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 13.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                                <div *ngIf="v.value === '1.0'" class="var-badge included"
+                                                    style="border: 1px solid #7dd3fc; padding: 5px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 13.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                                                     <strong style="font-weight: 700;">{{v.name}}</strong>
                                                     <span style="opacity: 0.5;">=</span>
                                                     <span style="font-weight: 800;">1.0</span>
@@ -563,17 +563,17 @@
                                     </div>
 
                                     <!-- Columna de Descartadas -->
-                                    <div
-                                        style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                        <span
-                                            style="font-weight: 600; color: #64748b; font-size: 13.5px; display: flex; align-items: center; margin-bottom: 12px;">
+                                    <div class="variables-col excluded-col"
+                                        style="padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                        <span class="col-title"
+                                            style="font-weight: 600; font-size: 13.5px; display: flex; align-items: center; margin-bottom: 12px;">
                                             <i class="fas fa-times-circle" style="margin-right: 6px;"></i> Excluded from
                                             optimal solution (0.0)
                                         </span>
                                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                             <ng-container *ngFor="let v of result?.variables">
-                                                <div *ngIf="v.value !== '1.0'"
-                                                    style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; padding: 5px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+                                                <div *ngIf="v.value !== '1.0'" class="var-badge excluded"
+                                                    style="border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 13px; display: flex; align-items: center; gap: 6px;">
                                                     <strong style="font-weight: 600;">{{v.name}}</strong>
                                                     <span style="opacity: 0.5;">=</span>
                                                     <span style="font-weight: 500;">0.0</span>

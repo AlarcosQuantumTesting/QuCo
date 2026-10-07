@@ -1636,3 +1636,189 @@ tr.table-active {
 .text-running-dark {
   color: #b45309 !important;
 }
+
+/* --- DARK MODE OVERRIDES PARA VIEW RESULTS MODAL (STDOUT) --- */
+
+/* Textos generales que deben forzarse a claros */
+:host-context(body.dark-mode) .modal-body [style*="color: #0f172a"],
+:host-context(body.dark-mode) .modal-body [style*="color: #334155"],
+:host-context(body.dark-mode) .modal-body [style*="color: #475569"],
+:host-context(body.dark-mode) .modal-body [style*="color: #64748b"] {
+  color: #e2e8f0 !important;
+}
+
+/* Modal general */
+:host-context(body.dark-mode) .modal-content[style*="background-color: #ffffff"] {
+  background-color: #172424 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 10px 30px rgba(0, 5, 5, 0.7) !important;
+}
+
+/* Modal Body */
+:host-context(body.dark-mode) .modal-body[style*="background-color: #f8fafc"] {
+  background-color: #172424 !important;
+}
+
+/* Cajas principales (Original problem, QUBO, Hamiltonian, Best solution container) */
+:host-context(body.dark-mode) .modal-body [style*="background: white"],
+:host-context(body.dark-mode) .modal-body [style*="background: #ffffff"] {
+  background-color: #1a2a2a !important;
+  border-color: #386161 !important;
+}
+:host-context(body.dark-mode) .modal-body [style*="border: 2px solid #10b981"] {
+  border-color: #10b981 !important;
+}
+
+/* Cabeceras de cajas (Original problem, QUBO, Hamiltonian) y desglose de variables */
+:host-context(body.dark-mode) .modal-body [style*="background: #f1f5f9"],
+:host-context(body.dark-mode) .modal-body [style*="background: #f8fafc"] {
+  background-color: #233737 !important;
+  border-color: #386161 !important;
+  color: #f0f4f4 !important;
+}
+
+/* Botones / badges / tags (variables, constraints) */
+:host-context(body.dark-mode) .modal-body [style*="background: #e2e8f0"] {
+  background-color: #162424 !important;
+  border-color: #386161 !important;
+  color: #a4e4eb !important;
+}
+
+/* Info extendida (bombilla), Incluidas en solución */
+:host-context(body.dark-mode) .modal-body [style*="background: #e0f2fe"] {
+  background-color: #0f3642 !important;
+  border-color: #12556b !important;
+  color: #a4e4eb !important;
+}
+
+/* Cajas de código/ecuaciones (raw content) */
+:host-context(body.dark-mode) .modal-body [style*="background: #fafafa"] {
+  background-color: #162424 !important;
+  color: #ffffff !important;
+}
+
+/* Coste de Best Solution */
+:host-context(body.dark-mode) .modal-body [style*="background: #ecfdf5"] {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+}
+
+:host-context(body.dark-mode) .modal-body [style*="color: #065f46"] {
+  color: #a7f3d0 !important;
+}
+
+:host-context(body.dark-mode) .modal-body [style*="color: #047857"] {
+  color: #10b981 !important;
+}
+
+/* Paneles de Filtros */
+:host-context(body.dark-mode) .modal-body button[style*="background: transparent"] {
+  color: #e2e8f0 !important;
+}
+
+:host-context(body.dark-mode) .modal-body input[type="number"],
+:host-context(body.dark-mode) .modal-body select {
+  background-color: #233737 !important;
+  color: #ffffff !important;
+  border: 1px solid #386161 !important;
+}
+
+/* --- REFACTORED SOLUTION CARD STYLES (LIGHT MODE) --- */
+.solution-card {
+  background: #ffffff;
+}
+
+.solution-title {
+  color: #334155;
+}
+.solution-title.best {
+  color: #047857;
+}
+
+.qpu-badge {
+  background: #f8fafc;
+}
+
+.cost-container {
+  background: #ecfdf5;
+}
+.cost-label {
+  color: #065f46;
+}
+.cost-value {
+  color: #047857;
+}
+
+.variables-col {
+  background: #f8fafc;
+}
+.col-title {
+  color: #0369a1;
+}
+.excluded-col .col-title {
+  color: #64748b;
+}
+
+.var-badge.included {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.var-badge.excluded {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* --- REFACTORED SOLUTION CARD STYLES (DARK MODE) --- */
+:host-context(body.dark-mode) .solution-card {
+  background: #1a2a2a !important;
+  border-color: #386161 !important;
+}
+:host-context(body.dark-mode) .solution-card.best-solution {
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+:host-context(body.dark-mode) .solution-title {
+  color: #e2e8f0 !important;
+}
+:host-context(body.dark-mode) .solution-title.best {
+  color: #10b981 !important;
+}
+
+:host-context(body.dark-mode) .qpu-badge {
+  background: #233737 !important;
+  border-color: #386161 !important;
+}
+
+:host-context(body.dark-mode) .cost-container {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: #10b981 !important;
+}
+:host-context(body.dark-mode) .cost-label {
+  color: #a7f3d0 !important;
+}
+:host-context(body.dark-mode) .cost-value {
+  color: #10b981 !important;
+}
+
+:host-context(body.dark-mode) .variables-col {
+  background: #233737 !important;
+  border-color: #386161 !important;
+}
+:host-context(body.dark-mode) .included-col .col-title {
+  color: #a4e4eb !important;
+}
+:host-context(body.dark-mode) .excluded-col .col-title {
+  color: #94a3b8 !important;
+}
+
+:host-context(body.dark-mode) .var-badge.included {
+  background: #0f3642 !important;
+  border-color: #12556b !important;
+  color: #a4e4eb !important;
+}
+:host-context(body.dark-mode) .var-badge.excluded {
+  background: #162424 !important;
+  border-color: #386161 !important;
+  color: #94a3b8 !important;
+}
