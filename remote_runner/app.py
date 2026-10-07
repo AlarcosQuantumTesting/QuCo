@@ -6,12 +6,14 @@ from endpoints.run_cirq_endpoint import bp as run_cirq_bp
 from endpoints.run_qiskit_transpiler import bp as run_qiskit_transpiler_bp
 from endpoints.run_qiskit_annealing_endpoint import bp as run_qiskit_annealing_bp
 from endpoints.run_dwave_annealing_endpoint import bp as run_dwave_annealing_bp
+from endpoints.run_code_async_endpoint import bp as run_code_async_bp
 from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
     app.register_blueprint(run_code_bp)
+    app.register_blueprint(run_code_async_bp)
     app.register_blueprint(run_qiskit_bp)
     app.register_blueprint(run_cirq_bp)  
     app.register_blueprint(run_qiskit_transpiler_bp)

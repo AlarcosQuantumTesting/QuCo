@@ -1,8 +1,9 @@
 import os
 
-#TEMP_SCRIPTS_DIR = os.path.expanduser("~/Desktop/temp_scripts")  #Local
-
-TEMP_SCRIPTS_DIR = "/home/qexec/temp_scripts"  #Remoto
+TEMP_SCRIPTS_DIR = os.environ.get(
+    "TEMP_SCRIPTS_DIR",
+    "/home/qexec/temp_scripts" if os.path.exists("/home/qexec") else os.path.expanduser("~/Desktop/temp_scripts")
+)
 
 os.makedirs(TEMP_SCRIPTS_DIR, exist_ok=True)
 
