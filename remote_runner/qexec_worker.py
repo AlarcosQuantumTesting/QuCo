@@ -59,5 +59,5 @@ def make_pool(workers: int):
         max_workers=workers,
         mp_context=multiprocessing.get_context("spawn"),
         initializer=init_worker,
-        max_tasks_per_child=200
+        max_tasks_per_child=1
     )
