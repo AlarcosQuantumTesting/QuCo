@@ -518,35 +518,62 @@ export class AnnealingComponent implements OnInit {
     return terms;
   }
 
-  calculateQUBO(): void {
+  calculateQUBO(addSlacks: boolean = false): void {
     // Initialize QUBO linear weights and quadratic interactions
     this.quboLinear = new Array(this.numQubits).fill(0);
     this.quboQuadratic = {};
     this.quboOffset = 0;
 
+    let slackIndex = this.numQubits;
+
     // 1) Add objective function terms
     for (const term of this.objTerms) {
       const idx = this.varList.indexOf(term.var1);
-      this.quboLinear[idx] += term.coef;
+      this.quboLinear[idx] = (this.quboLinear[idx] || 0) + term.coef;
     }
 
     // 2) Add constraint penalty expansions: lambda * (sum a_i x_i - C)^2
     for (const c of this.constraints) {
       const lambda = c.lambda;
-      const C = c.target;
+      let C = c.target;
+      let sign = c.sense;
 
-      // Map internal variable indices to coefficients for easy lookup inside this constraint
       const coefMap: { [key: number]: number } = {};
       for (const term of c.terms) {
         const idx = this.varList.indexOf(term.var1);
         coefMap[idx] = (coefMap[idx] || 0) + term.coef;
       }
 
+      if (addSlacks && (sign === '<=' || sign === '>=' || sign === '<' || sign === '>')) {
+        if (sign === '<') {
+          C = C - 0.01;
+          sign = '<=';
+        } else if (sign === '>') {
+          C = C + 0.01;
+          sign = '>=';
+        }
+
+        let targetForSlack = C;
+        if (targetForSlack === 0) {
+          targetForSlack = (sign === '<=') ? 0.01 : -0.01;
+        }
+
+        let bits = Math.floor(Math.log2(Math.abs(targetForSlack))) + 1;
+        if (bits < 1 || isNaN(bits)) bits = 1; // Fallback to avoid infinite loops or errors
+
+        for (let i = 0; i < bits; i++) {
+          let exponente = Math.pow(2, bits - i - 1);
+          let factor = (sign === '<=') ? exponente : -exponente;
+          coefMap[slackIndex] = factor;
+          slackIndex++;
+        }
+      }
+
       // Linear terms penalty: lambda * (a_i^2 - 2 * C * a_i) * x_i
       for (const varStr of Object.keys(coefMap)) {
         const i = parseInt(varStr);
         const a_i = coefMap[i];
-        this.quboLinear[i] += lambda * (a_i * a_i - 2 * C * a_i);
+        this.quboLinear[i] = (this.quboLinear[i] || 0) + lambda * (a_i * a_i - 2 * C * a_i);
       }
 
       // Quadratic terms penalty: 2 * lambda * a_i * a_j * x_i * x_j
@@ -569,16 +596,18 @@ export class AnnealingComponent implements OnInit {
   calculateIsing(): void {
     // Map x_i to (1 - s_i) / 2 to get spin coefficients
     // H = sum h_i Z_i + sum J_ij Z_i Z_j + Offset
-    this.isingLinear = new Array(this.numQubits).fill(0);
+    this.isingLinear = new Array(this.quboLinear.length).fill(0);
     this.isingQuadratic = {};
     this.isingOffset = this.quboOffset;
 
     // Add QUBO linear contributions
-    for (let i = 0; i < this.numQubits; i++) {
-      const Q_i = this.quboLinear[i];
-      // Q_i * x_i = Q_i * (1 - s_i) / 2 = Q_i/2 - Q_i/2 * s_i
-      this.isingLinear[i] -= Q_i / 2;
-      this.isingOffset += Q_i / 2;
+    for (let i = 0; i < this.quboLinear.length; i++) {
+      const Q_i = this.quboLinear[i] || 0;
+      if (Q_i !== 0) {
+        // Q_i * x_i = Q_i * (1 - s_i) / 2 = Q_i/2 - Q_i/2 * s_i
+        this.isingLinear[i] = (this.isingLinear[i] || 0) - Q_i / 2;
+        this.isingOffset += Q_i / 2;
+      }
     }
 
     // Add QUBO quadratic contributions
@@ -590,8 +619,8 @@ export class AnnealingComponent implements OnInit {
 
       // Q_ij * x_i * x_j = Q_ij/4 * (1 - s_i - s_j + s_i * s_j)
       // Linear coefficients: -Q_ij/4 for both s_i and s_j
-      this.isingLinear[i] -= Q_ij / 4;
-      this.isingLinear[j] -= Q_ij / 4;
+      this.isingLinear[i] = (this.isingLinear[i] || 0) - Q_ij / 4;
+      this.isingLinear[j] = (this.isingLinear[j] || 0) - Q_ij / 4;
 
       // Quadratic coefficient: Q_ij / 4
       this.isingQuadratic[key] = Q_ij / 4;
@@ -656,7 +685,10 @@ export class AnnealingComponent implements OnInit {
 
       this.parseInput();
       this.buildFormattedProblem();
-      this.calculateQUBO();
+      const selectedFile = this.manager.selectedTemplate?.fileName || '';
+      const isDwave = selectedFile.includes('dwave_dictionary') || selectedFile.includes('linear_quadratic');
+      
+      this.calculateQUBO(isDwave);
       this.calculateIsing();
 
       // 1) Build variables code block
@@ -688,18 +720,73 @@ ${cTermsStr}
       }).join('\n\n');
 
       // 4) Fetch template and substitute tokens
-      if (!this.manager.selectedTemplate || !this.manager.selectedTemplate.fileName || !this.manager.selectedTemplate.fileName.startsWith('annealing')) {
+      const fileName = this.manager.selectedTemplate?.fileName;
+      if (!this.manager.selectedTemplate || !fileName || (!fileName.startsWith('annealing') && !fileName.includes('dwave_dictionary') && !fileName.includes('linear_quadratic'))) {
         throw new Error("Please select an annealing template from the Template Manager.");
       }
       let templateCode = this.manager.selectedTemplate.code;
 
-      const lambdaLine = `converter = QuadraticProgramToQubo(penalty=${this.globalLambda})`;
+      if (fileName.includes('dwave_dictionary')) {
+        let rulesStr = '';
+        for (let i = 0; i < this.quboLinear.length; i++) {
+          if (this.quboLinear[i] !== undefined && this.quboLinear[i] !== 0) {
+            rulesStr += `Q[(${i}, ${i})] = ${this.quboLinear[i]}\n`;
+          }
+        }
+        for (const key of Object.keys(this.quboQuadratic)) {
+          if (this.quboQuadratic[key] !== 0) {
+            const parts = key.split(',');
+            rulesStr += `Q[(${parts[0]}, ${parts[1]})] = ${this.quboQuadratic[key]}\n`;
+          }
+        }
+        this.code = templateCode.replace('#RULES#', rulesStr.trim());
+        if (this.code.includes('#Generated_Code_Goes_Here#')) {
+          this.code = this.code.replace('#Generated_Code_Goes_Here#', 'Q = defaultdict(int)\n\n\n#RULES#\n' + rulesStr.trim());
+        }
+        
+        // Inject loop to print all results instead of just the first one, so they show in the View results modal
+        if (this.code.includes('print(result.first)')) {
+            this.code = this.code.replace('print(result.first)', 'print("---Todas_las_soluciones---")\nfor sample, energy in result.data(["sample", "energy"]):\n    print(f"Sample(sample={sample}, energy={energy})")');
+        }
+      } else if (fileName.includes('linear_quadratic')) {
+        let linearStr = 'linear = {\n    ';
+        let count = 0;
+        for (let i = 0; i < this.quboLinear.length; i++) {
+          if (this.quboLinear[i] !== undefined && this.quboLinear[i] !== 0) {
+            linearStr += `(${i}, ${i}) : ${this.quboLinear[i]}, `;
+            if (++count % 6 === 0) linearStr += '\n    ';
+          }
+        }
+        linearStr += '\n}';
+        
+        let quadStr = 'quadratic = {\n    ';
+        count = 0;
+        for (const key of Object.keys(this.quboQuadratic)) {
+          if (this.quboQuadratic[key] !== 0) {
+            const parts = key.split(',');
+            quadStr += `(${parts[0]}, ${parts[1]}) : ${this.quboQuadratic[key]}, `;
+            if (++count % 6 === 0) quadStr += '\n    ';
+          }
+        }
+        quadStr += '\n}';
+        
+        this.code = templateCode.replace('#Generated_Code_Goes_Here#', linearStr + '\n\n' + quadStr);
+        if (this.code.includes('print(result.first)')) {
+            this.code = this.code.replace('print(result.first)', 'print("---Todas_las_soluciones---")\nfor sample, energy in result.data(["sample", "energy"]):\n    print(f"Sample(sample={sample}, energy={energy})")');
+        }
+      } else {
+        const lambdaLine = `converter = QuadraticProgramToQubo(penalty=${this.globalLambda})`;
+        this.code = templateCode
+          .replace('#VARIABLES#', variablesStr)
+          .replace('#OBJECTIVE_FUNCTION#', objectiveStr)
+          .replace('#CONSTRAINTS#', constraintsStr)
+          .replace(/#LAMBDA#/g, lambdaLine);
+      }
 
-      this.code = templateCode
-        .replace('#VARIABLES#', variablesStr)
-        .replace('#OBJECTIVE_FUNCTION#', objectiveStr)
-        .replace('#CONSTRAINTS#', constraintsStr)
-        .replace(/#LAMBDA#/g, lambdaLine);
+      if (isDwave) {
+        this.calculateQUBO(false);
+        this.calculateIsing();
+      }
 
     } catch (err: any) {
       this.errorMessage = err.message || err;

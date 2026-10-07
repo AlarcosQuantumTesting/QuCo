@@ -39,7 +39,7 @@
         <div class="input-group">
           <label>Available templates:</label>
           <select [(ngModel)]="manager.selectedTemplate" (ngModelChange)="onTemplateChange($event)">
-            <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['annealing'])" [ngValue]="template">
+            <option *ngFor="let template of manager.getTemplatesStartingExactlyBy(['annealing', 'dwave_dictionary', 'linear_quadratic'])" [ngValue]="template">
               {{ template.displayName }}
             </option>
           </select>

@@ -797,6 +797,8 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
           collectResults = true;
           continue;
         }
+
+        // Qiskit format parsing
         if (collectResults && line.includes('fval=')) {
           const resultLine = line.trim();
           const parts = resultLine.split(',').map(p => p.trim());
@@ -817,6 +819,30 @@ export class ExecutionHistoryComponent implements OnInit, OnDestroy {
           const isDuplicate = results.some(r => r.qpu === currentQpu && r.fval === fval && r.status === status && JSON.stringify(r.variables) === JSON.stringify(variables));
           if (!isDuplicate) {
             results.push({ qpu: currentQpu, fval, variables, status });
+          }
+        }
+
+        // D-Wave format parsing
+        const dwaveSampleMatch = line.match(/Sample\(sample=\{(.*?)\},\s*energy=([-\d\.]+)/);
+        if (dwaveSampleMatch) {
+          const sampleStr = dwaveSampleMatch[1];
+          const energy = dwaveSampleMatch[2];
+          const variables: { name: string, value: string }[] = [];
+          
+          const parts = sampleStr.split(',');
+          for (const p of parts) {
+            const kv = p.split(':');
+            if (kv.length === 2) {
+              let val = kv[1].trim();
+              if (val === '0') val = '0.0';
+              if (val === '1') val = '1.0';
+              variables.push({ name: `x${kv[0].trim()}`, value: val });
+            }
+          }
+          
+          const isDuplicate = results.some(r => r.qpu === currentQpu && r.fval === energy && JSON.stringify(r.variables) === JSON.stringify(variables));
+          if (!isDuplicate) {
+            results.push({ qpu: currentQpu, fval: energy, variables, status: 'SUCCESS' });
           }
         }
       }
