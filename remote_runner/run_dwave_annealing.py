@@ -52,7 +52,11 @@ if __name__ == "__main__":
                     print(f"--- Running {os.path.basename(path)} on D-Wave (Iteration {iteration}) ---", flush=True)
                     start_time = time.time()
                     
-                    proc = subprocess.run([sys.executable, "-W", "ignore", path], capture_output=True, text=True)
+                    env = os.environ.copy()
+                    if token:
+                        env["DWAVE_API_TOKEN"] = token
+                    
+                    proc = subprocess.run([sys.executable, "-W", "ignore", path], capture_output=True, text=True, env=env)
                     
                     duration = time.time() - start_time
                     print(proc.stdout, end="")
