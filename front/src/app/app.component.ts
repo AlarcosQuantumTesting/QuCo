@@ -471,11 +471,23 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        const email = response.body;
-        if (email) {
-          console.log("Email del usuario:", email);
-          localStorage.setItem('email', email);
-          return email;
+        let rawBody = response.body;
+        if (rawBody) {
+          let emailToUse = rawBody.trim();
+          try {
+            const userData = JSON.parse(emailToUse);
+            if (userData && userData.email) {
+              emailToUse = userData.email;
+              if (userData.role) localStorage.setItem('role', userData.role);
+              if (userData.isAdmin !== undefined) localStorage.setItem('isAdmin', String(userData.isAdmin));
+            }
+          } catch (e) {
+            // Fallback for non-JSON response
+          }
+
+          console.log("Email del usuario:", emailToUse);
+          localStorage.setItem('email', emailToUse);
+          return emailToUse;
         } else {
           throw new Error("Email vacío recibido.");
         }
@@ -524,6 +536,8 @@ export class AppComponent implements AfterViewInit, OnInit {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('email');
+    localStorage.removeItem('role');
+    localStorage.removeItem('isAdmin');
 
     localStorage.removeItem('selectedProjectId_blocks');
     localStorage.removeItem('selectedProjectId_editor');
@@ -574,7 +588,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
     // If we have an email, we can try to validate or just restore
     // But per user request, we should call getUser to verify session
-    const cookieValid = await this.restoreSessionFromCookie(false);
+    const cookieValid = await this.restoreSessionFromCookie(true);
 
     if (cookieValid) {
       console.log("Session valid from cookie.");
@@ -594,21 +608,55 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        let responseEmail = response.body;
-        if (responseEmail && responseEmail.trim()) {
-          responseEmail = responseEmail.trim();
-          console.log("Session valid from cookie. Email:", responseEmail);
+        let rawBody = response.body;
+        if (rawBody && rawBody.trim()) {
+          let responseText = rawBody.trim();
+          let emailToUse: string | null = null;
 
-          localStorage.setItem('userEmail', responseEmail);
-          localStorage.setItem('email', responseEmail); // Consistency with other methods
-          this.emailUsuario = responseEmail;
+          try {
+            const userData = JSON.parse(responseText);
+            if (userData && userData.email) {
+              emailToUse = userData.email;
+              if (userData.role) localStorage.setItem('role', userData.role);
+              if (userData.isAdmin !== undefined) localStorage.setItem('isAdmin', String(userData.isAdmin));
+            } else {
+              // Valid JSON, but no email property (could be an error object or empty)
+              console.log("Invalid session data (no email). Assuming expired.");
+              this.clearUserStorage();
+              return false;
+            }
+          } catch (e) {
+            // Not a JSON object. Could be a plain string email, or an HTML login page.
+            if (responseText.includes('<') || responseText.includes('>')) {
+              console.log("HTML response received instead of user data. Assuming session expired.");
+              this.clearUserStorage();
+              return false;
+            }
 
-          if (!silent) {
-            this.mensajeExito = `Welcome back, ${responseEmail}!`;
-            this.mostrarMensajeExito = true;
-            this.limpiarMensajeExito(2000);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(responseText)) {
+              emailToUse = responseText;
+            } else {
+              console.log("Unrecognized response string. Assuming session expired.");
+              this.clearUserStorage();
+              return false;
+            }
           }
-          return true;
+
+          if (emailToUse) {
+            console.log("Session valid from cookie. Email:", emailToUse);
+
+            localStorage.setItem('userEmail', emailToUse);
+            localStorage.setItem('email', emailToUse); // Consistency with other methods
+            this.emailUsuario = emailToUse;
+
+            if (!silent) {
+              this.mensajeExito = `Welcome back, ${emailToUse}!`;
+              this.mostrarMensajeExito = true;
+              this.limpiarMensajeExito(2000);
+            }
+            return true;
+          }
         }
       }
     } catch (error) {
