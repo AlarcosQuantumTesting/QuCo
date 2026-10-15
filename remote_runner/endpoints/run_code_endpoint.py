@@ -59,8 +59,8 @@ def run_code():
             pass
         return jsonify({"error": f"Fallo al ejecutar en paralelo: {e}", "batch_dir": batch_dir}), 500
 
-    # Ordenamos resultados por nombre de archivo (p1.py, p2.py, ...)
-    results.sort(key=lambda r: r["file"])
+    # Ordenamos resultados numéricamente por nombre de archivo (0.py, 1.py, ...)
+    results.sort(key=lambda r: int(os.path.splitext(r["file"])[0]))
 
     # Intentar eliminar el directorio tras ejecutar todo
     try:

@@ -1165,8 +1165,10 @@
     position: fixed;
     bottom: 15px;
     top: auto;
-    left: 60px; /* Aligned with sidebar width */
-    background-color: #172424; /* Matches component Dark Backgrounds */
+    left: 60px;
+    /* Aligned with sidebar width */
+    background-color: #172424;
+    /* Matches component Dark Backgrounds */
     border: 1px solid #386161;
     border-radius: 8px;
     display: flex;
@@ -1179,7 +1181,8 @@
   }
 
   .user-dropdown.menu-open {
-    left: 200px; /* Aligned with open sidebar width */
+    left: 200px;
+    /* Aligned with open sidebar width */
   }
 
   .user-dropdown-header {
