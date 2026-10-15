@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
+import warnings
+warnings.filterwarnings('ignore')
 import glob
 import os
 import time

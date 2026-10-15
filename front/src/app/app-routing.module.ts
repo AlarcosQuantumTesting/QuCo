@@ -11,6 +11,7 @@ import { HomeComponent } from './home/home.component';
 import { CanDeactivateGuard } from './CanDeactivateGuard';
 import { TranspilationComponent } from './transpilation/transpilation.component';
 import { ExecutionHistoryComponent } from './execution-history/execution-history.component';
+import { AnnealingComponent } from './annealing/annealing.component';
 
 const routes: Routes = [
   { path: "", redirectTo: "/home", pathMatch: "full" },
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: "qubits-configuration", component: QubitsConfigurationComponent },
   { path: "transpilation", component: TranspilationComponent },
   { path: 'execution-history', component: ExecutionHistoryComponent },
+  { path: "annealing", component: AnnealingComponent },
   { path: "home", component: HomeComponent },
 
 ];

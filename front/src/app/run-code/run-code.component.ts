@@ -26,7 +26,7 @@ interface BatchInfo {
 export class RunCodeComponent implements OnInit {
 
   @Input() qiskitCode: string = '';
-  @Input() runnerType: 'qiskit' | 'cirq' | 'editor' = 'qiskit';
+  @Input() runnerType: 'qiskit' | 'cirq' | 'editor' | 'annealing' = 'qiskit';
 
   @Input() mostrarModal = false;
 
@@ -87,6 +87,12 @@ export class RunCodeComponent implements OnInit {
     }
     if (this.runnerType === 'editor') {
       this.runWhat = 'run_qiskit_editor';
+    } else if (this.runnerType === 'annealing') {
+      if (this.qiskitCode && this.qiskitCode.includes('dwave')) {
+        this.runWhat = 'run_dwave_annealing';
+      } else {
+        this.runWhat = 'run_qiskit_annealing';
+      }
     } else {
       this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
     }
@@ -132,6 +138,12 @@ export class RunCodeComponent implements OnInit {
 
     if (this.runnerType === 'editor') {
       this.runWhat = 'run_qiskit_editor';
+    } else if (this.runnerType === 'annealing') {
+      if (this.qiskitCode && this.qiskitCode.includes('dwave')) {
+        this.runWhat = 'run_dwave_annealing';
+      } else {
+        this.runWhat = 'run_qiskit_annealing';
+      }
     } else {
       this.runWhat = "run_" + (this.qiskitCode.indexOf("import cirq") !== -1 ? "cirq" : "qiskit");
     }
