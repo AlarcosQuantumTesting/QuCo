@@ -20,4 +20,8 @@ export class EdCircuitsService {
   getCircuit(name: string) {
     return this.client.get<EdCircuit>(environment.tp3Url + "circuits/getCircuit/" + name);
   }
+
+  generateCode(payload: any) {
+    return this.client.post<any>(environment.tp3Url + "circuits/generateCode", payload);
+  }
 }

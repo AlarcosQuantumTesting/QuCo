@@ -1,9 +1,11 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, OnInit, HostListener } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccessibilityService } from './accessibility.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
+import { ToastService, Toast } from './toast.service';
+import { ExecutionPollingService } from './execution-polling.service';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +17,11 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   menuAbierto = false;
   mostrarInicio = true;
-  tokenStored: string | null = localStorage.getItem('userToken');
 
   ngOnInit(): void {
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('email');
+
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       this.darkMode = savedTheme === 'dark';
@@ -26,13 +30,24 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.checkTokenValidity();
   }
 
-  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient) {
+  constructor(private router: Router, private el: ElementRef, public accessibility: AccessibilityService, private renderer: Renderer2, private http: HttpClient, public toastService: ToastService, private executionPollingService: ExecutionPollingService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         // this.mostrarInicio = this.router.url === '/quco';
         this.mostrarInicio = this.router.url === '/home';
       }
     });
+  }
+
+  removeToast(toast: Toast): void {
+    this.toastService.removeToast(toast.id);
+  }
+
+  openExecutionDetailsFromToast(toast: Toast): void {
+    if (toast.executionId) {
+      this.router.navigate(['/execution-history'], { queryParams: { selectedId: toast.executionId } });
+    }
+    this.removeToast(toast);
   }
 
   ngAfterViewInit() {
@@ -83,6 +98,14 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   toggleUserDropdown() {
     this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const clickedInside = this.el.nativeElement.querySelector('.user')?.contains(event.target);
+    if (!clickedInside) {
+      this.isUserDropdownOpen = false;
+    }
   }
 
   toggleDarkMode() {
@@ -273,7 +296,8 @@ export class AppComponent implements AfterViewInit, OnInit {
   //   this.mostrarModalLogin = true;
   // }
   toggleLogin() {
-    window.open(environment.qsauronUrl, '_blank');
+    //window.open(environment.qsauronUrl, '_blank');
+    window.open('https://alarcosj.esi.uclm.es/qsauron', '_blank');
   }
 
   isLoginDisabled(): boolean {
@@ -447,11 +471,23 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        const email = response.body;
-        if (email) {
-          console.log("Email del usuario:", email);
-          localStorage.setItem('email', email);
-          return email;
+        let rawBody = response.body;
+        if (rawBody) {
+          let emailToUse = rawBody.trim();
+          try {
+            const userData = JSON.parse(emailToUse);
+            if (userData && userData.email) {
+              emailToUse = userData.email;
+              if (userData.role) localStorage.setItem('role', userData.role);
+              if (userData.isAdmin !== undefined) localStorage.setItem('isAdmin', String(userData.isAdmin));
+            }
+          } catch (e) {
+            // Fallback for non-JSON response
+          }
+
+          console.log("Email del usuario:", emailToUse);
+          localStorage.setItem('email', emailToUse);
+          return emailToUse;
         } else {
           throw new Error("Email vacío recibido.");
         }
@@ -483,7 +519,7 @@ export class AppComponent implements AfterViewInit, OnInit {
 
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('userToken');
+    return !!localStorage.getItem('userEmail');
   }
 
   mostrarModalLogoutConfirmacion: boolean = false;
@@ -499,14 +535,17 @@ export class AppComponent implements AfterViewInit, OnInit {
   clearUserStorage(): void {
     localStorage.removeItem('userToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
+    localStorage.removeItem('isAdmin');
 
     localStorage.removeItem('selectedProjectId_blocks');
     localStorage.removeItem('selectedProjectId_editor');
     localStorage.removeItem('selectedProjectId_genetic');
     localStorage.removeItem('selectedProjectId_algorithm');
     localStorage.removeItem('selectedProjectId_matrices');
-    
-    this.tokenStored = null;
+
+    //this.tokenStored = null;
     this.emailUsuario = '';
   }
 
@@ -543,49 +582,22 @@ export class AppComponent implements AfterViewInit, OnInit {
   errorToken: string = '';
 
   async checkTokenValidity(): Promise<boolean> {
-    const sToken = localStorage.getItem('userToken');
     const email = localStorage.getItem('userEmail');
 
     this.errorToken = '';
 
-    if (!sToken || !email) {
-      console.log("No token in localStorage. Cannot restore session without JWT.");
-      this.clearUserStorage();
-      return false;
-    }
-
+    // If we have an email, we can try to validate or just restore
+    // But per user request, we should call getUser to verify session
     const cookieValid = await this.restoreSessionFromCookie(true);
-    if (!cookieValid) {
-      console.log("Session cookie missing or invalid. Cleared local storage.");
-      return false;
+
+    if (cookieValid) {
+      console.log("Session valid from cookie.");
+      return true;
     }
 
-
-
-    const validationData = {
-      token: sToken,
-      email: email
-    };
-
-    try {
-      const response = await firstValueFrom(this.http.post(`${environment.qsauronUrl}tokens/validate`, validationData, {
-        observe: 'response',
-        responseType: 'json'
-      }));
-
-      if (response.ok) {
-        console.log("Token válido y activo.");
-        return true;
-      }
-
-      this.clearUserStorage();
-      return false;
-
-    } catch (error: any) {
-      console.log("Token validation failed.", error);
-      this.clearUserStorage();
-      return false;
-    }
+    console.log("No valid session found.");
+    this.clearUserStorage();
+    return false;
   }
 
   async restoreSessionFromCookie(silent: boolean = false): Promise<boolean> {
@@ -596,23 +608,61 @@ export class AppComponent implements AfterViewInit, OnInit {
       }));
 
       if (response.ok) {
-        const responseEmail = response.body;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (responseEmail && emailRegex.test(responseEmail.trim())) {
-          console.log("Session valid from cookie. Email:", responseEmail);
+        let rawBody = response.body;
+        if (rawBody && rawBody.trim()) {
+          let responseText = rawBody.trim();
+          let emailToUse: string | null = null;
 
-          if (!silent) {
-            this.mensajeExito = `Welcome back, ${responseEmail}!`;
-            this.mostrarMensajeExito = true;
-            this.limpiarMensajeExito(2000);
+          try {
+            const userData = JSON.parse(responseText);
+            if (userData && userData.email) {
+              emailToUse = userData.email;
+              if (userData.role) localStorage.setItem('role', userData.role);
+              if (userData.isAdmin !== undefined) localStorage.setItem('isAdmin', String(userData.isAdmin));
+            } else {
+              // Valid JSON, but no email property (could be an error object or empty)
+              console.log("Invalid session data (no email). Assuming expired.");
+              this.clearUserStorage();
+              return false;
+            }
+          } catch (e) {
+            // Not a JSON object. Could be a plain string email, or an HTML login page.
+            if (responseText.includes('<') || responseText.includes('>')) {
+              console.log("HTML response received instead of user data. Assuming session expired.");
+              this.clearUserStorage();
+              return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(responseText)) {
+              emailToUse = responseText;
+            } else {
+              console.log("Unrecognized response string. Assuming session expired.");
+              this.clearUserStorage();
+              return false;
+            }
           }
-          return true;
+
+          if (emailToUse) {
+            console.log("Session valid from cookie. Email:", emailToUse);
+
+            localStorage.setItem('userEmail', emailToUse);
+            localStorage.setItem('email', emailToUse); // Consistency with other methods
+            this.emailUsuario = emailToUse;
+
+            if (!silent) {
+              this.mensajeExito = `Welcome back, ${emailToUse}!`;
+              this.mostrarMensajeExito = true;
+              this.limpiarMensajeExito(2000);
+            }
+            return true;
+          }
         }
       }
     } catch (error) {
       console.log("Could not restore session from cookie:", error);
     }
-    this.clearUserStorage();
+    // Only clear if we explicitly failed to restore and weren't just checking
     return false;
   }
 

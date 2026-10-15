@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.uclm.tp3.common.model.EdCircuit;
 import edu.uclm.tp3.dao.EdCircuitDao;
+import edu.uclm.tp3.common.model.CircuitEditorPayload;
+import edu.uclm.tp3.common.services.CircuitEditorService;
+import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("circuits")
@@ -20,6 +24,15 @@ public class CircuitsController {
 
     @Autowired
     private EdCircuitDao circuitDao;
+
+    @Autowired
+    private CircuitEditorService circuitEditorService;
+
+    @PostMapping("/generateCode")
+    public ResponseEntity<Map<String, Object>> generateCode(@RequestBody CircuitEditorPayload payload) throws Exception {
+        Map<String, Object> result = this.circuitEditorService.generateCode(payload);
+        return ResponseEntity.ok(result);
+    }
 
     @PostMapping("/saveCircuit")
     public void saveCircuit(@RequestBody EdCircuit circuit) {

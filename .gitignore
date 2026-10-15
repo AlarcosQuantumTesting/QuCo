@@ -238,3 +238,28 @@ tp3/target/tp3-1/WEB-INF/lib/spring-websocket-5.3.9.jar
 tp3/target/tp3-1/WEB-INF/lib/tomcat-embed-core-9.0.52.jar
 tp3/target/tp3-1/WEB-INF/lib/tomcat-embed-el-9.0.52.jar
 tp3/target/tp3-1/WEB-INF/lib/tomcat-embed-websocket-9.0.52.jar
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+env/
+*.venv/
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Testing & cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE & OS
+.idea/
+.DS_Store

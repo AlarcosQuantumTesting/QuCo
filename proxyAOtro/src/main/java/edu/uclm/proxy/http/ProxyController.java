@@ -2,6 +2,7 @@ package edu.uclm.proxy.http;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,14 +30,19 @@ public class ProxyController {
 			.body("Hola desde AlarcosJ o wherever");
 	}
 
-	@PostMapping("/resend")
-	public Object resend(HttpServletRequest request, @RequestBody(required = false) Object payload) {
+	@RequestMapping(value = "/resend", method = { RequestMethod.GET, RequestMethod.POST })
+	public ResponseEntity<byte[]> resend(HttpServletRequest request, @RequestBody(required = false) Object payload) {
 		try {
 			String queryString = request.getQueryString();
 			int indexIgual = queryString.indexOf('=');
 			String url = queryString.substring(indexIgual + 1);
 			HttpClient client = new HttpClient();
-			return client.resend(url, payload);
+			HttpClient.RemoteResponse remoteResponse = client.resend(url, payload);
+			
+			HttpHeaders headers = new HttpHeaders();
+			headers.set(HttpHeaders.CONTENT_TYPE, remoteResponse.getContentType());
+			
+			return new ResponseEntity<>(remoteResponse.getBytes(), headers, HttpStatus.OK);
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
 		}

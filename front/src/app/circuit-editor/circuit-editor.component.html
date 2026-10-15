@@ -85,8 +85,7 @@
     <div class="info1">
 
     </div>
-    <div class="container matrix-container">
-      <div class="form-row">
+    <div class="form-row">
         <div class="section qubitsContainer">
           <div class="form-group">
             <!-- <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
@@ -130,8 +129,9 @@
               <div class="gates-section">
                 <div class="gate-category-title">Default gates</div>
                 <div class="gate-buttons">
-                  <button *ngFor="let dg of defaultGates" (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" 
-                    class="gate-btn" [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
+                  <button *ngFor="let dg of defaultGates"
+                    (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" class="gate-btn"
+                    [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
                     {{ dg.name }} <i *ngIf="dg.name === 'M'" class="fas fa-ruler"></i>
                   </button>
                 </div>
@@ -169,24 +169,24 @@
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
                                 style="margin-top: 0px !important"
-                                *ngIf="userEmail && userToken"
+                                *ngIf="userEmail"
                             >
                                 <i class="fas fa-save"></i> Save project
                             </button> -->
 
             <button (click)="openSaveProjectModal()" class="btn-confirm-save" style="margin-top: 0px !important"
-              *ngIf="userEmail && userToken && !selectedProjectId" [disabled]="!circuit">
+              *ngIf="userEmail && !selectedProjectId" [disabled]="!circuit">
               <i class="fas fa-save"></i> Save
             </button>
 
             <button (click)="openApplyChangesModal()" class="btn-confirm-save update-btn"
               style="margin-top: 0px !important"
-              *ngIf="userEmail && userToken && selectedProjectId && isCircuitModified">
+              *ngIf="userEmail && selectedProjectId && isCircuitModified">
               <i class="fas fa-pen"></i> Update
             </button>
 
             <button (click)="openSaveAsNewModal()" class="btn-confirm-save"
-              style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && userToken && selectedProjectId"
+              style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && selectedProjectId"
               title="Save the current circuit state as a new project">
               <i class="fas fa-save"></i> Save as new
             </button>
@@ -254,7 +254,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Modales -->
 
@@ -267,11 +266,9 @@
       </div>
 
       <div class="code-output">
-        <!-- <small id="codeArea"> -->
-        <pre>
-                    {{ code }}
-                    </pre>
-        <!-- </small> -->
+        <pre *ngIf="!isEditingCode" id="codeArea" class="code-editor-pre">{{ code }}</pre>
+        <textarea *ngIf="isEditingCode" [(ngModel)]="code" [rows]="codeLinesCount" class="code-editor-textarea"
+          spellcheck="false"></textarea>
       </div>
 
       <div class="modal-footer">
@@ -281,8 +278,13 @@
           Execute remote</button>
         <button class="transpile-code-btn" (click)="transpileCodigo()"><i class="fas fa-exchange-alt"></i>
           Transpile</button>
-        <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download as</button>
+        <button class="download-as-btn" (click)="mostrarDownloadModal = true"><i class="fas fa-download"></i> Download
+          as</button>
         <button class="copy-btn" (click)="copiarCodigo()"><i class="fas fa-copy"></i> Copy</button>
+        <button class="copy-btn" style="background-color: #34495eba !important;" (click)="toggleEditCode()">
+          <i class="fas" [ngClass]="isEditingCode ? 'fa-check' : 'fa-edit'"></i>
+          {{ isEditingCode ? 'Finish editing' : 'Edit code' }}
+        </button>
       </div>
     </div>
   </div>
@@ -291,7 +293,7 @@
   <app-download-code-modal [mostrarModal]="mostrarDownloadModal" (cerrar)="mostrarDownloadModal = false"
     [qiskitCode]="code || ''" style="width: 100%; height: 100%;"></app-download-code-modal>
   <app-run-code [mostrarModal]="mostrarEjecucionRemote" (cerrar)="mostrarEjecucionRemote = false"
-    [qiskitCode]="code || ''"></app-run-code>
+    [qiskitCode]="code || ''" runnerType="editor"></app-run-code>
 
   <div class="modal" *ngIf="mostrarModalCrear" style="z-index: 1001">
     <div class="modal-content">
@@ -375,7 +377,8 @@
           </thead>
           <tbody>
             <tr *ngIf="customizedGates.length === 0">
-              <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.</td>
+              <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.
+              </td>
             </tr>
             <tr *ngFor="let cg of customizedGates; let i = index">
               <td>{{ cg.name }}</td>
@@ -392,7 +395,7 @@
           </tbody>
         </table>
 
-        <span class="modal-gate-category-title">Default gates</span>
+        <!-- <span class="modal-gate-category-title">Default gates</span>
         <table class="expressions-table">
           <thead>
             <tr>
@@ -408,12 +411,13 @@
               <td>{{ dg.qubits }}</td>
               <td>{{ dg.description || (dg.name === 'M' ? 'Measure this qubit' : '') }}</td>
               <td>
-                <button class="update-btn" title="See code" (click)="dg.name === 'M' ? showMeasurementCodeGate() : codeShowGates(dg); copiarCodigoGate()"
+                <button class="update-btn" title="See code"
+                  (click)="dg.name === 'M' ? showMeasurementCodeGate() : codeShowGates(dg); copiarCodigoGate()"
                   style="margin-right: 10px;"><i class="fa fa-code"></i></button>
               </td>
             </tr>
           </tbody>
-        </table>
+        </table> -->
       </div>
 
       <!-- <div class="modal-footer">
@@ -436,14 +440,13 @@
 
       <div class="code-output">
         <!-- <small id="codeArea"> -->
-        <pre>
-                    {{ selectedGate?.code }}
-                    </pre>
+        <pre>{{ selectedGate?.code }}</pre>
         <!-- </small> -->
       </div>
 
       <div class="modal-footer">
-        <button class="download-as-btn" (click)="mostrarDownloadModalGate = true"><i class="fas fa-download"></i> Download as</button>
+        <button class="download-as-btn" (click)="mostrarDownloadModalGate = true"><i class="fas fa-download"></i>
+          Download as</button>
         <button class="copy-btn" (click)="copiarCodigoGate()"><i class="fas fa-copy"></i> Copy</button>
       </div>
     </div>

@@ -68,7 +68,6 @@ export class BlocksComponent extends EvolutionaryComponent {
   saveError: string = '';
 
   userEmail: string = localStorage.getItem('userEmail') || '';
-  userToken: string = localStorage.getItem('userToken') || '';
 
   BLOCKS_GENERATOR_FQCN = 'BLOCKS';
   REQUIRED_GENERATOR_TYPE = this.BLOCKS_GENERATOR_FQCN;
@@ -117,7 +116,6 @@ export class BlocksComponent extends EvolutionaryComponent {
   ngOnInit() {
 
     this.userEmail = localStorage.getItem('userEmail') || '';
-    this.userToken = localStorage.getItem('userToken') || '';
 
     window.addEventListener('beforeunload', this.confirmExit);
     localStorage.removeItem('qucoConfigurationBlocks');
@@ -153,34 +151,27 @@ export class BlocksComponent extends EvolutionaryComponent {
     this.availableBackends = JSON.parse(localStorage.getItem('availableBackends') || '[]');
 
     this.templateSelected = localStorage.getItem('templateSelectedBlocks') === 'true' || false;
-    if (this.templateSelected) {
+
+    this.manager.templatesLoaded.subscribe(() => {
       const savedTemplate = localStorage.getItem('selectedTemplateBlocks');
-      if (savedTemplate) {
+      if (this.templateSelected && savedTemplate) {
         try {
           const template = JSON.parse(savedTemplate);
-          setTimeout(() => {
-            this.onTemplateChange(template);
-          }, 1000);
-          console.log('Nombre:', template.fileName);
-          this.manager.selectedTemplate = this.manager.templates.find(t => t.fileName === template.fileName) || new CodeTemplate("", "", "");
-          console.log('Plantilla seleccionada:', this.manager.selectedTemplate);
+          this.onTemplateChange(template);
         } catch (error) {
           console.error('Error al parsear plantilla desde localStorage:', error);
+          this.selectDefaultTemplate();
         }
       } else {
-        console.log('No hay plantilla guardada en localStorage');
-        this.templateSelected = false;
-        this.validarDatos();
+        this.selectDefaultTemplate();
       }
-    } else {
-      console.log('No hay plantilla seleccionada');
-    }
+    });
 
     localStorage.setItem('isBlocks', "true");
     localStorage.setItem('isGenetic', "false");
 
     const savedProjectId = localStorage.getItem('selectedProjectId_blocks');
-    if (savedProjectId && this.userEmail && this.userToken) {
+    if (savedProjectId && this.userEmail) {
       this.selectedProjectId = savedProjectId;
       this.onProjectSelected();
     }
@@ -306,6 +297,15 @@ export class BlocksComponent extends EvolutionaryComponent {
 
     localStorage.setItem('templateSelectedBlocks', JSON.stringify(this.templateSelected));
     localStorage.setItem('selectedTemplateBlocks', JSON.stringify(this.manager.selectedTemplate));
+  }
+
+  private selectDefaultTemplate() {
+    const templates = this.manager.getTemplatesStartingExactlyBy(['elonging']);
+    if (templates && templates.length > 0) {
+      // Prioritize "elonging" if available, otherwise just the first one
+      const defaultTemplate = templates.find((t: any) => t.fileName === 'elonging') || templates[0];
+      this.onTemplateChange(defaultTemplate);
+    }
   }
 
 
@@ -873,7 +873,6 @@ export class BlocksComponent extends EvolutionaryComponent {
     const instanceId = window.crypto.randomUUID();
     const body: any = {
       email: this.userEmail,
-      token: this.userToken,
       instanceId: instanceId
     };
     if (projectId) {
@@ -883,7 +882,7 @@ export class BlocksComponent extends EvolutionaryComponent {
   }
 
   loadProjectNames(): void {
-    if (this.userEmail && this.userToken) {
+    if (this.userEmail) {
       const requestBody = this.getAuthRequestBody();
 
       this.projectService.getProjectsName(requestBody).subscribe({
