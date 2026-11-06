@@ -16,6 +16,8 @@ export class QiskitService {
     code.lines = gate.code.split("\n")
     code.description = gate.description
     code.qubits = gate.qubits
+    code.isFunction = (gate as any).isFunction ?? (gate.code.includes('def ') || (gate as any).isDslGeneric || false);
+    code.isGeneric = (gate as any).isGeneric ?? (gate as any).isDslGeneric ?? false;
     return this.client.post<any>(environment.tp3Url + "qiskit/saveCode", code)
   }
 

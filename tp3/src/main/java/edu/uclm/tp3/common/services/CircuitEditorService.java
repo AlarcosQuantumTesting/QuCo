@@ -3,6 +3,7 @@ package edu.uclm.tp3.common.services;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,31 +51,78 @@ public class CircuitEditorService {
         int maxQubitIndex = -1;
         if (gateRegistry != null) {
             for (CircuitGate registration : gateRegistry) {
-                for (Integer q : registration.getQubits()) {
-                    if (q > maxQubitIndex) {
-                        maxQubitIndex = q;
+                if (registration.getQubits() != null) {
+                    for (Integer q : registration.getQubits()) {
+                        if (q > maxQubitIndex) {
+                            maxQubitIndex = q;
+                        }
+                    }
+                }
+            }
+        }
+        if (circuit != null && circuit.getQubits() != null) {
+            for (int i = 0; i < circuit.getQubits().size(); i++) {
+                EdQubit qubit = circuit.getQubits().get(i);
+                if (qubit.getGates() != null) {
+                    for (EdGate gate : qubit.getGates()) {
+                        if (gate != null && gate.getName() != null && !gate.getName().equals("I") && !gate.getName().equals("0")) {
+                            if (i > maxQubitIndex) {
+                                maxQubitIndex = i;
+                            }
+                        }
                     }
                 }
             }
         }
         
-        int usedQubitsCount = maxQubitIndex == -1 ? 0 : maxQubitIndex + 1;
+        int usedQubitsCount = (maxQubitIndex >= 0)
+            ? (maxQubitIndex + 1)
+            : ((circuit != null && circuit.getQubits() != null && !circuit.getQubits().isEmpty())
+                ? Math.min(circuit.getQubits().size(), 4)
+                : 4);
 
-        Map<String, String> usedGatesMapping = new HashMap<>();
+        Map<String, String> usedGatesMapping = new LinkedHashMap<>();
 
         if (circuit != null && circuit.getQubits() != null) {
             for (EdQubit qubit : circuit.getQubits()) {
                 if (qubit.getGates() != null) {
                     for (EdGate gate : qubit.getGates()) {
                         String gateName = gate.getName();
-                        if (gateName != null && !gateName.equals("I") && !gateName.equals("M") && !gateName.equals("0") && !gateName.equals("H")) {
+                        if (gateName != null && !gateName.equals("I") && !gateName.equals("M") && !gateName.equalsIgnoreCase("Measure") && !gateName.equals("H") && !gateName.equals("X")) {
+                            if (gate.getParentQubit() != null && "0".equals(gateName)) {
+                                continue;
+                            }
                             if (!usedGatesMapping.containsKey(gateName)) {
-                                Optional<QiskitCode> optQiskitCode = this.qiskitCodeDao.findById(gateName);
-                                if (optQiskitCode.isPresent()) {
-                                    usedGatesMapping.put(gateName, optQiskitCode.get().getCode());
+                                if (payload.getGateCodes() != null && payload.getGateCodes().containsKey(gateName)) {
+                                    usedGatesMapping.put(gateName, payload.getGateCodes().get(gateName));
                                 } else {
-                                    usedGatesMapping.put(gateName, null);
+                                    Optional<QiskitCode> optQiskitCode = this.qiskitCodeDao.findById(gateName);
+                                    if (optQiskitCode.isPresent()) {
+                                        usedGatesMapping.put(gateName, optQiskitCode.get().getCode());
+                                    } else {
+                                        usedGatesMapping.put(gateName, null);
+                                    }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (gateRegistry != null) {
+            for (CircuitGate reg : gateRegistry) {
+                String gateName = reg.getName();
+                if (gateName != null && !gateName.equals("I") && !gateName.equals("M") && !gateName.equalsIgnoreCase("Measure") && !gateName.equals("H") && !gateName.equals("X")) {
+                    if (!usedGatesMapping.containsKey(gateName)) {
+                        if (payload.getGateCodes() != null && payload.getGateCodes().containsKey(gateName)) {
+                            usedGatesMapping.put(gateName, payload.getGateCodes().get(gateName));
+                        } else {
+                            Optional<QiskitCode> optQiskitCode = this.qiskitCodeDao.findById(gateName);
+                            if (optQiskitCode.isPresent()) {
+                                usedGatesMapping.put(gateName, optQiskitCode.get().getCode());
+                            } else {
+                                usedGatesMapping.put(gateName, null);
                             }
                         }
                     }
@@ -90,37 +138,39 @@ public class CircuitEditorService {
             String gateCode = entry.getValue();
 
             if (gateCode != null) {
-                initialize.append(gateCode).append("\n\n");
+                initialize.append(gateCode.trim()).append("\n\n\n");
                 String funcName = extractFunctionName(gateCode);
                 if (funcName != null) {
                     gateToFunctionMap.put(gateName, funcName);
+                } else {
+                    gateToFunctionMap.put(gateName, "get" + gateName);
                 }
             } else {
                 initialize.append("# Error loading gate ").append(gateName).append("\n\n");
             }
         }
 
-        StringBuilder measures = new StringBuilder();
-        if (circuit != null && circuit.getQubits() != null) {
-            for (int i = 0; i < circuit.getColumns(); i++) {
-                for (int j = 0; j < circuit.getQubits().size(); j++) {
-                    EdQubit qubit = circuit.getQubits().get(j);
-                    if (qubit.getGates() != null && qubit.getGates().size() > i) {
-                        EdGate gate = qubit.getGates().get(i);
-                        if (gate == null || gate.getName() == null || gate.getName().equals("I") || gate.getName().equals("0")) {
-                            continue;
-                        }
-                        if (gate.getName().equals("M")) {
-                            measures.append("circuit.measure(").append(j).append(", ").append(usedQubitsCount - j - 1).append(")\n");
-                        }
-                    }
-                }
+        class OpItem {
+            int column;
+            int minQubit;
+            String name;
+            List<Integer> qubits;
+            Map<String, Object> dslParams;
+
+            OpItem(int col, int minQ, String n, List<Integer> qs, Map<String, Object> dslParams) {
+                this.column = col;
+                this.minQubit = minQ;
+                this.name = n;
+                this.qubits = qs;
+                this.dslParams = dslParams;
             }
         }
 
-        StringBuilder calculus = new StringBuilder();
+        List<OpItem> operations = new ArrayList<>();
+        Set<String> processedTransactions = new HashSet<>();
+
         if (gateRegistry != null) {
-            Map<String, Set<Integer>> consolidatedQubitSets = new java.util.LinkedHashMap<>();
+            Map<String, OpItem> registryMap = new LinkedHashMap<>();
             List<CircuitGate> sortedRegistry = new ArrayList<>(gateRegistry);
             sortedRegistry.sort((a, b) -> {
                 if (a.getColumn() != b.getColumn()) {
@@ -129,37 +179,133 @@ public class CircuitEditorService {
                 return Integer.compare(a.getParentQubit(), b.getParentQubit());
             });
 
-            for (CircuitGate registration : sortedRegistry) {
-                String key = registration.getTransactionId() + "_" + registration.getName();
-                consolidatedQubitSets.putIfAbsent(key, new HashSet<>());
-                consolidatedQubitSets.get(key).addAll(registration.getQubits());
+            for (CircuitGate reg : sortedRegistry) {
+                String tid = reg.getTransactionId() != null && !reg.getTransactionId().isEmpty()
+                        ? reg.getTransactionId()
+                        : (reg.getColumn() + "_" + reg.getParentQubit() + "_" + reg.getName());
+
+                if (!registryMap.containsKey(tid)) {
+                    int minQ = reg.getParentQubit();
+                    if (reg.getQubits() != null && !reg.getQubits().isEmpty()) {
+                        minQ = reg.getQubits().stream().min(Integer::compareTo).orElse(minQ);
+                    }
+                    List<Integer> initialQubits = reg.getQubits() != null ? new ArrayList<>(reg.getQubits()) : new ArrayList<>();
+                    registryMap.put(tid, new OpItem(reg.getColumn(), minQ, reg.getName(), initialQubits, reg.getDslParams()));
+                } else {
+                    OpItem item = registryMap.get(tid);
+                    if (reg.getDslParams() != null && item.dslParams == null) {
+                        item.dslParams = reg.getDslParams();
+                    }
+                    if (reg.getQubits() != null) {
+                        for (Integer q : reg.getQubits()) {
+                            if (!item.qubits.contains(q)) {
+                                item.qubits.add(q);
+                            }
+                        }
+                        int minQ = reg.getQubits().stream().min(Integer::compareTo).orElse(item.minQubit);
+                        if (minQ < item.minQubit) item.minQubit = minQ;
+                    }
+                }
             }
 
-            for (Map.Entry<String, Set<Integer>> entry : consolidatedQubitSets.entrySet()) {
-                String key = entry.getKey();
-                String gateName = key.substring(key.indexOf("_") + 1);
+            for (Map.Entry<String, OpItem> entry : registryMap.entrySet()) {
+                processedTransactions.add(entry.getKey());
+                OpItem item = entry.getValue();
+                item.qubits.sort(Integer::compareTo);
+                operations.add(item);
+            }
+        }
 
-                List<Integer> sortedQubits = new ArrayList<>(entry.getValue());
-                sortedQubits.sort(Integer::compareTo);
-
-                List<String> qubitsStrList = new ArrayList<>();
-                for (Integer q : sortedQubits) {
-                    qubitsStrList.add(q.toString());
-                }
-                String qubitsList = String.join(", ", qubitsStrList);
-
-                if (gateName.equals("M")) {
-                    for (Integer q : sortedQubits) {
-                        calculus.append("circuit.measure(").append(q).append(", ").append(usedQubitsCount - q - 1).append(")\n");
+        if (circuit != null && circuit.getQubits() != null) {
+            for (int col = 0; col < circuit.getColumns(); col++) {
+                for (int q = 0; q < circuit.getQubits().size(); q++) {
+                    EdQubit qubit = circuit.getQubits().get(q);
+                    if (qubit.getGates() != null && qubit.getGates().size() > col) {
+                        EdGate gate = qubit.getGates().get(col);
+                        if (gate == null || gate.getName() == null || gate.getName().equals("I") || (gate.getParentQubit() != null && gate.getName().equals("0"))) {
+                            continue;
+                        }
+                        String tid = (gate.getTransactionId() != null && !gate.getTransactionId().isEmpty()) ? gate.getTransactionId() : null;
+                        if (tid == null || !processedTransactions.contains(tid)) {
+                            List<Integer> qs = new ArrayList<>();
+                            qs.add(q);
+                            if (gate.getTargetQubits() != null) {
+                                qs.addAll(gate.getTargetQubits());
+                            }
+                            qs.sort(Integer::compareTo);
+                            operations.add(new OpItem(col, q, gate.getName(), qs, gate.getDslParams()));
+                            if (tid != null) processedTransactions.add(tid);
+                        }
                     }
-                } else if (gateName.equals("H")) {
-                    for (Integer q : sortedQubits) {
-                        calculus.append("circuit.h(").append(q).append(")\n");
-                    }
-                } else {
-                    String displayGateName = findFunctionName(gateToFunctionMap, gateName);
-                    calculus.append("circuit.append(").append(displayGateName).append("(), [").append(qubitsList).append("])\n");
                 }
+            }
+        }
+
+        operations.sort((a, b) -> {
+            if (a.column != b.column) return Integer.compare(a.column, b.column);
+            return Integer.compare(a.minQubit, b.minQubit);
+        });
+
+        StringBuilder calculus = new StringBuilder();
+        StringBuilder measures = new StringBuilder();
+
+        for (OpItem op : operations) {
+            String gateName = op.name;
+            List<String> qStrs = new ArrayList<>();
+            for (Integer q : op.qubits) {
+                qStrs.add(q.toString());
+            }
+            String qubitsList = String.join(", ", qStrs);
+
+            if (gateName.equals("M") || gateName.equalsIgnoreCase("Measure")) {
+                for (Integer q : op.qubits) {
+                    int targetBit = usedQubitsCount - q - 1;
+                    calculus.append("circuit.measure(").append(q).append(", ").append(targetBit).append(")\n");
+                    measures.append("circuit.measure(").append(q).append(", ").append(targetBit).append(")\n");
+                }
+            } else if (gateName.equals("H")) {
+                for (Integer q : op.qubits) {
+                    calculus.append("circuit.h(").append(q).append(")\n");
+                }
+            } else if (gateName.equals("X")) {
+                for (Integer q : op.qubits) {
+                    calculus.append("circuit.x(").append(q).append(")\n");
+                }
+            } else {
+                String displayGateName = findFunctionName(gateToFunctionMap, gateName);
+                if (displayGateName == null || displayGateName.equals("0") || displayGateName.equals(gateName)) {
+                    displayGateName = gateToFunctionMap.getOrDefault(gateName, "get" + (gateName.equals("0") ? "Subcircuito_0" : gateName.replace(" ", "_")));
+                }
+                String callArgs = "";
+                if (usedGatesMapping != null && usedGatesMapping.containsKey(gateName)) {
+                    String gCode = usedGatesMapping.get(gateName);
+                    if (gCode != null) {
+                        Matcher matcher = Pattern.compile("def\\s+[^\\(\\s]+\\s*\\((.*?)\\)").matcher(gCode);
+                        if (matcher.find()) {
+                            String paramsStr = matcher.group(1);
+                            int nQubits = op.qubits.size();
+                            if (paramsStr.contains("m")) {
+                                Object mVal = (op.dslParams != null && op.dslParams.get("value") != null) ? op.dslParams.get("value") : null;
+                                if (mVal == null && gateName.equals("Oracle")) {
+                                    List<OpItem> oracles = new ArrayList<>();
+                                    for (OpItem oi : operations) {
+                                        if (oi.name.equals("Oracle")) oracles.add(oi);
+                                    }
+                                    int idx = oracles.indexOf(op);
+                                    mVal = (idx % 2 == 0) ? 4 : 9;
+                                }
+                                if (mVal != null) {
+                                    callArgs = nQubits + ", " + mVal;
+                                } else {
+                                    callArgs = String.valueOf(nQubits);
+                                }
+                            } else if (paramsStr.contains("n")) {
+                                callArgs = String.valueOf(nQubits);
+                            }
+                        }
+                    }
+                }
+                calculus.append("circuit.append(").append(displayGateName).append("(").append(callArgs).append("), [").append(qubitsList).append("])\n");
             }
         }
 
@@ -206,7 +352,6 @@ public class CircuitEditorService {
         if (gateToFunctionMap.containsKey(gateName)) {
             return gateToFunctionMap.get(gateName);
         }
-        // Case-insensitive and space/underscore flexible lookup
         for (Map.Entry<String, String> entry : gateToFunctionMap.entrySet()) {
             String key = entry.getKey();
             if (key.equalsIgnoreCase(gateName) || 
@@ -219,8 +364,7 @@ public class CircuitEditorService {
 
     private String extractFunctionName(String code) {
         if (code == null) return null;
-        // Permissive regex: find 'def', skip spaces, capture everything until '('
-        Pattern pattern = Pattern.compile("def\\s+([^\\(]+)\\(");
+        Pattern pattern = Pattern.compile("def\\s+([^\\(\\s]+)\\s*\\(");
         Matcher matcher = pattern.matcher(code);
         if (matcher.find()) {
             return matcher.group(1).trim();

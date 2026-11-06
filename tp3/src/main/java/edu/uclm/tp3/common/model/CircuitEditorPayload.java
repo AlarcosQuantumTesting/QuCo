@@ -7,6 +7,7 @@ public class CircuitEditorPayload {
     private String qubitsConfigurationName;
     private EdCircuit circuit;
     private List<CircuitGate> gateRegistry;
+    private java.util.Map<String, String> gateCodes;
 
     public String getTemplateName() {
         return templateName;
@@ -38,5 +39,13 @@ public class CircuitEditorPayload {
 
     public void setGateRegistry(List<CircuitGate> gateRegistry) {
         this.gateRegistry = gateRegistry;
+    }
+
+    public java.util.Map<String, String> getGateCodes() {
+        return gateCodes;
+    }
+
+    public void setGateCodes(java.util.Map<String, String> gateCodes) {
+        this.gateCodes = gateCodes;
     }
 }

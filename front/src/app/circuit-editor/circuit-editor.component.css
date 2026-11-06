@@ -1253,6 +1253,27 @@ ol.list-instructions {
   background: #912703;
 }
 
+td[rowspan] {
+  vertical-align: middle;
+  padding: 2px;
+  height: 100%;
+}
+
+td[rowspan] .gate-circuit-btn {
+  height: 100%;
+  min-height: calc(100% - 4px);
+  width: 100%;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-weight: 600;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
 .expressions-table {
   border-collapse: collapse;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -2841,4 +2862,590 @@ table {
   background-color: #166534;
   transform: scale(1.05);
   cursor: pointer;
+}
+
+/* ==========================================================================
+   QUANTUM DSL (TFM) COMPONENT STYLES (ESTILO NATIVO QUCO)
+   ========================================================================== */
+
+.dsl-tab-row {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.dsl-tab {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dsl-tab.active {
+  background-color: #008b95;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.dsl-tab:hover:not(.active) {
+  background-color: #e0f2f1;
+  color: #008b95;
+}
+
+.dsl-summary-box {
+  padding: 10px 14px;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.dsl-code-block {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Modo oscuro nativo de QuCo */
+:host-context(body.dark-mode) .dsl-tab-row {
+  border-bottom-color: #386161;
+}
+
+:host-context(body.dark-mode) .dsl-tab {
+  color: #b0bec5;
+}
+
+:host-context(body.dark-mode) .dsl-tab.active {
+  background-color: #008b95;
+  color: #ffffff;
+}
+
+:host-context(body.dark-mode) .dsl-tab:hover:not(.active) {
+  background-color: #1a2f2f;
+  color: #ffffff;
+}
+
+:host-context(body.dark-mode) .dsl-summary-box,
+:host-context(body.dark-mode) .dsl-code-block {
+  background-color: #1a2525 !important;
+  color: #e4eced !important;
+  border-color: #386161 !important;
+}
+
+/* --- Generic Gate Creation Modal (Quantum DSL) Helper Styles --- */
+.dsl-token-btn {
+  background-color: #e0f2f1;
+  color: #00695c;
+  border: 1px solid #b2dfdb;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-family: monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dsl-token-btn:hover {
+  background-color: #008b95;
+  color: #ffffff;
+  border-color: #00695c;
+}
+
+.dsl-link-btn {
+  background: none;
+  border: none;
+  color: #008b95;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dsl-link-btn:hover {
+  color: #00565b;
+  text-decoration: underline;
+}
+
+.dsl-table-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #e0f2f1;
+  color: #00695c;
+  border: 1px solid #b2dfdb;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+:host-context(body.dark-mode) .dsl-token-btn {
+  background-color: #1a3c3c !important;
+  color: #80cbc4 !important;
+  border-color: #008b95 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+:host-context(body.dark-mode) .dsl-token-btn:hover {
+  background-color: #008b95 !important;
+  color: #ffffff !important;
+  border-color: #4dd0e1 !important;
+}
+
+:host-context(body.dark-mode) .dsl-link-btn {
+  color: #4dd0e1 !important;
+}
+
+:host-context(body.dark-mode) .dsl-link-btn:hover {
+  color: #80deea !important;
+}
+
+:host-context(body.dark-mode) .dsl-table-badge {
+  background: #193333;
+  color: #80cbc4;
+  border-color: #00695c;
+}
+
+/* --- DSL Help Buttons & Info Boxes --- */
+/* --- DSL Help Buttons (Pretty, Simple & Minimalist) --- */
+.dsl-section-help-btn {
+  background: transparent !important;
+  color: #008b95 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: none !important;
+  flex-shrink: 0 !important;
+  outline: none !important;
+}
+
+.dsl-section-help-btn:hover {
+  background: rgba(0, 139, 149, 0.12) !important;
+  color: #005f66 !important;
+  transform: scale(1.18) !important;
+  box-shadow: none !important;
+}
+
+.dsl-section-help-btn.active {
+  background: rgba(0, 139, 149, 0.2) !important;
+  color: #004d40 !important;
+  transform: scale(1.1) !important;
+}
+
+/* Versión integrada para la cabecera del modal */
+.modal-header .dsl-section-help-btn {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent !important;
+}
+
+.modal-header .dsl-section-help-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  transform: scale(1.18) !important;
+}
+
+.modal-header .dsl-section-help-btn.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.28) !important;
+}
+
+.dsl-help-box {
+  background: #f2f9f9;
+  border: 1px solid #b2dfdb;
+  border-left: 4px solid #008b95;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0 12px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #244345;
+  box-shadow: 0 2px 6px rgba(0, 139, 149, 0.08);
+  position: relative;
+  animation: dslFadeIn 0.2s ease-out;
+}
+
+@keyframes dslFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dsl-help-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d4ebea;
+}
+
+.dsl-help-box-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #00695c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dsl-help-box-close {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #00796b;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.dsl-help-box-close:hover {
+  color: #c92e2e;
+}
+
+.dsl-help-content p {
+  margin: 0 0 6px 0;
+}
+
+.dsl-help-content ul {
+  margin: 4px 0 6px 0;
+  padding-left: 18px;
+}
+
+.dsl-help-content li {
+  margin-bottom: 4px;
+}
+
+.dsl-help-code {
+  background: #e0f2f1;
+  color: #004d40;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.dsl-help-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.dsl-help-table th, .dsl-help-table td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid #e0f2f1;
+}
+
+.dsl-help-table th {
+  background: #e0f2f1;
+  color: #00695c;
+  font-weight: 600;
+}
+
+/* Dark mode for DSL help buttons */
+:host-context(body.dark-mode) .dsl-section-help-btn {
+  background: transparent !important;
+  color: #4dd0e1 !important;
+}
+
+:host-context(body.dark-mode) .dsl-section-help-btn:hover {
+  background: rgba(77, 208, 225, 0.15) !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .dsl-section-help-btn.active {
+  background: rgba(77, 208, 225, 0.25) !important;
+  color: #80deea !important;
+}
+
+:host-context(body.dark-mode) .dsl-help-box {
+  background: #142a2d;
+  border-color: #00695c;
+  border-left-color: #4dd0e1;
+  color: #d1ecee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+:host-context(body.dark-mode) .dsl-help-box-header {
+  border-bottom-color: #244b4e;
+}
+
+:host-context(body.dark-mode) .dsl-help-box-title {
+  color: #4dd0e1;
+}
+
+:host-context(body.dark-mode) .dsl-help-box-close {
+  color: #80cbc4;
+}
+
+:host-context(body.dark-mode) .dsl-help-code {
+  background: #1f3b3e;
+  color: #80deea;
+}
+
+:host-context(body.dark-mode) .dsl-help-table th {
+  background: #1b383b;
+  color: #80deea;
+}
+
+:host-context(body.dark-mode) .dsl-help-table th, 
+:host-context(body.dark-mode) .dsl-help-table td {
+  border-bottom-color: #244b4e;
+}
+
+/* --- Floating, Draggable Generic Gate Help Modal --- */
+.floating-help-modal {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent !important;
+  z-index: 1060;
+  overflow: hidden;
+  pointer-events: none;
+  padding: 70px 40px 20px 20px;
+  box-sizing: border-box;
+}
+
+.floating-help-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 600px;
+  max-width: 92vw;
+  height: 560px;
+  max-height: 82vh;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  pointer-events: auto;
+  border: 1px solid #b2dfdb;
+  resize: both;
+  overflow: hidden;
+  min-width: 320px;
+  min-height: 180px;
+  animation: dslFadeIn 0.25s ease-out;
+}
+
+.floating-help-header {
+  cursor: grab;
+  padding: 12px 16px;
+  background-color: #008b95;
+  color: white !important;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.floating-help-header:active {
+  cursor: grabbing;
+}
+
+.floating-help-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.floating-help-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.floating-help-actions .minimize-btn,
+.floating-help-actions .close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+}
+
+.floating-help-actions .close-btn {
+  font-size: 22px;
+}
+
+.floating-help-actions .minimize-btn:hover,
+.floating-help-actions .close-btn:hover {
+  opacity: 0.8;
+}
+
+.floating-help-tabs {
+  display: flex;
+  background-color: #eef7f8;
+  border-bottom: 1px solid #d0ecee;
+  padding: 6px 10px;
+  gap: 6px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.floating-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #00695c;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.floating-tab-btn:hover {
+  background-color: #e0f2f1;
+  color: #004d40;
+}
+
+.floating-tab-btn.active {
+  background-color: #008b95;
+  color: #ffffff;
+  border-color: #00695c;
+  box-shadow: 0 1px 3px rgba(0, 139, 149, 0.3);
+}
+
+.floating-help-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #2c4749;
+}
+
+.floating-help-section {
+  animation: dslFadeIn 0.2s ease-out;
+}
+
+.floating-help-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #00565b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.floating-help-card {
+  background: #f4fbfb;
+  border: 1px solid #cceced;
+  border-left: 4px solid #008b95;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.floating-help-card h4 {
+  margin: 0 0 5px 0;
+  color: #00695c;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.floating-help-card p {
+  margin: 0 0 6px 0;
+  font-size: 12.5px;
+}
+
+.floating-help-card ul {
+  margin: 4px 0 6px 0;
+  padding-left: 18px;
+}
+
+.floating-help-card li {
+  margin-bottom: 5px;
+  font-size: 12.5px;
+}
+
+/* Dark mode */
+:host-context(body.dark-mode) .floating-help-content {
+  background-color: #172a2d;
+  border-color: #00565b;
+  color: #e0f2f1;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+:host-context(body.dark-mode) .floating-help-tabs {
+  background-color: #102124;
+  border-bottom-color: #004d40;
+}
+
+:host-context(body.dark-mode) .floating-tab-btn {
+  color: #80cbc4;
+}
+
+:host-context(body.dark-mode) .floating-tab-btn:hover {
+  background-color: #1a393c;
+  color: #b2dfdb;
+}
+
+:host-context(body.dark-mode) .floating-tab-btn.active {
+  background-color: #008b95;
+  color: #ffffff;
+}
+
+:host-context(body.dark-mode) .floating-help-body {
+  color: #d1ecee;
+}
+
+:host-context(body.dark-mode) .floating-help-section h3 {
+  color: #4dd0e1;
+}
+
+:host-context(body.dark-mode) .floating-help-card {
+  background: #132427;
+  border-color: #00565b;
+  border-left-color: #4dd0e1;
+}
+
+:host-context(body.dark-mode) .floating-help-card h4 {
+  color: #80deea;
 }

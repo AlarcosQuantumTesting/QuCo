@@ -60,6 +60,11 @@ public class QiskitController {
 			sb.append(line).append("\n");
 		code.setCode(sb.toString());
 		code.setQubits((Integer) info.get("qubits"));
+		if (info.containsKey("isGeneric")) {
+			code.setGeneric(Boolean.parseBoolean(info.get("isGeneric").toString()));
+		} else if (info.containsKey("generic")) {
+			code.setGeneric(Boolean.parseBoolean(info.get("generic").toString()));
+		}
 		this.qiskitCodeDao.save(code);
 	}
 	

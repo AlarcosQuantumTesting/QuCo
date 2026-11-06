@@ -86,9 +86,9 @@
 
     </div>
     <div class="form-row">
-        <div class="section qubitsContainer">
-          <div class="form-group">
-            <!-- <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
+      <div class="section qubitsContainer">
+        <div class="form-group">
+          <!-- <div class="template-header" style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 8px;">
                           <div class="template-buttons">
                             <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-plus" style="cursor: pointer !important;" (click)="createCustomizedGate()"></i></button>
                           </div>
@@ -102,70 +102,93 @@
                             <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp" style="cursor: pointer;"><i class="fa fa-edit" style="cursor: pointer;"></i></button>
                           </div>
                         </div> -->
-            <div class="gates-container">
-              <div class="gates-section">
-                <div class="gate-category-title">
-                  <span>User gates</span>
-                  <div class="gate-title-actions">
-                    <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp">
-                      <i class="fa fa-plus"></i>
-                    </button>
-                    <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp">
-                      <i class="fa fa-edit"></i>
-                    </button>
-                  </div>
-                </div>
-                <div *ngIf="customizedGates.length === 0" class="no-user-gates">
-                  No user gates yet
-                </div>
-                <div class="gate-buttons" *ngIf="customizedGates.length > 0">
-                  <button *ngFor="let cg of customizedGates" (click)="selectGate(cg)"
-                    [ngClass]="{'selected-gate': selectedGate === cg}" class="gate-btn">
-                    {{ cg.name }}
+          <div class="gates-container">
+            <div class="gates-section">
+              <div class="gate-category-title">
+                <span>User gates</span>
+                <div class="gate-title-actions">
+                  <button (click)="createCustomizedGate()" title="Create gate" class="btn-toggle-createExp">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                  <button (click)="gatesModal = true" title="See gates" class="btn-toggle-createExp">
+                    <i class="fa fa-edit"></i>
                   </button>
                 </div>
               </div>
+              <div *ngIf="userOnlyCustomizedGates.length === 0" class="no-user-gates">
+                No user gates yet
+              </div>
+              <div class="gate-buttons" *ngIf="userOnlyCustomizedGates.length > 0">
+                <button *ngFor="let cg of userOnlyCustomizedGates" (click)="selectGate(cg)"
+                  [ngClass]="{'selected-gate': selectedGate === cg}" class="gate-btn">
+                  {{ cg.name }}
+                </button>
+              </div>
+            </div>
 
-              <div class="gates-section">
-                <div class="gate-category-title">Default gates</div>
-                <div class="gate-buttons">
-                  <button *ngFor="let dg of defaultGates"
-                    (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" class="gate-btn"
-                    [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
-                    {{ dg.name }} <i *ngIf="dg.name === 'M'" class="fas fa-ruler"></i>
+            <div class="gates-section">
+              <div class="gate-category-title">Default gates</div>
+              <div class="gate-buttons">
+                <button *ngFor="let dg of defaultGates"
+                  (click)="dg.name === 'M' ? selectMeasurementGate() : selectGate(dg)" class="gate-btn"
+                  [ngClass]="{'selected-gate': selectedGate === dg || (dg.name === 'M' && gateMselected), 'measurement-btn': dg.name === 'M'}">
+                  {{ dg.name }} <i *ngIf="dg.name === 'M'" class="fas fa-ruler"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="gates-section">
+              <div class="gate-category-title">
+                <span>Generic gates</span>
+                <div class="gate-title-actions">
+                  <button (click)="openDslModal()" title="Create generic gate" class="btn-toggle-createExp">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                  <button (click)="openDslGatesManagerModal()" title="Manage generic gates"
+                    class="btn-toggle-createExp">
+                    <i class="fa fa-edit"></i>
                   </button>
                 </div>
+              </div>
+              <div *ngIf="dslGenericGates.length === 0" class="no-user-gates">
+                No generic gates yet
+              </div>
+              <div class="gate-buttons" *ngIf="dslGenericGates.length > 0">
+                <button *ngFor="let dg of dslGenericGates" (click)="selectDslGenericGate(dg)" class="gate-btn"
+                  [ngClass]="{'selected-gate': selectedGate === dg}" [title]="dg.description">
+                  {{ dg.name }}
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="inline-config-row">
+      <div class="inline-config-row">
 
-          <div *ngIf="projectList && projectList.length > 0" style="max-width: 350px; margin-right: 15px;">
+        <div *ngIf="projectList && projectList.length > 0" style="max-width: 350px; margin-right: 15px;">
 
-            Load project:
-            <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()"
-              style="min-width: 200px !important; font-size: 14px; padding: 4px; border-radius: 5px; border: 1px solid #ccc;">
-              <option value="" disabled selected>Select project</option>
-              <option *ngFor="let project of projectList" [value]="project.id">
-                {{ project.name }}
-              </option>
-            </select>
-            <button *ngIf="selectedProjectId" (click)="openDeleteProjectModal()" class="btn-delete-project"
-              title="Delete Selected Project" style="margin-left: 10px; padding: 5px 8px;">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
+          Load project:
+          <select id="projectSelector" [(ngModel)]="selectedProjectId" (change)="onProjectSelected()"
+            style="min-width: 200px !important; font-size: 14px; padding: 4px; border-radius: 5px; border: 1px solid #ccc;">
+            <option value="" disabled selected>Select project</option>
+            <option *ngFor="let project of projectList" [value]="project.id">
+              {{ project.name }}
+            </option>
+          </select>
+          <button *ngIf="selectedProjectId" (click)="openDeleteProjectModal()" class="btn-delete-project"
+            title="Delete Selected Project" style="margin-left: 10px; padding: 5px 8px;">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
 
-          <div style="display: flex; justify-content: flex-end;" class="input-group">
-            <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal"
-              style="margin-left: 0px !important; margin-top: 0px !important">
-              <i class="fas"
-                [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
-              {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
-            </button>
-            <!-- <button 
+        <div style="display: flex; justify-content: flex-end;" class="input-group">
+          <button class="btn-notes" (click)="mostrarNotasModal = !mostrarNotasModal"
+            style="margin-left: 0px !important; margin-top: 0px !important">
+            <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
+            {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
+          </button>
+          <!-- <button 
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
                                 style="margin-top: 0px !important"
@@ -174,86 +197,85 @@
                                 <i class="fas fa-save"></i> Save project
                             </button> -->
 
-            <button (click)="openSaveProjectModal()" class="btn-confirm-save" style="margin-top: 0px !important"
-              *ngIf="userEmail && !selectedProjectId" [disabled]="!circuit">
-              <i class="fas fa-save"></i> Save
-            </button>
+          <button (click)="openSaveProjectModal()" class="btn-confirm-save" style="margin-top: 0px !important"
+            *ngIf="userEmail && !selectedProjectId" [disabled]="!circuit">
+            <i class="fas fa-save"></i> Save
+          </button>
 
-            <button (click)="openApplyChangesModal()" class="btn-confirm-save update-btn"
-              style="margin-top: 0px !important"
-              *ngIf="userEmail && selectedProjectId && isCircuitModified">
-              <i class="fas fa-pen"></i> Update
-            </button>
+          <button (click)="openApplyChangesModal()" class="btn-confirm-save update-btn"
+            style="margin-top: 0px !important" *ngIf="userEmail && selectedProjectId && isCircuitModified">
+            <i class="fas fa-pen"></i> Update
+          </button>
 
-            <button (click)="openSaveAsNewModal()" class="btn-confirm-save"
-              style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && selectedProjectId"
-              title="Save the current circuit state as a new project">
-              <i class="fas fa-save"></i> Save as new
-            </button>
-          </div>
-          <div class="circuit-block-container"
-            style="width: 100%; display: flex; justify-content: center; align-items: center;">
+          <button (click)="openSaveAsNewModal()" class="btn-confirm-save"
+            style="margin-top: 0px !important; margin-left: 5px;" *ngIf="userEmail && selectedProjectId"
+            title="Save the current circuit state as a new project">
+            <i class="fas fa-save"></i> Save as new
+          </button>
+        </div>
+        <div class="circuit-block-container"
+          style="width: 100%; display: flex; justify-content: center; align-items: center;">
 
 
-            <div class="table-scroll-wrapper">
-              <div class="table-wrapper">
-                <table *ngIf="qubitsConfiguration" [ngClass]="{'circuit-expanded': isGridExpanded}">
-                  <thead>
-                    <tr>
-                      <th>
-                        <button class="btn-toggle-grid" title="Open Floating Circuit View"
-                          (click)="openFloatingCircuit()">
-                          <i class="fas fa-expand-alt"></i>
-                        </button>
-                      </th>
-                      <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
-                        {{ i }}
-                        <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i
-                            class="fas fa-ruler"></i></sub>
-                      </th>
-                      <th>
-                        <div class="buttons-column-container">
-                          <button title="Add column" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i
-                              class="fas fa-plus"></i></button>
-                          <button title="Remove last column" class="remove-column-btn" (click)="removeColumn()"
-                            *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i
-                              class="fas fa-minus"></i></button>
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
-                      <th>q<sub>{{ i }}</sub></th>
+          <div class="table-scroll-wrapper">
+            <div class="table-wrapper">
+              <table *ngIf="qubitsConfiguration" [ngClass]="{'circuit-expanded': isGridExpanded}">
+                <thead>
+                  <tr>
+                    <th>
+                      <button class="btn-toggle-grid" title="Open Floating Circuit View"
+                        (click)="openFloatingCircuit()">
+                        <i class="fas fa-expand-alt"></i>
+                      </button>
+                    </th>
+                    <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
+                      {{ i }}
+                      <sub title="Measure all" class="measureFill-btn" (click)="measureColumn(i)"><i
+                          class="fas fa-ruler"></i></sub>
+                    </th>
+                    <th>
+                      <div class="buttons-column-container">
+                        <button title="Add column" class="add-column-btn" (click)="addColumn()" *ngIf="circuit"><i
+                            class="fas fa-plus"></i></button>
+                        <button title="Remove last column" class="remove-column-btn" (click)="removeColumn()"
+                          *ngIf="circuit" [disabled]="circuit && circuit.columns<=2"><i
+                            class="fas fa-minus"></i></button>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let qubit of [].constructor(qubitsConfiguration.qubits); let i = index">
+                    <th>q<sub>{{ i }}</sub></th>
 
-                      <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
+                    <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
 
-                        <td
-                          *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
-                          [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
-                          (click)="removeGate(i, j)">
-                          <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
-                        </td>
-
-                        <td
-                          *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
-                        </td>
-
-                        <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
-                      </ng-container>
-
-                      <td class="physicalQubits">
-                        {{ getPhysicalQubit(i) }}
+                      <td
+                        *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                        [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
+                        (click)="removeGate(i, j)">
+                        <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
                       </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+
+                      <td
+                        *ngIf="circuit!.qubits[i].gates[j].parentQubit !== undefined && circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0'">
+                      </td>
+
+                      <td *ngIf="circuit!.qubits[i].gates[j].name=='I'" (click)="openPlacementChoice(i, j)"></td>
+                    </ng-container>
+
+                    <td class="physicalQubits">
+                      {{ getPhysicalQubit(i) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
   <!-- Modales -->
 
@@ -376,11 +398,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngIf="customizedGates.length === 0">
+            <tr *ngIf="userOnlyCustomizedGates.length === 0">
               <td colspan="4" style="text-align: center; color: gray; font-style: italic;">No user gates created yet.
               </td>
             </tr>
-            <tr *ngFor="let cg of customizedGates; let i = index">
+            <tr *ngFor="let cg of userOnlyCustomizedGates; let i = index">
               <td>{{ cg.name }}</td>
               <td>{{ cg.qubits }}</td>
               <td>{{ cg.description }}</td>
@@ -423,6 +445,68 @@
       <!-- <div class="modal-footer">
               <button (click)="mostrarModalCrear = true; gatesModal = false" class="btn-createExp-edit"><i title="Create a new gate" class="fa fa-plus edit-create-icon"></i></button>
           </div> -->
+    </div>
+  </div>
+
+  <!-- Modal to Manage Generic Gates -->
+  <div class="modal" *ngIf="dslGatesModal" style="z-index: 1001">
+    <div class="modal-content" style="max-width: 900px;">
+      <!-- Encabezado del modal -->
+      <div class="modal-header">
+        <div class="header-with-button">
+          <h2 class="title-modal">Manage Generic Gates</h2>
+        </div>
+        <button class="close"><i class="close-i" (click)="dslGatesModal = false">&times;</i></button>
+      </div>
+
+      <!-- Generic gates table -->
+      <div class="table-container-expressions">
+        <span class="modal-gate-category-title" style="margin-top: 0;">Generic Gates</span>
+        <table class="expressions-table">
+          <thead>
+            <tr>
+              <th style="width: 15%;">Name</th>
+              <th style="width: 35%;">DSL Expression</th>
+              <th style="width: 30%;">Description</th>
+              <th style="width: 20%; min-width: 130px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="dslGenericGates.length === 0">
+              <td colspan="4" style="text-align: center; color: gray; font-style: italic; padding: 18px;">
+                No generic gates created yet. Click on the '+' icon in the palette to create one.
+              </td>
+            </tr>
+            <tr *ngFor="let dg of dslGenericGates; let i = index">
+              <td style="font-weight: 600;">{{ dg.name }}</td>
+              <td>
+                <span class="dsl-table-badge" [title]="getGateDslExpression(dg)">{{ getGateDslExpression(dg) }}</span>
+              </td>
+              <td>{{ dg.description }}</td>
+              <td style="text-align: center;">
+                <button class="update-btn" title="See code" (click)="viewDslGateCode(dg); copiarCodigoGate()"
+                  style="margin-right: 6px;">
+                  <i class="fa fa-code"></i>
+                </button>
+                <button class="update-btn" title="Edit in DSL" (click)="editDslGate(dg)"
+                  style="margin-right: 6px; background-color: #008b95;">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="delete-expression-btn" title="Delete gate" (click)="openDeleteDslGateModal(dg)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 10px 15px;">
+        <button (click)="openDslModal(); dslGatesModal = false" class="btn-createExp-edit"
+          style="border-radius: 6px; padding: 6px 12px; font-size: 13px; background-color: #008b95; color: white;">
+          <i class="fas fa-plus" style="margin-right: 5px;"></i> Create
+        </button>
+      </div> -->
     </div>
   </div>
 
@@ -470,6 +554,22 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <div *ngIf="showDeleteDslGateModal" class="modal-delete" style="z-index: 1002;">
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+        <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete DSL Gate</h2>
+        <button class="close"><i class="close-i" (click)="cancelDeleteDslGate()">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+        <p>Are you sure you want to delete the generic DSL gate <strong>{{dslGateToDelete?.name}}</strong>?</p>
+        <div class="modal-buttons">
+          <button class="btn btn-delete-modal" (click)="confirmDeleteDslGate()">Yes, delete</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteDslGate()">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -647,7 +747,7 @@
                   <ng-container *ngFor="let col of [].constructor(circuit?.columns); let j = index">
 
                     <td
-                      *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].name!='0' && circuit!.qubits[i].gates[j].parentQubit === undefined"
+                      *ngIf="circuit!.qubits[i].gates[j].name!='I' && circuit!.qubits[i].gates[j].parentQubit === undefined"
                       [attr.rowspan]="(circuit!.qubits[i].gates[j].targetQubits?.length || 0) + 1"
                       (click)="removeGate(i, j)">
                       <button class="gate-circuit-btn">{{ circuit!.qubits[i].gates[j].name }}</button>
@@ -800,5 +900,480 @@
 
   <app-notes-modal [mostrarModal]="mostrarNotasModal" (cerrarModal)="checkNotesChangeAndClose($event)"
     [contextIdentifier]="nombreComponente"> </app-notes-modal>
+
+  <!-- Modal Quantum DSL / Generic Gate Creation -->
+  <div class="modal" *ngIf="mostrarModalDsl" style="z-index: 1001">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+          <h2 class="title-modal">Create generic gate</h2>
+          <button title="Generic gate guide & help" (click)="toggleDslFloatingHelp('overview')"
+            style="color: white; font-weight: normal; font-size: small; border: none; background: none; margin-left: 8px; cursor: pointer;">
+            <i class="fa fa-info-circle" style="font-size: 16px;"></i>
+          </button>
+        </div>
+        <button class="close"><i class="close-i" (click)="mostrarModalDsl = false">&times;</i></button>
+      </div>
+
+      <div class="template-info-modal">
+
+        <div class="name-description-modal">
+          <div class="info-block">
+            <label for="dslGateNameInput">Name:</label>
+            <div class="input-wrapper-modal">
+              <input id="dslGateNameInput" placeholder="Gate name..." type="text" [(ngModel)]="newDslGateName"
+                (ngModelChange)="onDslNameChange()" />
+            </div>
+            <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('metadata')"
+              [class.active]="isDslHelpOpen('metadata')" title="Naming rules">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </div>
+
+          <div class="info-block">
+            <label for="dslTemplateSelect">Template:</label>
+            <select id="dslTemplateSelect" [(ngModel)]="selectedDslTemplateId" (ngModelChange)="onDslTemplateChange($event)">
+              <option *ngFor="let t of dslGateTemplates" [value]="t.id">{{ t.name }}</option>
+            </select>
+            <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('template')"
+              [class.active]="isDslHelpOpen('template')" title="Templates help">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="info-block" style="justify-content: left; width: 93%; margin-bottom: 10px">
+          <label for="dslGateDescInput">Description:</label>
+          <input id="dslGateDescInput" placeholder="This generic gate..." type="text" [(ngModel)]="newDslGateDesc" />
+        </div>
+
+        <label style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <strong>Quantum DSL expression:</strong>
+            <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('dsl')"
+              [class.active]="isDslHelpOpen('dsl')" title="DSL syntax help">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </span>
+          <span style="font-size: 12px; color: #666; font-weight: normal;">
+            Operators: <strong>·</strong> &nbsp;|&nbsp; Functions: <code>h(n)</code>, <code>x(n)</code>, <code>Binary(n, m)</code>, <code>mcp(n, pi, n-1)</code>, <code>[ ]&#123;k&#125;</code>
+          </span>
+        </label>
+
+        <textarea id="dslExpr" class="template-code-create" style="min-height: 55px; max-height: 80px; padding: 10px; margin-bottom: 4px;"
+          placeholder="e.g. Diffuser = h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)"
+          [(ngModel)]="newDslGateExpression" (ngModelChange)="onDslExpressionChange()">
+        </textarea>
+
+        <div style="display: flex; justify-content: flex-start; align-items: center; width: 93%; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+          <span style="font-size: 12px; color: #666; font-weight: bold;">Insert:</span>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken(' · ')">·</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('h(n)')">h(n)</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('x(n)')">x(n)</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('Binary(n, m)')">Binary(n, m)</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('mcp(n, pi, n-1)')">mcp(n, pi, n-1)</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('[ ]{1}')">[ ]&#123;k&#125;</button>
+          <span *ngIf="dslCompileError" class="error-text" style="margin-left: auto;">
+            {{ dslCompileError }}
+          </span>
+        </div>
+
+        <label style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <strong>Code:</strong>
+            <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('code')"
+              [class.active]="isDslHelpOpen('code')" title="Python code help">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </span>
+          <button type="button" (click)="regenerateDslGateCode()" class="dsl-link-btn" title="Regenerate Python code from DSL expression">
+            <i class="fas fa-sync-alt"></i> Regenerate from DSL
+          </button>
+        </label>
+
+        <textarea id="dslPythonCode" class="template-code-create" style="min-height: 180px; max-height: 240px; padding: 10px; margin-bottom: 10px;"
+          placeholder="Function code of this generic gate..." [(ngModel)]="newDslGateCode" (ngModelChange)="onDslCodeChange()"
+          spellcheck="false">
+        </textarea>
+
+        <div class="create-actions">
+          <button type="button" (click)="saveDslGenericGate()" class="save-btn"
+            [disabled]="!newDslGateName || !newDslGateCode || !!dslCompileError">
+            Save
+          </button>
+          <button type="button" (click)="mostrarModalDsl = false" class="cancel-btn">
+            Cancel
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para configurar y colocar puerta genérica DSL en la cuadrícula -->
+  <div class="modal" *ngIf="showDslPlacementModal" style="z-index: 1002">
+    <div class="modal-content" style="max-width: 540px;">
+      <div class="modal-header">
+        <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+          <h2 class="title-modal">Configure Gate: {{ selectedDslGenericType }}</h2>
+        </div>
+        <button class="close"><i class="close-i" (click)="cancelDslPlacement()">&times;</i></button>
+      </div>
+
+      <div class="template-info-modal" style="padding: 15px;">
+
+        <div style="width: 93%; margin-bottom: 12px; font-size: 14px; color: #555;">
+          <span>Target: Column <strong>{{ currentColumn }}</strong>, starting at <strong>q{{ currentStartQubit
+              }}</strong></span>
+        </div>
+
+        <div class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementNameInput">Gate name on grid:</label>
+          <input id="dslPlacementNameInput" type="text" [(ngModel)]="dslPlacementName" placeholder="Name on grid...">
+        </div>
+
+        <div class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementQubitsInput">Number of qubits (n):</label>
+          <input id="dslPlacementQubitsInput" type="number" min="1" max="16" [(ngModel)]="dslPlacementQubits">
+        </div>
+
+        <!-- Parámetros específicos para Oracle -->
+        <div *ngIf="selectedDslGenericType === 'Oracle'" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementValInput">Target marked value (m):</label>
+          <input id="dslPlacementValInput" type="number" min="0" [(ngModel)]="dslPlacementValue"
+            placeholder="e.g. 2, 7...">
+          <small style="color: #666; font-size: 12px; margin-top: 4px;">
+            Constructs O({{ dslPlacementQubits }}, {{ dslPlacementValue }}) = Binary · MCP · Binary
+          </small>
+        </div>
+
+        <!-- Parámetros específicos para MCP -->
+        <div *ngIf="selectedDslGenericType === 'MCP'" class="name-description-modal"
+          style="width: 93%; margin-bottom: 10px;">
+          <div class="info-block" style="flex: 1; margin-right: 15px;">
+            <label for="dslPlacementAlphaInput">Phase (alpha):</label>
+            <input id="dslPlacementAlphaInput" type="text" [(ngModel)]="dslPlacementAlpha" placeholder="pi">
+          </div>
+          <div class="info-block" style="width: 140px;">
+            <label for="dslPlacementTargetInput">Target qubit:</label>
+            <input id="dslPlacementTargetInput" type="number" min="0" [max]="dslPlacementQubits - 1"
+              [(ngModel)]="dslPlacementTarget">
+          </div>
+        </div>
+
+        <!-- Parámetros específicos para Measure -->
+        <div *ngIf="selectedDslGenericType === 'Measure'" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementOrderSelect">Measurement order:</label>
+          <select id="dslPlacementOrderSelect" [(ngModel)]="dslPlacementOrder">
+            <option value="+">Direct (+) [0..n-1]</option>
+            <option value="-">Reverse (-) [n-1..0]</option>
+          </select>
+        </div>
+
+        <!-- Parámetros específicos para Subcircuit 0 -->
+        <div *ngIf="selectedDslGenericType === '0' || selectedDslGenericType === 'Sub_0'" class="name-description-modal"
+          style="width: 93%; margin-bottom: 10px;">
+          <div class="info-block" style="flex: 1; margin-right: 15px;">
+            <label for="dslPlacementIterInput">Iterations (k):</label>
+            <input id="dslPlacementIterInput" type="number" min="1" max="10" [(ngModel)]="dslPlacementIterations">
+          </div>
+          <div class="info-block" style="flex: 1;">
+            <label for="dslPlacementSubValsInput">Marked values:</label>
+            <input id="dslPlacementSubValsInput" type="text" [(ngModel)]="dslPlacementSubValues" placeholder="2, 7">
+          </div>
+        </div>
+
+        <!-- Info para Diffuser e InitialH -->
+        <div *ngIf="selectedDslGenericType === 'Diffuser'"
+          style="width: 93%; margin-bottom: 10px; font-size: 13px; color: #666;">
+          <em>Diffuser D({{ dslPlacementQubits }}): Applies h({{ dslPlacementQubits }}) · x({{ dslPlacementQubits }}) ·
+            mcp(pi) · x({{ dslPlacementQubits }}) · h({{ dslPlacementQubits }})</em>
+        </div>
+
+        <div *ngIf="selectedDslGenericType === 'InitialH'"
+          style="width: 93%; margin-bottom: 10px; font-size: 13px; color: #666;">
+          <em>InitialH h({{ dslPlacementQubits }}): Applies Hadamard gate H to all {{ dslPlacementQubits }} qubits.</em>
+        </div>
+
+        <!-- Info for custom generic gates -->
+        <div
+          *ngIf="selectedDslGenericType !== 'Oracle' && selectedDslGenericType !== 'Diffuser' && selectedDslGenericType !== 'InitialH' && selectedDslGenericType !== 'MCP' && selectedDslGenericType !== 'Measure' && selectedDslGenericType !== '0' && selectedDslGenericType !== 'Sub_0'"
+          style="width: 93%; margin-bottom: 10px; font-size: 13px; color: #666;">
+          <em>Generic gate: <strong>{{ dslPlacementName || selectedDslGenericType }}</strong> configured for <strong>{{
+              dslPlacementQubits }}</strong> qubits.</em>
+        </div>
+
+        <div class="create-actions" style="margin-top: 15px; margin-bottom: 5px;">
+          <button type="button" (click)="confirmDslGatePlacement()" class="save-btn">Place gate</button>
+          <button type="button" (click)="cancelDslPlacement()" class="cancel-btn">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Draggable Help Modal for Quantum DSL & Generic Gates -->
+  <div class="help-modal floating-help-modal" *ngIf="showDslFloatingHelp">
+    <div class="floating-help-content" cdkDrag #minDirDslHelp="appMinimize" appMinimize
+      cdkDragRootElement=".floating-help-content">
+
+      <!-- Drag Handle Header -->
+      <div class="floating-help-header" cdkDragHandle>
+        <div class="floating-help-title">
+          <i class="fas fa-book-open"></i> Generic Quantum Gate Guide
+        </div>
+        <div class="floating-help-actions">
+          <button type="button" class="minimize-btn" (click)="minDirDslHelp.toggle($event)" title="Minimize / Restore">
+            <i class="minimize-i fas fa-minus"></i>
+          </button>
+          <button type="button" class="close-btn" (click)="closeDslFloatingHelp()" title="Close Guide">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="floating-help-tabs">
+        <button type="button" class="floating-tab-btn" [class.active]="dslHelpActiveTab === 'overview'"
+          (click)="setDslHelpTab('overview')">
+          <i class="fas fa-info-circle"></i> Overview
+        </button>
+        <button type="button" class="floating-tab-btn" [class.active]="dslHelpActiveTab === 'template'"
+          (click)="setDslHelpTab('template')">
+          <i class="fas fa-layer-group"></i> Templates
+        </button>
+        <button type="button" class="floating-tab-btn" [class.active]="dslHelpActiveTab === 'dsl'"
+          (click)="setDslHelpTab('dsl')">
+          <i class="fas fa-code"></i> DSL Syntax
+        </button>
+        <button type="button" class="floating-tab-btn" [class.active]="dslHelpActiveTab === 'code'"
+          (click)="setDslHelpTab('code')">
+          <i class="fab fa-python"></i> Qiskit Code
+        </button>
+        <button type="button" class="floating-tab-btn" [class.active]="dslHelpActiveTab === 'metadata'"
+          (click)="setDslHelpTab('metadata')">
+          <i class="fas fa-tag"></i> Naming & Rules
+        </button>
+      </div>
+
+      <!-- Scrollable Tab Content Body -->
+      <div class="floating-help-body">
+
+        <!-- Tab 1: Overview -->
+        <div class="floating-help-section" *ngIf="dslHelpActiveTab === 'overview'">
+          <h3><i class="fas fa-info-circle"></i> How Generic Quantum Gates Work</h3>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-magic"></i> What is a Generic Gate?</h4>
+            <p>Unlike standard quantum gates that have a fixed number of qubits, <strong>Generic Gates</strong> are
+              parameterized, scalable components. They dynamically adjust to any number of qubits <span
+                class="dsl-help-code">n</span> when placed onto your circuit grid.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-route"></i> 3-Step Creation Workflow</h4>
+            <ul>
+              <li><strong>1. Choose a Starting Point:</strong> Select a pre-built mathematical template (e.g., Diffuser,
+                Oracle, Initial Superposition) or start custom from scratch.</li>
+              <li><strong>2. Define via DSL or Python:</strong> Write high-level algebraic expressions using the
+                concatenation operator (<span class="dsl-help-code">·</span>) or edit the generated Qiskit Python code
+                directly. Both views stay in live bi-directional sync!</li>
+              <li><strong>3. Save and Place:</strong> Save your gate to the database. It appears in the Quantum DSL
+                palette. Click on an empty grid cell to configure the target qubits <span class="dsl-help-code">n</span>
+                and place it into your circuit.</li>
+            </ul>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-hand-paper"></i> Floating Window Features</h4>
+            <p>You can drag this help window by its header anywhere across your screen, resize it from the bottom-right
+              corner, minimize it to save space, and leave it open while typing code or editing your circuit!</p>
+          </div>
+        </div>
+
+        <!-- Tab 2: Templates -->
+        <div class="floating-help-section" *ngIf="dslHelpActiveTab === 'template'">
+          <h3><i class="fas fa-layer-group"></i> Generic Gate Templates Guide</h3>
+          <p>Templates provide pre-configured, mathematically verified quantum building blocks ready to use or
+            customize:</p>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-wave-square"></i> Grover Diffuser &mdash; <code>Diffuser</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)</span>
+            </p>
+            <p>Performs inversion about the average state, amplifying marked state probabilities in Grover's search
+              algorithm across <span class="dsl-help-code">n</span> qubits.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-crosshairs"></i> Grover Oracle &mdash; <code>Oracle</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">Binary(n, m) · mcp(n, pi, n-1) · Binary(n,
+                m)</span></p>
+            <p>Marks target state index <span class="dsl-help-code">m</span> by inverting its quantum phase using X
+              bit-flips and a multi-controlled phase flip.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-atom"></i> Initial Superposition &mdash; <code>InitialH</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">h(n)</span></p>
+            <p>Applies a Hadamard gate across all <span class="dsl-help-code">n</span> qubits simultaneously to create
+              an equal superposition state.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-project-diagram"></i> Multi-Controlled Phase &mdash; <code>MCP</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">mcp(n, pi, n-1)</span></p>
+            <p>Applies a phase shift of angle <span class="dsl-help-code">alpha</span> (default &pi;) controlled by
+              <span class="dsl-help-code">n-1</span> qubits targeted on qubit <span class="dsl-help-code">n-1</span>.
+            </p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-tachometer-alt"></i> Measurement Layer &mdash; <code>Measure</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">M(n, '+')</span></p>
+            <p>Measures all <span class="dsl-help-code">n</span> qubits into classical registers in direct (<span
+                class="dsl-help-code">'+'</span>) or reverse (<span class="dsl-help-code">'-'</span>) order.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-redo"></i> Grover Iteration Block &mdash; <code>GroverIter</code></h4>
+            <p><strong>Formula:</strong> <span class="dsl-help-code">[ Binary(n, m) · mcp(n, pi, n-1) · Binary(n, m) ·
+                h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n) ]&#123;k&#125;</span></p>
+            <p>Composite subcircuit chaining Oracle and Diffuser repeated <span class="dsl-help-code">k</span> times in
+              sequence.</p>
+          </div>
+        </div>
+
+        <!-- Tab 3: DSL Syntax -->
+        <div class="floating-help-section" *ngIf="dslHelpActiveTab === 'dsl'">
+          <h3><i class="fas fa-code"></i> Quantum DSL Syntax & Functions Reference</h3>
+          <p>Compose quantum operations chronologically from left to right using algebraic concatenation:</p>
+
+          <table class="dsl-help-table">
+            <thead>
+              <tr>
+                <th>Syntax</th>
+                <th>Operation</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="dsl-help-code">A · B</span> or <span class="dsl-help-code">A * B</span></td>
+                <td>Sequential Concatenation</td>
+                <td>Executes operation <span class="dsl-help-code">A</span>, followed chronologically by <span
+                    class="dsl-help-code">B</span>.</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">h(n)</span></td>
+                <td>Hadamard Layer</td>
+                <td>Applies Hadamard <span class="dsl-help-code">H</span> to all <span class="dsl-help-code">n</span>
+                  qubits in parallel.</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">x(n)</span></td>
+                <td>Pauli-X Layer</td>
+                <td>Applies bit-flip <span class="dsl-help-code">X</span> NOT gate to all <span
+                    class="dsl-help-code">n</span> qubits.</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">Binary(n, m)</span></td>
+                <td>State Encoder</td>
+                <td>Applies <span class="dsl-help-code">X</span> gates to qubits where the binary representation of
+                  integer <span class="dsl-help-code">m</span> has bit 0.</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">mcp(n, alpha, target)</span></td>
+                <td>Multi-Controlled Phase</td>
+                <td>Phase shift of angle <span class="dsl-help-code">alpha</span> controlled by <span
+                    class="dsl-help-code">n-1</span> qubits on <span class="dsl-help-code">target</span> qubit.</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">M(n, '+')</span> or <span class="dsl-help-code">M(n, '-')</span></td>
+                <td>Measurement Layer</td>
+                <td>Measures all <span class="dsl-help-code">n</span> qubits into classical registers direct (<span
+                    class="dsl-help-code">'+'</span>) or reverse (<span class="dsl-help-code">'-'</span>).</td>
+              </tr>
+              <tr>
+                <td><span class="dsl-help-code">[ expr ]&#123;k&#125;</span></td>
+                <td>Loop / Repetition</td>
+                <td>Repeats the enclosed quantum operation <span class="dsl-help-code">k</span> times in sequence.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="floating-help-card" style="margin-top: 12px;">
+            <h4><i class="fas fa-lightbulb"></i> Pro-Tip: Quick Tokens</h4>
+            <p>Click any token button (<span class="dsl-help-code">·</span>, <span class="dsl-help-code">h(n)</span>,
+              <span class="dsl-help-code">x(n)</span>, etc.) directly beneath the textarea to automatically insert the
+              syntax at your cursor position.
+            </p>
+          </div>
+        </div>
+
+        <!-- Tab 4: Qiskit Code -->
+        <div class="floating-help-section" *ngIf="dslHelpActiveTab === 'code'">
+          <h3><i class="fab fa-python"></i> Python / Qiskit Code & Live Bi-directional Sync</h3>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-sync-alt"></i> Live Bi-Directional Synchronization</h4>
+            <p>QuCo features a real-time bi-directional compiler:</p>
+            <ul>
+              <li><strong>DSL &rarr; Python:</strong> Typing or modifying the DSL formula immediately generates the
+                corresponding Qiskit Python implementation.</li>
+              <li><strong>Python &rarr; DSL:</strong> Editing or pasting valid Qiskit code decompiles the quantum logic
+                back into the equivalent high-level DSL formula in real time!</li>
+            </ul>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-file-code"></i> Generator Function Contract</h4>
+            <p>The code must define a function named <span class="dsl-help-code">def get&#123;GateName&#125;(n = 4,
+                ...):</span> that creates a <span class="dsl-help-code">QuantumCircuit</span>, applies the gates, and
+              returns the unitary as a custom gate via <span class="dsl-help-code">return
+                qc.to_gate(label='...')</span>.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-undo"></i> Regenerate from DSL</h4>
+            <p>If you manually edited the Python code and wish to discard your manual edits and reset back to the pure
+              DSL translation, click the <strong>Regenerate from DSL</strong> button.</p>
+          </div>
+        </div>
+
+        <!-- Tab 5: Naming & Rules -->
+        <div class="floating-help-section" *ngIf="dslHelpActiveTab === 'metadata'">
+          <h3><i class="fas fa-tag"></i> Gate Identification & Naming Rules</h3>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-font"></i> Gate Name Rules</h4>
+            <ul>
+              <li>Must start with a letter and contain only alphanumeric characters (no spaces, hyphens, or special
+                punctuation).</li>
+              <li>This name is rendered directly on the circuit block cell (e.g. <span
+                  class="dsl-help-code">Diffuser</span>, <span class="dsl-help-code">Oracle</span>, <span
+                  class="dsl-help-code">MyGate</span>).</li>
+              <li>In the generated Python code, the generator function is automatically named <span
+                  class="dsl-help-code">def get&#123;Name&#125;(n = ...):</span>.</li>
+            </ul>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-align-left"></i> Description Field</h4>
+            <p>Provide a clear, helpful description of your quantum component. This description is displayed in hover
+              tooltips on the grid palette and in the <strong>Manage Generic Gates</strong> table.</p>
+          </div>
+
+          <div class="floating-help-card">
+            <h4><i class="fas fa-th"></i> Placing on the Grid</h4>
+            <p>Once saved, click your generic gate from the palette, click any empty grid cell, and enter the desired
+              number of qubits <span class="dsl-help-code">n</span> to instantiate it at full circuit scale!</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
 </body>

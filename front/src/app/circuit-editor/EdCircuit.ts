@@ -67,11 +67,15 @@ export class EdQubit {
 export class EdGate {
     name?: string;
     qubits: number = 1;
-    columnIndex? : number
+    columnIndex? : number;
     code: string = ''; 
     description: string = ''; 
     targetQubits?: number[];
     parentQubit?: number;
+    isDslGeneric?: boolean;
+    isGeneric?: boolean;
+    dslType?: string;
+    dslParams?: any;
 
     constructor(name: string, qubits: number) {
         if (!name) 
@@ -88,8 +92,15 @@ export class EdGate {
     copy(): EdGate {
         const gateCopy = new EdGate(this.name!, this.qubits);
 
+        gateCopy.code = this.code;
+        gateCopy.description = this.description;
+        gateCopy.columnIndex = this.columnIndex;
         gateCopy.targetQubits = this.targetQubits ? [...this.targetQubits] : undefined;
         gateCopy.parentQubit = this.parentQubit;
+        gateCopy.isDslGeneric = this.isDslGeneric;
+        gateCopy.isGeneric = this.isGeneric;
+        gateCopy.dslType = this.dslType;
+        gateCopy.dslParams = this.dslParams ? JSON.parse(JSON.stringify(this.dslParams)) : undefined;
 
         return gateCopy;
     }

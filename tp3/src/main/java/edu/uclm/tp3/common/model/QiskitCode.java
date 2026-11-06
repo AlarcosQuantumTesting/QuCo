@@ -14,6 +14,7 @@ public class QiskitCode {
     @Column(columnDefinition = "TEXT")
     private String code;
     private Integer qubits;
+    private boolean isGeneric;
     
     public String getName() {
         return name;
@@ -27,6 +28,12 @@ public class QiskitCode {
     public String getCode() {
         return code;
     }
+    public boolean isGeneric() {
+        return isGeneric;
+    }
+    public boolean getIsGeneric() {
+        return isGeneric;
+    }
     public void setName(String name) {
         this.name = name;
     }
@@ -38,6 +45,12 @@ public class QiskitCode {
     }
     public void setCode(String code) {
         this.code = code;
+    }
+    public void setGeneric(boolean isGeneric) {
+        this.isGeneric = isGeneric;
+    }
+    public void setIsGeneric(boolean isGeneric) {
+        this.isGeneric = isGeneric;
     }
 
     public Integer getQubits() {

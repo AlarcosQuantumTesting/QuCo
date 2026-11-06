@@ -1,7 +1,9 @@
 package edu.uclm.tp3.common.model;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CircuitGate {
     private String id;
     private String name;
@@ -50,11 +52,21 @@ public class CircuitGate {
         this.parentQubit = parentQubit;
     }
 
+    private java.util.Map<String, Object> dslParams;
+
     public String getTransactionId() {
         return transactionId;
     }
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public java.util.Map<String, Object> getDslParams() {
+        return dslParams;
+    }
+
+    public void setDslParams(java.util.Map<String, Object> dslParams) {
+        this.dslParams = dslParams;
     }
 }
