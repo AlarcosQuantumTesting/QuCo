@@ -32,15 +32,15 @@ export class QuantumDslService {
       id: 'diffuser',
       name: 'Diffuser (Grover D(n))',
       gateName: 'Diffuser',
-      description: 'Grover Diffuser: D(n) = h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)',
+      description: 'Diffuser inversion about mean: D(n) = h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)',
       expression: 'Diffuser = h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)'
     },
     {
       id: 'oracle',
-      name: 'Oracle (Grover O(n, m))',
+      name: 'Oracle (Grover O(n, [a]))',
       gateName: 'Oracle',
-      description: 'Grover Oracle to mark value m: O(n, m) = Binary(n, m) · mcp(n, pi, n-1) · Binary(n, m)',
-      expression: 'Oracle = Binary(n, m) · mcp(n, pi, n-1) · Binary(n, m)'
+      description: 'Phase Oracle to mark target states: O(n, [a]) with target list [a]',
+      expression: 'Oracle = O(n, [a])'
     },
     {
       id: 'initial_h',
@@ -62,6 +62,13 @@ export class QuantumDslService {
       gateName: 'Measure',
       description: 'Measurement layer in natural order: M(n, \'+\')',
       expression: 'Measure = M(n, \'+\')'
+    },
+    {
+      id: 'grover_algorithm',
+      name: 'Grover Algorithm (Full circuit h(n) · [O(n, [a]) · D(n)]{k})',
+      gateName: 'Grover',
+      description: 'Complete Grover search algorithm: Grover = h(n) · [O(n, [a]) · D(n)]{k}',
+      expression: 'Grover = h(n) · [O(n, [a]) · D(n)]{k}'
     },
     {
       id: 'grover_block',

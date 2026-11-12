@@ -17,7 +17,7 @@ export interface SequenceNode extends ASTNode {
 export interface RepeatNode extends ASTNode {
   type: 'REPEAT';
   body: ASTNode;
-  count: number;
+  count: number | string;
 }
 
 export interface CallNode extends ASTNode {

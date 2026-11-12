@@ -21,7 +21,7 @@ interface QProgram { id: string; qubits: number; expressions: QProgramExpression
 interface ProjectListItem { id: string; name: string; type: string; }
 interface StoredProject { id: string; name: string; qProgram: any; projectNotes: any[]; }
 interface FinalPayload { circuit: any; user: { id: string }; }
-interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; }
+interface CircuitGate { id: string; name: string; column: number; qubits: number[]; parentQubit: number; transactionId: string; dslParams?: any; }
 
 @Component({
   selector: 'app-circuit-editor',
@@ -150,6 +150,7 @@ export class CircuitEditorComponent {
   dslPlacementName: string = '';
   dslPlacementQubits: number = 4;
   dslPlacementValue: number = 2;
+  dslPlacementTargetsInput: string = '[2]';
   dslPlacementAlpha: string = 'pi';
   dslPlacementTarget: number = 3;
   dslPlacementOrder: string = '+';
@@ -182,6 +183,10 @@ export class CircuitEditorComponent {
             edGate.isGeneric = true;
             (edGate as any).isDslGeneric = true;
             (edGate as any).dslType = g.name;
+            if (g.name === 'Oracle' && (!edGate.code || !edGate.code.includes('a = [2]'))) {
+              edGate.code = "def getOracle(n = 4, a = [2]) : \n\tU = QuantumCircuit(n, name=\"Oracle\")\n\ttargets = a if isinstance(a, list) else [a]\n\ttarget = n - 1\n\tcontrols = [i for i in range(n) if i != target]\n\tfor m in targets:\n\t\tfor i in range(n):\n\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\t\tU.mcp(pi, controls, target)\n\t\tfor i in range(n):\n\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\treturn U.to_gate()\n";
+              edGate.description = 'Generic Oracle O(n, [a])';
+            }
             const existingIdx = this.dslGenericGates.findIndex(dg => dg.name === g.name);
             if (existingIdx >= 0) {
               this.dslGenericGates[existingIdx] = edGate;
@@ -195,7 +200,7 @@ export class CircuitEditorComponent {
           }
         }
         // Ordenar dslGenericGates de forma consistente
-        const preferredOrder = ['InitialH', 'Oracle', 'Diffuser', 'MCP', 'Measure', '0', 'Subcircuito_0'];
+        const preferredOrder = ['InitialH', 'Oracle', 'Diffuser', 'MCP', 'Measure', 'Grover', '0', 'Subcircuito_0'];
         this.dslGenericGates.sort((a, b) => {
           const nameA = a.name || '';
           const nameB = b.name || '';
@@ -276,7 +281,7 @@ export class CircuitEditorComponent {
     }
 
     this.dslGateTemplates = this.dslService.gateTemplates;
-    this.loadCustomGenericGatesFromStorage();
+    localStorage.removeItem(this.LOCAL_STORAGE_KEYS.CUSTOM_GENERIC_GATES);
 
 
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
@@ -539,11 +544,9 @@ export class CircuitEditorComponent {
     this.code = this.buildCircuitQiskitCode();
 
     const gateCodes: { [name: string]: string } = {};
-    for (const q of this.circuit.qubits) {
-      for (const g of q.gates) {
-        if (g && g.name && g.name !== 'I' && g.name !== '0' && g.code) {
-          gateCodes[g.name] = g.code;
-        }
+    for (const dg of this.dslGenericGates) {
+      if (dg && dg.name && dg.code) {
+        gateCodes[dg.name] = dg.code;
       }
     }
     for (const cg of this.customizedGates) {
@@ -551,9 +554,21 @@ export class CircuitEditorComponent {
         gateCodes[cg.name] = cg.code;
       }
     }
-    for (const dg of this.dslGenericGates) {
-      if (dg && dg.name && dg.code) {
-        gateCodes[dg.name] = dg.code;
+    for (const q of this.circuit.qubits) {
+      for (const g of q.gates) {
+        if (g && g.name && g.name !== 'I' && g.name !== '0' && g.code) {
+          gateCodes[g.name] = g.code;
+        }
+      }
+    }
+    for (const reg of this.gateRegistry || []) {
+      if (reg.name && reg.name !== 'I' && reg.name !== 'M' && reg.name !== '0') {
+        const nQ = reg.qubits ? reg.qubits.length : 4;
+        const dslParams = reg.dslParams || {};
+        const adapted = this.generateDslGateCode(reg.name, nQ, reg.name, dslParams);
+        if (adapted) {
+          gateCodes[reg.name] = adapted;
+        }
       }
     }
 
@@ -573,11 +588,10 @@ export class CircuitEditorComponent {
     obs.subscribe({
       next: response => {
         this.responseReceived = response;
-        const clientCode = this.buildCircuitQiskitCode();
         if (response && response.CODE && response.CODE.includes('QuantumCircuit') && !response.CODE.includes('# Error loading gate')) {
           this.code = response.CODE;
         } else {
-          this.code = clientCode;
+          this.code = this.buildCircuitQiskitCode();
         }
       },
       error: error => {
@@ -759,9 +773,15 @@ plt.show()
       }
 
       let code = '';
-      const isGeneric = Boolean((op.gate as any)?.isGeneric || (op.gate as any)?.isDslGeneric || this.dslGenericGates.some(dg => dg.name === gName));
+      const dslParams = op.dslParams || (op.gate as any)?.dslParams;
+      const isGeneric = Boolean(
+        (op.gate as any)?.isGeneric ||
+        (op.gate as any)?.isDslGeneric ||
+        this.dslGenericGates.some(dg => dg.name === gName) ||
+        (dslParams && (dslParams.targets !== undefined || dslParams.value !== undefined))
+      );
       if (isGeneric) {
-        code = this.generateDslGateCode(gName, op.qubits.length, gName, op.dslParams || (op.gate as any)?.dslParams);
+        code = this.generateDslGateCode(gName, op.qubits.length, gName, dslParams);
       } else {
         code = op.gate?.code || this.customizedGates.find(cg => cg.name === gName)?.code || '';
       }
@@ -816,17 +836,47 @@ plt.show()
             const paramsStr = fnDefMatch[1];
             const nQubits = op.qubits.length;
             const dslParams = op.dslParams || (op.gate as any)?.dslParams;
-            if (paramsStr.includes('m')) {
-              let mVal = dslParams && dslParams.value !== undefined ? dslParams.value : undefined;
-              if (mVal === undefined) {
-                const oracleOps = operations.filter(o => o.name === 'Oracle');
-                const idx = oracleOps.indexOf(op);
-                mVal = (idx % 2 === 0) ? 4 : 9;
-              }
-              callArgs = `${nQubits}, ${mVal}`;
-            } else if (paramsStr.includes('n')) {
-              callArgs = `${nQubits}`;
+
+            let aVal = dslParams && (dslParams.targets !== undefined ? dslParams.targets : dslParams.value);
+            if (aVal === undefined) {
+              const aDefMatch = paramsStr.match(/a\s*=\s*(\[?[0-9,\s]+\]?)/);
+              if (aDefMatch) aVal = aDefMatch[1];
+              else aVal = [2];
             }
+            const aArr = Array.isArray(aVal) ? aVal : (typeof aVal === 'string' ? aVal.replace(/[\[\]]/g, '').split(',').map((s: string) => parseInt(s.trim(), 10)).filter((n: number) => !isNaN(n)) : [aVal]);
+
+            let kVal = dslParams?.iterations ?? dslParams?.k;
+            if (kVal === undefined) {
+              const kDefMatch = paramsStr.match(/k\s*=\s*(\d+)/);
+              if (kDefMatch) kVal = parseInt(kDefMatch[1], 10);
+              else kVal = 2;
+            }
+
+            let mVal = dslParams && dslParams.value !== undefined ? dslParams.value : undefined;
+            if (mVal === undefined) {
+              const oracleOps = operations.filter(o => o.name === 'Oracle');
+              const idx = oracleOps.indexOf(op);
+              mVal = (idx % 2 === 0) ? 4 : 9;
+            }
+
+            const rawParamParts = paramsStr.split(/,(?![^\[]*\])/);
+            const argList: string[] = [];
+            for (const part of rawParamParts) {
+              const paramName = part.split('=')[0].trim();
+              if (paramName === 'n') {
+                argList.push(`${nQubits}`);
+              } else if (paramName === 'a') {
+                argList.push(`[${aArr.join(', ')}]`);
+              } else if (paramName === 'k') {
+                argList.push(`${kVal}`);
+              } else if (paramName === 'm') {
+                argList.push(`${mVal !== undefined ? mVal : 2}`);
+              }
+            }
+            if (argList.length === 0 && paramsStr.includes('n')) {
+              argList.push(`${nQubits}`);
+            }
+            callArgs = argList.join(', ');
           }
         }
         calculusLines.push(`circuit.append(${fnName}(${callArgs}), [${qubitsStr}])`);
@@ -1314,6 +1364,7 @@ plt.show()
   showModalCode() {
     this.isEditingCode = false;
     this.modalCodigo = true;
+    this.code = this.buildCircuitQiskitCode();
     this.generateCode();
   }
 
@@ -2207,60 +2258,9 @@ plt.show()
     // 3. Asegurar que las compuertas genéricas DSL NO se agreguen a las puertas de usuario
     this.customizedGates = this.customizedGates.filter(g => g.name !== cleanName && !this.isGenericDslGate(g));
 
-    // 4. Persistir puertas genéricas personalizadas en localStorage
-    this.saveCustomGenericGatesToStorage();
-
-    // 5. Cerrar modal y auto-seleccionar la puerta guardada
+    // 4. Cerrar modal y auto-seleccionar la puerta guardada
     this.mostrarModalDsl = false;
     this.selectDslGenericGate(edGate);
-  }
-
-  loadCustomGenericGatesFromStorage() {
-    try {
-      const raw = localStorage.getItem(this.LOCAL_STORAGE_KEYS.CUSTOM_GENERIC_GATES);
-      if (raw) {
-        const storedGates: any[] = JSON.parse(raw);
-        for (const sg of storedGates) {
-          const cleanName = sg.name;
-          const existing = this.dslGenericGates.find(g => g.name === cleanName);
-          if (existing) {
-            if (sg.dslExpression && !(existing as any).dslExpression) {
-              (existing as any).dslExpression = sg.dslExpression;
-            }
-            continue;
-          }
-          const edGate = new EdGate(cleanName, sg.qubits || 4);
-          edGate.description = sg.description || '';
-          edGate.code = sg.code || '';
-          edGate.isGeneric = true;
-          (edGate as any).isDslGeneric = true;
-          (edGate as any).dslExpression = sg.dslExpression;
-          (edGate as any).dslType = cleanName;
-          this.dslGenericGates.push(edGate);
-        }
-      }
-      // Asegurar que ninguna compuerta genérica quede en customizedGates
-      this.customizedGates = this.customizedGates.filter(g => !this.isGenericDslGate(g));
-    } catch (e) {
-      console.error('Error al cargar puertas genéricas desde storage', e);
-    }
-  }
-
-  saveCustomGenericGatesToStorage() {
-    try {
-      const gatesToStore = this.dslGenericGates.map(g => ({
-        name: g.name,
-        qubits: g.qubits,
-        description: g.description,
-        code: g.code,
-        isGeneric: true,
-        isDslGeneric: true,
-        dslExpression: (g as any).dslExpression
-      }));
-      localStorage.setItem(this.LOCAL_STORAGE_KEYS.CUSTOM_GENERIC_GATES, JSON.stringify(gatesToStore));
-    } catch (e) {
-      console.error('Error al guardar puertas genéricas en storage', e);
-    }
   }
 
   // --- GESTIÓN DE COMPUERTAS GENÉRICAS DSL ---
@@ -2300,12 +2300,9 @@ plt.show()
     // 2. Quitar de customizedGates
     this.customizedGates = this.customizedGates.filter(g => g.name !== gateName);
 
-    // 3. Persistir en localStorage
-    this.saveCustomGenericGatesToStorage();
-
-    // 4. Intentar eliminar en backend si existía allí
+    // 3. Eliminar en backend (base de datos)
     this.qiskitService.deleteFromServer(this.dslGateToDelete).subscribe({
-      next: () => {},
+      next: () => { },
       error: (err) => console.warn('Aviso al eliminar en backend:', err)
     });
 
@@ -2437,18 +2434,218 @@ plt.show()
     return this.circuit.qubits.length - this.currentStartQubit;
   }
 
+  getParsedPlacementTargets(): number[] {
+    const raw = (this.dslPlacementTargetsInput ?? '').toString().trim();
+    if (!raw) return [2];
+    const cleaned = raw.replace(/[\[\]]/g, '');
+    const parts = cleaned.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+    return parts.length > 0 ? parts : [2];
+  }
+
+  get dslPlacementTargetsDisplay(): string {
+    const targets = this.getParsedPlacementTargets();
+    return `[${targets.join(', ')}]`;
+  }
+
+  get dslPlacementTargetsCount(): number {
+    return this.getParsedPlacementTargets().length;
+  }
+
+  get isPlacementOracleGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    const type = this.selectedDslGenericType || gate?.name || '';
+    if (type === 'Oracle' || gate?.name === 'Oracle') {
+      return true;
+    }
+
+    if (gate) {
+      // 1. Expresión DSL asociada a la puerta
+      const dslExpr = ((gate as any).dslExpression || '').toString();
+      if (/O\s*\(\s*n\s*,\s*\[?[a-zA-Z0-9_,\s]*\]?\s*\)/i.test(dslExpr) ||
+        /o\s*\(\s*n\s*,\s*\[?[a-zA-Z0-9_,\s]*\]?\s*\)/i.test(dslExpr) ||
+        /oracle/i.test(dslExpr)) {
+        return true;
+      }
+
+      // 2. Código Python de la puerta
+      const code = (gate.code || '').toString();
+      if (code.includes('a = [') || code.includes('a=[') || code.includes('targets =') ||
+        /def\s+[a-zA-Z0-9_]+\s*\([^)]*\ba\b[^)]*\)/.test(code) ||
+        code.includes('getOracle')) {
+        return true;
+      }
+
+      // 3. Descripción
+      const desc = (gate.description || '').toString();
+      if (/oracle/i.test(desc) || /O\s*\(\s*n\s*,\s*\[?a\]?\s*\)/i.test(desc)) {
+        return true;
+      }
+
+      // 4. Parámetros DSL previos
+      if ((gate as any).dslParams && ((gate as any).dslParams.targets !== undefined || (gate as any).dslParams.type === 'Oracle')) {
+        return true;
+      }
+    }
+
+    // 5. Comprobar si existe en dslGenericGates
+    const dbGate = this.dslGenericGates.find(g => g.name === type);
+    if (dbGate && dbGate !== gate) {
+      const code = dbGate.code || '';
+      if (code.includes('a = [') || code.includes('a=[') || code.includes('targets =') || /def\s+[a-zA-Z0-9_]+\s*\([^)]*\ba\b[^)]*\)/.test(code)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  get isPlacementGroverGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    const name = (this.selectedDslGenericType || gate?.name || '').toLowerCase();
+
+    // Si es un Oráculo o un Difusor independiente, NO es el algoritmo de Grover completo
+    if (name.includes('oracle') || name.includes('orac') || name.includes('diffuser') || name.includes('difus')) {
+      return false;
+    }
+
+    if (gate) {
+      const dslExpr = ((gate as any).dslExpression || '').toString().toLowerCase();
+      // Si la expresión DSL es únicamente un oráculo O(n, [a]) o un difusor D(n), no es Grover
+      if (/^\s*([a-zA-Z0-9_]+\s*=\s*)?o\s*\(\s*n\s*,\s*\[?[a-zA-Z0-9_,\s]*\]?\s*\)\s*$/i.test(dslExpr) ||
+          /^\s*([a-zA-Z0-9_]+\s*=\s*)?d\s*\(\s*n\s*\)\s*$/i.test(dslExpr)) {
+        return false;
+      }
+      // Es el algoritmo de Grover si la expresión contiene tanto el oráculo como el difusor: O(...) y D(...)
+      if (dslExpr.includes('o(') && dslExpr.includes('d(')) {
+        return true;
+      }
+      // O si el nombre es Grover / Grover_Algorithm y contiene repetición
+      if ((name === 'grover' || name === 'grover_algorithm') && (dslExpr.includes('{k}') || /\[.*\]\s*\{/.test(dslExpr))) {
+        return true;
+      }
+      const code = ((gate as any).code || '').toString();
+      if ((name === 'grover' || name === 'grover_algorithm') && (/range\s*\(\s*k\s*\)/.test(code) || /def\s+[a-zA-Z0-9_]+\s*\([^)]*\bk\b[^)]*\)/.test(code))) {
+        return true;
+      }
+    } else if (name === 'grover' || name === 'grover_algorithm') {
+      return true;
+    }
+    return false;
+  }
+
+  get isPlacementRepeatGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    const name = (this.selectedDslGenericType || gate?.name || '').toLowerCase();
+
+    // Si es un Oráculo o Difusor independiente sin bloque explícito de repetición, NO tiene iteraciones k
+    if (name.includes('oracle') || name.includes('orac') || name.includes('diffuser') || name.includes('difus')) {
+      const dslExpr = ((gate as any)?.dslExpression || '').toString();
+      if (/\[.*\]\s*\{\s*(\d+|[a-zA-Z_]+)\s*\}/.test(dslExpr) || /\{\s*k\s*\}/i.test(dslExpr)) {
+        return true;
+      }
+      return false;
+    }
+
+    if (this.isPlacementGroverGate) {
+      return true;
+    }
+
+    if (gate) {
+      const dslExpr = ((gate as any).dslExpression || '').toString();
+      if (/\[.*\]\s*\{\s*(\d+|[a-zA-Z_]+)\s*\}/.test(dslExpr) || /\{\s*k\s*\}/i.test(dslExpr)) {
+        return true;
+      }
+      const code = ((gate as any).code || '').toString();
+      if (/def\s+[a-zA-Z0-9_]+\s*\([^)]*\b(k|iterations)\b[^)]*\)/.test(code) ||
+          /for\s+_\s+in\s+range\s*\(\s*(k|iterations)\s*\):/.test(code) ||
+          /range\s*\(\s*k\s*\)/.test(code)) {
+        return true;
+      }
+      if ((gate as any).dslParams && ((gate as any).dslParams.iterations !== undefined || (gate as any).dslParams.k !== undefined)) {
+        return true;
+      }
+    }
+
+    const dbGate = this.dslGenericGates.find(g => (g.name || '').toLowerCase() === name);
+    if (dbGate && dbGate !== gate) {
+      const code = dbGate.code || '';
+      if (/def\s+[a-zA-Z0-9_]+\s*\([^)]*\b(k|iterations)\b[^)]*\)/.test(code) || /range\s*\(\s*k\s*\)/.test(code)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  get optimalGroverIterations(): number {
+    const n = Math.max(1, Math.min(20, Number(this.dslPlacementQubits) || 4));
+    const m = Math.max(1, this.dslPlacementTargetsCount);
+    const totalStates = Math.pow(2, n);
+    if (totalStates <= m) return 1;
+    return Math.max(1, Math.round((Math.PI / 4) * Math.sqrt(totalStates / m)));
+  }
+
+  onPlacementParamsChange(): void {
+    if (this.isPlacementGroverGate) {
+      this.dslPlacementIterations = this.optimalGroverIterations;
+    }
+  }
+
+  applyOptimalIterations(): void {
+    this.dslPlacementIterations = this.optimalGroverIterations;
+  }
+
   openDslGatePlacementModal(gate: EdGate) {
     this.selectedGenericGateForPlacement = gate;
     this.selectedDslGenericType = (gate as any).dslType || gate.name || 'Oracle';
 
-    const totalQubits = this.circuit ? this.circuit.qubits.length : 4;
-    const available = this.circuit ? (totalQubits - (this.currentStartQubit ?? 0)) : 4;
-    this.dslPlacementQubits = Math.max(1, available > 0 ? available : totalQubits);
+    // Determinar cúbits por defecto de forma coherente con la compuerta
+    let defaultQubits = 4;
+    if (gate.qubits && gate.qubits > 0 && gate.qubits <= 32) {
+      defaultQubits = gate.qubits;
+    } else if (gate.code) {
+      const nMatch = gate.code.match(/def\s+[a-zA-Z0-9_]+\s*\(\s*n\s*=\s*(\d+)/);
+      if (nMatch && nMatch[1]) {
+        defaultQubits = parseInt(nMatch[1], 10) || 4;
+      }
+    }
+    this.dslPlacementQubits = defaultQubits;
     this.dslPlacementValue = 2;
+
+    const existingTargets = (gate as any)?.dslParams?.targets ?? (gate as any)?.dslParams?.value;
+    if (existingTargets !== undefined && existingTargets !== null) {
+      if (Array.isArray(existingTargets)) {
+        this.dslPlacementTargetsInput = `[${existingTargets.join(', ')}]`;
+      } else {
+        this.dslPlacementTargetsInput = `[${existingTargets}]`;
+      }
+    } else if (this.isPlacementGroverGate) {
+      // Para Grover, el caso de referencia estándar es 2 estados diana (g_4_2_7)
+      this.dslPlacementTargetsInput = '[2, 7]';
+    } else if (gate.code && /a\s*=\s*(\[?[0-9,\s]+\]?)/.test(gate.code)) {
+      const match = gate.code.match(/a\s*=\s*(\[?[0-9,\s]+\]?)/);
+      if (match && match[1]) {
+        const val = match[1].trim();
+        this.dslPlacementTargetsInput = val.startsWith('[') ? val : `[${val}]`;
+      } else {
+        this.dslPlacementTargetsInput = '[2]';
+      }
+    } else {
+      this.dslPlacementTargetsInput = '[2]';
+    }
+
     this.dslPlacementAlpha = 'pi';
     this.dslPlacementTarget = Math.max(0, this.dslPlacementQubits - 1);
     this.dslPlacementOrder = '+';
-    this.dslPlacementIterations = 2;
+
+    const existingIter = (gate as any)?.dslParams?.iterations ?? (gate as any)?.dslParams?.k;
+    if (existingIter !== undefined && existingIter !== null) {
+      this.dslPlacementIterations = Number(existingIter) || 2;
+    } else if (this.isPlacementGroverGate) {
+      this.dslPlacementIterations = this.optimalGroverIterations;
+    } else {
+      this.dslPlacementIterations = 2;
+    }
     this.dslPlacementSubValues = '2, 7';
 
     // Por defecto, sale de forma genérica con el nombre que tenga en el editor
@@ -2492,6 +2689,9 @@ plt.show()
 
     const newGateId = `T-${Date.now()}`;
     const uniqueGateId = `${newGateId}-${mainQubit}`;
+    const isOracle = this.isPlacementOracleGate;
+    const parsedTargets = isOracle ? this.getParsedPlacementTargets() : [this.dslPlacementValue];
+    const gateValue = isOracle ? parsedTargets : this.dslPlacementValue;
 
     const gate = new EdGate(this.dslPlacementName || this.selectedDslGenericType, n);
     gate.columnIndex = col;
@@ -2501,20 +2701,16 @@ plt.show()
     (gate as any).isDslGeneric = true;
     (gate as any).dslParams = {
       type: this.selectedDslGenericType,
-      value: this.dslPlacementValue,
+      value: gateValue,
+      targets: parsedTargets,
       target: this.dslPlacementTarget,
       order: this.dslPlacementOrder,
       phase: this.dslPlacementAlpha,
-      iterations: this.dslPlacementIterations
+      iterations: this.isPlacementRepeatGate ? (Number(this.dslPlacementIterations) || 2) : undefined,
+      k: this.isPlacementRepeatGate ? (Number(this.dslPlacementIterations) || 2) : undefined
     };
 
-    let gateCode = '';
-    if (this.selectedGenericGateForPlacement && (this.selectedGenericGateForPlacement as any).isCustomDsl && this.selectedGenericGateForPlacement.code) {
-      gateCode = this.selectedGenericGateForPlacement.code;
-    } else {
-      gateCode = this.generateDslGateCode(this.selectedDslGenericType, n, this.dslPlacementName, (gate as any).dslParams);
-    }
-
+    const gateCode = this.generateDslGateCode(this.selectedDslGenericType, n, this.dslPlacementName, (gate as any).dslParams);
     gate.code = gateCode;
     gate.description = `${this.selectedDslGenericType} (${n} qubits)`;
 
@@ -2565,34 +2761,56 @@ plt.show()
   generateDslGateCode(type: string, n: number, gateName: string, params?: any): string {
     const rawName = (gateName || type).replace(/[^a-zA-Z0-9_]/g, '_');
     const fnName = rawName.startsWith('get') ? rawName : ('get' + (rawName === '0' ? 'Subcircuito_0' : rawName));
-    const m = params?.value ?? this.dslPlacementValue ?? 2;
-    const target = params?.target ?? this.dslPlacementTarget ?? (n - 1);
-    const iterations = params?.iterations ?? this.dslPlacementIterations ?? 2;
+    const rawTargets = params?.targets ?? params?.value ?? this.getParsedPlacementTargets();
+    let targetsArr: number[] = [2];
+    if (Array.isArray(rawTargets)) {
+      targetsArr = rawTargets;
+    } else if (rawTargets !== undefined && rawTargets !== null) {
+      const s = rawTargets.toString().replace(/[\[\]]/g, '');
+      const parsed = s.split(',').map((x: string) => parseInt(x.trim(), 10)).filter((x: number) => !isNaN(x));
+      if (parsed.length > 0) targetsArr = parsed;
+    }
+    const targetsStr = `[${targetsArr.join(', ')}]`;
 
-    const dbGate = this.dslGenericGates.find(g => g.name === type || g.name === gateName || (type === '0' && (g.name === '0' || g.name === 'Subcircuito_0')));
-    if (dbGate && dbGate.code && dbGate.code.trim()) {
-      let code = dbGate.code;
+    const baseGate = this.dslGenericGates.find(g => g.name === type || g.name === gateName || (type === '0' && (g.name === '0' || g.name === 'Subcircuito_0')))
+      || this.customizedGates.find(g => g.name === type || g.name === gateName)
+      || this.circuit?.qubits.flatMap(q => q.gates).find(g => g && (g.name === type || g.name === gateName))
+      || this.selectedGenericGateForPlacement;
+    if (baseGate && baseGate.code && baseGate.code.trim()) {
+      let code = baseGate.code;
       const existingFn = this.extractFunctionName(code);
       if (existingFn && existingFn !== fnName) {
         code = code.replace(new RegExp(`def\\s+${existingFn}\\b`), `def ${fnName}`);
       }
       code = code.replace(/def\s+([A-Za-z0-9_]+)\s*\(\s*n\s*=\s*\d+/g, `def $1(n = ${n}`);
-      if (m !== undefined) {
-        code = code.replace(/m\s*=\s*\d+/g, `m = ${m}`);
+      if (code.includes('a =') || code.includes('a=')) {
+        code = code.replace(/a\s*=\s*\[?[0-9,\s]*\]?/g, `a = ${targetsStr}`);
+      } else if (code.includes('m =')) {
+        if (type === 'Oracle' || gateName === 'Oracle' || this.isPlacementOracleGate) {
+          code = code.replace(/m\s*=\s*\d+/g, `a = ${targetsStr}`);
+          code = code.replace(/def\s+([A-Za-z0-9_]+)\s*\(\s*n\s*=\s*\d+\s*,\s*m\s*=\s*\d+\s*\)/g, `def $1(n = ${n}, a = ${targetsStr})`);
+        } else {
+          const m = params?.value ?? this.dslPlacementValue ?? 2;
+          code = code.replace(/m\s*=\s*\d+/g, `m = ${m}`);
+        }
       }
+      const kVal = params?.iterations ?? params?.k ?? this.dslPlacementIterations ?? 2;
+      if (code.includes('k =') || code.includes('k=')) {
+        code = code.replace(/k\s*=\s*\d+/g, `k = ${kVal}`);
+      }
+      code = code.replace(/for\s+_\s+in\s+range\(\s*\d+\s*\):/g, `for _ in range(${kVal}):`);
       return code;
+    }
+
+    if (type === 'Grover' || gateName === 'Grover' || this.isPlacementGroverGate) {
+      const kVal = params?.iterations ?? params?.k ?? this.dslPlacementIterations ?? 2;
+      return `def ${fnName}(n = ${n}, a = ${targetsStr}, k = ${kVal}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n\tfor i in range(n): U.h(i)\n\ttargets = a if isinstance(a, list) else [a]\n\ttarget = n - 1\n\tcontrols = [i for i in range(n) if i != target]\n\tfor _ in range(k):\n\t\tfor m in targets:\n\t\t\tfor i in range(n):\n\t\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\t\t\tU.mcp(pi, controls, target)\n\t\t\tfor i in range(n):\n\t\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\t\tfor i in range(n): U.h(i)\n\t\tfor i in range(n): U.x(i)\n\t\tU.mcp(pi, controls, target)\n\t\tfor i in range(n): U.x(i)\n\t\tfor i in range(n): U.h(i)\n\treturn U.to_gate()\n`;
+    }
+
+    if (type === 'Oracle' || gateName === 'Oracle' || this.isPlacementOracleGate) {
+      return `def ${fnName}(n = ${n}, a = ${targetsStr}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n\ttargets = a if isinstance(a, list) else [a]\n\ttarget = n - 1\n\tcontrols = [i for i in range(n) if i != target]\n\tfor m in targets:\n\t\tfor i in range(n):\n\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\t\tU.mcp(pi, controls, target)\n\t\tfor i in range(n):\n\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n\treturn U.to_gate()\n`;
     }
 
     return `def ${fnName}(n = ${n}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n\treturn U.to_gate()\n`;
   }
-}
-
-interface CircuitGate {
-  id: string;
-  name: string;
-  column: number;
-  qubits: number[];
-  parentQubit: number;
-  transactionId: string;
-  dslParams?: any;
 }

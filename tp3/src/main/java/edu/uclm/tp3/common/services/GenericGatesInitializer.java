@@ -35,17 +35,19 @@ public class GenericGatesInitializer implements ApplicationRunner {
 
         seedGateIfNotExists(
             "Oracle",
-            "Generic Grover Oracle O(n, m)",
+            "Generic Grover Oracle O(n, [a])",
             4,
-            "def getOracle(n = 4, m = 2) : \n" +
+            "def getOracle(n = 4, a = [2]) : \n" +
             "\tU = QuantumCircuit(n, name=\"Oracle\")\n" +
-            "\tfor i in range(n):\n" +
-            "\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
+            "\ttargets = a if isinstance(a, list) else [a]\n" +
             "\ttarget = n - 1\n" +
             "\tcontrols = [i for i in range(n) if i != target]\n" +
-            "\tU.mcp(pi, controls, target)\n" +
-            "\tfor i in range(n):\n" +
-            "\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
+            "\tfor m in targets:\n" +
+            "\t\tfor i in range(n):\n" +
+            "\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
+            "\t\tU.mcp(pi, controls, target)\n" +
+            "\t\tfor i in range(n):\n" +
+            "\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
             "\treturn U.to_gate()\n"
         );
 
@@ -88,6 +90,31 @@ public class GenericGatesInitializer implements ApplicationRunner {
         );
 
         seedGateIfNotExists(
+            "Grover",
+            "Generic Grover Algorithm h(n) · [O(n, [a]) · D(n)]{k}",
+            4,
+            "def getGrover(n = 4, a = [2, 7], k = 2) : \n" +
+            "\tU = QuantumCircuit(n, name=\"Grover\")\n" +
+            "\tfor i in range(n): U.h(i)\n" +
+            "\ttargets = a if isinstance(a, list) else [a]\n" +
+            "\ttarget = n - 1\n" +
+            "\tcontrols = [i for i in range(n) if i != target]\n" +
+            "\tfor _ in range(k):\n" +
+            "\t\tfor m in targets:\n" +
+            "\t\t\tfor i in range(n):\n" +
+            "\t\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
+            "\t\t\tU.mcp(pi, controls, target)\n" +
+            "\t\t\tfor i in range(n):\n" +
+            "\t\t\t\tif ((m >> i) & 1) == 0: U.x(i)\n" +
+            "\t\tfor i in range(n): U.h(i)\n" +
+            "\t\tfor i in range(n): U.x(i)\n" +
+            "\t\tU.mcp(pi, controls, target)\n" +
+            "\t\tfor i in range(n): U.x(i)\n" +
+            "\t\tfor i in range(n): U.h(i)\n" +
+            "\treturn U.to_gate()\n"
+        );
+
+        seedGateIfNotExists(
             "0",
             "Grover composite subcircuit 0",
             4,
@@ -114,10 +141,20 @@ public class GenericGatesInitializer implements ApplicationRunner {
                 log.info("Seeded generic gate '{}' into database.", name);
             } else {
                 QiskitCode existing = opt.get();
+                boolean changed = false;
                 if (!existing.isGeneric()) {
                     existing.setGeneric(true);
+                    changed = true;
+                }
+                if ("Oracle".equals(name) && (existing.getCode() == null || !existing.getCode().contains("a = [2]"))) {
+                    existing.setCode(code);
+                    existing.setDescription(description);
+                    changed = true;
+                    log.info("Updated generic gate 'Oracle' in database to multi-target O(n, a = [2]).");
+                }
+                if (changed) {
                     qiskitCodeDao.save(existing);
-                    log.info("Updated generic flag for gate '{}' in database.", name);
+                    log.info("Updated generic gate '{}' in database.", name);
                 }
             }
         } catch (Exception e) {

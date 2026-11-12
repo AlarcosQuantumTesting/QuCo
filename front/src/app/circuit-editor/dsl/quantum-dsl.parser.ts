@@ -155,13 +155,22 @@ export class QuantumDslParser {
 
     // Check if followed by repetition `{count}`
     if (this.match('LBRACE')) {
-      const countToken = this.consume('NUMBER', 'Expected number of repetitions inside { }');
+      let count: number | string = 1;
+      if (this.check('NUMBER')) {
+        const countToken = this.advance();
+        count = parseInt(countToken.value, 10);
+        if (isNaN(count)) count = 1;
+      } else if (this.check('IDENTIFIER')) {
+        const countToken = this.advance();
+        count = countToken.value;
+      } else {
+        throw new Error(`Expected repetition count or variable (e.g. {2} or {k}) inside { } at pos ${this.peek().pos}`);
+      }
       this.consume('RBRACE', "Expected '}' after repetition count");
-      const count = parseInt(countToken.value, 10);
       base = {
         type: 'REPEAT',
         body: base,
-        count: isNaN(count) ? 1 : count
+        count
       } as RepeatNode;
     }
 

@@ -90,7 +90,8 @@ export class QuantumDslEngine {
       }
       case 'REPEAT': {
         const repeat = node as RepeatNode;
-        for (let i = 0; i < repeat.count; i++) {
+        const repCount = typeof repeat.count === 'number' ? repeat.count : (parseInt(repeat.count, 10) || 1);
+        for (let i = 0; i < repCount; i++) {
           this.processNode(repeat.body, columnsData, options, onQubitsDetected);
         }
         break;
@@ -225,27 +226,42 @@ export class QuantumDslEngine {
       return;
     }
 
-    // 6. o(n, m): Oráculo para buscar valor m
+    // 6. o(n, a): Oráculo para buscar valores a = [m1, m2, ...] o a = m
     if (fn === 'o' || fn === 'oracle') {
-      const m = typeof args[1] === 'number' ? args[1] : 0;
+      let values: number[] = [];
+      if (Array.isArray(args[1])) {
+        values = args[1].map((v: any) => typeof v === 'number' ? v : parseInt(v, 10)).filter((v: number) => !isNaN(v));
+      } else if (typeof args[1] === 'number') {
+        values = [args[1]];
+        for (let k = 2; k < args.length; k++) {
+          if (typeof args[k] === 'number') values.push(args[k]);
+        }
+      } else if (typeof args[1] === 'string' && !isNaN(Number(args[1]))) {
+        values = [Number(args[1])];
+      }
+      if (values.length === 0) values = [2];
+
       if (options.expansionMode === 'MODULAR_BLOCKS') {
         // Bloque compacto
+        const label = values.join('_');
         const col: GatePlacement[] = [{
-          name: `Oracle_${m}`,
+          name: `Oracle_${label}`,
           qubit: 0,
           columnIndex: columnsData.length,
           qubitsCount: n,
           targetQubits: Array.from({ length: n - 1 }, (_, i) => i + 1),
-          description: `Oracle for state |${m}> on ${n} qubits`,
-          pythonCode: `# Oracle for ${m}\nqc.compose(oracle_${n}_${m}, inplace=True)`
+          description: `Oracle for states ${values.map(v => '|' + v + '>').join(', ')} on ${n} qubits`,
+          pythonCode: `# Oracle for ${JSON.stringify(values)}\nqc.compose(oracle_${n}_${label}, inplace=True)`
         }];
         columnsData.push(col);
       } else {
-        // Expandido: Binary(n, m) · MCP(n, pi, n-1) · Binary(n, m)
+        // Expandido: Para cada m en values, Binary(n, m) · MCP(n, pi, n-1) · Binary(n, m)
         const target = n - 1;
-        this.instantiateCall({ type: 'CALL', name: 'binary', args: [n, m] }, columnsData, options, onQubitsDetected);
-        this.instantiateCall({ type: 'CALL', name: 'mcp', args: [n, Math.PI, target] }, columnsData, options, onQubitsDetected);
-        this.instantiateCall({ type: 'CALL', name: 'binary', args: [n, m] }, columnsData, options, onQubitsDetected);
+        for (const m of values) {
+          this.instantiateCall({ type: 'CALL', name: 'binary', args: [n, m] }, columnsData, options, onQubitsDetected);
+          this.instantiateCall({ type: 'CALL', name: 'mcp', args: [n, Math.PI, target] }, columnsData, options, onQubitsDetected);
+          this.instantiateCall({ type: 'CALL', name: 'binary', args: [n, m] }, columnsData, options, onQubitsDetected);
+        }
       }
       return;
     }
@@ -387,11 +403,13 @@ export class QuantumDslEngine {
       `    qc.mcp(alpha, controls, target)`,
       `    return qc`,
       ``,
-      `def oracle(n: int, m: int) -> QuantumCircuit:`,
+      `def oracle(n: int, a = [2]) -> QuantumCircuit:`,
       `    qc = QuantumCircuit(n, n)`,
-      `    qc = qc.compose(binary_n(n, m))`,
-      `    qc = qc.compose(mcp_n(n, np.pi, n - 1))`,
-      `    qc = qc.compose(binary_n(n, m))`,
+      `    targets = a if isinstance(a, list) else [a]`,
+      `    for m in targets:`,
+      `        qc = qc.compose(binary_n(n, m))`,
+      `        qc = qc.compose(mcp_n(n, np.pi, n - 1))`,
+      `        qc = qc.compose(binary_n(n, m))`,
       `    return qc`,
       ``,
       `def diffuser(n: int) -> QuantumCircuit:`,
@@ -446,7 +464,12 @@ export class QuantumDslEngine {
         }
         case 'REPEAT': {
           const rep = node as RepeatNode;
-          pythonLines.push(`${indent}for _ in range(${rep.count}):`);
+          if (typeof rep.count === 'string' && isNaN(Number(rep.count))) {
+            detectedParams.add(rep.count);
+            pythonLines.push(`${indent}for _ in range(${rep.count}):`);
+          } else {
+            pythonLines.push(`${indent}for _ in range(${rep.count}):`);
+          }
           traverse(rep.body, indent + '\t');
           break;
         }
@@ -480,17 +503,27 @@ export class QuantumDslEngine {
               pythonLines.push(`${indent}for i in range(n): U.measure(i, n - i - 1)`);
             }
           } else if (fn === 'o' || fn === 'oracle') {
-            const mVal = args[1] !== undefined ? args[1] : 'm';
-            if (typeof mVal === 'string' && isNaN(Number(mVal))) {
-              detectedParams.add(mVal);
+            const aArg = args[1] !== undefined ? args[1] : 'a';
+            if (typeof aArg === 'string' && isNaN(Number(aArg))) {
+              detectedParams.add(aArg.replace(/[\[\]]/g, ''));
+            } else if (Array.isArray(aArg)) {
+              if (aArg.length === 1 && typeof aArg[0] === 'string' && isNaN(Number(aArg[0]))) {
+                detectedParams.add(aArg[0]);
+              } else {
+                detectedParams.add('a');
+              }
+            } else {
+              detectedParams.add('a');
             }
-            pythonLines.push(`${indent}for i in range(n):`);
-            pythonLines.push(`${indent}\tif ((int(${mVal}) >> i) & 1) == 0: U.x(i)`);
+            pythonLines.push(`${indent}targets = a if isinstance(a, list) else [a]`);
             pythonLines.push(`${indent}target = n - 1`);
             pythonLines.push(`${indent}controls = [i for i in range(n) if i != target]`);
-            pythonLines.push(`${indent}U.mcp(pi, controls, target)`);
-            pythonLines.push(`${indent}for i in range(n):`);
-            pythonLines.push(`${indent}\tif ((int(${mVal}) >> i) & 1) == 0: U.x(i)`);
+            pythonLines.push(`${indent}for m in targets:`);
+            pythonLines.push(`${indent}\tfor i in range(n):`);
+            pythonLines.push(`${indent}\t\tif ((m >> i) & 1) == 0: U.x(i)`);
+            pythonLines.push(`${indent}\tU.mcp(pi, controls, target)`);
+            pythonLines.push(`${indent}\tfor i in range(n):`);
+            pythonLines.push(`${indent}\t\tif ((m >> i) & 1) == 0: U.x(i)`);
           } else if (fn === 'd' || fn === 'diffuser') {
             pythonLines.push(`${indent}for i in range(n): U.h(i)`);
             pythonLines.push(`${indent}for i in range(n): U.x(i)`);
@@ -512,8 +545,18 @@ export class QuantumDslEngine {
     traverse(ast, '\t');
 
     const paramList: string[] = ['n = 4'];
+    const orderedStandardKeys = ['a', 'm', 'k'];
+    for (const key of orderedStandardKeys) {
+      if (detectedParams.has(key)) {
+        if (key === 'a') paramList.push('a = [2]');
+        else if (key === 'm') paramList.push('m = 2');
+        else if (key === 'k') paramList.push('k = 2');
+      }
+    }
     for (const p of detectedParams) {
-      paramList.push(`${p} = 2`);
+      if (!orderedStandardKeys.includes(p)) {
+        paramList.push(`${p} = 2`);
+      }
     }
 
     const header = `def ${fnName}(${paramList.join(', ')}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n`;
@@ -596,8 +639,8 @@ export class QuantumDslEngine {
         continue;
       }
 
-      // 1. Bucle for con contador fijo: for _ in range(k):
-      const repeatMatch = trimmed.match(/^for\s+[\w_]+\s+in\s+range\((\d+)\)\s*:/);
+      // 1. Bucle for con contador o variable: for _ in range(k):
+      const repeatMatch = trimmed.match(/^for\s+[\w_]+\s+in\s+range\(([a-zA-Z0-9_]+)\)\s*:/);
       if (repeatMatch && !trimmed.includes('U.') && !trimmed.includes('qc.')) {
         const count = repeatMatch[1];
         const currentIndent = line.search(/\S/);
@@ -624,7 +667,21 @@ export class QuantumDslEngine {
         continue;
       }
 
-      // 2. Binary(n, m)
+      // 2. Oracle multi-target: targets = a if isinstance... o for m in targets:
+      if (trimmed.includes('targets = a') || trimmed.includes('for m in targets:') || trimmed.includes('for m in a:')) {
+        let aParam = 'a';
+        if (trimmed.includes('targets =')) {
+          const matchA = trimmed.match(/targets\s*=\s*([a-zA-Z0-9_]+)/);
+          if (matchA && matchA[1] && matchA[1] !== 'list') aParam = matchA[1];
+        }
+        while (i < lines.length && !lines[i].includes('return U.to_gate()') && !lines[i].includes('return qc')) {
+          i++;
+        }
+        ops.push(`O(n, [${aParam}])`);
+        continue;
+      }
+
+      // 3. Binary(n, m)
       if (trimmed.startsWith('b = bin(') || trimmed.startsWith('b=bin(')) {
         const binMatch = trimmed.match(/bin\(([^)]+)\)/);
         const mVal = binMatch ? binMatch[1].trim() : 'm';

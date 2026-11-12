@@ -130,26 +130,6 @@ public class CircuitEditorService {
             }
         }
 
-        StringBuilder initialize = new StringBuilder();
-        Map<String, String> gateToFunctionMap = new HashMap<>();
-
-        for (Map.Entry<String, String> entry : usedGatesMapping.entrySet()) {
-            String gateName = entry.getKey();
-            String gateCode = entry.getValue();
-
-            if (gateCode != null) {
-                initialize.append(gateCode.trim()).append("\n\n\n");
-                String funcName = extractFunctionName(gateCode);
-                if (funcName != null) {
-                    gateToFunctionMap.put(gateName, funcName);
-                } else {
-                    gateToFunctionMap.put(gateName, "get" + gateName);
-                }
-            } else {
-                initialize.append("# Error loading gate ").append(gateName).append("\n\n");
-            }
-        }
-
         class OpItem {
             int column;
             int minQubit;
@@ -246,6 +226,67 @@ public class CircuitEditorService {
             return Integer.compare(a.minQubit, b.minQubit);
         });
 
+        StringBuilder initialize = new StringBuilder();
+        Map<String, String> gateToFunctionMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : usedGatesMapping.entrySet()) {
+            String gateName = entry.getKey();
+            String gateCode = entry.getValue();
+
+            if (gateCode != null) {
+                OpItem matchingOp = null;
+                for (OpItem oi : operations) {
+                    if (oi.name != null && oi.name.equals(gateName)) {
+                        matchingOp = oi;
+                        break;
+                    }
+                }
+
+                String adaptedCode = gateCode.trim();
+                int opQubits = (matchingOp != null && matchingOp.qubits != null && !matchingOp.qubits.isEmpty())
+                        ? matchingOp.qubits.size()
+                        : usedQubitsCount;
+
+                adaptedCode = adaptedCode.replaceAll("def\\s+([A-Za-z0-9_]+)\\s*\\(\\s*n\\s*=\\s*\\d+", "def $1(n = " + opQubits);
+
+                if (matchingOp != null && matchingOp.dslParams != null) {
+                    Object aVal = matchingOp.dslParams.get("targets") != null
+                            ? matchingOp.dslParams.get("targets")
+                            : (matchingOp.dslParams.get("values") != null ? matchingOp.dslParams.get("values") : matchingOp.dslParams.get("value"));
+                    if (aVal != null) {
+                        String targetsStr = formatPythonList(aVal);
+                        if (adaptedCode.contains("a =") || adaptedCode.contains("a=")) {
+                            adaptedCode = adaptedCode.replaceAll("a\\s*=\\s*\\[?[0-9,\\s]*\\]?", "a = " + Matcher.quoteReplacement(targetsStr));
+                        } else if (adaptedCode.contains("m =")) {
+                            adaptedCode = adaptedCode.replaceAll("m\\s*=\\s*\\d+", "a = " + Matcher.quoteReplacement(targetsStr));
+                            adaptedCode = adaptedCode.replaceAll("def\\s+([A-Za-z0-9_]+)\\s*\\(\\s*n\\s*=\\s*\\d+\\s*,\\s*m\\s*=\\s*\\d+\\s*\\)", "def $1(n = " + opQubits + ", a = " + Matcher.quoteReplacement(targetsStr) + ")");
+                        }
+                    }
+
+                    Object kVal = matchingOp.dslParams.get("iterations") != null
+                            ? matchingOp.dslParams.get("iterations")
+                            : matchingOp.dslParams.get("k");
+                    if (kVal != null) {
+                        if (adaptedCode.contains("k =") || adaptedCode.contains("k=")) {
+                            adaptedCode = adaptedCode.replaceAll("k\\s*=\\s*\\d+", "k = " + kVal);
+                        }
+                        adaptedCode = adaptedCode.replaceAll("for\\s+_\\s+in\\s+range\\(\\s*\\d+\\s*\\):", "for _ in range(" + kVal + "):");
+                    }
+                }
+
+                entry.setValue(adaptedCode);
+                initialize.append(adaptedCode).append("\n\n\n");
+                String funcName = extractFunctionName(adaptedCode);
+                if (funcName != null) {
+                    gateToFunctionMap.put(gateName, funcName);
+                } else {
+                    gateToFunctionMap.put(gateName, "get" + gateName);
+                }
+            } else {
+                initialize.append("# Error loading gate ").append(gateName).append("\n\n");
+            }
+        }
+
         StringBuilder calculus = new StringBuilder();
         StringBuilder measures = new StringBuilder();
 
@@ -282,26 +323,62 @@ public class CircuitEditorService {
                     if (gCode != null) {
                         Matcher matcher = Pattern.compile("def\\s+[^\\(\\s]+\\s*\\((.*?)\\)").matcher(gCode);
                         if (matcher.find()) {
-                            String paramsStr = matcher.group(1);
+                            String paramsStr = matcher.group(1).trim();
                             int nQubits = op.qubits.size();
-                            if (paramsStr.contains("m")) {
-                                Object mVal = (op.dslParams != null && op.dslParams.get("value") != null) ? op.dslParams.get("value") : null;
-                                if (mVal == null && gateName.equals("Oracle")) {
-                                    List<OpItem> oracles = new ArrayList<>();
-                                    for (OpItem oi : operations) {
-                                        if (oi.name.equals("Oracle")) oracles.add(oi);
-                                    }
-                                    int idx = oracles.indexOf(op);
-                                    mVal = (idx % 2 == 0) ? 4 : 9;
-                                }
-                                if (mVal != null) {
-                                    callArgs = nQubits + ", " + mVal;
-                                } else {
-                                    callArgs = String.valueOf(nQubits);
-                                }
-                            } else if (paramsStr.contains("n")) {
-                                callArgs = String.valueOf(nQubits);
+
+                            Object aVal = null;
+                            if (op.dslParams != null) {
+                                if (op.dslParams.get("targets") != null) aVal = op.dslParams.get("targets");
+                                else if (op.dslParams.get("values") != null) aVal = op.dslParams.get("values");
+                                else if (op.dslParams.get("value") != null) aVal = op.dslParams.get("value");
                             }
+                            if (aVal == null) {
+                                Matcher aDefMatcher = Pattern.compile("a\\s*=\\s*(\\[?[0-9,\\s]+\\]?)").matcher(paramsStr);
+                                if (aDefMatcher.find()) {
+                                    aVal = aDefMatcher.group(1);
+                                }
+                            }
+                            if (aVal == null && (gateName.equals("Oracle") || gateName.equals("Grover"))) {
+                                aVal = "[2]";
+                            }
+
+                            Object kVal = (op.dslParams != null && (op.dslParams.get("iterations") != null || op.dslParams.get("k") != null))
+                                    ? (op.dslParams.get("iterations") != null ? op.dslParams.get("iterations") : op.dslParams.get("k"))
+                                    : null;
+                            if (kVal == null) {
+                                Matcher kDefMatcher = Pattern.compile("k\\s*=\\s*(\\d+)").matcher(paramsStr);
+                                if (kDefMatcher.find()) kVal = kDefMatcher.group(1);
+                                else kVal = "2";
+                            }
+
+                            Object mVal = (op.dslParams != null && op.dslParams.get("value") != null) ? op.dslParams.get("value") : null;
+                            if (mVal == null && gateName.equals("Oracle")) {
+                                List<OpItem> oracles = new ArrayList<>();
+                                for (OpItem oi : operations) {
+                                    if (oi.name.equals("Oracle")) oracles.add(oi);
+                                }
+                                int idx = oracles.indexOf(op);
+                                mVal = (idx % 2 == 0) ? 4 : 9;
+                            }
+
+                            List<String> argList = new ArrayList<>();
+                            String[] rawParamParts = paramsStr.split(",(?![^\\[]*\\])");
+                            for (String part : rawParamParts) {
+                                String paramName = part.split("=")[0].trim();
+                                if (paramName.equals("n")) {
+                                    argList.add(String.valueOf(nQubits));
+                                } else if (paramName.equals("a")) {
+                                    argList.add(formatPythonList(aVal));
+                                } else if (paramName.equals("k")) {
+                                    argList.add(String.valueOf(kVal));
+                                } else if (paramName.equals("m")) {
+                                    argList.add(String.valueOf(mVal != null ? mVal : "2"));
+                                }
+                            }
+                            if (argList.isEmpty() && paramsStr.contains("n")) {
+                                argList.add(String.valueOf(nQubits));
+                            }
+                            callArgs = String.join(", ", argList);
                         }
                     }
                 }
@@ -370,5 +447,30 @@ public class CircuitEditorService {
             return matcher.group(1).trim();
         }
         return null;
+    }
+
+    private String formatPythonList(Object val) {
+        if (val == null) return "[2]";
+        if (val instanceof List) {
+            List<?> list = (List<?>) val;
+            List<String> items = new ArrayList<>();
+            for (Object obj : list) {
+                if (obj != null) items.add(obj.toString().trim());
+            }
+            return "[" + String.join(", ", items) + "]";
+        }
+        String str = val.toString().trim();
+        if (str.startsWith("[") && str.endsWith("]")) {
+            return str;
+        }
+        if (str.contains(",")) {
+            String[] parts = str.split(",");
+            List<String> items = new ArrayList<>();
+            for (String p : parts) {
+                items.add(p.trim());
+            }
+            return "[" + String.join(", ", items) + "]";
+        }
+        return "[" + str + "]";
     }
 }
