@@ -933,7 +933,8 @@
 
           <div class="info-block">
             <label for="dslTemplateSelect">Template:</label>
-            <select id="dslTemplateSelect" [(ngModel)]="selectedDslTemplateId" (ngModelChange)="onDslTemplateChange($event)">
+            <select id="dslTemplateSelect" [(ngModel)]="selectedDslTemplateId"
+              (ngModelChange)="onDslTemplateChange($event)">
               <option *ngFor="let t of dslGateTemplates" [value]="t.id">{{ t.name }}</option>
             </select>
             <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('template')"
@@ -948,7 +949,8 @@
           <input id="dslGateDescInput" placeholder="This generic gate..." type="text" [(ngModel)]="newDslGateDesc" />
         </div>
 
-        <label style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+        <label
+          style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
           <span style="display: flex; align-items: center; gap: 6px;">
             <strong>Quantum DSL expression:</strong>
             <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('dsl')"
@@ -956,17 +958,16 @@
               <i class="fas fa-question-circle"></i>
             </button>
           </span>
-          <span style="font-size: 12px; color: #666; font-weight: normal;">
-            Operators: <strong>·</strong> &nbsp;|&nbsp; Functions: <code>h(n)</code>, <code>x(n)</code>, <code>O(n, [a])</code>, <code>D(n)</code>, <code>M(n, '+')</code>, <code>Binary(n, m)</code>, <code>mcp(n, pi, n-1)</code>, <code>[ ]&#123;k&#125;</code>
-          </span>
         </label>
 
-        <textarea id="dslExpr" class="template-code-create" style="min-height: 55px; max-height: 80px; padding: 10px; margin-bottom: 4px;"
+        <textarea id="dslExpr" class="template-code-create"
+          style="min-height: 55px; max-height: 80px; padding: 10px; margin-bottom: 4px;"
           placeholder="e.g. Oracle = O(n, [a]) or Diffuser = h(n) · x(n) · mcp(n, pi, n-1) · x(n) · h(n)"
           [(ngModel)]="newDslGateExpression" (ngModelChange)="onDslExpressionChange()">
         </textarea>
 
-        <div style="display: flex; justify-content: flex-start; align-items: center; width: 93%; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+        <div
+          style="display: flex; justify-content: flex-start; align-items: center; width: 93%; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
           <span style="font-size: 12px; color: #666; font-weight: bold;">Insert:</span>
           <button type="button" class="dsl-token-btn" (click)="insertDslToken(' · ')">·</button>
           <button type="button" class="dsl-token-btn" (click)="insertDslToken('h(n)')">h(n)</button>
@@ -975,14 +976,16 @@
           <button type="button" class="dsl-token-btn" (click)="insertDslToken('D(n)')">D(n)</button>
           <button type="button" class="dsl-token-btn" (click)="insertDslToken('M(n, \'+\')')">M(n, '+')</button>
           <button type="button" class="dsl-token-btn" (click)="insertDslToken('Binary(n, m)')">Binary(n, m)</button>
-          <button type="button" class="dsl-token-btn" (click)="insertDslToken('mcp(n, pi, n-1)')">mcp(n, pi, n-1)</button>
+          <button type="button" class="dsl-token-btn" (click)="insertDslToken('mcp(n, pi, n-1)')">mcp(n, pi,
+            n-1)</button>
           <button type="button" class="dsl-token-btn" (click)="insertDslToken('[ ]{k}')">[ ]&#123;k&#125;</button>
           <span *ngIf="dslCompileError" class="error-text" style="margin-left: auto;">
             {{ dslCompileError }}
           </span>
         </div>
 
-        <label style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+        <label
+          style="justify-content: left; width: 93%; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
           <span style="display: flex; align-items: center; gap: 6px;">
             <strong>Code:</strong>
             <button type="button" class="dsl-section-help-btn" (click)="toggleDslFloatingHelp('code')"
@@ -990,14 +993,16 @@
               <i class="fas fa-question-circle"></i>
             </button>
           </span>
-          <button type="button" (click)="regenerateDslGateCode()" class="dsl-link-btn" title="Regenerate Python code from DSL expression">
+          <button type="button" (click)="regenerateDslGateCode()" class="dsl-link-btn"
+            title="Regenerate Python code from DSL expression">
             <i class="fas fa-sync-alt"></i> Regenerate from DSL
           </button>
         </label>
 
-        <textarea id="dslPythonCode" class="template-code-create" style="min-height: 180px; max-height: 240px; padding: 10px; margin-bottom: 10px;"
-          placeholder="Function code of this generic gate..." [(ngModel)]="newDslGateCode" (ngModelChange)="onDslCodeChange()"
-          spellcheck="false">
+        <textarea id="dslPythonCode" class="template-code-create"
+          style="min-height: 180px; max-height: 240px; padding: 10px; margin-bottom: 10px;"
+          placeholder="Function code of this generic gate..." [(ngModel)]="newDslGateCode"
+          (ngModelChange)="onDslCodeChange()" spellcheck="false">
         </textarea>
 
         <div class="create-actions">
@@ -1043,27 +1048,31 @@
         </div>
 
         <!-- Parámetros específicos para Oracle o cualquier compuerta que use la variable objetivo [a] -->
-        <div *ngIf="isPlacementOracleGate" class="info-block" style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
-          <label for="dslPlacementValInput" style="min-width: 140px; margin-top: 6px;">Target marked value(s) [a]:</label>
+        <div *ngIf="isPlacementOracleGate" class="info-block"
+          style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
+          <label for="dslPlacementValInput" style="min-width: 140px; margin-top: 6px;">Target marked value(s)
+            [a]:</label>
           <div style="flex: 1; display: flex; flex-direction: column;">
             <input id="dslPlacementValInput" type="text" [(ngModel)]="dslPlacementTargetsInput"
-              (ngModelChange)="onPlacementParamsChange()"
-              placeholder="e.g. [2, 7] or [2] or 2, 7">
+              (ngModelChange)="onPlacementParamsChange()" placeholder="e.g. [2, 7] or [2] or 2, 7">
             <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">
-              Search target(s) [a] = <strong>{{ dslPlacementTargetsDisplay }}</strong> ({{ dslPlacementTargetsCount }} state(s))
+              Search target(s) [a] = <strong>{{ dslPlacementTargetsDisplay }}</strong> ({{ dslPlacementTargetsCount }}
+              state(s))
             </small>
           </div>
         </div>
 
         <!-- Parámetros de iteraciones (k) para Grover o compuertas con repetición -->
-        <div *ngIf="isPlacementRepeatGate" class="info-block" style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
+        <div *ngIf="isPlacementRepeatGate" class="info-block"
+          style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
           <label for="dslPlacementIterInput" style="min-width: 140px; margin-top: 6px;">Iterations (k):</label>
           <div style="flex: 1; display: flex; flex-direction: column;">
             <input id="dslPlacementIterInput" type="number" min="1" max="100" [(ngModel)]="dslPlacementIterations">
             <small *ngIf="isPlacementGroverGate" style="color: #555; font-size: 12px; margin-top: 4px; display: block;">
               Optimal Grover iterations for {{ dslPlacementQubits }} qubits & {{ dslPlacementTargetsCount }} target(s):
               <a href="javascript:void(0)" (click)="applyOptimalIterations()"
-                style="color: #008b95; font-weight: bold; text-decoration: underline; cursor: pointer;" title="Click to apply optimal iterations">
+                style="color: #008b95; font-weight: bold; text-decoration: underline; cursor: pointer;"
+                title="Click to apply optimal iterations">
                 {{ optimalGroverIterations }} iteration(s) (click to apply)
               </a>
             </small>
@@ -1094,8 +1103,8 @@
         </div>
 
         <!-- Parámetros específicos para Subcircuit 0 (valores marcados secundarios si no es Grover) -->
-        <div *ngIf="(selectedDslGenericType === '0' || selectedDslGenericType === 'Sub_0') && !isPlacementGroverGate" class="info-block"
-          style="width: 93%; margin-bottom: 10px;">
+        <div *ngIf="(selectedDslGenericType === '0' || selectedDslGenericType === 'Sub_0') && !isPlacementGroverGate"
+          class="info-block" style="width: 93%; margin-bottom: 10px;">
           <label for="dslPlacementSubValsInput">Marked values:</label>
           <input id="dslPlacementSubValsInput" type="text" [(ngModel)]="dslPlacementSubValues" placeholder="2, 7">
         </div>
