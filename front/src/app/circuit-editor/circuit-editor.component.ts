@@ -55,8 +55,28 @@ export class CircuitEditorComponent {
 
   dslGenericGates: EdGate[] = [];
 
+  // Temporal gates (stored exclusively in localStorage, not in database)
+  temporalGates: EdGate[] = [];
+  saveAsTemporalGate: boolean = false;
+  temporalGateName: string = '';
+  temporalGatesModal: boolean = false;
+  showEditTemporalGateModal: boolean = false;
+  editingTemporalGate: EdGate | null = null;
+  editingTemporalGateName: string = '';
+  editingTemporalGateQubits: number = 1;
+  editingTemporalGateTargets: string = '';
+  editingTemporalGateIterations: number = 2;
+  editingTemporalGatePhase: string = 'pi';
+  editingTemporalGateTargetQubit: number = 0;
+  editingTemporalGateOrder: string = '+';
+  editingTemporalGateSubValues: string = '2, 7';
+  editingTemporalGatePreviewCode: string = '';
+  temporalGateToDelete: EdGate | null = null;
+  showDeleteTemporalGateModal: boolean = false;
+  showDeleteAllTemporalModal: boolean = false;
+
   get userOnlyCustomizedGates(): EdGate[] {
-    return this.customizedGates.filter(g => !this.isGenericDslGate(g));
+    return this.customizedGates.filter(g => !this.isGenericDslGate(g) && !(g as any).isTemporal);
   }
 
   isGenericDslGate(gate: any): boolean {
@@ -162,7 +182,8 @@ export class CircuitEditorComponent {
     QUBITS_CONFIG_NAME: 'circuitEditorQubitsConfigName',
     GATE_REGISTRY: 'circuitEditorGateRegistry',
     SELECTED_TEMPLATE_FILENAME: 'circuitEditorTemplateFileName',
-    CUSTOM_GENERIC_GATES: 'circuitEditorCustomGenericGates'
+    CUSTOM_GENERIC_GATES: 'circuitEditorCustomGenericGates',
+    TEMPORAL_GATES: 'circuitEditorTemporalGates'
   };
 
   constructor(public manager: ManagerService, private qiskitService: QiskitService, private qubitsConfigurationService: QubitsConfigurationService,
@@ -282,6 +303,7 @@ export class CircuitEditorComponent {
 
     this.dslGateTemplates = this.dslService.gateTemplates;
     localStorage.removeItem(this.LOCAL_STORAGE_KEYS.CUSTOM_GENERIC_GATES);
+    this.loadTemporalGates();
 
 
     this.qubitsConfigurationService.getQubitConfigurationNames().subscribe(
@@ -504,10 +526,20 @@ export class CircuitEditorComponent {
         gate.parentQubit = undefined;
         gate.columnIndex = column;
 
+        let totalQ = qubits.length;
+        if (transactionId) {
+          const siblingRegs = this.gateRegistry.filter(r => r.transactionId === transactionId);
+          const allQs = new Set<number>();
+          for (const sr of siblingRegs) {
+            for (const q of sr.qubits || []) allQs.add(q);
+          }
+          if (allQs.size > 0) totalQ = allQs.size;
+        }
+
         if ((registration as any).dslParams) {
           (gate as any).dslParams = JSON.parse(JSON.stringify((registration as any).dslParams));
           (gate as any).isDslGeneric = true;
-          gate.code = this.generateDslGateCode(name, qubits.length, name, (gate as any).dslParams);
+          gate.code = this.generateDslGateCode(name, totalQ, name, (gate as any).dslParams);
         }
 
         if (parentQubit < this.circuit!.qubits.length) {
@@ -549,6 +581,11 @@ export class CircuitEditorComponent {
         gateCodes[dg.name] = dg.code;
       }
     }
+    for (const tg of this.temporalGates || []) {
+      if (tg && tg.name && tg.code) {
+        gateCodes[tg.name] = tg.code;
+      }
+    }
     for (const cg of this.customizedGates) {
       if (cg && cg.name && cg.code) {
         gateCodes[cg.name] = cg.code;
@@ -563,9 +600,17 @@ export class CircuitEditorComponent {
     }
     for (const reg of this.gateRegistry || []) {
       if (reg.name && reg.name !== 'I' && reg.name !== 'M' && reg.name !== '0') {
-        const nQ = reg.qubits ? reg.qubits.length : 4;
+        let totalQ = reg.qubits ? reg.qubits.length : 4;
+        if (reg.transactionId) {
+          const siblingRegs = this.gateRegistry.filter(r => r.transactionId === reg.transactionId);
+          const allQs = new Set<number>();
+          for (const sr of siblingRegs) {
+            for (const q of sr.qubits || []) allQs.add(q);
+          }
+          if (allQs.size > 0) totalQ = allQs.size;
+        }
         const dslParams = reg.dslParams || {};
-        const adapted = this.generateDslGateCode(reg.name, nQ, reg.name, dslParams);
+        const adapted = this.generateDslGateCode(reg.name, totalQ, reg.name, dslParams);
         if (adapted) {
           gateCodes[reg.name] = adapted;
         }
@@ -735,23 +780,34 @@ plt.show()
     }
 
     // Puertas individuales que no estén en gateRegistry
+    const circuitFallbackMap = new Map<string, any>();
     for (let j = 0; j < (this.circuit.columns || 0); j++) {
       for (let i = 0; i < this.circuit.qubits.length; i++) {
         const g = this.circuit.qubits[i].gates[j];
         if (g && g.name !== 'I' && (g.parentQubit === undefined || g.name !== '0')) {
           const tid = (g as any).transactionId;
-          if (!tid || !processedTransactions.has(tid)) {
+          if (tid && processedTransactions.has(tid)) {
+            continue;
+          }
+          if (tid && circuitFallbackMap.has(tid)) {
+            const item = circuitFallbackMap.get(tid);
+            item.qubits.push(i);
+            if (g.targetQubits) item.qubits.push(...g.targetQubits);
+            item.qubits.sort((a: number, b: number) => a - b);
+            if ((g as any).dslParams && !item.dslParams) item.dslParams = (g as any).dslParams;
+          } else {
             const targetQubits = g.targetQubits ? [i, ...g.targetQubits] : [i];
             targetQubits.sort((a, b) => a - b);
-            operations.push({
+            const op = {
               column: j,
               name: g.name || '',
               qubits: targetQubits,
               minQubit: i,
               gate: g,
               dslParams: (g as any).dslParams
-            });
-            if (tid) processedTransactions.add(tid);
+            };
+            if (tid) circuitFallbackMap.set(tid, op);
+            operations.push(op);
           }
         }
       }
@@ -777,13 +833,19 @@ plt.show()
       const isGeneric = Boolean(
         (op.gate as any)?.isGeneric ||
         (op.gate as any)?.isDslGeneric ||
+        (op.gate as any)?.isTemporal ||
         this.dslGenericGates.some(dg => dg.name === gName) ||
+        this.temporalGates?.some(tg => tg.name === gName) ||
         (dslParams && (dslParams.targets !== undefined || dslParams.value !== undefined))
       );
       if (isGeneric) {
         code = this.generateDslGateCode(gName, op.qubits.length, gName, dslParams);
+        if (!code && op.gate?.code) code = op.gate.code;
+        if (!code && this.temporalGates?.find(tg => tg.name === gName)?.code) {
+          code = this.temporalGates.find(tg => tg.name === gName)!.code;
+        }
       } else {
-        code = op.gate?.code || this.customizedGates.find(cg => cg.name === gName)?.code || '';
+        code = op.gate?.code || this.customizedGates.find(cg => cg.name === gName)?.code || this.temporalGates?.find(tg => tg.name === gName)?.code || '';
       }
 
       if (code) {
@@ -932,8 +994,12 @@ plt.show()
     const circuitLength = this.circuit!.qubits.length;
 
     if (startQubit + requiredQubits > circuitLength) {
-      alert("Not enough qubits for this gate");
-      return;
+      const requiredTotal = startQubit + requiredQubits;
+      if (this.qubitsConfiguration) {
+        this.qubitsConfiguration.qubits = requiredTotal;
+        this.qubitsConfiguration.matrix = Array.from({ length: requiredTotal }, (_, i) => i);
+      }
+      this.circuit!.resizeTo(requiredTotal);
     }
 
     const selectedQubits: number[] = [];
@@ -976,8 +1042,12 @@ plt.show()
     const selectedQubits: number[] = [];
 
     if (mainQubit + requiredQubits > this.circuit!.qubits.length) {
-      alert("Not enough qubits for this gate");
-      return;
+      const requiredTotal = mainQubit + requiredQubits;
+      if (this.qubitsConfiguration) {
+        this.qubitsConfiguration.qubits = requiredTotal;
+        this.qubitsConfiguration.matrix = Array.from({ length: requiredTotal }, (_, i) => i);
+      }
+      this.circuit!.resizeTo(requiredTotal);
     }
 
     for (let i = 0; i < requiredQubits; i++) {
@@ -998,7 +1068,8 @@ plt.show()
       column: column,
       qubits: selectedQubits,
       parentQubit: mainQubit,
-      transactionId: newGateId
+      transactionId: newGateId,
+      dslParams: (gate as any).dslParams ? JSON.parse(JSON.stringify((gate as any).dslParams)) : undefined
     } as CircuitGate);
 
     this.circuit!.qubits[mainQubit].gates[column] = gate;
@@ -1091,6 +1162,13 @@ plt.show()
 
       (gate as any).gateId = uniqueGateId;
       (gate as any).transactionId = transactionId;
+      if ((this.selectedGate as any).dslParams) {
+        (gate as any).dslParams = JSON.parse(JSON.stringify((this.selectedGate as any).dslParams));
+        (gate as any).isDslGeneric = true;
+      }
+      if ((this.selectedGate as any).isGeneric) {
+        (gate as any).isGeneric = true;
+      }
 
       this.gateRegistry.push({
         id: uniqueGateId,
@@ -1098,7 +1176,8 @@ plt.show()
         column: column,
         qubits: group,
         parentQubit: mainQubit,
-        transactionId: transactionId
+        transactionId: transactionId,
+        dslParams: (gate as any).dslParams ? JSON.parse(JSON.stringify((gate as any).dslParams)) : undefined
       } as CircuitGate);
 
 
@@ -1121,6 +1200,8 @@ plt.show()
 
     this.showGatePlacementModal = false;
     this.pendingColumn = null;
+    this.currentStartQubit = null;
+    this.currentColumn = null;
 
     this.qubitsConsecutivos = false;
 
@@ -1141,6 +1222,8 @@ plt.show()
     this.showGatePlacementModal = false;
     this.pendingColumn = null;
     this.selectedQubitsForGate = [];
+    this.currentStartQubit = null;
+    this.currentColumn = null;
   }
 
 
@@ -1531,11 +1614,23 @@ plt.show()
   openPlacementChoice(startQubit: number, column: number) {
     if (!this.selectedGate) return;
 
-    if ((this.selectedGate as any).isDslGeneric) {
+    if ((this.selectedGate as any).isDslGeneric && !(this.selectedGate as any).isTemporal) {
       this.currentStartQubit = startQubit;
       this.currentColumn = column;
       this.openDslGatePlacementModal(this.selectedGate);
       return;
+    }
+
+    const requiredQubits = this.selectedGate.qubits || 1;
+    const circuitLength = this.circuit!.qubits.length;
+
+    if (startQubit + requiredQubits > circuitLength) {
+      const requiredTotal = startQubit + requiredQubits;
+      if (this.qubitsConfiguration) {
+        this.qubitsConfiguration.qubits = requiredTotal;
+        this.qubitsConfiguration.matrix = Array.from({ length: requiredTotal }, (_, i) => i);
+      }
+      this.circuit!.resizeTo(requiredTotal);
     }
 
     if (this.selectedGate.qubits === 1) {
@@ -1582,6 +1677,61 @@ plt.show()
 
   toggleCircuitView() {
     this.isGridExpanded = !this.isGridExpanded;
+  }
+
+  hasGatesOnGrid(): boolean {
+    if (this.gateRegistry && this.gateRegistry.length > 0) {
+      return true;
+    }
+    if (!this.circuit || !this.circuit.qubits) return false;
+    for (const q of this.circuit.qubits) {
+      if (q && q.gates) {
+        for (const g of q.gates) {
+          if (g && g.name && g.name !== 'I') {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  clearGrid(): void {
+    if (!this.hasGatesOnGrid() || !this.circuit || !this.circuit.qubits) {
+      return;
+    }
+
+    for (let i = 0; i < this.circuit.qubits.length; i++) {
+      for (let j = 0; j < this.circuit.columns; j++) {
+        const gate = new EdGate('I', 1);
+        gate.columnIndex = j;
+        this.circuit.qubits[i].gates[j] = gate;
+      }
+    }
+
+    if (this.qubitsConfiguration && this.circuit.qubits.length > this.qubitsConfiguration.qubits) {
+      this.circuit.resizeTo(this.qubitsConfiguration.qubits);
+    }
+
+    this.gateRegistry = [];
+    this.selectedGate = undefined;
+    this.currentStartQubit = null;
+    this.currentColumn = null;
+    this.selectedQubitsForGate = [];
+
+    this.code = this.buildCircuitQiskitCode();
+    this.generateCode();
+
+    if (this.selectedProjectId) {
+      this.isCircuitModified = true;
+    }
+
+    this.saveState();
+
+    this.mensajeTemporal2 = 'Circuit grid cleared';
+    setTimeout(() => {
+      this.mensajeTemporal2 = '';
+    }, 2500);
   }
 
 
@@ -2577,6 +2727,68 @@ plt.show()
     return false;
   }
 
+  get isPlacementQubitsGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    if (!gate) return false;
+
+    const dslExpr = ((gate as any).dslExpression || '').toString().trim();
+    if (dslExpr) {
+      const hasVariableN = /\b(h|x|d|diffuser|o|oracle|binary|mcp|mcz|m|measure)\s*\(\s*n\s*[,)]/i.test(dslExpr) ||
+                           /\b(h|x|d)\s*\(\s*n\s*\)/i.test(dslExpr);
+      if (hasVariableN) return true;
+
+      const hasFixedNumbers = /\b(h|x|d|diffuser|o|oracle|binary|mcp|mcz|m|measure)\s*\(\s*\d+\s*[,)]/i.test(dslExpr) ||
+                              /\b(h|x|d)\s*\(\s*\d+\s*\)/i.test(dslExpr);
+      if (hasFixedNumbers) return false;
+    }
+
+    const type = (this.selectedDslGenericType || gate.name || '').toLowerCase();
+    if (type === 'oracle' || type === 'diffuser' || type === 'initialh' || type === 'mcp' || type === 'measure') {
+      return true;
+    }
+
+    const code = (gate.code || '').toString();
+    if (/def\s+[a-zA-Z0-9_]+\s*\([^)]*\bn\s*=/i.test(code) || /def\s+[a-zA-Z0-9_]+\s*\([^)]*\bn\s*[,)]/i.test(code)) {
+      if (dslExpr && !/\bn\b/i.test(dslExpr)) {
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  get isPlacementMcpGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    const type = (this.selectedDslGenericType || gate?.name || '').toLowerCase();
+    const dslExpr = (((gate as any)?.dslExpression || '') as string).toLowerCase().trim();
+    if (type.includes('grover') || type.includes('diffuser') || type.includes('oracle')) {
+      return false;
+    }
+    if (type === 'mcp' || dslExpr.startsWith('mcp(') || (dslExpr.includes('mcp(') && !dslExpr.includes('o(') && !dslExpr.includes('d('))) {
+      return true;
+    }
+    return false;
+  }
+
+  get isPlacementMeasureGate(): boolean {
+    const gate = this.selectedGenericGateForPlacement;
+    const type = (this.selectedDslGenericType || gate?.name || '').toLowerCase();
+    const dslExpr = (((gate as any)?.dslExpression || '') as string).toLowerCase().trim();
+    if (type.includes('grover') || type.includes('diffuser') || type.includes('oracle')) {
+      return false;
+    }
+    if (type === 'measure' || dslExpr.startsWith('m(') || (dslExpr.includes('m(') && !dslExpr.includes('o(') && !dslExpr.includes('d('))) {
+      return true;
+    }
+    return false;
+  }
+
+  get isPlacementSubValuesGate(): boolean {
+    const type = (this.selectedDslGenericType || this.selectedGenericGateForPlacement?.name || '');
+    return (type === '0' || type === 'Sub_0') && !this.isPlacementGroverGate;
+  }
+
   get optimalGroverIterations(): number {
     const n = Math.max(1, Math.min(20, Number(this.dslPlacementQubits) || 4));
     const m = Math.max(1, this.dslPlacementTargetsCount);
@@ -2586,8 +2798,14 @@ plt.show()
   }
 
   onPlacementParamsChange(): void {
+    const n = Math.max(1, Number(this.dslPlacementQubits) || 1);
     if (this.isPlacementGroverGate) {
       this.dslPlacementIterations = this.optimalGroverIterations;
+    }
+    if (this.isPlacementMcpGate) {
+      if (this.dslPlacementTarget >= n || this.dslPlacementTarget === undefined || this.dslPlacementTarget === null) {
+        this.dslPlacementTarget = Math.max(0, n - 1);
+      }
     }
   }
 
@@ -2650,6 +2868,8 @@ plt.show()
 
     // Por defecto, sale de forma genérica con el nombre que tenga en el editor
     this.dslPlacementName = this.selectedDslGenericType;
+    this.saveAsTemporalGate = false;
+    this.temporalGateName = this.dslPlacementName;
     this.showDslPlacementModal = true;
   }
 
@@ -2666,92 +2886,88 @@ plt.show()
     const col = this.currentColumn;
     const n = Math.max(1, Number(this.dslPlacementQubits) || 1);
 
-    // Si el circuito no tiene suficientes cúbits, ampliarlo
-    if (mainQubit + n > this.circuit.qubits.length) {
-      const requiredTotal = mainQubit + n;
-      if (this.qubitsConfiguration) {
-        this.qubitsConfiguration.qubits = requiredTotal;
-        this.qubitsConfiguration.matrix = Array.from({ length: requiredTotal }, (_, i) => i);
-      }
-      this.circuit.resizeTo(requiredTotal);
-    }
-
-    // Verificar si los cúbits están libres en esta columna
-    const selectedQubits: number[] = [];
-    for (let i = 0; i < n; i++) {
-      selectedQubits.push(mainQubit + i);
-    }
-
-    if (!this.areQubitsAvailable(selectedQubits, col)) {
-      alert(`Cannot place '${this.dslPlacementName}' because one or more qubits in column ${col} are already occupied.`);
-      return;
-    }
-
-    const newGateId = `T-${Date.now()}`;
-    const uniqueGateId = `${newGateId}-${mainQubit}`;
     const isOracle = this.isPlacementOracleGate;
     const parsedTargets = isOracle ? this.getParsedPlacementTargets() : [this.dslPlacementValue];
     const gateValue = isOracle ? parsedTargets : this.dslPlacementValue;
+    let gateName = this.dslPlacementName || this.selectedDslGenericType;
+    if (this.saveAsTemporalGate && this.temporalGateName && this.temporalGateName.trim()) {
+      gateName = this.temporalGateName.trim();
+    }
 
-    const gate = new EdGate(this.dslPlacementName || this.selectedDslGenericType, n);
-    gate.columnIndex = col;
-    gate.parentQubit = undefined;
-    (gate as any).gateId = uniqueGateId;
-    (gate as any).transactionId = newGateId;
-    (gate as any).isDslGeneric = true;
-    (gate as any).dslParams = {
+    const activeSpecifiedFields: string[] = ['name'];
+    if (this.isPlacementQubitsGate) activeSpecifiedFields.push('qubits');
+    if (this.isPlacementOracleGate) activeSpecifiedFields.push('targets');
+    if (this.isPlacementRepeatGate) activeSpecifiedFields.push('iterations');
+    if (this.isPlacementMcpGate) {
+      activeSpecifiedFields.push('phase');
+      activeSpecifiedFields.push('targetQubit');
+    }
+    if (this.isPlacementMeasureGate) activeSpecifiedFields.push('order');
+    if (this.isPlacementSubValuesGate) activeSpecifiedFields.push('subValues');
+
+    let targetQubit = Number(this.dslPlacementTarget);
+    if (isNaN(targetQubit) || targetQubit < 0 || targetQubit >= n) {
+      targetQubit = Math.max(0, n - 1);
+    }
+    this.dslPlacementTarget = targetQubit;
+
+    const dslParams = {
       type: this.selectedDslGenericType,
       value: gateValue,
       targets: parsedTargets,
-      target: this.dslPlacementTarget,
+      target: targetQubit,
       order: this.dslPlacementOrder,
       phase: this.dslPlacementAlpha,
       iterations: this.isPlacementRepeatGate ? (Number(this.dslPlacementIterations) || 2) : undefined,
-      k: this.isPlacementRepeatGate ? (Number(this.dslPlacementIterations) || 2) : undefined
+      k: this.isPlacementRepeatGate ? (Number(this.dslPlacementIterations) || 2) : undefined,
+      specifiedFields: activeSpecifiedFields
     };
 
-    const gateCode = this.generateDslGateCode(this.selectedDslGenericType, n, this.dslPlacementName, (gate as any).dslParams);
-    gate.code = gateCode;
-    gate.description = `${this.selectedDslGenericType} (${n} qubits)`;
+    const gateCode = this.generateDslGateCode(this.selectedDslGenericType, n, gateName, dslParams);
 
-    if (n > 1) {
-      gate.targetQubits = selectedQubits.slice(1);
-    } else {
-      gate.targetQubits = undefined;
+    // Configurar la puerta genérica seleccionada con n cúbits y sus parámetros
+    const configuredGate = new EdGate(gateName, n);
+    configuredGate.code = gateCode;
+    configuredGate.description = `${this.selectedDslGenericType} (${n} qubits)`;
+    (configuredGate as any).isDslGeneric = true;
+    (configuredGate as any).isGeneric = true;
+    (configuredGate as any).dslType = this.selectedDslGenericType;
+    (configuredGate as any).dslParams = dslParams;
+    (configuredGate as any).specifiedFields = activeSpecifiedFields;
+
+    if (this.saveAsTemporalGate) {
+      (configuredGate as any).isTemporal = true;
+      this.saveTemporalGate(configuredGate);
+      this.saveAsTemporalGate = false;
+      this.temporalGateName = '';
     }
 
-    // Colocar la compuerta principal
-    this.circuit.qubits[mainQubit].gates[col] = gate;
+    this.selectedGate = configuredGate;
 
-    // Colocar fillers en los cúbits secundarios
-    for (let i = 1; i < selectedQubits.length; i++) {
-      const q = selectedQubits[i];
-      const filler = new EdGate('0', 1);
-      filler.parentQubit = mainQubit;
-      (filler as any).gateId = uniqueGateId;
-      (filler as any).transactionId = newGateId;
-      filler.columnIndex = col;
-      this.circuit.qubits[q].gates[col] = filler;
-    }
-
-    // Registrar en gateRegistry
-    this.gateRegistry.push({
-      id: uniqueGateId,
-      name: gate.name!,
-      column: col,
-      qubits: selectedQubits,
-      parentQubit: mainQubit,
-      transactionId: newGateId,
-      dslParams: (gate as any).dslParams ? JSON.parse(JSON.stringify((gate as any).dslParams)) : undefined
-    } as CircuitGate);
-
-    this.isCircuitModified = true;
-    this.saveState();
-
+    // Cerrar el modal de configuración de la compuerta genérica
     this.showDslPlacementModal = false;
-    this.selectedGate = undefined;
-    this.mensajeTemporal = `Gate '${gate.name}' placed successfully at q${mainQubit} (${n} qubits)`;
-    setTimeout(() => this.mensajeTemporal = '', 2500);
+
+    // Si el circuito no tiene suficientes cúbits, ampliarlo
+    const minRequired = Math.max(this.circuit.qubits.length, n, mainQubit + n);
+    if (minRequired > this.circuit.qubits.length) {
+      if (this.qubitsConfiguration) {
+        this.qubitsConfiguration.qubits = minRequired;
+        this.qubitsConfiguration.matrix = Array.from({ length: minRequired }, (_, i) => i);
+      }
+      this.circuit.resizeTo(minRequired);
+    }
+
+    if (n === 1) {
+      // 1 solo cúbit: colocar directamente
+      this.placeGate(mainQubit, col);
+      this.currentStartQubit = null;
+      this.currentColumn = null;
+      return;
+    }
+
+    // Más de 1 cúbit: abrir el modal de Qubit placement ("Consecutive" o "Specify qubits")
+    this.pendingColumn = col;
+    this.showPlacementChoiceModal = true;
   }
 
   cancelDslPlacement() {
@@ -2773,6 +2989,7 @@ plt.show()
     const targetsStr = `[${targetsArr.join(', ')}]`;
 
     const baseGate = this.dslGenericGates.find(g => g.name === type || g.name === gateName || (type === '0' && (g.name === '0' || g.name === 'Subcircuito_0')))
+      || this.temporalGates?.find(g => g.name === type || g.name === gateName)
       || this.customizedGates.find(g => g.name === type || g.name === gateName)
       || this.circuit?.qubits.flatMap(q => q.gates).find(g => g && (g.name === type || g.name === gateName))
       || this.selectedGenericGateForPlacement;
@@ -2799,7 +3016,21 @@ plt.show()
         code = code.replace(/k\s*=\s*\d+/g, `k = ${kVal}`);
       }
       code = code.replace(/for\s+_\s+in\s+range\(\s*\d+\s*\):/g, `for _ in range(${kVal}):`);
+
+      if ((type === 'MCP' || gateName === 'MCP' || this.isPlacementMcpGate) && params?.target !== undefined) {
+        code = code.replace(/target\s*=\s*[^\\n]+/g, `target = ${params.target}`);
+      }
+      if ((type === 'MCP' || gateName === 'MCP' || this.isPlacementMcpGate) && params?.phase !== undefined) {
+        code = code.replace(/U\.mcp\(\s*[^,]+\s*,/g, `U.mcp(${params.phase}, `);
+      }
+
       return code;
+    }
+
+    if (type === 'MCP' || gateName === 'MCP' || this.isPlacementMcpGate) {
+      const targetVal = params?.target ?? this.dslPlacementTarget ?? (n - 1);
+      const phaseVal = params?.phase ?? this.dslPlacementAlpha ?? 'pi';
+      return `def ${fnName}(n = ${n}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n\ttarget = ${targetVal}\n\tcontrols = [i for i in range(n) if i != target]\n\tU.mcp(${phaseVal}, controls, target)\n\treturn U.to_gate()\n`;
     }
 
     if (type === 'Grover' || gateName === 'Grover' || this.isPlacementGroverGate) {
@@ -2812,5 +3043,398 @@ plt.show()
     }
 
     return `def ${fnName}(n = ${n}) : \n\tU = QuantumCircuit(n, name="${rawName}")\n\treturn U.to_gate()\n`;
+  }
+
+  // --- MÉTODOS PARA PUERTAS TEMPORALES (TEMPORAL GATES) ---
+
+  onSaveAsTemporalGateToggle() {
+    if (this.saveAsTemporalGate && (!this.temporalGateName || !this.temporalGateName.trim())) {
+      this.temporalGateName = this.dslPlacementName || this.selectedDslGenericType || 'TemporalGate';
+    }
+  }
+
+  onTemporalGateNameChange() {
+    if (this.temporalGateName && this.temporalGateName.trim()) {
+      this.dslPlacementName = this.temporalGateName.trim();
+    }
+  }
+
+  saveTemporalGate(gate: EdGate) {
+    const temporalCopy = gate.copy();
+    temporalCopy.isTemporal = true;
+    temporalCopy.isGeneric = true;
+    temporalCopy.isDslGeneric = true;
+    temporalCopy.specifiedFields = (gate as any).specifiedFields ? [...(gate as any).specifiedFields] : undefined;
+    const existingIdx = this.temporalGates.findIndex(g => g.name === gate.name);
+    if (existingIdx >= 0) {
+      this.temporalGates[existingIdx] = temporalCopy;
+    } else {
+      this.temporalGates.push(temporalCopy);
+    }
+    this.persistTemporalGates();
+    this.mensajeTemporal = `Saved temporal gate '${gate.name}'`;
+    setTimeout(() => this.mensajeTemporal = '', 2500);
+  }
+
+  persistTemporalGates() {
+    try {
+      const serialized = this.temporalGates.map(g => ({
+        name: g.name,
+        qubits: g.qubits,
+        code: g.code,
+        description: g.description,
+        isTemporal: true,
+        isGeneric: true,
+        isDslGeneric: true,
+        dslType: (g as any).dslType || g.name,
+        dslParams: (g as any).dslParams || {},
+        specifiedFields: (g as any).specifiedFields || (g as any).dslParams?.specifiedFields || ['name']
+      }));
+      localStorage.setItem(this.LOCAL_STORAGE_KEYS.TEMPORAL_GATES, JSON.stringify(serialized));
+    } catch (err) {
+      console.error('Error saving temporal gates to localStorage', err);
+    }
+  }
+
+  loadTemporalGates() {
+    try {
+      const raw = localStorage.getItem(this.LOCAL_STORAGE_KEYS.TEMPORAL_GATES);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          this.temporalGates = parsed.map((item: any) => {
+            const g = new EdGate(item.name, item.qubits || 1);
+            g.code = item.code || '';
+            g.description = item.description || `Temporal gate: ${item.name} (${item.qubits || 1} qubits)`;
+            (g as any).isTemporal = true;
+            (g as any).isGeneric = true;
+            (g as any).isDslGeneric = true;
+            (g as any).dslType = item.dslType || item.name;
+            (g as any).dslParams = item.dslParams || {};
+            (g as any).specifiedFields = item.specifiedFields || (item.dslParams && item.dslParams.specifiedFields) || undefined;
+            return g;
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error loading temporal gates from localStorage', err);
+    }
+  }
+
+  selectTemporalGate(gate: EdGate) {
+    this.gateMselected = false;
+    if (this.selectedGate === gate) {
+      this.selectedGate = undefined;
+    } else {
+      this.selectedGate = gate;
+    }
+  }
+
+  openTemporalGatesManagerModal() {
+    this.temporalGatesModal = true;
+  }
+
+  viewTemporalGateCode(gate: EdGate) {
+    if (!gate.code || !gate.code.trim()) {
+      const dslType = (gate as any).dslType || gate.name;
+      const n = gate.qubits || 1;
+      const params = (gate as any).dslParams || {};
+      gate.code = this.generateDslGateCode(dslType, n, gate.name || dslType, params);
+    }
+    this.selectedGate = gate;
+    this.modalCodigoGate = true;
+    this.copiarCodigoGate();
+  }
+
+  openEditTemporalGateModal(gate: EdGate) {
+    this.editingTemporalGate = gate;
+    this.editingTemporalGateName = gate.name || '';
+    this.editingTemporalGateQubits = gate.qubits || 1;
+    const p = (gate as any).dslParams || {};
+    const targets = p.targets ?? p.value;
+    if (Array.isArray(targets)) {
+      this.editingTemporalGateTargets = `[${targets.join(', ')}]`;
+    } else if (targets !== undefined && targets !== null) {
+      this.editingTemporalGateTargets = String(targets);
+    } else {
+      this.editingTemporalGateTargets = '';
+    }
+    this.editingTemporalGateIterations = p.iterations ?? p.k ?? 2;
+    this.editingTemporalGatePhase = p.phase || 'pi';
+    this.editingTemporalGateTargetQubit = p.target !== undefined ? p.target : Math.max(0, (gate.qubits || 1) - 1);
+    this.editingTemporalGateOrder = p.order || '+';
+    this.editingTemporalGateSubValues = p.subValues || '2, 7';
+
+    // Asegurar que specifiedFields esté inicializado
+    if (!(gate as any).specifiedFields && (gate as any).dslParams?.specifiedFields) {
+      (gate as any).specifiedFields = [...(gate as any).dslParams.specifiedFields];
+    } else if (!(gate as any).specifiedFields) {
+      const fields: string[] = ['name'];
+      if (this.canEditTemporalField('qubits')) fields.push('qubits');
+      if (this.canEditTemporalField('targets')) fields.push('targets');
+      if (this.canEditTemporalField('iterations')) fields.push('iterations');
+      if (this.canEditTemporalField('phase')) { fields.push('phase'); fields.push('targetQubit'); }
+      if (this.canEditTemporalField('order')) fields.push('order');
+      if (this.canEditTemporalField('subValues')) fields.push('subValues');
+      (gate as any).specifiedFields = fields;
+    }
+
+    this.onEditingTemporalGateParamChange();
+    this.showEditTemporalGateModal = true;
+  }
+
+  onEditingTemporalGateParamChange() {
+    if (!this.editingTemporalGate) return;
+    const n = this.canEditTemporalField('qubits')
+      ? Math.max(1, Number(this.editingTemporalGateQubits) || 1)
+      : (this.editingTemporalGate.qubits || 1);
+    const name = (this.editingTemporalGateName || this.editingTemporalGate.name || 'Gate').trim();
+    const dslType = (this.editingTemporalGate as any).dslType || this.editingTemporalGate.name;
+
+    let parsedTargets: any = undefined;
+    if (this.editingTemporalGateTargets && this.editingTemporalGateTargets.trim()) {
+      const raw = this.editingTemporalGateTargets.replace(/[\[\]]/g, '');
+      const arr = raw.split(',').map((s: string) => parseInt(s.trim(), 10)).filter((x: number) => !isNaN(x));
+      if (arr.length > 0) parsedTargets = arr;
+    }
+
+    const params = {
+      ...((this.editingTemporalGate as any).dslParams || {}),
+      targets: parsedTargets,
+      value: parsedTargets ? parsedTargets : (this.editingTemporalGate as any).dslParams?.value,
+      iterations: Number(this.editingTemporalGateIterations) || 2,
+      k: Number(this.editingTemporalGateIterations) || 2,
+      phase: this.editingTemporalGatePhase,
+      target: Number(this.editingTemporalGateTargetQubit) || (n - 1),
+      order: this.editingTemporalGateOrder,
+      subValues: this.editingTemporalGateSubValues
+    };
+
+    this.editingTemporalGatePreviewCode = this.generateDslGateCode(dslType, n, name, params);
+  }
+
+  saveEditedTemporalGate() {
+    if (!this.editingTemporalGate) return;
+    const newName = (this.editingTemporalGateName || this.editingTemporalGate.name || '').trim();
+    if (!newName) {
+      alert('Please enter a gate name.');
+      return;
+    }
+    const n = this.canEditTemporalField('qubits')
+      ? Math.max(1, Number(this.editingTemporalGateQubits) || 1)
+      : (this.editingTemporalGate.qubits || 1);
+    const oldName = this.editingTemporalGate.name;
+
+    let parsedTargets: number[] | undefined;
+    if (this.editingTemporalGateTargets && this.editingTemporalGateTargets.trim()) {
+      const raw = this.editingTemporalGateTargets.replace(/[\[\]]/g, '');
+      parsedTargets = raw.split(',').map((s: string) => parseInt(s.trim(), 10)).filter((x: number) => !isNaN(x));
+      if (parsedTargets.length === 0) parsedTargets = undefined;
+    }
+
+    const activeFields = (this.editingTemporalGate as any).specifiedFields || ['name'];
+
+    const updatedParams = {
+      ...((this.editingTemporalGate as any).dslParams || {}),
+      targets: parsedTargets,
+      value: parsedTargets ? parsedTargets : (this.editingTemporalGate as any).dslParams?.value,
+      iterations: Number(this.editingTemporalGateIterations) || 2,
+      k: Number(this.editingTemporalGateIterations) || 2,
+      phase: this.editingTemporalGatePhase,
+      target: Number(this.editingTemporalGateTargetQubit) || (n - 1),
+      order: this.editingTemporalGateOrder,
+      subValues: this.editingTemporalGateSubValues,
+      specifiedFields: activeFields
+    };
+
+    const dslType = (this.editingTemporalGate as any).dslType || this.editingTemporalGate.name;
+    const newCode = this.generateDslGateCode(dslType, n, newName, updatedParams);
+
+    this.editingTemporalGate.name = newName;
+    this.editingTemporalGate.qubits = n;
+    this.editingTemporalGate.code = newCode;
+    this.editingTemporalGate.description = `Temporal gate: ${dslType} (${n} qubits)`;
+    (this.editingTemporalGate as any).dslParams = updatedParams;
+    (this.editingTemporalGate as any).dslType = dslType;
+    (this.editingTemporalGate as any).isTemporal = true;
+    (this.editingTemporalGate as any).isGeneric = true;
+    (this.editingTemporalGate as any).isDslGeneric = true;
+    (this.editingTemporalGate as any).specifiedFields = activeFields;
+
+    if (this.circuit) {
+      for (const q of this.circuit.qubits) {
+        for (const g of q.gates) {
+          if (g && (g.name === oldName || g.name === newName)) {
+            g.name = newName;
+            g.code = newCode;
+            (g as any).dslParams = updatedParams;
+            (g as any).specifiedFields = activeFields;
+          }
+        }
+      }
+      for (const reg of this.gateRegistry) {
+        if (reg.name === oldName || reg.name === newName) {
+          reg.name = newName;
+          reg.dslParams = updatedParams;
+        }
+      }
+    }
+
+    this.persistTemporalGates();
+    this.showEditTemporalGateModal = false;
+    this.editingTemporalGate = null;
+    this.mensajeTemporal = `Temporal gate '${newName}' updated successfully`;
+    setTimeout(() => this.mensajeTemporal = '', 2500);
+  }
+
+  cancelEditTemporalGate() {
+    this.editingTemporalGate = null;
+    this.showEditTemporalGateModal = false;
+  }
+
+  openDeleteTemporalGateModal(gate: EdGate) {
+    this.temporalGateToDelete = gate;
+    this.showDeleteTemporalGateModal = true;
+  }
+
+  confirmDeleteTemporalGate() {
+    if (!this.temporalGateToDelete) return;
+    const name = this.temporalGateToDelete.name || '';
+    this.temporalGates = this.temporalGates.filter(g => g.name !== name);
+    this.persistTemporalGates();
+    if (this.selectedGate?.name === name) {
+      this.selectedGate = undefined;
+    }
+    this.temporalGateToDelete = null;
+    this.showDeleteTemporalGateModal = false;
+    this.mensajeTemporal = `Temporal gate '${name}' deleted`;
+    setTimeout(() => this.mensajeTemporal = '', 2500);
+  }
+
+  cancelDeleteTemporalGate() {
+    this.temporalGateToDelete = null;
+    this.showDeleteTemporalGateModal = false;
+  }
+
+  deleteAllTemporalGates() {
+    if (this.temporalGates.length === 0) return;
+    this.showDeleteAllTemporalModal = true;
+  }
+
+  confirmDeleteAllTemporalGates() {
+    this.temporalGates = [];
+    this.persistTemporalGates();
+    if ((this.selectedGate as any)?.isTemporal) {
+      this.selectedGate = undefined;
+    }
+    this.showDeleteAllTemporalModal = false;
+    this.mensajeTemporal = 'All temporal gates deleted';
+    setTimeout(() => this.mensajeTemporal = '', 2500);
+  }
+
+  cancelDeleteAllTemporalGates() {
+    this.showDeleteAllTemporalModal = false;
+  }
+
+  canEditTemporalField(field: string): boolean {
+    if (!this.editingTemporalGate) return false;
+
+    // 1. Si la compuerta guardó qué campos fueron especificados al configurarla:
+    const specified = (this.editingTemporalGate as any).specifiedFields ||
+                      (this.editingTemporalGate as any).dslParams?.specifiedFields;
+    if (Array.isArray(specified) && specified.length > 0) {
+      return specified.includes(field);
+    }
+
+    // 2. Fallback inteligente para compuertas guardadas previamente sin specifiedFields explícito:
+    if (field === 'name') return true;
+
+    const p = (this.editingTemporalGate as any).dslParams || {};
+    const type = ((this.editingTemporalGate as any).dslType || this.editingTemporalGate.name || '').toLowerCase();
+    const dslExpr = (((this.editingTemporalGate as any).dslExpression || '') as string).toLowerCase().trim();
+
+    if (field === 'targets') {
+      return p.targets !== undefined || p.value !== undefined || this.isEditingTemporalOracleGate();
+    }
+    if (field === 'iterations') {
+      return p.iterations !== undefined || p.k !== undefined || this.isEditingTemporalRepeatGate();
+    }
+    if (field === 'phase' || field === 'targetQubit') {
+      return (type === 'mcp' || dslExpr.startsWith('mcp(')) && !type.includes('grover') && !type.includes('diffuser');
+    }
+    if (field === 'order') {
+      return (type === 'measure' || dslExpr.startsWith('m(')) && !type.includes('grover');
+    }
+    if (field === 'subValues') {
+      return (type === '0' || type === 'sub_0') && !type.includes('grover');
+    }
+    if (field === 'qubits') {
+      if (dslExpr && !/\bn\b/i.test(dslExpr)) return false;
+      if (p.targets !== undefined || p.iterations !== undefined) {
+        if (!dslExpr.includes('(n') && !dslExpr.includes('n,')) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  getTemporalGateSpecs(gate: EdGate): string {
+    const p = (gate as any).dslParams || {};
+    const type = (gate as any).dslType || gate.name;
+    const parts: string[] = [`Type: ${type}`];
+    const specified = (gate as any).specifiedFields || p.specifiedFields;
+    if (!specified || specified.includes('qubits')) {
+      parts.push(`n: ${gate.qubits}`);
+    }
+    const targets = p.targets ?? p.value;
+    if (targets !== undefined && targets !== null && (!specified || specified.includes('targets'))) {
+      parts.push(`a: ${Array.isArray(targets) ? `[${targets.join(', ')}]` : targets}`);
+    }
+    if ((p.iterations !== undefined || p.k !== undefined) && (!specified || specified.includes('iterations'))) {
+      parts.push(`k: ${p.iterations ?? p.k}`);
+    }
+    if (p.phase && (!specified || specified.includes('phase'))) {
+      parts.push(`phase: ${p.phase}`);
+    }
+    return parts.join(' | ');
+  }
+
+  isEditingTemporalOracleGate(): boolean {
+    if (!this.editingTemporalGate) return false;
+    const type = ((this.editingTemporalGate as any).dslType || this.editingTemporalGate.name || '').toLowerCase();
+    const code = (this.editingTemporalGate.code || '').toLowerCase();
+    const p = (this.editingTemporalGate as any).dslParams || {};
+    return type.includes('oracle') || type.includes('grover') || p.targets !== undefined || p.value !== undefined || code.includes('a =') || code.includes('m =') || code.includes('targets');
+  }
+
+  isEditingTemporalRepeatGate(): boolean {
+    if (!this.editingTemporalGate) return false;
+    const type = ((this.editingTemporalGate as any).dslType || this.editingTemporalGate.name || '').toLowerCase();
+    const code = (this.editingTemporalGate.code || '').toLowerCase();
+    const p = (this.editingTemporalGate as any).dslParams || {};
+    return type.includes('grover') || p.iterations !== undefined || p.k !== undefined || code.includes('k =') || code.includes('range(k)');
+  }
+
+  isEditingTemporalMcpGate(): boolean {
+    if (!this.editingTemporalGate) return false;
+    const type = ((this.editingTemporalGate as any).dslType || this.editingTemporalGate.name || '').toLowerCase();
+    const dslExpr = (((this.editingTemporalGate as any).dslExpression || '') as string).toLowerCase().trim();
+    if (type.includes('grover') || type.includes('diffuser') || type.includes('oracle')) {
+      return false;
+    }
+    return type === 'mcp' || dslExpr.startsWith('mcp(') || (dslExpr.includes('mcp(') && !dslExpr.includes('o(') && !dslExpr.includes('d('));
+  }
+
+  isEditingTemporalMeasureGate(): boolean {
+    if (!this.editingTemporalGate) return false;
+    const type = ((this.editingTemporalGate as any).dslType || this.editingTemporalGate.name || '').toLowerCase();
+    const dslExpr = (((this.editingTemporalGate as any).dslExpression || '') as string).toLowerCase().trim();
+    if (type.includes('grover') || type.includes('diffuser') || type.includes('oracle')) {
+      return false;
+    }
+    return type === 'measure' || dslExpr.startsWith('m(') || (dslExpr.includes('m(') && !dslExpr.includes('o(') && !dslExpr.includes('d('));
   }
 }

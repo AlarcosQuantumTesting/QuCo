@@ -196,6 +196,7 @@ public class CircuitEditorService {
             }
         }
 
+        Map<String, OpItem> circuitFallbackMap = new LinkedHashMap<>();
         if (circuit != null && circuit.getQubits() != null) {
             for (int col = 0; col < circuit.getColumns(); col++) {
                 for (int q = 0; q < circuit.getQubits().size(); q++) {
@@ -206,15 +207,29 @@ public class CircuitEditorService {
                             continue;
                         }
                         String tid = (gate.getTransactionId() != null && !gate.getTransactionId().isEmpty()) ? gate.getTransactionId() : null;
-                        if (tid == null || !processedTransactions.contains(tid)) {
+                        if (tid != null && processedTransactions.contains(tid)) {
+                            continue;
+                        }
+                        if (tid != null && circuitFallbackMap.containsKey(tid)) {
+                            OpItem existing = circuitFallbackMap.get(tid);
+                            if (!existing.qubits.contains(q)) existing.qubits.add(q);
+                            if (gate.getTargetQubits() != null) {
+                                for (Integer tq : gate.getTargetQubits()) {
+                                    if (!existing.qubits.contains(tq)) existing.qubits.add(tq);
+                                }
+                            }
+                            existing.qubits.sort(Integer::compareTo);
+                            if (gate.getDslParams() != null && existing.dslParams == null) existing.dslParams = gate.getDslParams();
+                        } else {
                             List<Integer> qs = new ArrayList<>();
                             qs.add(q);
                             if (gate.getTargetQubits() != null) {
                                 qs.addAll(gate.getTargetQubits());
                             }
                             qs.sort(Integer::compareTo);
-                            operations.add(new OpItem(col, q, gate.getName(), qs, gate.getDslParams()));
-                            if (tid != null) processedTransactions.add(tid);
+                            OpItem opItem = new OpItem(col, q, gate.getName(), qs, gate.getDslParams());
+                            if (tid != null) circuitFallbackMap.put(tid, opItem);
+                            operations.add(opItem);
                         }
                     }
                 }

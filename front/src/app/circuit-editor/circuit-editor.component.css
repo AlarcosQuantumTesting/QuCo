@@ -1207,6 +1207,65 @@ ol.list-instructions {
   font-size: 12px;
 }
 
+.gate-title-actions .btn-delete-all-temporal {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.gate-title-actions .btn-delete-all-temporal i {
+  color: white !important;
+}
+
+.gate-title-actions .btn-delete-all-temporal:hover:not(:disabled) {
+  background-color: #bb2d3b !important;
+}
+
+.gate-title-actions .btn-delete-all-temporal:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #dc3545 !important;
+}
+
+.temporal-gate-placement-card {
+  width: 93%;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background-color: #f7f9fa;
+  border-radius: 8px;
+  border: 1px solid #dce4e6;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.temporal-gate-placement-card:hover {
+  border-color: #b2d8d8;
+  background-color: #f0f7f8;
+}
+
+.temporal-gate-placement-card label {
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer;
+  font-size: 14px;
+  gap: 10px;
+  margin: 0 !important;
+  font-weight: 600;
+  color: #2c3e50;
+  user-select: none;
+}
+
+.temporal-gate-placement-card input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  flex: 0 0 18px !important;
+  margin: 0 !important;
+  cursor: pointer;
+  accent-color: #008b95;
+}
+
 .no-user-gates {
   font-style: italic;
   color: #7f8c8d;
@@ -2158,6 +2217,39 @@ table {
 .btn-save-as-new {
   background-color: #6c757d;
   color: white;
+}
+
+.btn-confirm-save.btn-clear-grid {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.btn-confirm-save.btn-clear-grid:hover:not(:disabled) {
+  background-color: #bb2d3b !important;
+  transform: scale(1.05);
+}
+
+.btn-confirm-save.btn-clear-grid:disabled {
+  background-color: #6c757d !important;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.btn-toggle-grid.btn-clear-grid-corner {
+  color: #ff9999 !important;
+}
+
+.btn-toggle-grid.btn-clear-grid-corner:hover:not(:disabled) {
+  color: #ff4d4d !important;
+  transform: scale(1.15);
+}
+
+.btn-toggle-grid.btn-clear-grid-corner:disabled {
+  color: #888888 !important;
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 /*

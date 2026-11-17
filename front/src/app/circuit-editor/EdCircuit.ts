@@ -74,8 +74,10 @@ export class EdGate {
     parentQubit?: number;
     isDslGeneric?: boolean;
     isGeneric?: boolean;
+    isTemporal?: boolean;
     dslType?: string;
     dslParams?: any;
+    specifiedFields?: string[];
 
     constructor(name: string, qubits: number) {
         if (!name) 
@@ -99,8 +101,10 @@ export class EdGate {
         gateCopy.parentQubit = this.parentQubit;
         gateCopy.isDslGeneric = this.isDslGeneric;
         gateCopy.isGeneric = this.isGeneric;
+        gateCopy.isTemporal = this.isTemporal;
         gateCopy.dslType = this.dslType;
         gateCopy.dslParams = this.dslParams ? JSON.parse(JSON.stringify(this.dslParams)) : undefined;
+        gateCopy.specifiedFields = this.specifiedFields ? [...this.specifiedFields] : undefined;
 
         return gateCopy;
     }

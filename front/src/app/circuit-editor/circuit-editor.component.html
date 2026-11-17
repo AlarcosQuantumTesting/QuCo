@@ -160,6 +160,32 @@
                 </button>
               </div>
             </div>
+
+            <div class="gates-section">
+              <div class="gate-category-title">
+                <span>Temporal gates</span>
+                <div class="gate-title-actions">
+                  <button (click)="openTemporalGatesManagerModal()" title="Manage temporal gates"
+                    class="btn-toggle-createExp">
+                    <i class="fa fa-edit"></i>
+                  </button>
+                  <button (click)="deleteAllTemporalGates()" title="Delete all temporal gates"
+                    class="btn-toggle-createExp btn-delete-all-temporal" [disabled]="temporalGates.length === 0"
+                    style="background-color: #dc3545 !important; color: white !important; border: none;">
+                    <i class="fa fa-trash" style="color: white !important;"></i>
+                  </button>
+                </div>
+              </div>
+              <div *ngIf="temporalGates.length === 0" class="no-user-gates">
+                No temporal gates yet
+              </div>
+              <div class="gate-buttons" *ngIf="temporalGates.length > 0">
+                <button *ngFor="let tg of temporalGates" (click)="selectTemporalGate(tg)" class="gate-btn"
+                  [ngClass]="{'selected-gate': selectedGate === tg}" [title]="tg.description">
+                  {{ tg.name }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -188,6 +214,8 @@
             <i class="fas" [ngClass]="{'fa-clipboard-list': !mostrarNotasModal, 'fa-eye-slash': mostrarNotasModal}"></i>
             {{ mostrarNotasModal ? 'Hide notes' : 'Show notes' }}
           </button>
+
+
           <!-- <button 
                                 (click)="mostrarModalGuardarProyecto = true" 
                                 class="btn-confirm-save" 
@@ -212,6 +240,12 @@
             title="Save the current circuit state as a new project">
             <i class="fas fa-save"></i> Save as new
           </button>
+
+          <button (click)="clearGrid()" class="btn-confirm-save btn-clear-grid"
+            style="margin-top: 0px !important; margin-left: 5px;" title="Clear grid (remove all gates)"
+            [disabled]="!hasGatesOnGrid()">
+            <i class="fas fa-trash"></i> Clear grid
+          </button>
         </div>
         <div class="circuit-block-container"
           style="width: 100%; display: flex; justify-content: center; align-items: center;">
@@ -223,10 +257,13 @@
                 <thead>
                   <tr>
                     <th>
-                      <button class="btn-toggle-grid" title="Open Floating Circuit View"
-                        (click)="openFloatingCircuit()">
-                        <i class="fas fa-expand-alt"></i>
-                      </button>
+                      <div class="corner-grid-buttons"
+                        style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <button class="btn-toggle-grid" title="Open Floating Circuit View"
+                          (click)="openFloatingCircuit()">
+                          <i class="fas fa-expand-alt"></i>
+                        </button>
+                      </div>
                     </th>
                     <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
                       {{ i }}
@@ -510,7 +547,7 @@
     </div>
   </div>
 
-  <div class="modal instrucciones" *ngIf="modalCodigoGate" style="z-index: 1001">
+  <div class="modal instrucciones" *ngIf="modalCodigoGate" style="z-index: 1010">
 
     <div class="modal-content ejemplos" cdkDrag #minDir="appMinimize" appMinimize cdkDragRootElement="modal-content"
       style="width: 400px; height: 200px;">
@@ -568,6 +605,181 @@
         <div class="modal-buttons">
           <button class="btn btn-delete-modal" (click)="confirmDeleteDslGate()">Yes, delete</button>
           <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteDslGate()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal to Manage Temporal Gates -->
+  <div class="modal" *ngIf="temporalGatesModal" style="z-index: 1001">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <div class="header-with-button">
+          <h2 class="title-modal">Manage Temporal Gates</h2>
+        </div>
+        <button class="close"><i class="close-i" (click)="temporalGatesModal = false">&times;</i></button>
+      </div>
+
+      <div class="table-container-expressions">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="modal-gate-category-title" style="margin-top: 0;">Temporal Gates</span>
+          <button *ngIf="temporalGates.length > 0" (click)="deleteAllTemporalGates()" class="btn-cancel-delete-modal"
+            style="background-color: #dc3545; color: white; padding: 5px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer;">
+            <i class="fas fa-trash" style="margin-right: 5px;"></i> Delete all
+          </button>
+        </div>
+        <table class="expressions-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Name</th>
+              <th style="width: 12%;">Qubits</th>
+              <th style="width: 38%;">Specifications</th>
+              <th style="width: 30%; min-width: 140px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="temporalGates.length === 0">
+              <td colspan="4" style="text-align: center; color: gray; font-style: italic; padding: 18px;">
+                No temporal gates saved yet. Configure a generic gate and check "Save as temporal gate" to add one here.
+              </td>
+            </tr>
+            <tr *ngFor="let tg of temporalGates; let i = index">
+              <td style="font-weight: 600;">{{ tg.name }}</td>
+              <td>{{ tg.qubits }}</td>
+              <td>
+                <span class="dsl-table-badge" [title]="getTemporalGateSpecs(tg)">{{ getTemporalGateSpecs(tg) }}</span>
+              </td>
+              <td style="text-align: center;">
+                <button class="update-btn" title="See code" (click)="viewTemporalGateCode(tg)"
+                  style="margin-right: 6px;">
+                  <i class="fa fa-code"></i>
+                </button>
+                <button class="update-btn" title="Edit specifications" (click)="openEditTemporalGateModal(tg)"
+                  style="margin-right: 6px; background-color: #008b95;">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="delete-expression-btn" title="Delete gate" (click)="openDeleteTemporalGateModal(tg)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal to Edit Temporal Gate Specifications (Code non-editable) -->
+  <div class="modal" *ngIf="showEditTemporalGateModal" style="z-index: 1002">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+          <h2 class="title-modal">Edit Specifications: {{ editingTemporalGate?.name }}</h2>
+        </div>
+        <button class="close"><i class="close-i" (click)="cancelEditTemporalGate()">&times;</i></button>
+      </div>
+
+      <div class="template-info-modal" style="padding: 15px;">
+        <div *ngIf="canEditTemporalField('name')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgNameInput">Gate name:</label>
+          <input id="editTgNameInput" type="text" [(ngModel)]="editingTemporalGateName"
+            (ngModelChange)="onEditingTemporalGateParamChange()" placeholder="Gate name...">
+        </div>
+
+        <div *ngIf="canEditTemporalField('qubits')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgQubitsInput">Number of qubits (n):</label>
+          <input id="editTgQubitsInput" type="number" min="1" max="16" [(ngModel)]="editingTemporalGateQubits"
+            (ngModelChange)="onEditingTemporalGateParamChange()">
+        </div>
+
+        <!-- Parámetros específicos para Oracle o dianas marcadas [a] -->
+        <div *ngIf="canEditTemporalField('targets')" class="info-block"
+          style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
+          <label for="editTgTargetsInput" style="min-width: 140px; margin-top: 6px;">Target marked value(s) [a]:</label>
+          <div style="flex: 1; display: flex; flex-direction: column;">
+            <input id="editTgTargetsInput" type="text" [(ngModel)]="editingTemporalGateTargets"
+              (ngModelChange)="onEditingTemporalGateParamChange()" placeholder="e.g. [2, 7] or [2]">
+          </div>
+        </div>
+
+        <!-- Parámetros de iteraciones (k) -->
+        <div *ngIf="canEditTemporalField('iterations')" class="info-block"
+          style="width: 93%; margin-bottom: 12px; align-items: flex-start;">
+          <label for="editTgIterInput" style="min-width: 140px; margin-top: 6px;">Iterations (k):</label>
+          <div style="flex: 1; display: flex; flex-direction: column;">
+            <input id="editTgIterInput" type="number" min="1" max="100" [(ngModel)]="editingTemporalGateIterations"
+              (ngModelChange)="onEditingTemporalGateParamChange()">
+          </div>
+        </div>
+
+        <!-- Parámetros específicos para MCP -->
+        <div *ngIf="canEditTemporalField('phase')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgAlphaInput" style="min-width: 150px;">Phase (alpha):</label>
+          <input id="editTgAlphaInput" type="text" [(ngModel)]="editingTemporalGatePhase"
+            (ngModelChange)="onEditingTemporalGateParamChange()" placeholder="pi" style="min-width: 0; flex: 1;">
+        </div>
+
+        <div *ngIf="canEditTemporalField('targetQubit')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgTargetInput" style="min-width: 150px;">Target qubit:</label>
+          <input id="editTgTargetInput" type="number" min="0" [max]="editingTemporalGateQubits - 1"
+            [(ngModel)]="editingTemporalGateTargetQubit" (ngModelChange)="onEditingTemporalGateParamChange()"
+            style="min-width: 0; flex: 1;">
+        </div>
+
+        <!-- Parámetros específicos para Measure -->
+        <div *ngIf="canEditTemporalField('order')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgOrderSelect">Measurement order:</label>
+          <select id="editTgOrderSelect" [(ngModel)]="editingTemporalGateOrder"
+            (ngModelChange)="onEditingTemporalGateParamChange()">
+            <option value="+">Direct (+) [0..n-1]</option>
+            <option value="-">Reverse (-) [n-1..0]</option>
+          </select>
+        </div>
+
+        <!-- Parámetros específicos para Subcircuit 0 -->
+        <div *ngIf="canEditTemporalField('subValues')" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="editTgSubValsInput">Marked values:</label>
+          <input id="editTgSubValsInput" type="text" [(ngModel)]="editingTemporalGateSubValues"
+            (ngModelChange)="onEditingTemporalGateParamChange()" placeholder="2, 7">
+        </div>
+
+        <div class="create-actions" style="margin-top: 15px; margin-bottom: 5px;">
+          <button type="button" (click)="saveEditedTemporalGate()" class="save-btn">Save specifications</button>
+          <button type="button" (click)="cancelEditTemporalGate()" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar eliminación individual de Temporal Gate -->
+  <div *ngIf="showDeleteTemporalGateModal" class="modal-delete" style="z-index: 1002;">
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+        <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete Temporal Gate</h2>
+        <button class="close"><i class="close-i" (click)="cancelDeleteTemporalGate()">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+        <p>Are you sure you want to delete the temporal gate <strong>{{temporalGateToDelete?.name}}</strong>?</p>
+        <div class="modal-buttons">
+          <button class="btn btn-delete-modal" (click)="confirmDeleteTemporalGate()">Yes, delete</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteTemporalGate()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar eliminación de TODAS las Temporal Gates -->
+  <div *ngIf="showDeleteAllTemporalModal" class="modal-delete" style="z-index: 1002;">
+    <div class="modal-content-delete">
+      <div class="modal-header" style="background-color: rgb(201, 46, 46);">
+        <h2 class="title-modal"><i class="fas fa-exclamation-triangle"></i> Delete All Temporal Gates</h2>
+        <button class="close"><i class="close-i" (click)="cancelDeleteAllTemporalGates()">&times;</i></button>
+      </div>
+      <div class="modal-message-delete">
+        <p>Are you sure you want to delete <strong>ALL</strong> temporal gates? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button class="btn btn-delete-modal" (click)="confirmDeleteAllTemporalGates()">Yes, delete all</button>
+          <button class="btn btn-cancel-delete-modal" (click)="cancelDeleteAllTemporalGates()">Cancel</button>
         </div>
       </div>
     </div>
@@ -723,6 +935,13 @@
               <thead>
                 <tr>
                   <th>
+                    <div class="corner-grid-buttons"
+                      style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <button class="btn-toggle-grid btn-clear-grid-corner" title="Clear grid (remove all gates)"
+                        (click)="clearGrid()" [disabled]="!hasGatesOnGrid()">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
                   </th>
                   <th *ngFor="let col of [].constructor(circuit?.columns); let i = index">
                     {{ i }}
@@ -1041,7 +1260,7 @@
           <input id="dslPlacementNameInput" type="text" [(ngModel)]="dslPlacementName" placeholder="Name on grid...">
         </div>
 
-        <div class="info-block" style="width: 93%; margin-bottom: 10px;">
+        <div *ngIf="isPlacementQubitsGate" class="info-block" style="width: 93%; margin-bottom: 10px;">
           <label for="dslPlacementQubitsInput">Number of qubits (n):</label>
           <input id="dslPlacementQubitsInput" type="number" min="1" max="16" [(ngModel)]="dslPlacementQubits"
             (ngModelChange)="onPlacementParamsChange()">
@@ -1080,21 +1299,20 @@
         </div>
 
         <!-- Parámetros específicos para MCP -->
-        <div *ngIf="selectedDslGenericType === 'MCP'" class="name-description-modal"
-          style="width: 93%; margin-bottom: 10px;">
-          <div class="info-block" style="flex: 1; margin-right: 15px;">
-            <label for="dslPlacementAlphaInput">Phase (alpha):</label>
-            <input id="dslPlacementAlphaInput" type="text" [(ngModel)]="dslPlacementAlpha" placeholder="pi">
-          </div>
-          <div class="info-block" style="width: 140px;">
-            <label for="dslPlacementTargetInput">Target qubit:</label>
-            <input id="dslPlacementTargetInput" type="number" min="0" [max]="dslPlacementQubits - 1"
-              [(ngModel)]="dslPlacementTarget">
-          </div>
+        <div *ngIf="isPlacementMcpGate" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementAlphaInput" style="min-width: 150px;">Phase (alpha):</label>
+          <input id="dslPlacementAlphaInput" type="text" [(ngModel)]="dslPlacementAlpha" placeholder="pi"
+            style="min-width: 0; flex: 1;">
+        </div>
+
+        <div *ngIf="isPlacementMcpGate" class="info-block" style="width: 93%; margin-bottom: 10px;">
+          <label for="dslPlacementTargetInput" style="min-width: 150px;">Target qubit:</label>
+          <input id="dslPlacementTargetInput" type="number" min="0" [max]="dslPlacementQubits - 1"
+            [(ngModel)]="dslPlacementTarget" style="min-width: 0; flex: 1;">
         </div>
 
         <!-- Parámetros específicos para Measure -->
-        <div *ngIf="selectedDslGenericType === 'Measure'" class="info-block" style="width: 93%; margin-bottom: 10px;">
+        <div *ngIf="isPlacementMeasureGate" class="info-block" style="width: 93%; margin-bottom: 10px;">
           <label for="dslPlacementOrderSelect">Measurement order:</label>
           <select id="dslPlacementOrderSelect" [(ngModel)]="dslPlacementOrder">
             <option value="+">Direct (+) [0..n-1]</option>
@@ -1103,8 +1321,7 @@
         </div>
 
         <!-- Parámetros específicos para Subcircuit 0 (valores marcados secundarios si no es Grover) -->
-        <div *ngIf="(selectedDslGenericType === '0' || selectedDslGenericType === 'Sub_0') && !isPlacementGroverGate"
-          class="info-block" style="width: 93%; margin-bottom: 10px;">
+        <div *ngIf="isPlacementSubValuesGate" class="info-block" style="width: 93%; margin-bottom: 10px;">
           <label for="dslPlacementSubValsInput">Marked values:</label>
           <input id="dslPlacementSubValsInput" type="text" [(ngModel)]="dslPlacementSubValues" placeholder="2, 7">
         </div>
@@ -1127,6 +1344,27 @@
           style="width: 93%; margin-bottom: 10px; font-size: 13px; color: #666;">
           <em>Generic gate: <strong>{{ dslPlacementName || selectedDslGenericType }}</strong> configured for <strong>{{
               dslPlacementQubits }}</strong> qubits.</em>
+        </div>
+
+        <!-- Checkbox para guardar como puerta temporal -->
+        <div class="temporal-gate-placement-card"
+          style="width: 93%; margin-top: 14px; margin-bottom: 8px; padding: 10px 14px; background-color: #f7f9fa; border-radius: 8px; border: 1px solid #dce4e6; box-sizing: border-box;">
+          <label
+            style="display: flex; align-items: center; cursor: pointer; font-size: 14px; gap: 10px; margin: 0; font-weight: 600; color: #2c3e50; user-select: none;">
+            <input type="checkbox" [(ngModel)]="saveAsTemporalGate" (ngModelChange)="onSaveAsTemporalGateToggle()"
+              style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; flex: 0 0 18px; margin: 0; cursor: pointer; accent-color: #008b95;">
+            <span>Save as temporal gate</span>
+          </label>
+
+          <div *ngIf="saveAsTemporalGate"
+            style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cfd8dc; display: flex; align-items: center; gap: 10px;">
+            <label for="temporalGateNameInput"
+              style="min-width: 150px; font-size: 13px; font-weight: 600; color: #495057; margin: 0; white-space: nowrap;">Temporal
+              gate name:</label>
+            <input id="temporalGateNameInput" type="text" [(ngModel)]="temporalGateName"
+              (ngModelChange)="onTemporalGateNameChange()" placeholder="Enter temporal gate name..."
+              style="flex: 1; min-width: 0; padding: 6px 10px; font-size: 13px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box;">
+          </div>
         </div>
 
         <div class="create-actions" style="margin-top: 15px; margin-bottom: 5px;">
